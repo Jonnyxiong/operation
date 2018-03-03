@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信平台运营系统 </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet">
+    <!-- jqgrid-->
+    <!--<link th:href="@{/resources/css/plugins/jqgrid/ui.jqgridffe4.css?0820}" rel="stylesheet">-->
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+
+	<link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+    <style>
+        /* Additional style to fix warning dialog position */
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+    </style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+	<div class="wrapper wrapper-content animated fadeInRight">
+	    <div class="row">
+	        <div class="col-sm-12">
+	            <div class="ibox "> 
+	                <div class="ibox-content">
+
+						<div class="pull-right tooltip-demo">
+							<!--<a class="btn btn-danger btn-sm" data-toggle="tooltip" data-placement="top" title="返回" onclick="javascript:self.location=document.referrer;"><i class="fa fa-reply"></i>&nbsp;返回</a>-->
+						</div>
+	                    <div class="row">
+	                        <div class="col-sm-10 b-r">
+	                            <form class="form-horizontal m-t" id="manager_form">
+	                                <div class="form-group">
+									    <label class="col-sm-3 control-label">客户ID:</label>
+									    <div class="col-sm-8">
+									      <p class="form-control-static" th:text="${data.agent_id}"></p>
+									    </div> 
+										<input id="agent_id" type="hidden" th:value="${data.agent_id}">
+	                                </div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label">客户类型:</label>
+										<div class="col-sm-8">
+											<p class="form-control-static" th:text="${data.agent_type_name}"></p>
+											<!--<button type="botton" class="btn btn-sm btn-success"  onclick="updateAgentType(this,1)" th:if="${data.agent_type}==2">转成销售代理商</button>-->
+											<!--<button type="botton" class="btn btn-sm btn-warning"  onclick="updateAgentType(this,5)" th:if="${data.agent_type}==2 and ${data.convertOEM}==true">转成OEM代理商</button>-->
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label">客户名称:</label>
+										<div class="col-sm-8">
+											<p class="form-control-static" th:text="${data.agent_name}"></p>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label">联系地址:</label>
+										<div class="col-sm-8">
+											<p class="form-control-static" th:text="${data.address}"></p>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label">邮箱:</label>
+										<div class="col-sm-8">
+											<p class="form-control-static" th:text="${data.email}"></p>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label">手机号码:</label>
+										<div class="col-sm-8">
+											<p class="form-control-static" th:text="${data.mobile}"></p>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label">归属销售:</label>
+										<input type="hidden" id="oldSaleId" th:value="${data.belong_sale}">
+										<div class="col-sm-8">
+											<select class="form-control" name="saleSelect" id="saleSelect" style="width: 250px" disabled>
+												<option value="">请选择销售</option>
+												<option th:each="sale : ${saleList}" th:value="${sale.id}" th:text="${sale.name}">选项 4</option>
+											</select>
+										</div>
+									</div>
+									<!--<div class="form-group">-->
+	                                	<!--<label class="col-sm-3 control-label">管理员ID:</label>-->
+	                                    <!--<div class="col-sm-8">-->
+									      <!--<p class="form-control-static" th:text="${data.admin_id}"></p>-->
+	                                    <!--</div>-->
+	                                <!--</div>-->
+
+
+	                                <!--<div class="form-group">-->
+	                                	<!--<label class="col-sm-3 control-label">代理商简称:</label>-->
+	                                	<!--<div class="col-sm-8">-->
+									      <!--<p class="form-control-static" th:text="${data.shorter_name}"></p>-->
+	                                	<!--</div>-->
+	                                <!--</div>-->
+									<div class="form-horizontal" th:if="${data.agent_type}==5 and ${data.dataExist}==true">
+										<div class="form-group">
+											<label class="col-sm-3 control-label">域名:</label>
+											<div class="col-sm-8">
+												<p class="form-control-static" th:text="${data.domain_name}"></p>
+											</div>
+										</div>
+										<div class="form-group">
+											<label class="col-sm-3 control-label">版权文字:</label>
+											<div class="col-sm-8">
+												<p class="form-control-static" th:text="${data.copyright_text}"></p>
+											</div>
+										</div>
+										<div class="form-group">
+											<label class="col-sm-3 control-label">导航栏背景色:</label>
+											<div class="col-sm-8">
+												<p class="form-control-static"  th:text="${data.navigation_backcolor}"></p>
+											</div>
+										</div>
+										<div class="form-group">
+											<label class="col-sm-3 control-label">导航栏文字颜色:</label>
+											<div class="col-sm-8">
+												<p class="form-control-static" th:text="${data.navigation_text_color}"></p>
+											</div>
+										</div>
+										<div class="form-group">
+											<label class="col-sm-3 control-label">测试短信赠送:</label>
+											<div class="col-sm-8" style="width: 180px">
+												<select class="form-control" name="productType" id="productType" disabled="disabled">
+													<option value="0">行业+全网+全国</option>
+												</select>
+											</div>
+											<div class="col-sm-8" style="width: 230px">
+												<select class="form-control" name="productId" id="productId" disabled="disabled">
+													<option value="" >赠送短信包</option>
+												</select>
+											</div>
+											<div class="col-sm-8" style="width: 230px">
+												<input type="text" id="productNum" th:value="${data.test_sms_number}" name="productNum" class="form-control" placeholder="请填写赠送的短信条数" readonly="true" disabled="disabled">
+											</div>
+										</div>
+										<div class="form-group">
+											<label class="col-sm-3 control-label">标签页图标:<br/> (尺寸：48px*48px)</label>
+											<div class="col-sm-8">
+												<img id="preview_tab_logo" style="width: 48px;height: 48px;cursor: pointer;" name="preview_tab_logo" class="eg-preview" th:src="${data.smsp_img_url}+'/file/scanPic.html?path='+${data.tab_logo_url}"  alt="示例：标签图标"  />
+											</div>
+										</div>
+										<div class="form-group">
+											<label class="col-sm-3 control-label">LOGO图:<br/> (尺寸：41px*43px)</label>
+											<div class="col-sm-8">
+												<img id="preview_logo" class="eg-preview" style="width: 41px;height: 43px;cursor: pointer;"  alt="示例：logo"  th:src="${data.smsp_img_url}+'/file/scanPic.html?path='+${data.logo_url}">
+											</div>
+										</div>
+										<div class="form-group">
+											<label class="col-sm-3 control-label">LOGO + 公司名称图:<br/> (尺寸：184px*30px)</label>
+											<div class="col-sm-8">
+												<img id="preview_company_logo" class="eg-preview" style="width: 184px;height: 30px;cursor: pointer;"  th:src="${data.smsp_img_url}+'/file/scanPic.html?path='+${data.company_logo_url}" alt="示例：logo+公司名"   />
+											</div>
+										</div>
+										<div class="form-group">
+											<label class="col-sm-3 control-label">接口文档<br/>(文件不大于5MB):</label>
+											<div class="col-sm-8">
+												<a th:href="${data.smsp_img_url}+'/file/downloadFile.html?path='+${data.api_document_url}" th:text="'原接口文档'"  th:unless="${#strings.isEmpty(data.api_document_url)}" ></a>
+											</div>
+										</div>
+										<div class="form-group">
+											<label class="col-sm-3 control-label">FAQ文档<br/>(文件不大于5MB):</label>
+											<div class="col-sm-8">
+												<a  th:href="${data.smsp_img_url}+'/file/downloadFile.html?path='+${data.FAQ_document_url}" th:text="'原FAQ文档'" th:unless="${#strings.isEmpty(data.FAQ_document_url)}"></a>
+											</div>
+										</div>
+									</div>
+
+
+									<div class="form-group">
+										<label class="col-sm-3 control-label">备注</label>
+										<div class="col-sm-8">
+											<p class="form-control-static" th:text="${data.remark}"></p>
+										</div>
+									</div>
+
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">客户状态:</label>
+	                                    <div class="col-sm-8">
+									      <p class="form-control-static" th:text="${data.status_name}"></p>
+	                                    </div>
+	                                </div>
+
+
+									<div class="form-group">
+	                                    <label class="col-sm-3 control-label">认证状态:</label>
+	                                    <div class="col-sm-8">
+									      <p class="form-control-static" th:text="${data.oauth_status_name}"></p>
+	                                    </div>
+	                                </div> 
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">认证时间:</label>
+	                                    <div class="col-sm-8">
+									      <p class="form-control-static" th:text="${data.oauth_date}"></p>
+	                                    </div>
+	                                </div> 
+
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">证件类型:</label>
+	                                    <div class="col-sm-8">
+									      <p class="form-control-static" th:text="${data.id_type}"></p>
+	                                    </div>
+	                                </div> 
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">证件号码:</label>
+	                                    <div class="col-sm-8">
+									      <p class="form-control-static" th:text="${data.id_nbr}"></p>
+	                                    </div>
+	                                </div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label">证件图片:</label>
+										<div class="col-sm-8">
+											<img th:src="${data.smsp_img_url}+'/file/scanPic.html?path='+${data.img_url}"
+												 width="50" height="35" style="cursor: pointer;" title="点击查看大图"
+												 onclick="viewFile(this)" th:if="${data.img_url}"/>
+										</div>
+									</div>
+
+									<div class="form-group">
+	                                    <label class="col-sm-3 control-label">账户余额（元） :</label>
+	                                    <div class="col-sm-8">
+									      <p class="form-control-static" th:text="${data.balance}"></p>
+	                                    </div>
+	                                </div> 
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">授信额度（元） :</label>
+	                                    <div class="col-sm-8">
+									      <p class="form-control-static" th:text="${data.credit_balance}"></p>
+	                                    </div>
+	                                </div> 
+	                                <!-- 
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">待结算费用（元） :</label>
+	                                    <div class="col-sm-8">
+									      <p class="form-control-static" th:text="${data.wait_settlement_amount}"></p>
+	                                    </div>
+	                                </div>
+	                                 --> 
+	                                <!--<div class="form-group">-->
+	                                    <!--<label class="col-sm-3 control-label">历史累计佣金收入（元）:</label>-->
+	                                    <!--<div class="col-sm-8">-->
+									      <!--<p class="form-control-static" th:text="${data.accumulated_income}"></p>-->
+	                                    <!--</div>-->
+	                                <!--</div> -->
+	                                <!--<div class="form-group">-->
+	                                    <!--<label class="col-sm-3 control-label">佣金收入（元）:</label>-->
+	                                    <!--<div class="col-sm-8">-->
+									      <!--<p class="form-control-static" th:text="${data.commission_income}"></p>-->
+	                                    <!--</div>-->
+	                                <!--</div> -->
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">创建时间:</label>
+	                                    <div class="col-sm-8">
+									      <p class="form-control-static" th:text="${data.create_time}"></p>
+	                                    </div>
+	                                </div> 
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">修改时间 :</label>
+	                                    <div class="col-sm-8">
+									      <p class="form-control-static" th:text="${data.update_date}"></p>
+	                                    </div>
+	                                </div> 
+
+								     <div class="form-group">
+								        <div class="col-sm-12 col-sm-offset-3">
+											<!--<button type="button" class="btn btn-sm btn-success"  onclick="updateData()" >修改</button>-->
+											<button type="button" class="btn btn-sm btn-success"  onclick="viewOemData()" >修改</button>
+											<!--<button type="button" class="btn btn-sm btn-success" th:if="${data.oauth_status_name eq '已认证'}"  onclick="viewAudit()">查看资质</button>-->
+											<button type="button" class="btn btn-sm btn-error"  onclick="goback()" >返回</button>
+											<!--<button type="button" class="btn btn-sm btn-success"  onclick="editOemData()" th:if="${data.agent_type}==5 and ${data.dataExist}==false">提交OEM资料</button> -->
+								        </div>
+								    </div>
+	                            </form>
+	                        </div>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	</div>
+	<script th:src="@{/resources/js/hex_ha_ha_ha_ha_ha.js}"></script>
+	<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+	<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+	<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+	<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+	<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+	<script th:src="@{/resources/js/jquery.form.js?v=1.0.0}"></script>
+	<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+	<script th:src="@{/resources/js/plugins/validate/jquery.validate.min.js}"></script>
+	<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+	<script th:src="@{/resources/js/layer/layer.js}"></script>
+	
+	<script th:inline="javascript">
+		/*<![CDATA[*/
+
+		$(function () {
+
+            //初始化销售id和原因
+            var oldSaleId = $('#oldSaleId').val();
+
+            if(oldSaleId != null && oldSaleId != ''){
+                $("#saleSelect").val(oldSaleId);
+            }
+
+        });
+		 
+  	function updateAgentType(btn,type){
+  		event.preventDefault();
+  		var msgTime = 1500;
+  		var agent_id = $("#agent_id").val();
+  		var agentTypeName = "销售代理商";
+  		switch(type){
+  			case 1: agentTypeName="销售代理商";break;
+  			case 5: agentTypeName="OEM代理商";break;
+  		}
+  		swal({
+	             title: "您确定要将该代理商转为"+agentTypeName+"？",
+	             text: "",
+	             type: "warning",
+	             showCancelButton: true,
+	             confirmButtonColor: "#DD6B55",
+	             confirmButtonText: "确定",
+	             cancelButtonText: "让我再考虑一下…",
+	             closeOnConfirm: false
+	         }, function () {
+	             $.ajax({
+	                 url:/*[[@{/accountInfo/agent/updateAgentType}]]*/,
+	                 type:"POST",
+	                 data:{
+						agentType : type,
+						agentId : agent_id
+	                 },
+	                 success:function(data){
+	                     if(data == null){
+	                         swal("失败！", "系统错误，请稍后再试！", "error")
+	                     }else if(data.success == true){
+	                         swal("成功！", data.msg, "success")
+	                     }else{
+	                         swal("失败！", data.msg, "error")
+	                     }
+						 window.location.reload();
+	                 }
+	             });
+	         }); 	
+  		return false;
+	 
+	}
+	  	
+	  	function editOemData(){
+	  		var agent_id = $("#agent_id").val();
+	  		var editOemUrl = /*[[@{/accountInfo/oem/edit}]]*/;
+	  		window.location.href=editOemUrl+"?agentId="+agent_id;
+	  	}
+	  	function viewAudit() {
+            var agent_id = $("#agent_id").val();
+            var editOemUrl = /*[[@{/opsAudit/agent/view}]]*/;
+            window.location.href=editOemUrl+"?agentId="+agent_id;
+        }
+	  	function viewOemData(){
+	  		var agent_id = $("#agent_id").val();
+	  		var viewOemUrl = /*[[@{/accountInfo/oem/edit}]]*/;
+	  		window.location.href=viewOemUrl+"?agentId="+agent_id;
+	  	}
+	  	function goback() {
+            var backUrl = /*[[@{/accountInfo/agent/query}]]*/;
+            window.location.href=backUrl;
+        }
+        function viewFile(img) {
+            open($(img).attr("src"), "viewFile");
+        }
+	  	var msgTime = 1500;
+        /**
+		 * 修改归属销售id
+         */
+	  	function updateData() {
+
+            var agent_id = $("#agent_id").val();
+            var saleId = $("#saleSelect").val();
+
+            var oldSaleId = $('#oldSaleId').val();
+            if(saleId == oldSaleId){
+                layer.msg("归属销售没有修改！", {icon: 2,time: msgTime});
+                return;
+			}
+
+			//确认修改归属销售
+            layer.confirm("确定要修改归属销售吗？", function(index){
+
+                $.ajax({
+                    url: /*[[@{/accountInfo/agent/updateBelongSaleForAgent}]]*/,
+                    type:"POST",
+                    data:{
+                        agent_id: agent_id,
+                        belong_sale:saleId,
+                        oldBelongSale:oldSaleId
+                    },
+                    success:function(data){
+                        if(data == null){
+                            layer.msg(data.msg, {icon: 2,time: msgTime});
+                        }else if(data.success == true){
+                            layer.msg("修改成功！", {icon: 1,time: msgTime},function(){
+                                //刷新页面
+                                location.reload();
+                            });
+                        }else{
+                            layer.msg(data.msg, {icon: 2,time: msgTime});
+                        }
+                    }
+                });
+
+                layer.close(index);
+            });
+        }
+	    /*]]>*/
+	    
+	</script>
+</body>
+</html>

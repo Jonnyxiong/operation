@@ -1,0 +1,483 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 客户资质审核 -->
+<mapper namespace="customerAudit">
+
+	<sql id="queryCommon">
+		<where>
+			<if test="text != null and text!=''">
+				(
+					t.name LIKE CONCAT('%', #{text}, '%')
+					OR
+					t.clientid LIKE CONCAT('%', #{text}, '%')
+					OR
+					t.mobile LIKE CONCAT('%', #{text}, '%')
+					OR
+					t.realname LIKE CONCAT('%', #{text}, '%')
+				)
+			</if>
+			<if test="oauth_status != null and oauth_status != -1">
+				AND t.oauth_status = #{oauth_status}
+			</if>
+			<if test="start_time != null and start_time!=''">
+				<![CDATA[
+				AND o.update_date >= #{start_time}
+				]]>
+			</if>
+			<if test="end_time != null and end_time!=''">
+				<![CDATA[
+				AND o.update_date <= #{end_time}
+				]]>
+			</if>
+			
+		</where>
+	</sql>
+
+	<!-- 查询客户资质审核记录 -->
+	<select id="query" resultType="map">
+		SELECT
+			t.clientid AS client_id,
+			t.name AS client_name,
+			t.mobile AS mobile,
+			t.realname AS realname,
+			t.address AS address,
+			o.id_type AS oauth_type,
+			t.oauth_status AS oauth_status,
+			CASE t.oauth_status 
+				WHEN 3 THEN '审核通过'
+				WHEN 4 THEN '审核不通过'
+				ELSE '待审核' END AS oauth_status_name,
+			DATE_FORMAT(o.update_date,'%Y-%m-%d %H:%i:%S') AS submit_time
+		FROM
+			t_sms_account t
+		INNER JOIN t_sms_oauth_pic o ON t.clientid = o.client_id AND o.oauth_type = 2
+		<include refid="queryCommon" />
+		ORDER BY submit_time DESC
+		${limit}
+	</select>
+	
+	
+	<!-- 查询客户资质审核记录总数 -->
+	<select id="queryCount" resultType="map">
+		SELECT
+			COUNT(1) as totalCount
+		FROM
+			t_sms_account t
+		INNER JOIN t_sms_oauth_pic o ON t.clientid = o.client_id AND o.oauth_type = 2
+		<include refid="queryCommon" />
+	</select>
+	
+	<select id="getAuditInfo" resultType="map">
+		SELECT
+			t.clientid AS client_id,
+			t.agent_id AS agent_id,
+			t.name AS client_name,
+			t.client_type,
+			t.mobile AS mobile,
+			t.realname AS realname,
+			t.address AS address,
+			o.id_type AS oauth_type,
+			o.id_type AS id_type,
+			o.id_nbr AS id_nbr,
+			o.img_url AS img_url,
+			t.oauth_status AS oauth_status,
+			CASE t.oauth_status 
+				WHEN 3 THEN '审核通过'
+				WHEN 4 THEN '审核不通过'
+				ELSE '待审核' END AS oauth_status_name,
+			DATE_FORMAT(o.update_date,'%Y-%m-%d %H:%i:%S') AS submit_time,
+			l.remark AS remark
+		FROM
+			t_sms_account t
+		INNER JOIN t_sms_oauth_pic o ON t.clientid = o.client_id
+		LEFT JOIN t_sms_oauth_audit_log l ON t.clientid = l.client_id AND l.audit_type = 2
+		WHERE
+		  t.clientid = #{client_id}
+		  AND o.oauth_type = 2
+		ORDER BY l.create_date DESC
+		LIMIT 1
+	</select>
+
+	<select id="getAuditInfoOfAudit" resultType="map">
+		SELECT
+		t.clientid AS client_id,
+		t.agent_id AS agent_id,
+		t.name AS client_name,
+		t.client_type,
+		t.mobile AS mobile,
+		t.realname AS realname,
+		t.address AS address,
+		o.id_type AS oauth_type,
+		o.id_type AS id_type,
+		o.id_nbr AS id_nbr,
+		o.img_url AS img_url,
+		t.oauth_status AS oauth_status,
+		CASE t.oauth_status
+		WHEN 3 THEN '审核通过'
+		WHEN 4 THEN '审核不通过'
+		ELSE '待审核' END AS oauth_status_name,
+		DATE_FORMAT(o.update_date,'%Y-%m-%d %H:%i:%S') AS submit_time
+		FROM
+		t_sms_account t
+		LEFT JOIN t_sms_oauth_pic o ON t.clientid = o.client_id
+		WHERE
+		t.clientid = #{client_id}
+		LIMIT 1
+	</select>
+
+	<update id="updateStatus">
+		UPDATE t_sms_account t
+		SET t.oauth_status = #{oauth_status},
+			t.oauth_date = NOW(),t.updatetime = NOW()
+		WHERE t.clientid = #{client_id}
+	</update>
+	
+	<select id="checkCustomerOauthStatus" resultType="java.lang.Integer">
+		SELECT COUNT(1) FROM t_sms_account WHERE clientid = #{client_id} AND oauth_status = 2
+	</select>
+	
+	<insert id="insertAuditLog">
+		INSERT INTO `t_sms_oauth_audit_log` (
+			`agent_id`,
+			`client_id`,
+			`admin_id`,
+			`audit_type`,
+			`status`,
+			`create_date`,
+			`remark`
+		)
+		VALUES
+			(
+				#{agent_id},
+				#{client_id},
+				#{admin_id},
+				#{audit_type},
+				IF(#{oauth_status} = 3,1,0),
+				NOW(),
+				#{remark}
+			)
+	</insert>
+	
+	<select id="getAgentIdByClientId" resultType="java.lang.String">
+		SELECT
+			agent_id
+		FROM
+			t_sms_account
+		WHERE
+			clientid = #{clientid}
+	</select>
+
+	<select id="getPaytype" resultType="integer">
+		select paytype from t_sms_account where clientid = #{clientid}
+	</select>
+
+	<select id="getRealName" resultType="String">
+		select realname from t_sms_account where clientid = #{clientid}
+	</select>
+
+	<select id="getAgentTypeByAgentId" resultType="int">
+		SELECT
+			agent_type
+		FROM
+			t_sms_agent_info
+		WHERE
+			agent_id = #{agent_id}
+	</select>
+	
+	
+	<select id="getOemDataConfig" resultType="map">
+		SELECT
+			id,
+			test_product_id,
+			test_sms_number
+		FROM
+			t_sms_oem_data_config
+		WHERE
+			agent_id = #{agent_id}
+	</select>
+
+	<select id="getOemProductInfoByProductId" resultType="map">
+		SELECT
+			status,
+			unit_price,
+			operator_code,
+			product_type,
+			area_code,
+			due_time,
+			product_id,
+			product_code,
+			product_name
+		FROM
+			t_sms_oem_product_info
+		WHERE
+			product_id = #{product_id}
+	</select>
+	
+	
+	<select id="getAgentAccountByAgentId" resultType="map">
+		SELECT
+			balance
+		FROM
+			t_sms_agent_account
+		WHERE
+			agent_id = #{agent_id}
+	</select>
+	
+	<insert id="createAgentBalanceBill">
+		INSERT INTO `t_sms_agent_balance_bill` (
+			`id`,
+			`agent_id`,
+			`payment_type`,
+			`financial_type`,
+			`amount`,
+			`balance`,
+			`create_time`,
+			`order_id`,
+			`admin_id`,
+			`client_id`,
+			`remark`
+		)
+		VALUES
+			(
+				#{id},
+				#{agent_id},
+				#{payment_type},
+				#{financial_type},
+				#{amount},
+				#{balance},
+				#{create_time},
+				#{order_id},
+				#{admin_id},
+				#{client_id},
+				#{remark}
+			)
+	</insert>
+
+	<select id="getAgentPoolIdByCondition" resultType="map">
+		SELECT
+			agent_pool_id
+		FROM
+			t_sms_oem_agent_pool
+		WHERE
+			agent_id = #{agent_id}
+			AND product_type = #{product_type}
+			AND operator_code = #{operator_code}
+			AND area_code = #{area_code}
+			AND due_time = #{due_time}
+			AND unit_price = #{unit_price}
+			AND status = #{status}
+	</select>
+
+	<select id="getClientPoolIdByCondition" resultType="map">
+		SELECT
+			client_pool_id
+		FROM
+			t_sms_oem_client_pool
+		WHERE
+			client_id = #{client_id}
+		AND product_type = #{product_type}
+		AND operator_code = #{operator_code}
+		AND area_code = #{area_code}
+		AND due_time = #{due_time}
+		AND unit_price = #{unit_price}
+		AND status = #{status}
+	</select>
+
+	<update id="updateClientPoolByCondition">
+		UPDATE
+			t_sms_oem_client_pool
+		SET
+			total_number = total_number + #{test_num},
+			remain_number = remain_number + #{test_num},
+			remain_test_number = remain_test_number + #{test_num}
+		WHERE
+			client_pool_id = #{client_pool_id}
+
+	</update>
+
+	<insert id="createOemAgentPool" useGeneratedKeys="true" keyProperty="agent_pool_id">
+		INSERT INTO `t_sms_oem_agent_pool` (
+			`agent_pool_id`,
+			`agent_id`,
+			`product_type`,
+			`operator_code`,
+			`area_code`,
+			`due_time`,
+			`status`,
+			`remain_number`,
+			`unit_price`,
+			`remain_amount`,
+			`update_time`,
+			`remark`
+		)
+		VALUES
+			(
+				#{agent_pool_id},
+				#{agent_id},
+				#{product_type},
+				#{operator_code},
+				#{area_code},
+				#{due_time},
+				#{status},
+				#{remain_number},
+				#{unit_price},
+				#{remain_amount},
+				#{update_time},
+				#{remark}
+			);
+	</insert>
+
+	<insert id="createOemClientPool" useGeneratedKeys="true" keyProperty="client_pool_id">
+		INSERT INTO `t_sms_oem_client_pool` (
+			`client_pool_id`,
+			`client_id`,
+			`product_type`,
+			`operator_code`,
+			`area_code`,
+			`due_time`,
+			`status`,
+			`total_number`,
+			`remain_number`,
+			`unit_price`,
+			`total_amount`,
+			`remain_amount`,
+			`remain_test_number`,
+			`update_time`,
+			`remark`
+		)
+		VALUES
+			(
+				#{client_pool_id},
+				#{client_id},
+				#{product_type},
+				#{operator_code},
+				#{area_code},
+				#{due_time},
+				#{status},
+				#{total_number},
+				#{remain_number},
+				#{unit_price},
+				#{total_amount},
+				#{remain_amount},
+				#{remain_test_number},
+				#{update_time},
+				#{remark}
+			)
+	</insert>
+
+	<select id="getOemAgentOrderTheMostNumForMinute" resultType="string">
+		SELECT
+			MAX(substring(CONCAT(t.order_id,""),14)) as num
+		FROM
+			t_sms_oem_agent_order t
+		WHERE
+			1 = 1
+			AND
+			t.order_id like CONCAT('${orderIdPre}','%' )
+	</select>
+
+	<select id="getOemClientOrderTheMostNumForMinute" resultType="string">
+		SELECT
+	  		MAX(substring(CONCAT(t.order_id,""),14)) as num
+	  	FROM
+	  		t_sms_oem_client_order t
+	  	WHERE 1 = 1
+	  	AND t.order_id like CONCAT('${orderIdPre}','%' )
+	</select>
+
+
+	<insert id="insertOemAgentOrder">
+		INSERT INTO `t_sms_oem_agent_order` (
+			`order_id`,
+			`order_no`,
+			`order_type`,
+			`product_id`,
+			`product_code`,
+			`product_type`,
+			`operator_code`,
+			`area_code`,
+			`product_name`,
+			`unit_price`,
+			`order_number`,
+			`order_amount`,
+			`product_price`,
+			`agent_id`,
+			`client_id`,
+			`name`,
+			`agent_pool_id`,
+			`due_time`,
+			`create_time`,
+			`remark`
+		)
+		VALUES
+			(
+				#{order_id},
+				#{order_no},
+				#{order_type},
+				#{product_id},
+				#{product_code},
+				#{product_type},
+				#{operator_code},
+				#{area_code},
+				#{product_name},
+				#{unit_price},
+				#{order_number},
+				#{order_amount},
+				#{product_price},
+				#{agent_id},
+				#{client_id},
+				#{name},
+				#{agent_pool_id},
+				#{due_time},
+				#{create_time},
+				#{remark}
+			)
+	</insert>
+	
+	
+	<insert id="insertOemClientOrder">
+
+		INSERT INTO `t_sms_oem_client_order` (
+			`order_id`,
+			`order_no`,
+			`product_type`,
+			`operator_code`,
+			`area_code`,
+			`order_type`,
+			`order_number`,
+			`unit_price`,
+			`order_price`,
+			`client_id`,
+			`agent_id`,
+			`client_pool_id`,
+			`due_time`,
+			`create_time`,
+			`remark`
+		)
+		VALUES
+			(
+				#{order_id},
+				#{order_no},
+				#{product_type},
+				#{operator_code},
+				#{area_code},
+				#{order_type},
+				#{order_number},
+				#{unit_price},
+				#{order_price},
+				#{client_id},
+				#{agent_id},
+				#{client_pool_id},
+				#{due_time},
+				#{create_time},
+				#{remark}
+			);
+	</insert>
+
+	
+	
+	
+	
+</mapper> 

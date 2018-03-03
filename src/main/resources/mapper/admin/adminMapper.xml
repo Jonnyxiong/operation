@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 信息管理-管理员中心 -->
+<mapper namespace="admin">
+
+	<!-- 获取管理员资料 -->
+	<select id="getAdmin" resultType="map">
+		SELECT
+			u.id,
+			u.sid,
+			u.email,
+			u.mobile,
+			u.realname,
+			u.web_id,
+			GROUP_CONCAT(r.id) as role_id,
+			GROUP_CONCAT(r.role_name) as role_name
+		FROM
+			t_sms_user u
+		INNER JOIN
+			t_sms_user_role ur ON u.id = ur.user_id
+		INNER JOIN
+			t_sms_role r ON ur.role_id = r.id
+		WHERE
+			u.web_id IN (3,2,4)
+		AND
+			u.user_type = 1
+		AND u.id = #{id}
+	</select>
+	
+	<!-- 添加、修改管理员之前查重 -->
+	<select id="checkAdmin" resultType="map">
+		SELECT
+			u.email,
+			u.mobile
+		FROM
+			t_sms_user u
+		WHERE
+			u.user_type = 1
+		AND (u.email = #{email} OR u.mobile = #{mobile})
+		AND u.web_id =#{web_id}
+		<if test="id != null">
+			AND u.id != #{id}
+		</if>
+		limit 1
+	</select>
+	
+	<!-- 修改管理员资料 -->
+	<update id="updateAdmin">
+		UPDATE t_sms_user a
+		SET a.email = #{email},
+			a.realname = #{realname},
+			a.mobile = #{mobile},
+			<if test="password != null">
+				a.password = #{password},
+			</if>
+			a.update_date = now()
+		WHERE
+			a.user_type = 1
+		AND a.id = #{id}
+	</update>
+	
+	<!-- 修改密码 -->
+	<update id="savePassword">
+		UPDATE t_sms_user a
+		SET a.`password` = #{newPassword},
+		 a.update_date = now()
+		WHERE
+			a.user_type = 1
+		AND a.id = #{id}
+		AND a.`password` = #{password}
+	</update>
+	
+	<!-- 分页查询管理员 -->
+	<select id="query" resultType="map">
+		SELECT
+			u.id,
+			u.sid,
+			u.email,
+			u.mobile,
+			r.role_name,
+			u.realname,
+			date_format(
+				u.create_date,
+				'%Y-%m-%d %H:%i:%S'
+			) AS create_date,
+			u.`status`,
+			u.`web_id`,
+			CASE u.`web_id`
+				WHEN 2 THEN '代理商平台'
+				WHEN 3 THEN '运营平台'
+				WHEN 4 THEN 'OEM代理商平台'
+			END AS web_id_str
+		FROM
+			t_sms_user u
+		INNER JOIN
+			t_sms_user_role ur ON u.id = ur.user_id
+		INNER JOIN
+			t_sms_role r ON ur.role_id = r.id
+		WHERE
+			u.web_id IN (3,2,4)
+		AND u.user_type = 1
+		<if test="text != null">
+			AND (
+				u.sid LIKE concat('%', #{text}, '%')
+				OR u.email LIKE concat('%', #{text}, '%')
+				OR u.mobile LIKE concat('%', #{text}, '%')
+				OR u.realname LIKE concat('%', #{text}, '%')
+			)
+		</if>
+		<if test="role_id != null">
+			AND r.id = #{role_id}
+		</if>
+		ORDER BY
+			u.id ASC
+		${limit}
+	</select>
+	
+	<!-- 分页查询管理员 记录总数 -->
+	<select id="queryCount" resultType="map">
+		SELECT
+			count(0) AS totalCount
+		FROM
+			t_sms_user u
+		INNER JOIN
+			t_sms_user_role ur ON u.id = ur.user_id
+		INNER JOIN
+			t_sms_role r ON ur.role_id = r.id
+		WHERE
+			u.web_id IN (3,2,4)
+		AND u.user_type = 1
+<!-- 		AND u.`status` = 1 -->
+		<if test="text != null">
+			AND (
+				u.sid LIKE concat('%', #{text}, '%')
+				OR u.email LIKE concat('%', #{text}, '%')
+				OR u.mobile LIKE concat('%', #{text}, '%')
+				OR u.realname LIKE concat('%', #{text}, '%')
+			)
+		</if>
+		<if test="role_id != null">
+			AND r.id = #{role_id}
+		</if>
+	</select>
+	
+	<!-- 添加管理员 -->
+	<insert id="insertAdmin" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO t_sms_user (
+			sid,
+			email,
+			realname,
+			mobile,
+			PASSWORD,
+			user_type,
+			create_date,
+			update_date,
+			STATUS,
+			web_id
+		)
+		VALUES
+			(#{sid}, #{email}, #{realname}, #{mobile}, #{password}, 1, now(),now(), 1,#{web_id})
+	</insert>
+	
+	<!-- 添加管理员角色 -->
+	<insert id="insertAdminRole">
+		INSERT INTO t_sms_user_role (user_id, role_id)
+		VALUES
+			(#{user_id}, #{role_id})
+	</insert>
+	
+	<!-- 修改管理员角色 -->
+	<update id="updateAdminRole">
+		UPDATE t_sms_user_role r
+		SET r.role_id = #{role_id}
+		WHERE
+			r.user_id = #{user_id}
+	</update>
+	
+	<!-- 修改管理员状态 -->
+	<update id="updateStatus">
+		UPDATE t_sms_user u
+		SET u.`status` = #{status}
+		WHERE u.id = #{id}
+	</update>
+	
+	<!-- 删除管理员 -->
+	<delete id="deleteUser">
+		DELETE u, ur
+		FROM
+			t_sms_user u
+		LEFT JOIN t_sms_user_role ur ON u.id = ur.user_id
+		WHERE
+			u.id = #{id}
+		AND u.web_id = 3
+	</delete>
+	
+	<!-- 发送短信验证码之前对手机号码查重 -->
+	<select id="checkMobile" resultType="map">
+		SELECT
+			count(0) AS totalCount
+		FROM
+			t_sms_user u
+		WHERE
+			u.user_type = 1
+		AND u.mobile = #{mobile}
+	</select>
+	
+	<select id="getWebIdByRoleId" resultType="map">
+		SELECT 
+			web_id
+		FROM 
+			t_sms_role
+		WHERE 
+			id = #{id}
+	</select>
+	
+	
+	<select id="getAgentNumBySale" resultType="int">
+		SELECT
+			count(*)
+		from
+			t_sms_agent_info
+		WHERE
+			belong_sale = #{belong_sale}
+	</select>
+
+	<select id="getAccountNumBySale" resultType="int">
+		SELECT
+			count(*)
+		from
+			t_sms_account
+		WHERE
+			belong_sale = #{belong_sale}
+	</select>
+	
+	<update id="updateAgentSale">
+		UPDATE
+			t_sms_agent_info
+		SET
+			belong_sale = #{new_belong_sale}
+		WHERE
+			belong_sale = #{old_belong_sale}
+	</update>
+
+	<update id="updateAccountSale">
+		UPDATE
+			t_sms_account
+		SET
+			belong_sale = #{new_belong_sale}
+		WHERE
+			belong_sale = #{old_belong_sale}
+	</update>
+
+	
+</mapper> 

@@ -1,0 +1,355 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 运营平台客户短信记录 -->
+<mapper namespace="smsReport">
+	
+	<!-- 传统短信(标准短信).查询公用条件 -->
+	<sql id="stdSmsQueryCommon">
+		<where>
+			<if test="text != null and text!=''">
+				and (
+						t.clientid like CONCAT('%',#{text},'%' ) 
+						OR t.name like CONCAT('%',#{text},'%' )
+						OR t.agent_id LIKE CONCAT('%',#{text},'%' )
+					)
+			</if>
+			<if test="start_time != null and start_time!=''">
+				<![CDATA[
+					AND t.date >= REPLACE(#{start_time},"-","")
+				 ]]>
+			</if>
+			<if test="end_time != null and end_time!=''">
+				<![CDATA[
+					AND t.date <= REPLACE(#{end_time},"-","")
+				 ]]>
+			</if>
+			AND t.product_type IN (0,1,2,9) <!-- 按产品类型统计 0：行业，1：营销，2：国际，7：USSD，8：闪信，9：挂机短信 -->
+			AND t.stattype = 0 <!-- 每日数据 -->
+<!-- 			and t.paytype = 0 付费类型，0：预付费，1：后付费 -->
+		</where>
+	</sql>
+	<!-- 传统短信查询  -->
+	<select id="stdSmsQuery" resultType="map">
+		SELECT
+			t.clientid,
+			t.name,
+			t.agent_id,
+			SUM(t.usersmstotal) AS cusSubTotal,<!-- 提交条数 -->
+			SUM(t.reportsuccess) AS successTotal,<!-- 成功条数 -->
+			SUM(t.usersmstotal) - (
+				SUM(t.submitsuccess) + SUM(t.reportsuccess) + SUM(t.notsend)
+			) AS failTotal,<!-- 失败条数 -->
+			SUM(t.chargetotal) AS chargetotal,<!-- 计费条数 -->
+			SUM(t.notsend) AS notsend,<!-- 待发送条数 -->
+			SUM(t.submitsuccess) AS submitsuccess,<!-- 未知条数 -->
+			ROUND(SUM(t.salefee) / 1000, 2) AS salefee,<!-- 消费金额 -->
+			ROUND(SUM(t.productfee) / 1000, 2) AS productfee,<!-- 消耗成本 -->
+			ROUND(SUM(t.costfee) / 1000, 2) AS costfee<!-- 通道成本 -->
+		FROM
+			t_sms_access_channel_statistics t
+			
+		<include refid="stdSmsQueryCommon" />
+		
+		GROUP BY clientid
+		ORDER BY chargetotal DESC
+		${limit}
+	</select>
+	
+	
+	<!-- 传统短信总计栏 -->
+	<select id="stdSmsTotal" resultType="map">
+		SELECT 
+			SUM(IFNULL(t.usersmstotal,0)) AS cusSubTotal,<!-- 提交条数 -->
+			SUM(IFNULL(t.reportsuccess,0)) AS successTotal,<!-- 成功条数 -->
+			SUM(IFNULL(t.usersmstotal,0)) - (
+				SUM(IFNULL(t.submitsuccess,0)) + SUM(IFNULL(t.reportsuccess,0)) + SUM(IFNULL(t.notsend,0))
+			) AS failTotal,<!-- 失败条数 -->
+			SUM(IFNULL(t.chargetotal,0)) AS chargetotal,<!-- 计费条数 -->
+			SUM(IFNULL(t.notsend,0)) AS notsend,<!-- 待发送条数 -->
+			SUM(IFNULL(t.submitsuccess,0)) AS submitsuccess,<!-- 未知条数 -->
+			ROUND(SUM(IFNULL(t.salefee,0)) / 1000, 2) AS salefee,<!-- 消费金额 -->
+			ROUND(SUM(IFNULL(t.productfee,0)) / 1000, 2) AS productfee,<!-- 消耗成本 -->
+			ROUND(SUM(IFNULL(t.costfee,0)) / 1000, 2) AS costfee<!-- 通道成本 -->
+		FROM
+			t_sms_access_channel_statistics t
+			
+		<include refid="stdSmsQueryCommon" />
+		 
+	</select>
+	
+	<!-- 获取传统短信记录数 -->
+	<select id="stdSmsQueryCount" resultType="map">
+		SELECT
+			count(0) as totalCount
+		FROM(
+			SELECT
+				t.clientid
+			FROM
+				t_sms_access_channel_statistics t
+			<include refid="stdSmsQueryCommon" />
+			GROUP BY clientid
+			ORDER BY chargetotal DESC
+		) temp
+	</select>
+	
+	<!-- 查询传统短信(用于导出Excel) -->
+	<select id="stdSmsExcel" resultType="map">
+		SELECT
+			t.clientid,
+			t.name,
+			t.agent_id,
+			SUM(t.usersmstotal) AS cusSubTotal,<!-- 提交条数 -->
+			SUM(t.reportsuccess) AS successTotal,<!-- 成功条数 -->
+			SUM(t.usersmstotal) - (
+				SUM(t.submitsuccess) + SUM(t.reportsuccess) + SUM(t.notsend)
+			) AS failTotal,<!-- 失败条数 -->
+			SUM(t.chargetotal) AS chargetotal,<!-- 计费条数 -->
+			SUM(t.notsend) AS notsend,<!-- 待发送条数 -->
+			SUM(t.submitsuccess) AS submitsuccess,<!-- 未知条数 -->
+			ROUND(SUM(t.salefee) / 1000, 2) AS salefee,<!-- 消费金额 -->
+			ROUND(SUM(t.productfee) / 1000, 2) AS productfee,<!-- 消耗成本 -->
+			ROUND(SUM(t.costfee) / 1000, 2) AS costfee<!-- 通道成本 -->
+		FROM
+			t_sms_access_channel_statistics t
+			
+		<include refid="stdSmsQueryCommon" />
+		
+		GROUP BY clientid
+		ORDER BY chargetotal DESC
+	</select>
+	<!-- 闪信.查询公用条件 -->
+	<sql id="flashSmsQueryCommon">
+		<where>
+			<if test="text != null and text!=''">
+				AND (
+						t.clientid like CONCAT('%',#{text},'%' ) 
+						OR t.name like CONCAT('%',#{text},'%' )
+						OR t.agent_id LIKE CONCAT('%',#{text},'%' )
+					)
+			</if>
+			<if test="start_time != null and start_time!=''">
+				<![CDATA[
+					AND t.date >= REPLACE(#{start_time},"-","")
+				 ]]>
+			</if>
+			<if test="end_time != null and end_time!=''">
+				<![CDATA[
+					AND t.date <= REPLACE(#{end_time},"-","")
+				 ]]>
+			</if>
+			AND t.product_type = 8<!-- 按产品类型统计 0：行业，1：营销，2：国际，7：USSD，8：闪信，9：挂机短信 -->
+			AND t.stattype = 0 <!-- 每日数据 -->
+<!-- 			and t.paytype = 0 付费类型，0：预付费，1：后付费 -->
+		</where>
+	</sql>
+	<!-- 闪信.查询  -->
+	<select id="flashSmsQuery" resultType="map">
+		SELECT
+			t.clientid,
+			t.name,
+			t.agent_id,
+			SUM(t.usersmstotal) AS cusSubTotal,<!-- 提交条数 -->
+			SUM(t.reportsuccess) AS successTotal,<!-- 成功条数 -->
+			SUM(t.usersmstotal) - (
+				SUM(t.submitsuccess) + SUM(t.reportsuccess) + SUM(t.notsend)
+			) AS failTotal,<!-- 失败条数 -->
+			SUM(t.chargetotal) AS chargetotal,<!-- 计费条数 -->
+			SUM(t.notsend) AS notsend,<!-- 待发送条数 -->
+			SUM(t.submitsuccess) AS submitsuccess,<!-- 未知条数 -->
+			ROUND(SUM(t.salefee) / 1000, 2) AS salefee,<!-- 消费金额 -->
+			ROUND(SUM(t.productfee) / 1000, 2) AS productfee,<!-- 消耗成本 -->
+			ROUND(SUM(t.costfee) / 1000, 2) AS costfee<!-- 通道成本 -->
+		FROM
+			t_sms_access_channel_statistics t
+			
+		<include refid="flashSmsQueryCommon" />
+		
+		GROUP BY clientid
+		ORDER BY chargetotal DESC
+		${limit}
+	</select>
+	
+	<!-- 获取闪信.记录数 -->
+	<select id="flashSmsQueryCount" resultType="map">
+		SELECT
+			count(0) as totalCount
+		FROM(
+			SELECT
+				t.clientid
+			FROM
+				t_sms_access_channel_statistics t
+			<include refid="flashSmsQueryCommon" />
+			GROUP BY clientid
+			ORDER BY chargetotal DESC
+		) temp
+	</select>
+	
+	<!-- 查询闪信.(用于导出Excel) -->
+	<select id="flashSmsExcel" resultType="map">
+		SELECT
+			t.clientid,
+			t.name,
+			t.agent_id,
+			SUM(t.usersmstotal) AS cusSubTotal,<!-- 提交条数 -->
+			SUM(t.reportsuccess) AS successTotal,<!-- 成功条数 -->
+			SUM(t.usersmstotal) - (
+				SUM(t.submitsuccess) + SUM(t.reportsuccess) + SUM(t.notsend)
+			) AS failTotal,<!-- 失败条数 -->
+			SUM(t.chargetotal) AS chargetotal,<!-- 计费条数 -->
+			SUM(t.notsend) AS notsend,<!-- 待发送条数 -->
+			SUM(t.submitsuccess) AS submitsuccess,<!-- 未知条数 -->
+			ROUND(SUM(t.salefee) / 1000, 2) AS salefee,<!-- 消费金额 -->
+			ROUND(SUM(t.productfee) / 1000, 2) AS productfee,<!-- 消耗成本 -->
+			ROUND(SUM(t.costfee) / 1000, 2) AS costfee<!-- 通道成本 -->
+		FROM
+			t_sms_access_channel_statistics t
+			
+		<include refid="flashSmsQueryCommon" />
+		
+		GROUP BY clientid
+		ORDER BY chargetotal DESC
+	</select>
+	<!-- USSD.查询公用条件 -->
+	<sql id="ussdSmsQueryCommon">
+		<where>
+			<if test="text != null and text!=''">
+				and (
+						t.clientid like CONCAT('%',#{text},'%' ) 
+						OR t.name like CONCAT('%',#{text},'%' )
+						OR t.agent_id LIKE CONCAT('%',#{text},'%' )
+					)
+			</if>
+			<if test="start_time != null and start_time!=''">
+				<![CDATA[
+					AND t.date >= REPLACE(#{start_time},"-","")
+				 ]]>
+			</if>
+			<if test="end_time != null and end_time!=''">
+				<![CDATA[
+					AND t.date <= REPLACE(#{end_time},"-","")
+				 ]]>
+			</if>
+			AND t.product_type = 7<!-- 按产品类型统计 0：行业，1：营销，2：国际，7：USSD，8：闪信，9：挂机短信 -->
+			AND t.stattype = 0 <!-- 每日数据 -->
+<!-- 			and t.paytype = 0 付费类型，0：预付费，1：后付费 -->
+		</where>
+	</sql>
+	<!-- USSD.查询  -->
+	<select id="ussdSmsQuery" resultType="map">
+		SELECT
+			t.clientid,
+			t.name,
+			t.agent_id,
+			SUM(t.usersmstotal) AS cusSubTotal,<!-- 提交条数 -->
+			SUM(t.reportsuccess) AS successTotal,<!-- 成功条数 -->
+			SUM(t.usersmstotal) - (
+				SUM(t.submitsuccess) + SUM(t.reportsuccess) + SUM(t.notsend)
+			) AS failTotal,<!-- 失败条数 -->
+			SUM(t.chargetotal) AS chargetotal,<!-- 计费条数 -->
+			SUM(t.notsend) AS notsend,<!-- 待发送条数 -->
+			SUM(t.submitsuccess) AS submitsuccess,<!-- 未知条数 -->
+			ROUND(SUM(t.salefee) / 1000, 2) AS salefee,<!-- 消费金额 -->
+			ROUND(SUM(t.productfee) / 1000, 2) AS productfee,<!-- 消耗成本 -->
+			ROUND(SUM(t.costfee) / 1000, 2) AS costfee<!-- 通道成本 -->
+		FROM
+			t_sms_access_channel_statistics t
+			
+		<include refid="ussdSmsQueryCommon" />
+		
+		GROUP BY clientid
+		ORDER BY chargetotal DESC
+		${limit}
+	</select>
+	
+	<!-- 获取USSD.记录数 -->
+	<select id="ussdSmsQueryCount" resultType="map">
+		SELECT
+			count(0) as totalCount
+		FROM(
+			SELECT
+				t.clientid
+			FROM
+				t_sms_access_channel_statistics t
+			<include refid="ussdSmsQueryCommon" />
+			GROUP BY clientid
+			ORDER BY chargetotal DESC
+		) temp
+	</select>
+	
+	<!-- 查询USSD.(用于导出Excel) -->
+	<select id="ussdSmsExcel" resultType="map">
+		SELECT
+			t.clientid,
+			t.name,
+			t.agent_id,
+			SUM(t.usersmstotal) AS cusSubTotal,<!-- 提交条数 -->
+			SUM(t.reportsuccess) AS successTotal,<!-- 成功条数 -->
+			SUM(t.usersmstotal) - (
+				SUM(t.submitsuccess) + SUM(t.reportsuccess) + SUM(t.notsend)
+			) AS failTotal,<!-- 失败条数 -->
+			SUM(t.chargetotal) AS chargetotal,<!-- 计费条数 -->
+			SUM(t.notsend) AS notsend,<!-- 待发送条数 -->
+			SUM(t.submitsuccess) AS submitsuccess,<!-- 未知条数 -->
+			ROUND(SUM(t.salefee) / 1000, 2) AS salefee,<!-- 消费金额 -->
+			ROUND(SUM(t.productfee) / 1000, 2) AS productfee,<!-- 消耗成本 -->
+			ROUND(SUM(t.costfee) / 1000, 2) AS costfee<!-- 通道成本 -->
+		FROM
+			t_sms_access_channel_statistics t
+			
+		<include refid="ussdSmsQueryCommon" />
+		
+		GROUP BY clientid
+		ORDER BY chargetotal DESC
+	</select>
+
+	<!-- 获取短信记录关联的客户信息 -->
+	<select id="getClientAssociatedInfo" resultType="map">
+		SELECT
+			ac.clientid,
+			DATE_FORMAT(ac.createtime,'%Y-%m-%d %T') AS createtime,
+			ai.agent_name,
+			ai.agent_type,
+			CASE ai.agent_type
+				WHEN 1 THEN '销售代理商'
+				WHEN 2 THEN '品牌代理商'
+				WHEN 3 THEN '资源合作商'
+				WHEN 4 THEN '代理商和资源合作'
+				WHEN 5 THEN 'OEM代理商'
+			END AS agent_type_name
+		FROM
+			t_sms_account ac
+		INNER JOIN t_sms_agent_info ai
+			ON ac.agent_id = ai.agent_id
+		WHERE
+			ac.clientid IN
+		<foreach collection="list" item="param"  open="(" close=")" separator=",">
+			#{param}
+		</foreach>
+	</select>
+
+	<select id="getUserIdByUserName" resultType="map">
+		  SELECT
+		  	id
+		  FROM
+		  	t_sms_user
+		  WHERE
+		  	realname like CONCAT('%',#{text},'%' )
+	</select>
+
+	<select id="getUserInfoById" resultType="map">
+		SELECT
+			id,
+			realname
+		FROM
+			t_sms_user
+		WHERE
+			id IN
+			<foreach collection="list" item="item" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+	</select>
+
+
+</mapper> 

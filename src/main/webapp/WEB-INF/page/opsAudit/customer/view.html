@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信平台运营系统 </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet">
+    <!-- jqgrid-->
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+
+	<link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+    <style>
+        /* Additional style to fix warning dialog position */
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+    </style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+	<div class="wrapper wrapper-content animated fadeInRight">
+	    <div class="row">
+	        <div class="col-sm-12">
+	            <div class="ibox "> 
+	                <div class="ibox-content">
+
+						<div class="pull-right tooltip-demo">
+							<!--<a class="btn btn-danger btn-sm" data-toggle="tooltip" data-placement="top" title="返回" onclick="javascript:self.location=document.referrer;"><i class="fa fa-reply"></i>&nbsp;返回</a>-->
+						</div>
+	                    <div class="row">
+	                        <div class="col-sm-6 b-r">
+	                            <form class="form-horizontal m-t" id="mainForm">
+	                                <div class="form-group">
+									    <label class="col-sm-3 control-label">子账户ID:</label>
+									    <div class="col-sm-8">
+									      <p class="form-control-static" th:text="${data.client_id}" th:if="${data.client_id}"></p>
+									    </div> 
+										<input id="client_id" name="client_id" type="hidden" th:value="${data.client_id}" th:if="${data.client_id}">
+	                                </div>
+	                                <div class="form-group">
+	                                	<label class="col-sm-3 control-label">子账户名称:</label>
+	                                    <div class="col-sm-8">
+									      <p class="form-control-static" th:text="${data.client_name}" th:if="${data.client_name}"></p>
+	                                    </div>
+	                                </div>                                 
+	                                <div class="form-group">
+	                                	<label class="col-sm-3 control-label">手机号码:</label>
+	                                	<div class="col-sm-8">
+									      <p class="form-control-static" th:text="${data.mobile}" th:if="${data.mobile}"></p>
+	                                	</div>
+	                                </div>
+	                                <div class="form-group">
+	                                	<label class="col-sm-3 control-label" th:if="${data.client_type}==1">个人姓名:</label>
+	                                	<label class="col-sm-3 control-label" th:if="${data.client_type}==2">公司名称:</label>
+	                                	<div class="col-sm-8">
+									      <p class="form-control-static" th:text="${data.realname}" th:if="${data.realname}"></p>
+	                                	</div>
+	                                </div>
+	                                <div class="form-group">
+	                                	<label class="col-sm-3 control-label" th:if="${data.client_type}==1">个人地址:</label>
+	                                	<label class="col-sm-3 control-label" th:if="${data.client_type}==2">公司地址:</label>
+	                                	<div class="col-sm-8">
+									      <p class="form-control-static" th:text="${data.address}" th:if="${data.address}"></p>
+	                                	</div>
+	                                </div>
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">证件类型:</label>
+										<div class="col-sm-8" th:switch="${data.id_type}">
+									      <span class="form-control-static" th:case="1">身份证</span>
+									      <span class="form-control-static" th:case="2">护照</span>
+									      <span class="form-control-static" th:case="3">组织机构证</span>
+									      <span class="form-control-static" th:case="4">税务登记证</span>
+									      <span class="form-control-static" th:case="5">营业执照</span>
+									      <span class="form-control-static" th:case="6">三证合一</span>
+									      <span class="form-control-static" th:case="7">四证合一</span>
+									      <span class="form-control-static" th:case="8">登记证书号</span>
+	                                    </div>
+	                                </div> 
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">证件号码:</label>
+	                                    <div class="col-sm-8">
+									      <p class="form-control-static" th:text="${data.id_nbr}" th:if="${data.id_nbr}"></p>
+	                                    </div>
+	                                </div> 
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">证件图片:</label>
+	                                    <div class="col-sm-8">
+											<img th:src="${data.smsp_img_url}+'/file/scanPic.html?path='+${data.img_url}"
+												width="50" height="35" style="cursor: pointer;" title="点击查看大图"
+												onclick="viewFile(this)"  th:if="${data.img_url}"/>
+	                                    </div>
+	                                </div> 
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">认证状态:</label>
+	                                    <div class="col-sm-8">
+									      <p class="form-control-static" th:text="${data.oauth_status_name}" th:if="${data.oauth_status_name}"></p>
+	                                    </div>
+	                                </div> 
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">备注:</label>
+	                                    <div class="col-sm-8">
+									      <p class="form-control-static" th:text="${data.remark}" th:if="${data.remark}"></p>
+	                                    </div>
+	                                </div>  
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">提交时间:</label>
+	                                    <div class="col-sm-8">
+									      <p class="form-control-static" th:text="${data.submit_time}" th:if="${data.submit_time}"></p>
+	                                    </div>
+	                                </div> 
+	                                 
+								     <div class="form-group auditComplete">
+								        <div class="col-sm-12 col-sm-offset-3">
+								            <button type="button" class="btn btn-sm"  onclick="goback()" >返 回</button> 
+								        </div>
+								    </div>
+								     <div class="form-group auditWait">
+								        <div class="col-sm-12 col-sm-offset-3">
+								            <button type="button" class="btn btn-sm btn-success"  onclick="auditPrompt(3)" >通过认证</button> 
+								            <button type="button" class="btn btn-sm btn-error"  onclick="auditPrompt(4)" >不通过认证</button> 
+								        </div>
+								    </div>
+	                            </form>
+	                        </div>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	</div>
+	<script th:src="@{/resources/js/hex_ha_ha_ha_ha_ha.js}"></script>
+	<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+	<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+	<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+	<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+	<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+	<script th:src="@{/resources/js/jquery.form.js?v=1.0.0}"></script>
+
+	<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+	<script th:src="@{/resources/js/plugins/validate/jquery.validate.min.js}"></script>
+	<script th:src="@{/resources/js/layer/layer.js}"></script>
+	<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+	
+	
+	<script th:inline="javascript">
+		/*<![CDATA[*/
+		  
+	// 代理商审核状态
+	var oauth_status = /*[[${data.oauth_status}]]*/;
+	function viewFile(img) {
+		open($(img).attr("src"), "viewFile");
+	}
+
+	$(function(){
+		viewAuditBtn(); 
+	});
+	
+	function goback(){
+		window.history.back();
+	}
+	
+	function viewAuditBtn(oprate){
+		// 审核通过和审核不通过的显示“返回”
+		if(oauth_status == 3 || oauth_status == 4 || oprate){
+			$(".auditComplete").show();
+			$(".auditWait").hide();
+		}else{
+			// 待审核的显示先关操作
+			$(".auditWait").show();
+			$(".auditComplete").hide();
+		}
+	}
+	
+	function auditPrompt(oauth_status){
+		if(oauth_status == 3){
+			layer.confirm('确定通过认证？', function(index){
+				  //do something
+				  agentAudit(this, oauth_status, "");
+				  layer.close(index);
+				}); 
+			
+		}else{
+			layer.prompt({
+				  formType: 2,
+				  value: '',
+				  title: '认证不通过（理由必填）',
+				  maxlength: 100
+				}, function(value, index, elem){
+// 				  alert(value); //得到value
+				  agentAudit(this, oauth_status, value);
+				  layer.close(index);
+				});
+		}
+		
+	}
+
+	function agentAudit(btn, oauth_status, remark){
+		var options = {
+			beforeSubmit : function() {
+				$(btn).attr("disabled", true);
+			},
+			success : function(data) {
+				$(btn).attr("disabled", false);
+				if(data.success){
+					layer.msg(data.msg , {icon: 1}); 
+					window.setTimeout(function(){
+						viewAuditBtn(true); // 切换操作按钮
+// 						window.history.back();
+						window.location.href=/*[[@{/opsAudit/customer/query}]]*/;
+					}, 1200);
+				}else{
+					layer.msg(data.msg, {icon: 2}); 
+				} 
+// 				if(data.result==null){
+// 					$("#msg").text("服务器错误，请联系管理员").show();
+// 					return;
+// 				}
+// 				$("#msg").text(data.msg).show();
+				
+			},
+			url : /*[[@{/opsAudit/customer/audit}]]*/,
+			data : {
+				oauth_status : oauth_status,
+				remark : remark
+			},
+			type : "post",
+			timeout:30000
+		};
+		$("#mainForm").ajaxSubmit(options);
+	};
+	    /*]]>*/
+	    
+	</script>
+</body>
+</html>

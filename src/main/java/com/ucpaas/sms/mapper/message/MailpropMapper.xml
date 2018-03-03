@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ucpaas.sms.mapper.message.MailpropMapper">
+     
+        
+    <resultMap id="rowMapper" type="Mailprop">
+        <result property="id" jdbcType="BIGINT" column="id"/>
+        <result property="frm" jdbcType="VARCHAR" column="frm"/>
+        <result property="fromnickname" jdbcType="VARCHAR" column="fromnickname"/>
+        <result property="tonbr" jdbcType="VARCHAR" column="tonbr"/>
+        <result property="cc" jdbcType="VARCHAR" column="cc"/>
+        <result property="bcc" jdbcType="VARCHAR" column="bcc"/>
+        <result property="subject" jdbcType="VARCHAR" column="subject"/>
+        <result property="text" jdbcType="LONGVARCHAR" column="text"/>
+        <result property="atturl" jdbcType="VARCHAR" column="atturl"/>
+        <result property="type" jdbcType="CHAR" column="type"/>
+        <result property="createtime" jdbcType="TIMESTAMP" column="createtime"/>
+    </resultMap> 
+     
+    <sql id="BASE_COLUMN_LIST">
+        id,
+        frm,
+        fromnickname,
+        tonbr,
+        cc,
+        bcc,
+        subject,
+        text,
+        atturl,
+        type,
+        createtime
+    </sql>
+
+    <insert id="insert" parameterType="Mailprop" >
+        INSERT INTO t_sms_mailprop 
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                id,
+            </if>
+            <if test="frm != null" >
+                frm,
+            </if>
+            <if test="fromnickname != null" >
+                fromnickname,
+            </if>
+            <if test="tonbr != null" >
+                tonbr,
+            </if>
+            <if test="cc != null" >
+                cc,
+            </if>
+            <if test="bcc != null" >
+                bcc,
+            </if>
+            <if test="subject != null" >
+                subject,
+            </if>
+            <if test="text != null" >
+                text,
+            </if>
+            <if test="atturl != null" >
+                atturl,
+            </if>
+            <if test="type != null" >
+                type,
+            </if>
+            <if test="createtime != null" >
+                createtime
+            </if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id},
+            </if>
+            <if test="frm != null" >
+                #{frm},
+            </if>
+            <if test="fromnickname != null" >
+                #{fromnickname},
+            </if>
+            <if test="tonbr != null" >
+                #{tonbr},
+            </if>
+            <if test="cc != null" >
+                #{cc},
+            </if>
+            <if test="bcc != null" >
+                #{bcc},
+            </if>
+            <if test="subject != null" >
+                #{subject},
+            </if>
+            <if test="text != null" >
+                #{text},
+            </if>
+            <if test="atturl != null" >
+                #{atturl},
+            </if>
+            <if test="type != null" >
+                #{type},
+            </if>
+            <if test="createtime != null" >
+                #{createtime}
+            </if>
+        </trim>
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List" >
+        INSERT INTO t_sms_mailprop (
+            id,
+            frm,
+            fromnickname,
+            tonbr,
+            cc,
+            bcc,
+            subject,
+            text,
+            atturl,
+            type,
+            createtime
+        )VALUES
+        <foreach collection="list" item="item" index="index" separator="," >  
+            (
+                #{item.id},
+                #{item.frm},
+                #{item.fromnickname},
+                #{item.tonbr},
+                #{item.cc},
+                #{item.bcc},
+                #{item.subject},
+                #{item.text},
+                #{item.atturl},
+                #{item.type},
+                #{item.createtime}
+            )
+        </foreach>
+    </insert>
+    
+    
+    <update id="update" parameterType="Mailprop">
+        UPDATE t_sms_mailprop SET 
+            frm=#{frm},
+            fromnickname=#{fromnickname},
+            tonbr=#{tonbr},
+            cc=#{cc},
+            bcc=#{bcc},
+            subject=#{subject},
+            text=#{text},
+            atturl=#{atturl},
+            type=#{type},
+            createtime=#{createtime}
+        WHERE 
+            id = #{id} 
+    </update>
+    
+ 
+    
+    <update id="updateSelective" parameterType="Mailprop">
+        UPDATE t_sms_mailprop 
+            <set>
+                <if test="frm != null and frm != ''">
+                    frm = #{frm},
+                </if>
+                <if test="fromnickname != null and fromnickname != ''">
+                    fromnickname = #{fromnickname},
+                </if>
+                <if test="tonbr != null and tonbr != ''">
+                    tonbr = #{tonbr},
+                </if>
+                <if test="cc != null and cc != ''">
+                    cc = #{cc},
+                </if>
+                <if test="bcc != null and bcc != ''">
+                    bcc = #{bcc},
+                </if>
+                <if test="subject != null and subject != ''">
+                    subject = #{subject},
+                </if>
+                <if test="text != null and text != ''">
+                    text = #{text},
+                </if>
+                <if test="atturl != null and atturl != ''">
+                    atturl = #{atturl},
+                </if>
+                <if test="type != null and type != ''">
+                    type = #{type},
+                </if>
+                <if test="createtime != null and createtime != ''">
+                    createtime = #{createtime}
+                </if>
+            </set>
+        WHERE 
+            id = #{id} 
+    </update>
+
+    <select id="getById" resultMap="rowMapper">
+        SELECT 
+            <include refid="BASE_COLUMN_LIST" />
+        FROM t_sms_mailprop
+        WHERE 
+            id = #{id}
+    </select>
+
+    <select id="queryList" parameterType="Mailprop" resultMap="rowMapper">
+        SELECT 
+            <include refid="BASE_COLUMN_LIST" /> 
+        FROM t_sms_mailprop 
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            <if test="params.id != null and params.id != ''">
+                and id = #{params.id}
+            </if>
+            <if test="params.frm != null and params.frm != ''">
+                and frm = #{params.frm}
+            </if>
+            <if test="params.fromnickname != null and params.fromnickname != ''">
+                and fromnickname = #{params.fromnickname}
+            </if>
+            <if test="params.tonbr != null and params.tonbr != ''">
+                and tonbr = #{params.tonbr}
+            </if>
+            <if test="params.cc != null and params.cc != ''">
+                and cc = #{params.cc}
+            </if>
+            <if test="params.bcc != null and params.bcc != ''">
+                and bcc = #{params.bcc}
+            </if>
+            <if test="params.subject != null and params.subject != ''">
+                and subject = #{params.subject}
+            </if>
+            <if test="params.text != null and params.text != ''">
+                and text = #{params.text}
+            </if>
+            <if test="params.atturl != null and params.atturl != ''">
+                and atturl = #{params.atturl}
+            </if>
+            <if test="params.type != null and params.type != ''">
+                and type = #{params.type}
+            </if>
+            <if test="params.createtime != null and params.createtime != ''">
+                and createtime = #{params.createtime}
+            </if>
+	     </trim>
+    </select>
+
+    <select id="count" parameterType="Mailprop" resultType="int">
+        SELECT COUNT(0) 
+        FROM t_sms_mailprop 
+        WHERE 
+            1 = 1
+            <if test="id != null and id != ''">
+                and id = #{id}
+            </if>
+            <if test="frm != null and frm != ''">
+                and frm = #{frm}
+            </if>
+            <if test="fromnickname != null and fromnickname != ''">
+                and fromnickname = #{fromnickname}
+            </if>
+            <if test="tonbr != null and tonbr != ''">
+                and tonbr = #{tonbr}
+            </if>
+            <if test="cc != null and cc != ''">
+                and cc = #{cc}
+            </if>
+            <if test="bcc != null and bcc != ''">
+                and bcc = #{bcc}
+            </if>
+            <if test="subject != null and subject != ''">
+                and subject = #{subject}
+            </if>
+            <if test="text != null and text != ''">
+                and text = #{text}
+            </if>
+            <if test="atturl != null and atturl != ''">
+                and atturl = #{atturl}
+            </if>
+            <if test="type != null and type != ''">
+                and type = #{type}
+            </if>
+            <if test="createtime != null and createtime != ''">
+                and createtime = #{createtime}
+            </if>
+    </select>
+	 
+</mapper>
+

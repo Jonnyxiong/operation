@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:th="http://www.thymeleaf.org"
+	  lang="zh-cn">
+<head>
+	<meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+	<meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+	<title>短信云平台运营系统 - 品牌代理商订单详情</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+	<link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+	<link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+	<link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+	<link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+	<style>
+		/* Additional style to fix warning dialog position */
+		#alertmod_table_list_2 {
+			top: 900px !important;
+		}
+	</style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="ibox ">
+				<!-- 搜索条件 -->
+				<div class="ibox-content">
+					<div class="row">
+						<div class="col-sm-12">
+							<form class="form-horizontal m-t" id="manager_form">
+								<div class="form-group">
+									<label class="col-sm-3 control-label">订单:</label>
+									<div class="col-sm-8">
+										<p class="form-control-static" th:text="${data ne null ? data.order_id : ''}"></p>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-3 control-label">用户帐号:</label>
+									<div class="col-sm-8">
+										<p class="form-control-static" th:text="${data ne null ? data.client_id :''}"></p>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-3 control-label">代理商:</label>
+									<div class="col-sm-8">
+										<p class="form-control-static" th:text="${data ne null ? data.agent_id:''}"></p>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-3 control-label">产品代码:</label>
+									<div class="col-sm-8">
+										<p class="form-control-static" th:text="${data ne null ? data.product_code:''}"></p>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-3 control-label">产品类型:</label>
+									<div class="col-sm-8">
+										<p class="form-control-static" th:text="${data ne null ? data.product_type:''}"></p>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-3 control-label">运营商:</label>
+									<div class="col-sm-8">
+										<p class="form-control-static" th:text="${data.operator_code}"></p>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-3 control-label">区域:</label>
+									<div class="col-sm-8">
+										<p class="form-control-static" th:text="${data.area_code}">全国</p>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-3 control-label">订单类型:</label>
+									<div class="col-sm-8">
+										<p class="form-control-static" th:text="${data ne null ? data.order_type:''}"></p>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-3 control-label">订单状态:</label>
+									<div class="col-sm-8">
+										<p class="form-control-static" th:text="${data ne null ? data.status_name:''}"></p>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-3 control-label">有效期:</label>
+									<div class="col-sm-8">
+										<p class="form-control-static" th:text="${data ne null ? data.active_period_str:''}"></p>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-3 control-label">数量:</label>
+									<div class="col-sm-8">
+										<p class="form-control-static" th:text="${data ne null ?data.quantity:''}"></p>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-3 control-label">产品定价:</label>
+									<div class="col-sm-8">
+										<p class="form-control-static" th:text="${data ne null ? data.sale_price:''}"></p>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-3 control-label">产品成本:</label>
+									<div class="col-sm-8">
+										<p class="form-control-static" th:text="${data ne null ? data.product_cost:''}"></p>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-3 control-label">到期时间:</label>
+									<div class="col-sm-8">
+										<p class="form-control-static" th:text="${data ne null ? data.end_time:''}"></p>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-3 control-label">创建时间:</label>
+									<div class="col-sm-8">
+										<p class="form-control-static" th:text="${data ne null ? data.create_time:''}"></p>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-3 control-label">生效时间:</label>
+									<div class="col-sm-8">
+										<p class="form-control-static" th:text="${data ne null ? data.effective_time:''}"></p>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-3 control-label">更新时间:</label>
+									<div class="col-sm-8">
+										<p class="form-control-static" th:text="${data ne null ? data.update_time:''}"></p>
+									</div>
+								</div>
+
+								<div class="form-group">
+									<div class="col-sm-12 col-sm-offset-3">
+										<button type="button" class="btn btn-sm btn-error" onclick="goback()">返回</button>
+									</div>
+								</div>
+							</form>
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+
+<script th:inline="javascript">
+    function goback(){
+        var mainUrl =  [[@{/finance/order}]];
+        window.location.href = mainUrl;
+    }
+</script>
+
+</body>
+</html>

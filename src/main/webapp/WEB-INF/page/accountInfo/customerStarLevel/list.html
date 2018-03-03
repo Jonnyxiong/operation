@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信云平台运营系统 </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+    <link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+    <link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/doublebox-bootstrap.css}" rel="stylesheet">
+    <style>
+        /* Additional style to fix warning dialog position */
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+        ._green_link {
+            color: #008000;
+        }
+        ._green_link:hover {
+            color: #008000;
+            text-decoration:underline;
+        }
+        .modal-content{
+            opacity: 1 !important;
+            border:none;
+        }
+        .bootstrap-duallistbox-container label{
+            text-align: center;
+        }
+        .filter{
+            text-align: center;
+        }
+        .demo{
+            height: 322px !important;
+        }
+    </style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+                <!-- 搜索条件 -->
+                <div class="ibox-content">
+                    <form role="form" class="form-inline" id="mainForm" method="post">
+                        <div class="form-group">
+                            <label for="status">客户类型:</label>
+                            <select id="status" class="form-control" name="status">
+                                <option value="">所有</option>
+                                <option value="1">代理商子客户</option>
+                                <option value="2">直客</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="customerID" >客户ID：</label>
+                            <input type="text" class="form-control" id="customerID" name="customerID" >
+                        </div>
+                        <div class="form-group">
+                            <label for="customerName">客户名称：</label>
+                            <input type="text" class="form-control" id ="customerName" name="customerName" >
+                        </div>
+                        <div class="form-group">
+                            <label for="star_level">客户等级:</label>
+                            <select id="star_level" class="form-control" name="star_level">
+                                <option value="">所有</option>
+                                <option value="1">1星</option>
+                                <option value="2">2星</option>
+                                <option value="3">3星</option>
+                                <option value="4">4星</option>
+                                <option value="5">5星</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                        	<span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-danger" onclick="search()">搜索</button>
+                            <span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-primary" onclick="exportExcel()">导出Excel</button></span>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="ibox-content">
+                    <div class="jqGrid_wrapper">
+                        <table id="table_list"></table>
+                        <div id="pager_list"></div>
+                    </div>
+                    <p>&nbsp;</p>
+                </div>
+        </div>
+    </div>
+
+
+</div>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/js/doublebox-bootstrap.js}"></script>
+
+<script th:inline="javascript">
+    function search(){
+        $("#table_list").jqGrid('setGridParam',{
+            datatype:'json',
+            postData: {
+                customerID: $("#customerID").val(),
+                customerName : $("#customerName").val(),
+                status: $("#status").val(),
+                starLevel : $("#star_level").val()
+            }, //发送数据
+            page:1
+        }).trigger("reloadGrid"); //重新载入
+    }
+    var max_export_num = /*[[${max_export_num}]]*/;
+    //导出Excel文件
+    function exportExcel() {
+        var totalCount = $("#table_list").jqGrid('getGridParam','records');
+        if (totalCount == 0) {
+            layer.msg("共0条记录，将不导出Excel文件", {icon: 2});
+            return;
+        }
+        if(totalCount > max_export_num){
+            layer.msg("导出Excel文件条数大于"+max_export_num+"条", {icon: 2});
+            return;
+        }
+        var mainForm = $("#mainForm");
+        var action = mainForm.attr("action");
+        var exporUrl = /*[[@{/accountInfo/customerStarLevel/exportExcel}]]*/;
+        mainForm.attr("action", exporUrl).submit();
+        mainForm.attr("action", action);
+    }
+
+    $(document).ready(function () {
+        $.jgrid.defaults.styleUI = "Bootstrap";
+        $("#table_list").jqGrid({
+            url:/*[[@{/accountInfo/customerStarLevel/list}]]*/'',
+            mtype: 'POST',
+            datatype: "json",
+            jsonReader : {
+                root:"list",
+                page: "currentPage",
+                total: "totalPage",
+                records: "totalCount"
+            },
+            height: 'auto',
+            rownumbers:true,
+            autowidth: true,
+            shrinkToFit: false,
+            autoScroll: true,
+            rowNum: 20,
+            rowList: [10, 20, 30,50],
+            colModel: [
+                {label:"客户ID",name: "clientid",align: "left",sortable:false,width:260},
+                {label:"客户名称",name: "name",align: "left",sortable:false,width:260},
+                {label:'客户等级',name: "starLevelStr",align: "left",sortable:false,width:260},
+                {label:"客户等级",name: "starLevel", align: "left",sortable:false,hidden:true},
+                {label:"客户类型",name: "agentIdStr", align: "left",sortable:false,width:260},
+                {label:"创建时间",name: "createtimeStr", align: "left",sortable:false,width:280
+                    },
+                {label:"操作",name: "total",index: "total",align: "left",sortable:false,title:false,width:260,
+                    formatter:function(cellvalue, options, rowObject){
+                        var switcher = '';
+                        var clientid = rowObject.clientid;
+                        switcher = "<button type='button' class='btn btn-link btn-xs ' onclick=\"gradeSetting('"+clientid+"')\" title='等级设置'>等级设置</button>";
+                        return switcher;
+                    }
+                }
+            ],
+            pager: "#pager_list",
+            viewrecords: true,
+            hidegrid: false
+        });
+
+        $(window).bind("resize", function () {
+            var width = $(".jqGrid_wrapper").width();
+            $("#table_list").setGridWidth(width);
+        })
+
+        function keyUp(e) {
+            var currKey=0,e=e||event;
+            currKey=e.keyCode||e.which||e.charCode;
+            var keyName = String.fromCharCode(currKey);
+            if (currKey == 13){
+                search();
+            }
+        }
+
+        document.onkeyup = keyUp;
+    });
+    function gradeSetting(clientid){
+        layer.open({
+            type: 2,
+            shadeClose: true,
+            title:"客户等级设置",
+            content:"/accountInfo/customerStarLevel/getAccountPoOfStarLevel?clientid="+clientid,
+            area:['600px', '300px']
+        });
+    }
+    /*]]>*/
+</script>
+</body>
+</html>

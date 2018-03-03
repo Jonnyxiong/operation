@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:th="http://www.thymeleaf.org"
+	  lang="zh-cn">
+<head>
+	<meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+	<meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+	<title>短信云平台运营系统 - 客户历史授信</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+	<link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" href="/resources/css/bootstrap.min14ed.css" rel="stylesheet">
+	<link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" href="/resources/css/font-awesome.min93e3.css" rel="stylesheet"><!-- jqgrid-->
+	<link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" href="/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css" rel="stylesheet">
+	<link th:href="@{/resources/css/animate.min.css}" href="/resources/css/animate.min.css" rel="stylesheet">
+	<link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" href="/resources/css/style.min862f.css" rel="stylesheet">
+	<link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" href="/resources/css/plugins/sweetalert/sweetalert.css" rel="stylesheet">
+	<link th:href="@{/resources/css/select2.css}" rel="stylesheet">
+
+	<style>
+		/* Additional style to fix warning dialog position */
+
+		#alertmod_table_list_2 {
+			top: 900px !important;
+		}
+		.select2-container .select2-selection--single{
+			width: 185px !important;
+		}
+		.select2-dropdown--below{
+			width: 185px !important;
+		}
+	</style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="tabs-container">
+
+				<ul class="nav nav-tabs">
+					<li th:if="${menus.wdsx}" id="agentTab1" ><a href="/sellFinance/myCredit"> 我的授信</a>
+					</li>
+					<li th:if="${menus.khsx}" class="" ><a href="/sellFinance/credit4Customer">客户授信</a>
+					</li>
+					<li th:if="${menus.khlssx}" class="active"  ><a href="/sellFinance/customerHisCredit">客户历史授信</a>
+					</li>
+					<li th:if="${menus.xscw}" class="" ><a href="/sellFinance/saleFinance">销售财务</a>
+					</li>
+					<li th:if="${menus.xslscw}" class="" ><a  href="/sellFinance/salehisFinance">销售历史财务</a>
+					</li>
+					<li th:if="${menus.xssxzd}" class="" ><a  href="/sellFinance/saleCreditBill">销售授信账单</a>
+					</li>
+					<li th:if="${menus.khsxzd}" class="" ><a  href="/sellFinance/CustomerCreditBill">客户授信账单</a>
+					</li>
+				</ul>
+				<div class="tab-pane active" th:if="${menus.khlssx}">
+					<div class="panel-body">
+						<form class="form-inline" method="post" id="mainForm" onkeydown="if(event.keyCode==13)return false;" style="margin-bottom:15px;">
+							<div class="form-group m-r-md">
+								<input type="text" placeholder="代理商ID/代理商名称/邮箱/手机" name="condition" id="condition" class="form-control" style="width: 246px;">
+							</div>
+							<div class="form-group">
+								<label for="operatorCode">代理商类型:</label>
+								<select id="operatorCode" name="operatorCode" class="form-control ">
+									<option value="">全部</option>
+									<option value="2">品牌代理商</option>
+									<option value="5">OEM代理商</option>
+								</select>
+							</div>
+							<div class="form-group">
+								<label for="status">代理商状态:</label>
+								<select id="status" name="status"  class="form-control">
+									<option value="">全部</option>
+									<option value="1">已启用</option>
+									<option value="5">已冻结</option>
+									<option value="6">已注销</option>
+								</select>
+							</div>
+							<div class="form-group">
+								<label >归属销售:</label>
+								<select name="besales" id="besales"  ></select>
+							</div>
+							<!-- 时间选择 -->
+							<div class="form-group" id="sandbox-container" style="margin-left:5.5%">
+								<div class="form-group pull-right">时间:
+									<input placeholder="时间" class="form-control layer-date" name="create_time" id="startDateTime" />
+								</div>
+							</div>
+							<div class="form-group">
+								<span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-danger" onclick="search()">搜索</button></span>
+								<span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-primary" onclick="exportExcel()">导出Excel</button></span>
+							</div>
+						</form>
+
+						<div class="ibox-content">
+							<div class="jqGrid_wrapper">
+								<table id="table_list"></table>
+								<div id="pager_list"></div>
+							</div>
+							<p>&nbsp;</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/jquery.form.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/select2.min.js}"></script>
+
+<script th:inline="javascript">
+    var max_export_num = [[${max_export_num}]];
+    var normal_saleId=[[${saleIdforOne}]];
+    var myDate = getNowFormatDate();
+    var start = {
+        elem: "#startDateTime",
+        format: "YYYY-MM-DD hh:mm:ss",
+        max: laydate.now(),
+
+        istime: true,
+        istoday: true,
+        choose: function (datas) {
+            end.min = datas;
+        }
+    };
+
+
+    laydate(start);
+    $("#startDateTime").val(myDate)
+    function getNowFormatDate() {
+        var date = new Date();
+        var seperator1 = "-";
+        var seperator2 = ":";
+        var month = date.getMonth() + 1;
+        var strDate = date.getDate();
+        var minutes = date.getMinutes();
+        var seconds = date.getSeconds();
+        if (month >= 1 && month <= 9) {
+            month = "0" + month;
+        }
+        if (minutes >= 1 && minutes <= 9) {
+            minutes = "0" + minutes;
+        }
+        if (strDate >= 0 && strDate <= 9) {
+            strDate = "0" + strDate;
+        }
+        if (seconds >= 0 && seconds <= 9) {
+            seconds = "0" + seconds;
+        }
+        var currentdate = date.getFullYear() + seperator1 + month + seperator1 + strDate
+            + " " + date.getHours() + seperator2 + minutes + seperator2 + seconds;
+        return currentdate;
+    }
+    function search(){
+        $("#table_list").jqGrid('setGridParam',{
+            datatype:'json',
+            postData: {
+                condition: $("#condition").val(),
+                status:$("#status").val(),
+                agentType:$("#operatorCode").val(),
+                create_time: $("#startDateTime").val(),
+                besales:$("#besales").val()
+            }, //发送数据
+            page:1
+        }).trigger("reloadGrid"); //重新载入
+    }
+
+    // 导出Excel文件
+    function exportExcel() {
+        var totalCount = $("#table_list").jqGrid('getGridParam','records');
+        if (totalCount == 0) {
+            layer.alert("共0条记录，导出Excel文件失败");
+            return;
+        }
+
+        if(totalCount > max_export_num){
+            layer.msg("导出Excel文件条数大于"+max_export_num+"条", {icon: 2});
+            return;
+        }
+        var mainForm = $("#mainForm");
+        var action = mainForm.attr("action");
+        var exporUrl = /*[[@{/sellFinance/customerHisCredit/export}]]*/'';
+        mainForm.attr("action", exporUrl).submit();
+        mainForm.attr("action", action);
+    }
+    $(document).ready(function () {
+        //获取用户账号
+        var select2Date;
+        var dataAuthority;
+        var id;
+        var text;
+        $.ajax({
+            url : '/sellFinance/queryAllSales',
+            dataType : 'json',
+            async : false,
+            success : function(res){
+                for(var i = 0; i < res.length; i++){
+                    res[i].id = res[i].id;
+                    res[i].text = res[i].id+ "-" + res[i].realname ;
+                }
+                if(res.length ==1){
+                    dataAuthority = res[0].dataAuthority;
+                    id=res[0].id;
+                    text = res[0].id+ "-" + res[0].realname
+                }
+                res.unshift({id:"",text:""})
+                select2Date = res;
+            }
+        })
+        //初始化select2
+        $("#besales").select2({
+            data : select2Date
+        })
+        //select2默认赋值
+        if(dataAuthority ==0){
+            $('#besales').val(id);
+            $('#besales').trigger('change');
+        }
+
+        if(normal_saleId!=null){
+            $("#besales").val(normal_saleId).trigger("change");
+            $("#besales").prop("disabled", true);
+        }
+
+
+        $.jgrid.defaults.styleUI = "Bootstrap";
+        $("#table_list").jqGrid({
+            url:/*[[@{/sellFinance/customerHisCredit/list}]]*/"",
+            mtype: 'POST',
+            datatype: "json",
+            jsonReader : {
+                root:"entityList",
+                page: "currentPage",
+                total: "totalPage",
+                records: "totalCount"
+            },
+            postData: {
+                condition: $("#condition").val(),
+                status:$("#status").val(),
+                agentType:$("#operatorCode").val(),
+                create_time: $("#startDateTime").val(),
+                besales:$("#besales").val()
+            }, //发送数据
+            height: 'auto',
+            rownumbers:true,
+            autowidth: true,
+            shrinkToFit: false,
+            autoScroll: true,
+            rowNum: 20,
+            rowList: [10, 20, 30,50],
+            colModel: [
+                {label:'代理商ID',name: "agentId",align: "left",sortable:false},
+                {label:'代理商名称',name: "agentName",align: "left",sortable:false},
+                {label:'代理商类型',name: "agentTypeStr",align: "left",sortable:false},
+                {label:'代理商状态',name: "statusStr",align: "left",sortable:false},
+                {label:'邮箱',name: "email",align: "left",sortable:false},
+                {label:'手机',name: "mobile",align: "left",sortable:false},
+                {label:'归属销售',name: "realName",align: "left",sortable:false},
+                {label:'余额（元）',name: "balanceStr",align: "left",sortable:false},
+                {label:'历史授信额度（元）',name: "creditBalanceStr",align: "left",sortable:false},
+                {label:'历史授信回款额度（元）',name: "historyPaymentStr",align: "left",sortable:false},
+                {label:'授信余额（元）',name: "currentCreditStr",align: "left",sortable:false},
+                {label:'未回款额度（元）',name: "noBackPaymentStr",align: "left",sortable:false}
+
+            ],
+            pager: "#pager_list",
+            viewrecords: true,
+            hidegrid: false,
+			/*统计功能 */
+            footerrow:true,
+            gridComplete:function(){
+                var credit_balance = 0;
+                var history_payment = 0;
+                var no_back_payment = 0;
+                var balance = 0;
+                var current_credit = 0;
+                $.ajax({
+                    type : "post",
+                    url : /*[[@{/sellFinance/customerHisCredit/total}]]*/'',
+                    data : {
+                        condition: $("#condition").val(),
+                        status:$("#status").val(),
+                        agentType:$("#operatorCode").val(),
+                        create_time: $("#startDateTime").val(),
+                        besales:$("#besales").val()
+                    },
+                    async:false,
+                    success : function(result) {
+                        if(result.success){
+                            credit_balance = (result.data.credit_balance * 1).toFixed(4);
+                            history_payment = (result.data.history_payment *1).toFixed(4);
+                            no_back_payment = (result.data.no_back_payment *1).toFixed(4);
+                            balance = (result.data.balance *1 ).toFixed(4);
+                            current_credit = (result.data.current_credit * 1).toFixed(4);
+                        }else{
+                            layer.msg("计算总计失败", {icon: 2,time: msgTime});
+                        }
+
+                    }
+                });
+                $("#table_list").footerData('set', { "orderId": '总计',
+                    "agentId": '-',
+                    "agentName": '-',
+                    "agentTypeStr": '-',
+                    "statusStr": '-',
+                    "email": '-',
+                    "mobile":'-' ,
+                    "realName":'合计' ,
+                    "balanceStr": balance,
+                    "creditBalanceStr": credit_balance,
+                    "historyPaymentStr": history_payment,
+                    "currentCreditStr": current_credit,
+                    "noBackPaymentStr":no_back_payment} );
+            }
+        });
+
+        $(window).bind("resize", function () {
+            var width = $(".jqGrid_wrapper").width();
+            $("#table_list").setGridWidth(width);
+        })
+
+        function keyUp(e) {
+            var currKey=0,e=e||event;
+            currKey=e.keyCode||e.which||e.charCode;
+            var keyName = String.fromCharCode(currKey);
+            if (currKey == 13){
+                search();
+            }
+        }
+        document.onkeyup = keyUp;
+    });
+</script>
+
+</body>
+</html>

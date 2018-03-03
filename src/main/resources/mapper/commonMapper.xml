@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 公共业务 -->
+<mapper namespace="common">
+	
+	<resultMap id="SmsClientIdentifyLogMap" type="com.ucpaas.sms.model.SmsClientIdentifyLog" >
+	    <id column="id" property="id" jdbcType="BIGINT" />
+	    <result column="date" property="date" jdbcType="DATE" />
+	    <result column="clientid" property="clientid" jdbcType="VARCHAR" />
+	    <result column="identify" property="identify" jdbcType="INTEGER" />
+	    <result column="update" property="update" jdbcType="TIMESTAMP" />
+	    <result column="remark" property="remark" jdbcType="VARCHAR" />
+  	</resultMap>
+
+	<resultMap type="com.ucpaas.sms.entity.UserSession" id="UserMapper">
+        <result property="id" jdbcType="BIGINT" column="id"/>
+        <result property="sid" jdbcType="VARCHAR" column="sid"/>
+        <result property="status" jdbcType="VARCHAR" column="status"/>
+        <result property="realname" jdbcType="VARCHAR" column="realname"/>
+        <result property="roleId" jdbcType="INTEGER" column="roleId"/>
+        <result property="roleName" jdbcType="VARCHAR" column="roleName"/>
+        <result property="roleStatus" jdbcType="VARCHAR" column="roleStatus"/>
+        <result property="webId" jdbcType="INTEGER" column="webId"/>
+	</resultMap>
+	<!-- 登录时查询用户 -->
+	<select id="findUserForLogin" resultMap="UserMapper">
+		SELECT
+			a.id,
+			a.sid,
+			a.`status`,
+			a.realname,
+			c.id AS roleId,
+			c.role_name AS roleName,
+			c.`status` AS roleStatus,
+			c.`web_id` AS webId
+		FROM
+			t_sms_user a,
+			t_sms_user_role b,
+			t_sms_role c
+		WHERE
+			a.id = b.user_id
+		AND b.role_id = c.id
+		AND a.user_type = 1
+		AND (
+			a.email = #{username}
+			OR (
+				a.mobile = #{username}
+				AND c.id = 1
+			)
+		)
+		AND a.`password` = #{password}
+		AND a.`web_id` = 3
+		limit 1
+	</select>
+	
+	
+	<!-- 根据用户ID查找用户信息 -->
+	<select id="getUserStatusById" resultType="map">
+		SELECT
+			u.status
+		FROM
+			t_sms_user u
+		WHERE
+			u.web_id = 3
+		AND u.id = #{userId}
+		LIMIT 1
+	</select>
+	
+	<!-- 查询代理商用户 -->
+	<select id="queryAgentUser" resultType="map">
+		SELECT 
+			su.id,
+			ai.agent_id,
+			ai.status
+		FROM 
+			t_sms_user su 
+		INNER JOIN t_sms_agent_info ai ON su.id = ai.admin_id
+		WHERE 1 = 1
+		AND (
+			su.email = #{username} or su.mobile = #{username}
+		)
+		LIMIT 1
+	</select>
+	
+	<!-- 更新登录信息 -->
+	<update id="updateLoginInfo">
+		UPDATE t_sms_user a
+		SET a.login_times = a.login_times + 1
+		WHERE
+			a.id = #{id}
+	</update>
+	
+	<!-- 添加操作日志 -->
+	<insert id="addLog">
+		INSERT INTO t_sms_operation_operate_log (
+			admin_id,
+			page_id,
+			page_url,
+			op_type,
+			op_desc,
+			ip,
+			create_date
+		)
+		VALUES
+			(#{id}, #{page_id}, #{page_url}, #{op_type}, #{op_desc}, #{ip}, now())
+	</insert>
+	
+	<!-- 获取数据库的当前时间 -->
+	<select id="getCurrentTime" resultType="string">
+		SELECT now()
+	</select>
+	
+	<!-- 查询在时间范围内存在的表格 -->
+	<select id="getExistTable" resultType="map">
+		SELECT
+			t.table_name
+		FROM
+			v_table t
+		WHERE
+			t.table_name IN
+		<foreach collection="list" item="i" open="(" close=")" separator=",">
+			#{i}
+		</foreach>
+	</select>
+	
+	<!-- 查询系统参数“通道备份数” -->
+	<select id="getBackUpChannelNum" resultType="map">
+		SELECT param_value FROM t_sms_param WHERE param_key = 'BACKUP_CHANNEL_NUM'
+	</select>
+	
+	<!-- 按运营商查询通道 -->
+	<select id="getChannelByOperator" resultType="map">
+		select 
+		t.id, 
+		CONVERT (
+			concat(
+				t.text,
+				'（',
+				state,
+				'）'
+			),
+			CHAR
+			) AS text
+		from 
+		(
+		SELECT
+			CASE state
+			WHEN 1 THEN '正常'
+			WHEN 0 THEN '关闭'
+			END AS state,			
+			CONVERT (cid, CHAR) AS id,
+			CONVERT (
+				concat(
+					cid,
+					'（',
+					channelname,
+					'）'
+				),
+				CHAR
+			) AS text
+		FROM
+			t_sms_channel
+		WHERE 1 = 1
+		<!-- 全网 -->
+		<if test="operatorstype == 0">
+			AND operatorstype = #{operatorstype}
+		</if>
+		<!-- 移动、联通、电信、国际 -->
+		<if test="operatorstype == 1 || operatorstype == 2 || operatorstype == 3 || operatorstype == 4">
+			AND operatorstype = #{operatorstype} OR operatorstype = 0
+		</if>
+		<!-- 虚拟移动、联通、电信运营商 -->
+		<if test="operatorstype == 5 || operatorstype == 6 || operatorstype == 7">
+			AND support_ohas = 1 AND (operatorstype = (#{operatorstype} - 4) OR operatorstype = 0)
+		</if>
+		) t
+		ORDER BY
+			state DESC,
+			id
+			
+	</select>
+	
+	<select id="getSmsClientIdentifyLogForAll" parameterType="map" resultMap="SmsClientIdentifyLogMap" >
+		SELECT
+			id,
+			date,
+			clientid,
+			identify
+		FROM 
+			t_sms_client_identify_log
+		WHERE 
+			clientid = #{clientid}
+		ORDER BY date
+	</select>
+	
+	<select id="getIdentifyByClientid" resultType="map">
+		SELECT 
+			identify 
+		FROM 
+			t_sms_account 
+		WHERE 
+			clientid = #{clientid}
+	</select>
+	
+	
+	<select id="getIdentifyByCid" resultType="map">
+		SELECT 
+			identify 
+		FROM 
+			t_sms_channel 
+		WHERE 
+			cid = #{cid}
+	</select>
+	
+	<select id="getSysParams" resultType="map">
+	SELECT
+		param_value,
+		description
+	FROM
+		t_sms_param 
+	WHERE
+		param_key = #{paramKey}
+	</select>
+	
+	<!-- 获取当月代理商账号最大值 -->
+	<select id="getMostAgentNumForMonth" resultType="string">
+	  	SELECT 
+	  		MAX(substring(CONCAT(t.agent_id,""),7)) AS num
+	  	FROM 
+	  		t_sms_agent_info t
+	  	WHERE 1 = 1 
+	  	AND t.agent_id like CONCAT('${agentIdPre}','%' )
+	  	AND t.agent_id &lt; CONCAT('${agentIdPre}','5000' )
+    </select>
+
+
+	<select id="getMostDemandOrderNumForDay" resultType="string">
+		SELECT
+		MAX(substring(t.order_id,2,4)) as num
+		FROM
+		t_sms_order_list t
+		WHERE
+		t.order_id LIKE CONCAT('%','${orderIdSuf}')
+	</select>
+	
+	<!-- 查询所有商务人员 -->
+	<select id="getAllBusinessMan" resultMap="UserMapper">
+		SELECT
+			u.id,
+			u.sid,
+			u.`status`,
+			u.realname,
+			r.id AS roleId,
+			r.role_name AS roleName,
+			r.`status` AS roleStatus,
+			r.`web_id` AS webId
+		FROM
+			t_sms_user u
+		INNER JOIN t_sms_user_role ur ON ur.user_id = u.id
+		INNER JOIN t_sms_role r ON r.id = ur.role_id
+		WHERE r.role_name = "商务人员"
+	    ORDER BY convert(u.realname using gbk) collate gbk_chinese_ci
+	</select>
+
+	<select id="getMaxInvoiceIdSeq" resultType="string">
+		SELECT
+			MAX(substring(CONCAT(t.invoice_id,""),14)) as num
+		FROM
+			t_sms_agent_invoice_list t
+		WHERE 1 = 1
+			  AND t.invoice_id like CONCAT('${idPre}','%' )
+	</select>
+
+</mapper> 

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信云平台运营系统 </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+    <link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/style.min862f.css?v=4.2.0}" rel="stylesheet">
+    <link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+    <style>
+        /* Additional style to fix warning dialog position */
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+        input[type="radio"]{
+            margin-top:0 !important;
+        }
+        .page-title{
+            padding: 20px 10px;
+            border-bottom:1px solid #DDD;
+            margin-bottom:20px;
+        }
+    </style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12 bg-fff">
+            <div class="page-title">
+                <h3>添加客户</h3>
+            </div>
+            <form class="form-horizontal">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">所属代理商：</label>
+                    <div class="col-sm-3">
+                        <select class="form-control js-key js-agent" name="agentId" data-key="agentId">
+                            <option value="">请选择代理商</option>
+
+                        </select>
+                    </div>
+                    <div class="col-sm-2 control-label" style="color:red;text-align:left;">（不选则表示为直客）</div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">归属销售：</label>
+                    <div class="col-sm-3">
+                        <select class="form-control js-key js-sale" name="belongSale" data-key="belongSale">
+
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">付费方式：</label>
+                    <div class="col-sm-4">
+                        <label class="radio-inline">
+                            <input type="radio" name="paytype" value="0" checked class="js-yufu"> 预付费
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="paytype" value="1" class="js-houfu"> 后付费
+                        </label>
+                        <input type="hidden" class="js-key paytype" data-key="paytype" value="0">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">客户类型：</label>
+                    <div class="col-sm-3">
+                        <select class="form-control js-key" name="clientType" data-key="clientType">
+                            <option value="2">企业用户</option>
+                            <option value="1">个人用户</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="" class="col-sm-2 control-label">客户名称：</label>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control js-key" name="name" data-key="name">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="" class="col-sm-2 control-label">客户密码：</label>
+                    <div class="col-sm-4">
+                        <input type="password" class="form-control js-key" name="password" data-key="password">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="" class="col-sm-2 control-label">确认密码：</label>
+                    <div class="col-sm-4">
+                        <input type="password" class="form-control re-pwd">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="" class="col-sm-2 control-label">邮箱：</label>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control js-key" name="email" data-key="email">
+                    </div>
+                    <div class="col-sm-2 control-label" style="color:red;text-align:left;">（选填）</div>
+                </div>
+                <div class="form-group">
+                    <label for="" class="col-sm-2 control-label">手机号码：</label>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control js-key" name="mobile" data-key="mobile">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">联系地址：</label>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control js-key" name="address" data-key="address">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="" class="col-sm-2 control-label">是否审核：</label>
+                    <div class="col-sm-3">
+                        <select class="form-control js-key" readonly name="needaudit" data-key="needaudit">
+                            <option value="3">审核关键字</option>
+                            <!--<option>个人用户</option> 现在只有审核关键字这一个选项 -->
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="" class="col-sm-2 control-label">短信协议：</label>
+                    <div class="col-sm-3 ">
+                        <select class="form-control js-key" id="smsfrom" data-key="smsfrom">
+                            <option value="6">HTTPS</option>
+                            <option value="3">CMPP</option>
+                            <option value="2">SMPP</option>
+                            <option value="4">SGIP</option>
+                            <option value="5">SMGP</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-3 grid-smstype  hide">
+                        <select class="form-control js-key js-smstype" name="smstype" data-key="smstype">
+                            <option value="">请选择短信类型</option>
+                            <option value="0">通知</option>
+                            <option value="5">营销</option>
+                            <option value="4">验证码</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group grid-smstype-http">
+                    <label for="" class="col-sm-2 control-label">HTTP子协议类型：</label>
+                    <div class="col-sm-3 ">
+                        <select class="form-control js-key" id="smsHttp" name="httpProtocolTypeStr"  data-key="httpProtocolType">
+                            <option value="0">https json</option>
+                            <option value="1">https get/post</option>
+                            <option value="2">https tx-json</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-5 grid-sms-http-type hide">
+                        <label for="" class="col-sm-4 control-label">短信类型：</label>
+                        <div class="col-sm-5"><select class="form-control jsmstype js-key" name="smstype" data-key="smstype">
+                            <option value="">请选择短信类型</option>
+                            <option value="0">通知</option>
+                            <option value="5">营销</option>
+                            <option value="4">验证码</option>
+                        </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="sms-price" style="display: none;">
+                    <div class="form-group grid-yz grid-price">
+                        <label for="" class="col-sm-2 control-label">验证码短信单价：</label>
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control yz-price js-price" data-str="验证码短信单价" smstype="4">
+                        </div>
+                        <div class="col-sm-2 control-label" style="text-align:left;">元/条</div>
+                    </div>
+                    <div class="form-group grid-tz grid-price">
+                        <label for="" class="col-sm-2 control-label">通知短信单价：</label>
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control tz-price js-price" data-str="通知短信单价" smstype="0">
+                        </div>
+                        <div class="col-sm-2 control-label" style="text-align:left;">元/条</div>
+                    </div>
+                    <div class="form-group grid-yx grid-price">
+                        <label for="" class="col-sm-2 control-label">营销短信单价：</label>
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control yx-price js-price" data-str="营销短信单价" smstype="5">
+                        </div>
+                        <div class="col-sm-2 control-label" style="text-align:left;">元/条</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="" class="col-sm-2 control-label">状态报告获取方式：</label>
+                    <div class="col-sm-3">
+                        <select class="form-control js-key" data-key="needreport">
+                            <option value="0">不获取</option>
+                            <option value="1">推送简单状态报告</option>
+                            <option value="2">推送透传状态报告</option>
+                            <option value="3">用户主动拉取</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="" class="col-sm-2 control-label">上行获取方式：</label>
+                    <div class="col-sm-3">
+                        <select class="form-control js-key" data-key="needmo">
+                            <option value="0">不获取</option>
+                            <option value="1">SMSP主动推送</option>
+                            <option value="3">用户主动拉取</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid-https">
+                    <div class="form-group">
+                        <label for="" class="col-sm-2 control-label">上行回调地址：</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control js-key" data-key="mourl">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="" class="col-sm-2 control-label">状态报告回调地址：</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control js-key" name="deliveryurl" data-key="deliveryurl">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="" class="col-sm-2 control-label">模板审核通知回调地址：</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control js-key" data-key="noticeurl">
+                        </div>
+                    </div>
+                </div>
+                <div class="grid-sgip hide">
+                    <div class="form-group">
+                        <label for="" class="col-sm-2 control-label">SGIP协议-客户上行IP：</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control js-key js-moip" data-key="moip">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="" class="col-sm-2 control-label">SGIP协议-客户上行端口：</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control js-key js-moport" data-key="moport">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="" class="col-sm-2 control-label">SGIP协议-客户节点编码：</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control js-key js-nodeid" data-key="nodeid">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="" class="col-sm-2 control-label">IP白名单：</label>
+                    <div class="col-sm-4">
+                        <textarea name="" id="" class="form-control js-key" data-key="ip"></textarea>
+                    </div>
+                </div>
+                <div class="form-group form-inline">
+                    <label class="col-sm-2 control-label">自扩展：</label>
+                    <div class="col-sm-10">
+                        <label class="radio-inline">
+                            <input type="radio" name="needextend"  value="0" checked class="js-notextend"> 不支持
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="needextend"  value="1" class="js-extend"> 支持
+                        </label>
+                        <input type="text" class="form-control js-key grid-extend hide form-group" data-key="extendSize">
+                        <span class="grid-extend hide" style="margin-left:20px;">0-10之间的数值</span>
+                    </div>
+                    <input type="hidden" class="needextend js-key" data-key="needextend" value="0">
+                </div>
+                <div class="form-group">
+                    <label for="" class="col-sm-2 control-label">客户接入速度：</label>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control js-key" data-key="accessSpeed">
+                    </div>
+                    <div class="col-sm-2 control-label" style="color:red;text-align:left;">（0-3000之间的数值）</div>
+                </div>
+                <div class="form-group">
+                    <label for="" class="col-sm-2 control-label">认证状态：</label>
+                    <div class="col-sm-3">
+                        <select class="form-control js-auth js-key" disabled data-key="oauthStatus">
+                            <option value="2">待认证</option>
+                            <option value="3">已认证</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="" class="col-sm-2 control-label">备注：</label>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control js-key" data-key="remarks">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-4">
+                        <a class="btn btn-primary js-confirm">确认</a>
+                        <!--<a class="btn btn-default js-close" >取消</a>-->
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+
+</div>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script  th:src="@{/resources/js/layer/layer.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/auth.js?v=2.0.0}"></script>
+<script th:src="@{/resources/js/addClient.js?v=3.0.0}"></script>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+    /*]]>*/
+</script>
+</body>
+</html>

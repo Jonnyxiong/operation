@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信平台运营系统 </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link href="https://cdn.bootcss.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet">
+    <!-- jqgrid--> 
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+
+	<link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+	<script th:src="@{/resources/js/hex_ha_ha_ha_ha_ha.js}"></script>
+	<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+	<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+	<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+	<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+	<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+	<script th:src="@{/resources/js/jquery.form.js?v=1.0.0}"></script>
+
+	<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+	<script th:src="@{/resources/js/plugins/validate/jquery.validate.min.js}"></script>
+	<script th:src="@{/resources/js/layer/layer.js}"></script>
+	
+	<script th:src="@{/resources/js/select2.min.js}"></script>
+	<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+	<style type="text/css">
+		/*图表样式*/
+		.chart_box {background-color:#fff;}
+		.chart_button {float:right;}
+		.navbar .nav>.active>a, .navbar .nav>.active>a:hover, .navbar .nav>.active>a:focus{border-bottom: 4px solid #28B779;background:#EEEEEE;}
+		/* .navbar .nav>li>a, .navbar .nav>li>a:hover, .navbar .nav>:>a:focus{border-bottom: 0;} */
+		.nav-tabs>li>a{border: 0;}
+		
+		.radio-a{display: inline-block;padding-left: 24px;line-height: 36px;position: relative;margin-right: 20px;text-decoration: none;color:seagreen;}
+		.radio-a i{display: inline-block;width: 17px;height: 17px;background: url(../../resources/img/radio-icon.png) 0px 0px no-repeat;}
+		.radio-a.active i{background-position: 0px -17px;}
+		.table-hover tbody tr:hover>td, .table-hover tbody tr:hover>th {
+			background-color: #D6F1DA;}
+		.search{width:100%}
+		.search form ul li input[type='text'] .txt_180{width:180px;}
+		.search form ul li select{width:110px;}
+		.select2-dropdown {  
+	        margin-left: 8px !important;  
+	        margin-top: 8px !important;  
+	    }  
+		.wrap{margin-left:45%;} 
+		.btn{
+			cursor:pointer;
+		}
+	</style>
+</head>
+<body>
+<div th:replace="stat :: statCode"></div>
+	<div style="margin-left: 80px;margin-top: 20px;">
+		
+		<div>
+			<p>
+				<font style="font-family: '微软雅黑';color: red">*</font>
+				<span style="font-family: 微软雅黑;">短信签名：</span>
+				<span style="font-family: 微软雅黑;" id="sign">【】</span>
+				<!-- 				<input id="updateNum" type="text" style="width: 215px;height: 25px;border-radius:3px;"/> -->
+<!-- 				<font style="font-family: '微软雅黑';color: red" size="2">限2-8个汉字、英文字母和数字，不能全是数字</font> -->
+			</p>
+		</div>
+		<div style="margin-top: 20px;">
+			<p>
+				<font style="font-family: '微软雅黑';color: red">*</font>
+				<span style="font-family: 微软雅黑;">模板类型：</span>
+				<select class="js-example-basic-single" id="type" style="width: 220px;">
+					  <option value="">请选择</option>
+					  <option value="0">通知模板</option>
+					  <option value="4">验证码模板</option>
+					  <option value="5">营销模板</option>
+					  <option value="7">USSD模板</option>
+					  <option value="8">闪信模板</option>
+					  <option value="9">挂机短信模板</option>
+				</select>
+				<a class='radio-a' href='javascript:;'><i><input type="hidden" value="4"/></i>&nbsp;验证码</a>
+				<a class='radio-a' href='javascript:;'><i><input type="hidden" value="0"/></i>&nbsp;通知</a>
+				<a class='radio-a' href='javascript:;'><i><input type="hidden" value="5"/></i>&nbsp;会员营销</a>
+			</p>
+		</div>
+		<div style="margin-top: 25px;">
+			<div style="float: left">
+				<font style="font-family: '微软雅黑';color: red">*</font>
+				<span style="font-family: 微软雅黑;">短信内容：&nbsp;&nbsp;</span>
+			</div>
+			<div style="margin-top: 5px;">
+				<textarea style="width: 420px;height: 185px;" id="content" placeholder="如：您好，你的验证码是{xxx},请在{xxx}秒之内完成验证。"></textarea>
+			</div>
+			<div style="margin-left: 105px;">
+				<span style="font-family: '微软雅黑';font-size:12px;" >变量请按序填写如{1}{2}；短信内容（含签名、变量内容）超过67个字按多条处理</span>
+			</div>
+		</div>
+		
+		<div style="margin-top: 20px;">
+			<div class="wrap">
+				<button type="button" class="btn btn-success hidden" id="audit" onclick='audit(this,1)' th:if="${data.state} == 3">确定</button>
+				<button type="button" class="btn btn-warning hidden" id="transfer" onclick="audit(this,2)" th:if="${data.state} == 3">转审</button>&nbsp;
+				<button type="button" class="btn btn-default" onclick="closeWindow()" th:if="${data.state} == 3">取消</button>
+				
+				<button type="button" class="btn btn-success hidden" id="audit" onclick="audit(this,1)" th:if="${data.state} != 3">审核通过</button>
+				<button type="button" class="btn btn-warning hidden" id="transfer" onclick="audit(this,2)" th:if="${data.state} != 3">转审</button>&nbsp;
+				<button type="button" class="btn btn-default" onclick="audit(this,3)" th:if="${data.state} != 3">审核不通过</button>
+			</div>
+		</div>
+	</div>
+	
+	<script th:inline="javascript">
+		/*<![CDATA[*/
+		var template_id = /*[[${data.template_id}]]*/;
+		var sign = /*[[${data.sign}]]*/;
+		var last_time = /*[[${data.update_time}]]*/;
+		var type = /*[[${data.type}]]*/;
+		var sms_type = /*[[${data.sms_type}]]*/;
+		var content= /*[[${data.content}]]*/;
+		
+
+		function checkType(){
+			var s = $("#type").val();
+			if(s == null || s == ''){
+				layer.msg('请选择模板类型',{icon: 2});
+				return false;
+			}
+			type = s;
+			if(s == '9'){
+				var radio_a = $(".radio-a.active i input").val();
+				if(radio_a == '' || radio_a == null){
+					layer.msg('请选择模板短信类型！',{icon:2});
+					return false;
+				}
+				sms_type = radio_a;
+			}
+			return true;
+		}	
+		// <%-- 匹配0-4个模板的正则 --%>
+		var reg = /^([^\{\}]*\{[^\{\}]*\}[^\{\}]*){0,4}[^\{\}]*$/;
+		
+		function checkContent(){
+			content=$("#content").val();
+			var len = content.length;
+			if(len < 1){
+				layer.msg('模板不能为空',{icon:2});
+				return false;
+			}
+			if(len > 500){
+				layer.msg('模板过长',{icon:2});
+				return false;
+			}
+			if(!reg.test(content)){
+				layer.msg('请使用正确的模板参数格式',{icon:2});
+				return false;
+			}
+			return true;
+		}
+		var index = parent.layer.getFrameIndex(window.name); //获取当前窗体索引
+		function closeWindow(){
+			parent.layer.close(index); //执行关闭
+		}
+		
+		function audit(btn,status){
+			if(!checkType() || !checkContent()){
+				return;
+			}
+			var text = $(btn).text() == '确定'? "修改" : $(btn).text();
+			layer.confirm("确定" + text + "吗？", function(index){
+				$(btn).attr("disabled", true);
+				$.ajax({
+					url:/*[[@{/opsAudit/smsTemplate/auditAction}]]*/,
+					type:"POST",
+					data:{
+						content:content,
+						check_status:status,
+						template_id:template_id,
+						sms_type:sms_type,
+						type:type,
+						last_time:last_time
+					},
+					success:function(data){
+						$(btn).attr("disabled", false);
+						if(data.success){
+							layer.msg(data.msg,{icon:1});
+							window.setTimeout(function(){
+								parent.location.reload();
+								parent.layer.close(index);
+							}, 1500);
+						}else{
+							layer.msg(data.msg,{icon:2});
+						}
+					}
+				});
+			});
+		}
+		
+		$(function(){
+			$("#sign").html("【"+sign+"】");
+			$("#content").html(content);
+			$(".radio-a").click(function(){
+				$(this).toggleClass("active").siblings(".radio-a").removeClass("active");
+			});
+			$("#type").change(function(){
+				if($(this).val() == '9'){
+					$(".radio-a").show();
+					$(".radio-a i input[value='"+sms_type+"']").parent().click();
+				}else{
+					$(".radio-a").hide();
+				}
+				if($(this).val() == '7' || $(this).val() == '8'){
+					$("#audit").hide();
+					$("#transfer").show();
+				}else{
+					$("#audit").show();
+					$("#transfer").hide();
+				}
+			});
+			$("#type option[value="+type+"]").attr("selected",true);
+			$("#type").change();
+		});
+
+	    /*]]>*/
+	    
+	</script>
+	
+</body>
+</html>

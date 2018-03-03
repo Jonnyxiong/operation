@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mybatis="http://mybatis.org/schema/mybatis-spring"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+  		http://mybatis.org/schema/mybatis-spring
+  		http://mybatis.org/schema/mybatis-spring.xsd
+        ">
+
+
+	<!-- ucpaas_message_record 主库配置 START -->
+	<bean id="record_master_dataSource" parent="dataSourceParent">
+		<property name="url" value="${record_master.jdbc.url}" />
+		<property name="username" value="${record_master.jdbc.username}" />
+		<property name="password" value="${record_master.jdbc.password}" />
+	</bean>
+	<!-- 配置mybitasSqlSessionFactoryBean -->
+	<bean id="record_master_sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="record_master_dataSource" />
+		<property name="configLocation" value="classpath:mybatis.xml" />
+		<property name="mapperLocations" value="classpath:mapper/**/*Mapper.xml" />
+	</bean>
+	<!-- 配置SqlSessionTemplate -->
+	<bean id="record_master_sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg name="sqlSessionFactory" ref="record_master_sqlSessionFactory" />
+	</bean>
+	<!-- 事务配置 -->
+	<bean id="record_master_transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="record_master_dataSource" />
+	</bean>
+	<!-- 使用annotation注解方式配置事务 -->
+	<tx:annotation-driven transaction-manager="record_master_transactionManager" />
+	<!-- ucpaas_message_record 主库配置 END -->
+
+
+	<!-- ===========================================分割线======================================================== -->
+	<!-- 使用DAO的方式 -->
+
+	<!-- ucpaas_message_record 主库配置 START -->
+	<bean id="record_master_dataSource_new" parent="dataSourceParent">
+		<property name="url" value="${record_master.jdbc.url}" />
+		<property name="username" value="${record_master.jdbc.username}" />
+		<property name="password" value="${record_master.jdbc.password}" />
+	</bean>
+
+	<!-- 配置mybitasSqlSessionFactoryBean -->
+	<bean id="record_master_sqlSessionFactory_new" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="record_master_dataSource_new" />
+		<property name="configLocation" value="classpath:mybatis.xml" />
+		<!--<property name="mapperLocations" value="classpath:mapper/**/*Mapper.xml" />-->
+		<property name="typeAliasesPackage" value="com.ucpaas.sms.entity.record" />
+		<property name="plugins">
+			<list>
+				<ref bean="pageInterceptor" />
+				<ref bean="jsmsPageInterceptor" />
+			</list>
+		</property>
+	</bean>
+
+	<!-- 配置SqlSessionTemplate -->
+	<bean id="record_master_sqlSessionTemplate_new" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg name="sqlSessionFactory" ref="record_master_sqlSessionFactory_new" />
+	</bean>
+
+	<!-- 事务配置 -->
+	<bean id="record_master_transactionManager_new" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="record_master_dataSource_new" />
+		<qualifier value="recordMaster"/>
+	</bean>
+
+	<!-- 使用annotation注解方式配置事务 -->
+	<tx:annotation-driven transaction-manager="record_master_transactionManager_new" />
+	<!-- ucpaas_message_record 主库配置 END -->
+
+	<mybatis:scan base-package="com.ucpaas.sms.mapper.record,com.jsmsframework.*.record.mapper" template-ref="record_master_sqlSessionTemplate_new"/>
+</beans>

@@ -1,0 +1,766 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.ucpaas.sms</groupId>
+	<artifactId>smsa-operation</artifactId>
+	<packaging>war</packaging>
+	<version>5.19.3.0</version>
+
+	<name>smsa-operation</name>
+	<url>http://operation.sms.ucpaas.com</url>
+
+	<repositories>
+		<repository>
+			<id>JSMS repository</id>
+			<url>http://nexus.jsms.com/content/groups/jsms-group/</url>
+		</repository>
+	</repositories>
+	<pluginRepositories>
+		<pluginRepository>
+			<id>JSMS plugin repository</id>
+			<url>http://nexus.jsms.com/content/groups/jsms-group/</url>
+		</pluginRepository>
+	</pluginRepositories>
+
+	<properties>
+		<!--jsmsframework-->
+		<jsmsframework.version>5.6.0-SNAPSHOT</jsmsframework.version>
+
+		<!-- 项目文件编码 -->
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+		<!-- 编译时的编码 -->
+		<maven.compiler.encoding>UTF-8</maven.compiler.encoding>
+
+		<junit.version>4.12</junit.version>
+		<spring.version>4.3.9.RELEASE</spring.version>
+		<!--<spring-security.version>4.2.1.RELEASE</spring-security.version>-->
+
+		<mybatis.version>3.4.1</mybatis.version>
+		<mybatis-spring.version>1.3.0</mybatis-spring.version>
+		<mysql-connector-java.version>5.1.31</mysql-connector-java.version>
+		<joda-time.version>2.9.4</joda-time.version>
+		<slf4j-api.version>1.7.7</slf4j-api.version>
+		<logback-core.version>1.1.2</logback-core.version>
+		<logback-classic.version>1.1.2</logback-classic.version>
+		<logback-access.version>1.1.2</logback-access.version>
+		<jxl.version>2.6.12</jxl.version>
+		<javax.servlet-api.version>3.1.0</javax.servlet-api.version>
+		<jstl.version>1.2</jstl.version>
+		<gson.version>2.7</gson.version>
+		<httpclient.version>4.5.2</httpclient.version>
+
+		<thymeleaf.version>3.0.8.RELEASE</thymeleaf.version>
+		<thymeleaf.extras.version>2.1.2.RELEASE</thymeleaf.extras.version>
+
+		<!-- <mail.version>1.5.0-b01</mail.version> -->
+		<mail.version>1.5.2</mail.version>
+		<standard.version>1.1.2</standard.version>
+		<javassist.version>3.11.0.GA</javassist.version>
+		<commons-lang3.version>3.4</commons-lang3.version>
+		<commons-logging.version>1.2</commons-logging.version>
+		<commons-fileupload.version>1.3.1</commons-fileupload.version>
+		<commons-pool2.version>2.4.2</commons-pool2.version>
+		<commons-dbcp2.version>2.1.1</commons-dbcp2.version>
+		<aopalliance.version>1.0</aopalliance.version>
+		<aspectj.version>1.8.9</aspectj.version>
+		<oscache.version>2.4</oscache.version>
+		<fluent-hc.version>4.5.2</fluent-hc.version>
+		<janino.version>3.0.6</janino.version>
+		<json.version>20160810</json.version>
+		<aspectj.version>1.8.9</aspectj.version>
+
+		<!-- json -->
+		<jackson.version>2.6.3</jackson.version>
+		<guava.version>20.0</guava.version>
+		<!-- json -->
+		<fastjson-version>1.2.32</fastjson-version>
+		<gson.version>2.2.4</gson.version>
+
+		<!-- jxpath -->
+		<jxpath.version>1.3</jxpath.version>
+
+		<smsa-common-util.version>1.0.3.RELEASE</smsa-common-util.version>
+		<springfox-version>2.7.0</springfox-version>
+		<!--easypoi-->
+		<poi.version>3.15</poi.version>
+		<easypoi.version>3.0.3-SNAPSHOT</easypoi.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junit.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- spring相关配置start -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-jdbc</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-beans</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context-support</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjweaver</artifactId>
+			<version>${aspectj.version}</version>
+		</dependency>
+		<!-- spring-security相关配置 start -->
+<!-- 
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-web</artifactId>
+			<version>${spring-security.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-config</artifactId>
+			<version>${spring-security.version}</version>
+		</dependency>
+ -->
+		<!-- mybatis相关配置start -->
+		<dependency>
+			<groupId>org.mybatis</groupId>
+			<artifactId>mybatis</artifactId>
+			<version>${mybatis.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.mybatis</groupId>
+			<artifactId>mybatis-spring</artifactId>
+			<version>${mybatis-spring.version}</version>
+		</dependency>
+		<!-- mybatis相关配置end -->
+
+		<!-- mysql驱动包start -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>${mysql-connector-java.version}</version>
+		</dependency>
+		<!-- mysql驱动包end -->
+
+		<dependency>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time</artifactId>
+			<version>${joda-time.version}</version>
+		</dependency>
+
+		<!-- 日志相关start -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${slf4j-api.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-core</artifactId>
+			<version>${logback-core.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>${logback-classic.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-access</artifactId>
+			<version>${logback-access.version}</version>
+		</dependency>
+		<!-- 日志相关end -->
+
+		<dependency>
+			<groupId>net.sourceforge.jexcelapi</groupId>
+			<artifactId>jxl</artifactId>
+			<version>${jxl.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>log4j</artifactId>
+					<groupId>log4j</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>${javax.servlet-api.version}</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>jstl</artifactId>
+			<version>${jstl.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>${httpclient.version}</version>
+		</dependency>
+		<dependency>
+	        <groupId>org.apache.httpcomponents</groupId>
+	        <artifactId>httpmime</artifactId>
+	        <version>${httpclient.version}</version>
+	    </dependency>
+		
+		<!-- thymeleaf 相关配置 -->
+		<dependency>
+			<groupId>org.thymeleaf</groupId>
+			<artifactId>thymeleaf</artifactId>
+			<version>${thymeleaf.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.thymeleaf</groupId>
+			<artifactId>thymeleaf-spring4</artifactId>
+			<version>${thymeleaf.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.thymeleaf.extras</groupId>
+			<artifactId>thymeleaf-extras-conditionalcomments</artifactId>
+			<version>${thymeleaf.extras.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.thymeleaf</groupId>
+					<artifactId>thymeleaf</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>nz.net.ultraq.thymeleaf</groupId>
+			<artifactId>thymeleaf-layout-dialect</artifactId>
+			<version>2.2.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.thymeleaf</groupId>
+					<artifactId>thymeleaf</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>net.sourceforge.nekohtml</groupId>
+			<artifactId>nekohtml</artifactId>
+			<version>1.9.21</version>
+		</dependency>
+
+		<!-- <dependency> <groupId>javax.mail</groupId> <artifactId>mail</artifactId> 
+			<version>${mail.version}</version> </dependency> -->
+
+		<dependency>
+			<groupId>com.sun.mail</groupId>
+			<artifactId>javax.mail</artifactId>
+			<version>${mail.version}</version>
+		</dependency>
+
+<!-- 		
+        <dependency>
+			<groupId>taglibs</groupId>
+			<artifactId>standard</artifactId>
+			<version>${standard.version}</version>
+		</dependency> 
+-->
+
+<!-- 		
+        <dependency>
+			<groupId>org.freemarker</groupId>
+			<artifactId>freemarker</artifactId>
+			<version>${freemarker.version}</version>
+		</dependency> 
+-->
+
+		<dependency>
+			<groupId>javassist</groupId>
+			<artifactId>javassist</artifactId>
+			<version>${javassist.version}</version>
+		</dependency>
+
+		<!-- JSR 303 with Hibernate Validator -->
+		<dependency>
+			<groupId>javax.validation</groupId>
+			<artifactId>validation-api</artifactId>
+			<version>1.0.0.GA</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-validator</artifactId>
+			<version>4.1.0.Final</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>${commons-lang3.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-fileupload</groupId>
+			<artifactId>commons-fileupload</artifactId>
+			<version>${commons-fileupload.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+			<version>${commons-logging.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-pool2</artifactId>
+			<version>${commons-pool2.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-dbcp2</artifactId>
+			<version>${commons-dbcp2.version}</version>
+		</dependency>
+
+		<!--easypoi 依赖 start-->
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+			<version>${poi.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>${poi.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml-schemas</artifactId>
+			<version>${poi.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>cn.afterturn</groupId>
+			<artifactId>easypoi-base</artifactId>
+			<version>${easypoi.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>cn.afterturn</groupId>
+			<artifactId>easypoi-web</artifactId>
+			<version>${easypoi.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>cn.afterturn</groupId>
+			<artifactId>easypoi-annotation</artifactId>
+			<version>${easypoi.version}</version>
+		</dependency>
+		<!--easypoi 依赖 end-->
+
+		<!-- spring-test -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<version>${spring.version}</version>
+			<scope>test</scope>
+		</dependency>
+<!--
+		<dependency>
+			<groupId>aopalliance</groupId>
+			<artifactId>aopalliance</artifactId>
+			<version>${aopalliance.version}</version>
+		</dependency>-->
+
+
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjweaver</artifactId>
+			<version>${aspectj.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>opensymphony</groupId>
+			<artifactId>oscache</artifactId>
+			<version>${oscache.version}</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.sitemesh/sitemesh -->
+		<!--<dependency>-->
+			<!--<groupId>org.sitemesh</groupId>-->
+			<!--<artifactId>sitemesh</artifactId>-->
+			<!--<version>${sitemesh.version}</version>-->
+		<!--</dependency>-->
+
+
+		<!--<dependency>-->
+			<!--<groupId>opensymphony</groupId>-->
+			<!--<artifactId>sitemesh</artifactId>-->
+			<!--<version>${sitemesh.version}</version>-->
+		<!--</dependency>-->
+
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>fluent-hc</artifactId>
+			<version>${fluent-hc.version}</version>
+		</dependency>
+
+		<!-- <dependency> <groupId>janino</groupId> <artifactId>janino</artifactId> 
+			<version>2.5.15</version> </dependency> -->
+
+		<dependency>
+			<groupId>org.codehaus.janino</groupId>
+			<artifactId>janino</artifactId>
+			<version>${janino.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>${json.version}</version>
+		</dependency>
+		
+		<!-- xml -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>${gson.version}</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>${guava.version}</version>
+		</dependency>
+		<!-- jackson json -->
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>fastjson</artifactId>
+			<version>${fastjson-version}</version>
+		</dependency>
+
+		<!--分页使用 -->
+		<dependency>
+			<groupId>commons-jxpath</groupId>
+			<artifactId>commons-jxpath</artifactId>
+			<version>${jxpath.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.ucpaas.sms</groupId>
+			<artifactId>smsa-common-util</artifactId>
+			<version>${smsa-common-util.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger2</artifactId>
+			<version>${springfox-version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger-ui</artifactId>
+			<version>${springfox-version}</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>com.jsmsframework</groupId>
+			<artifactId>jsms-common</artifactId>
+			<version>${jsmsframework.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.jsmsframework</groupId>
+			<artifactId>jsms-finance</artifactId>
+			<version>${jsmsframework.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.jsmsframework</groupId>
+			<artifactId>jsms-user</artifactId>
+			<version>${jsmsframework.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.jsmsframework</groupId>
+			<artifactId>jsms-user-finance</artifactId>
+			<version>${jsmsframework.version}</version>
+		</dependency>
+
+
+
+		<dependency>
+			<groupId>com.jsmsframework</groupId>
+			<artifactId>jsms-product</artifactId>
+			<version>${jsmsframework.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.jsmsframework</groupId>
+			<artifactId>jsms-order</artifactId>
+			<version>${jsmsframework.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.jsmsframework</groupId>
+			<artifactId>jsms-audit</artifactId>
+			<version>${jsmsframework.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.jsmsframework</groupId>
+			<artifactId>jsms-order-product</artifactId>
+			<version>${jsmsframework.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.jsmsframework</groupId>
+			<artifactId>jsms-order-finance</artifactId>
+			<version>${jsmsframework.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.jsmsframework</groupId>
+			<artifactId>jsms-sale-credit</artifactId>
+			<version>${jsmsframework.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.jsmsframework</groupId>
+			<artifactId>jsms-user-audit</artifactId>
+			<version>${jsmsframework.version}</version>
+		</dependency>
+
+        <dependency>
+            <groupId>com.jsmsframework</groupId>
+            <artifactId>jsms-monitor</artifactId>
+            <version>${jsmsframework.version}</version>
+        </dependency>
+
+		<dependency>
+			<groupId>com.jsmsframework</groupId>
+			<artifactId>jsms-channel</artifactId>
+			<version>${jsmsframework.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.jsmsframework</groupId>
+			<artifactId>jsms-record</artifactId>
+			<version>${jsmsframework.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.jsmsframework</groupId>
+			<artifactId>jsms-statistics</artifactId>
+			<version>${jsmsframework.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.jsmsframework</groupId>
+			<artifactId>jsms-redis</artifactId>
+			<version>${jsmsframework.version}</version>
+		</dependency>
+	</dependencies>
+
+	<!-- 分环境打包 -->
+	<profiles>
+		<profile>
+			<!-- 打包命令命令 mvn package -Pdev -->
+			<id>dev</id> <!-- 开发环境 -->
+			<properties>
+				<env>development</env>
+			</properties>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+		</profile>
+		<profile>
+			<!-- 打包命令命令 mvn package -Pdevtest -->
+			<id>devtest</id> <!-- 开放测试环境 -->
+			<properties>
+				<env>devtest</env>
+			</properties>
+		</profile>
+		<profile>
+			<!-- 打包命令命令 mvn package -Ptest -->
+			<id>test</id> <!-- 测试环境 -->
+			<properties>
+				<env>test</env>
+			</properties>
+		</profile>
+		<profile>
+			<!-- 打包命令命令 mvn package -Pprod_yidong -->
+			<id>prod_yidong</id> <!-- 生产环境 -->
+			<properties>
+				<env>prod_yidong</env>
+			</properties>
+		</profile>
+		<profile>
+			<!-- 打包命令命令 mvn package -Pprod_ali -->
+			<id>prod_ali</id> <!-- 阿里环境 -->
+			<properties>
+				<env>prod_ali</env>
+			</properties>
+		</profile>
+		<profile>
+			<!-- 打包命令命令 mvn package -Pprod -->
+			<id>prod</id>
+			<properties>
+				<env>prod</env>
+			</properties>
+		</profile>
+		<profile>
+			<!-- 打包命令命令 mvn package -Pprod_jd -->
+			<id>prod_jd</id><!-- 京东环境 -->
+			<properties>
+				<env>prod_jd</env>
+			</properties>
+		</profile>
+		<profile>
+			<!-- 打包命令命令 mvn package -Pprod_bu -->
+			<id>prod_bu</id>
+			<properties>
+				<env>prod_bu</env>
+			</properties>
+		</profile>
+		<profile>
+			<!-- 打包命令命令 mvn package -Pdev_wj-->
+			<!-- 文杰的本地环境配置-->
+			<id>dev_wj</id>
+			<properties>
+				<env>dev_wj</env>
+			</properties>
+		</profile>
+
+		<profile>
+			<!-- 打包命令命令 mvn package -Pprod——preview -->
+			<id>prod_preview</id>
+			<properties>
+				<env>prod_preview</env>
+			</properties>
+		</profile>
+	</profiles>
+
+	<build>
+		<finalName>${project.artifactId}-${project.version}-${env}</finalName>
+		<pluginManagement>
+			<plugins>
+				<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-compiler-plugin</artifactId> 
+					<version>2.3.2</version> <configuration> <source>1.7</source> <target>1.7</target> 
+					<fork>true</fork> <executable>${JAVA_HOME}/bin/javac</executable> <encoding>UTF-8</encoding> 
+					</configuration> </plugin> -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<configuration>
+						<source>1.7</source>
+						<target>1.7</target>
+						<excludes>
+							<exclude>**/rebel.xml</exclude>
+						</excludes>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<configuration>
+						<skip>true</skip>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<configuration>
+						<excludes>
+							<exclude>**/rebel.xml</exclude>
+						</excludes>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-install-plugin</artifactId>
+					<!--<configuration>-->
+						<!--<excludes>-->
+							<!--<exclude>**/rebel.xml</exclude>-->
+							<!--<exclude>**/assembly.xml</exclude>-->
+						<!--</excludes>-->
+					<!--</configuration>-->
+				</plugin>
+			</plugins>
+		</pluginManagement>
+		<filters>
+			<filter>src/main/environment/${env}.properties</filter>
+		</filters>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<includes>
+					<include>**/*.ftl</include>
+					<include>**/*.xml</include>
+					<include>oscache.properties</include>
+				</includes>
+				<!-- 是否替换资源中的属性 -->
+				<filtering>false</filtering>
+			</resource>
+			<resource>
+				<directory>src/main/java</directory>
+				<includes>
+					<include>**/*.xml</include>
+				</includes>
+				<!-- 是否替换资源中的属性 -->
+				<filtering>false</filtering>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<includes>
+					<include>system.properties</include>
+				</includes>
+				<!-- 是否替换资源中的属性 -->
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+	</build>
+
+</project>
+  

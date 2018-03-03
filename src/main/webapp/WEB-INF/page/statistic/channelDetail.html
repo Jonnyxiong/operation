@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信云平台运营系统 </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" href="/resources/css/bootstrap.min14ed.css?v=3.3.6" rel="stylesheet">
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" href="/resources/css/font-awesome.min93e3.css?v=4.4.0" rel="stylesheet"><!-- jqgrid-->
+    <link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" href="/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css" rel="stylesheet">
+    <link th:href="@{/resources/css/animate.min.css}" href="/resources/css/animate.min.css" rel="stylesheet">
+    <link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" href="/resources/css/style.min862f.css?v=4.1.0" rel="stylesheet">
+    <link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" href="/resources/css/plugins/sweetalert/sweetalert.css" rel="stylesheet">
+    <style>
+        /* Additional style to fix warning dialog position */
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+
+        .modal-body input {
+            width: 150px;
+        }
+    </style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="tabs-container">
+                <!--<ul class="nav nav-tabs">-->
+                    <!--<li class="active" id="agentTab">-->
+                        <!--<a data-toggle="tab" href="#tab-1" aria-expanded="true">代理商子客户消耗报表</a>-->
+                    <!--</li>-->
+                    <!--<li class="" >-->
+                        <!--&lt;!&ndash;<a data-toggle="tab" th:href="@{/statistic/directClientConsume}" id="rebateConfigPage" aria-expanded="false">直客消耗报表</a>&ndash;&gt;-->
+                        <!--<a href="/statistic/directClientConsume" id="rebateConfigPage">直客消耗报表</a>-->
+                    <!--</li>-->
+                <!--</ul>-->
+                <div class="tab-content">
+                    <div id="tab-1" class="tab-pane active">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="ibox ">
+                                        <div class="ibox-title">
+                                            <h5 >
+                                                <span id="clientName" th:text="${_accountGname}" class="m-l-md"></span>通道消耗详情
+                                                <span th:if="${_existAgent}" class="m-l-md">
+                                                    所属代理商：<span th:text="${_agentName}" class="m-r-md"></span>
+                                                </span>
+                                                所属销售：<span th:text="${_belongSaleStr}"></span>
+                                            </h5>
+                                        </div>
+                                        <!-- 搜索条件 -->
+                                        <div class="ibox-content">
+                                            <form role="form" class="form-inline" id="mainForm">
+                                                <input type="hidden" id="hid-clientid" name="clientid" th:value="${clientid}"/>
+                                                <input type="hidden" id="hid-belongSale" name="belongSale" th:value="${belongSale}"/>
+                                                <input type="hidden" id="hid-operatorstype" name="operatorstype" th:value="${operatorstype}"/>
+
+                                                <div class="form-group m-r-md">
+                                                    <label for="smsType">短信类型:</label>
+                                                    <!--短信类型, 0:通知短信,4:验证码短信,5:营销短信,6:告警短信,7:USSD,8:闪信-->
+                                                    <select id="smstype" name="smstype" class="form-control">
+                                                        <option value="">全部状态</option>
+                                                        <option value="4">验证码</option>
+                                                        <option value="0">通知</option>
+                                                        <option value="5">营销</option>
+                                                        <option value="8">闪信</option>
+                                                        <option value="7">USSD</option>
+                                                        <option value="6">告警</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group m-r-md">
+                                                    <label for="paytype">付费类型:</label>
+                                                    <select id="paytype" name="paytype" class="form-control">
+                                                        <option value="">全部</option>
+                                                        <option value="0">预付费</option>
+                                                        <option value="1">后付费</option>
+                                                    </select>
+                                                </div>
+                                                <!-- 时间选择 -->
+                                                <div class="form-group m-r-md" id="sandbox-container">
+                                                    <div class="form-group pull-right"><span
+                                                            style="font-weight:700">时间:</span>
+                                                        <input style="width: 180px;" placeholder="起始时间" name="startTime"
+                                                               class="form-control layer-date" id="start_time_day"/>至
+                                                        <input placeholder="截止时间" class="form-control layer-date"
+                                                               id="end_time_day" name="endTime"/>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group pull-right m-r-md">
+                                                    <button type="button" class="btn btn-sm btn-danger m-r-md" onclick="search()">搜索</button>
+                                                    <button type="button" class="btn btn-sm btn-primary" onclick="exportExcel()">导出Excel</button>
+                                                </div>
+                                            </form>
+                                        </div>
+
+                                        <div class="ibox-content">
+                                            <div class="jqGrid_wrapper">
+                                                <table id="table_list"></table>
+                                                <div id="pager_list"></div>
+                                            </div>
+                                            <p>&nbsp;</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div><!-- panel-body -->
+                    </div><!-- tab-1 -->
+
+                </div><!-- panel-body -->
+            </div><!-- tab-2 -->
+        </div><!-- tab-content -->
+    </div><!-- tabs-container-->
+</div><!-- col-sm-12 -->
+</div><!-- row -->
+</div>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/js/plugins/validate/jquery.validate.min.js}"></script>
+<script th:src="@{/resources/js/jquery.form.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var max_export_num = [[${max_export_num}]];
+    var startTime = [[${startTime}]];
+    var endTime = [[${endTime}]];
+    var smstype = [[${smstype}]];
+    var paytype = [[${paytype}]];
+    $("#smstype").val(smstype);
+    $("#paytype").val(paytype);
+    var start = {
+        elem: "#start_time_day",
+        format: "YYYY-MM-DD",
+        min: halfYearAgo("yyyy-MM-dd"),
+        max: laydate.now(),
+        istoday: true,
+        choose: function (datas) {
+            end.min = datas;
+        }
+    };
+    var end = {
+        elem: "#end_time_day",
+        format: "YYYY-MM-DD",
+        min: halfYearAgo("yyyy-MM-dd"),
+        max: laydate.now(),
+        istoday: true,
+        choose: function (datas) {
+            start.max = datas;
+        }
+    };
+    laydate(start);
+    laydate(end);
+
+    $("#start_time_day").val(startTime);
+    $("#end_time_day").val(endTime);
+
+    function search() {
+
+        $("#table_list").jqGrid('setGridParam', {
+            datatype: 'json',
+            postData: {
+                clientid: $("#hid-clientid").val(),
+                smstype: $("#smstype").val(),
+                paytype: $("#paytype").val(),
+                belongSale: $("#hid-belongSale").val(),
+                startTime: $("#start_time_day").val(),
+                endTime: $("#end_time_day").val(),
+                operatorstype: $("#hid-operatorstype").val()
+            }, //发送数据
+//            page:1
+        }).trigger("reloadGrid"); //重新载入
+    }
+
+
+    $(document).ready(function () {
+        $.jgrid.defaults.styleUI = "Bootstrap";
+        $("#table_list").jqGrid({
+            url: /*[[@{/statistic/channelDetail?isInter=}+${isInter}]]*/'',
+            mtype: 'POST',
+            datatype: "json",
+            jsonReader: {
+                root: "data",
+                page: "pageNo",
+                total: "totalPage",
+                records: "totalRecord"
+            },
+            postData: {
+                clientid: $("#hid-clientid").val(),
+                smstype: $("#smstype").val(),
+                paytype: $("#paytype").val(),
+                belongSale: $("#hid-belongSale").val(),
+                startTime: $("#start_time_day").val(),
+                endTime: $("#end_time_day").val(),
+                operatorstype: $("#hid-operatorstype").val()
+            },
+            height: 'auto',
+            rownumbers: true,
+            autowidth: true,
+            shrinkToFit: false,
+            autoScroll: true,
+            footerrow:true,
+            rowNum: 20,
+            rowList: [10, 20, 30, 50],
+            colModel: [
+                {label: "日期", name: "dateStr", align: "left", sortable: false,width:'100'},
+                {label:"运营商类型",name: "operatorstypeStr",align: "left",sortable:false,width:'100'},
+                {label:"通道号",name: "channelid",align: "left",sortable:false,width:'100'},
+                {label:"通道备注",name: "remark", align: "left",sortable:false,width:'330'},
+                {label:"付费类型", name: "paytypeStr", align: "left", sortable: false,width:'100'},
+                {label:"短信类型",name: "smstypeStr", align: "left",sortable:false,width:'100'},
+                {label:"总发送量(条)",name: "sendtotal", align: "left",sortable:false,width:'100'},
+                {label:"成功率(%)",name: "successRate", align: "left",sortable:false,width:'100'},
+                {label:"成功量(条)",name: "successTotal", align: "left",sortable:false,width:'100'},
+                {label:"提交成功(条)",name: "submitsuccess", align: "left",sortable:false,width:'100'},
+                {label:"明确成功(条)",name: "reportsuccess", align: "left",sortable:false,width:'100'},
+                {label:"明确失败(条)",name: "reportfail", align: "left",sortable:false,width:'100'},
+                {label:"销售收入(元)",name: "salefeeStr", align: "left",sortable:false,width:'100'},
+//                {label:"通道单价(元)",name: "costpriceStr", align: "left",sortable:false,width:'100'},
+                {label:"通道计费数(条)",name: "recordChargeTotal", align: "left",sortable:false,width:'100'},
+                {label:"通道成本",name: "recordCosttotalStr", align: "left",sortable:false,width:'100'},
+                {label:"毛利(元)",name: "profit", align: "left",sortable:false,width:'100'},
+                {label:"毛利率(%)",name: "profitRate", align: "left",sortable:false,width:'100'}
+            ],
+            gridComplete: completeMethod,
+            pager: "#pager_list",
+            viewrecords: true,
+            hidegrid: false
+        });
+
+        //解决合计精度问题
+        Math.add = function(v1, v2)
+        {
+            var r1, r2, m;
+            try
+            {
+                r1 = v1.toString().split(".")[1].length;
+            }
+            catch (e)
+            {
+                r1 = 0;
+            }
+            try
+            {
+                r2 = v2.toString().split(".")[1].length;
+            }
+            catch (e)
+            {
+                r2 = 0;
+            }
+            m = Math.pow(10, Math.max(r1, r2));
+
+            return (v1 * m + v2 * m) / m;
+        };
+
+
+        //表格统计功能
+        function completeMethod(){
+//            var sum_sendTotal=$("#table_list").getCol('sendtotal',false,'sum');
+//            var sum_successRate=$("#table_list").getCol('successRate',false,'sum');
+//            var sum_successTotal=$("#table_list").getCol('successTotal',false,'sum');
+//            var sum_submitsuccess=$("#table_list").getCol('submitsuccess',false,'sum');
+//            var sum_reportsuccess=$("#table_list").getCol('reportsuccess',false,'sum');
+//            var sum_reportfail=$("#table_list").getCol('reportfail',false,'sum');
+//            var sum_salefeeStr=$("#table_list").getCol('salefeeStr',false,'sum');
+//            var sum_saletotalStr=$("#table_list").getCol('saletotalStr',false,'sum');
+//            var sum_costpriceStr=$("#table_list").getCol('costpriceStr',false,'sum');
+//            var sum_recordChargeTotal=$("#table_list").getCol('recordChargeTotal',false,'sum');
+//            var sum_recordCosttotalStr=$("#table_list").getCol('recordCosttotalStr',false,'sum');
+//            var sum_profit=$("#table_list").getCol('profit',false,'sum');
+//            var sum_profitRate=$("#table_list").getCol('profitRate',false,'sum');
+//            sum_salefeeStr = Number(sum_salefeeStr).toFixed(2);
+//            sum_saletotalStr = Number(sum_saletotalStr).toFixed(2);
+//            sum_recordCosttotalStr = Number(sum_recordCosttotalStr).toFixed(2);
+//            sum_profit = Number(sum_profit).toFixed(2);
+            var sum_sendTotal=0.0;
+            var sum_successRate=0.0;
+            var sum_successTotal=0.0;
+            var sum_submitsuccess=0.0;
+            var sum_reportsuccess=0.0;
+            var sum_reportfail=0.0;
+            var sum_salefeeStr=0.0;
+            var sum_saletotalStr=0.0;
+            var sum_costpriceStr=0.0;
+            var sum_recordChargeTotal=0.0;
+            var sum_recordCosttotalStr=0.0;
+            var sum_profit=0.0;
+            var sum_profitRate=0.0;
+
+
+            $.ajax({
+                type : "post",
+                url : /*[[@{/statistic/channelDetailTotal?isInter=}+${isInter}]]*/,
+                data : {
+                    clientid: $("#hid-clientid").val(),
+                    smstype: $("#smstype").val(),
+                    paytype: $("#paytype").val(),
+                    belongSale: $("#hid-belongSale").val(),
+                    startTime: $("#start_time_day").val(),
+                    endTime: $("#end_time_day").val(),
+                    operatorstype: $("#hid-operatorstype").val()
+                },
+                success : function(data) {
+
+                    sum_sendTotal=data.totalOtherData.totalLine.sendtotal;
+                    sum_successRate=data.totalOtherData.totalLine.successRate;
+                    sum_successTotal=data.totalOtherData.totalLine.successTotal;
+                    sum_submitsuccess=data.totalOtherData.totalLine.submitsuccess;
+                    sum_reportsuccess=data.totalOtherData.totalLine.reportsuccess;
+                    sum_reportfail=data.totalOtherData.totalLine.reportfail;
+                    sum_salefeeStr=data.totalOtherData.totalLine.salefeeStr;
+                    sum_saletotalStr=data.totalOtherData.totalLine.saletotalStr;
+                    sum_costpriceStr=data.totalOtherData.totalLine.costpriceStr;
+                    sum_recordChargeTotal=data.totalOtherData.totalLine.recordChargeTotal;
+                    sum_recordCosttotalStr=data.totalOtherData.totalLine.recordCosttotalStr;
+                    sum_profit=data.totalOtherData.totalLine.profit;
+                    sum_profitRate=data.totalOtherData.totalLine.profitRate;
+
+                    $("#table_list").footerData('set', { 'smstypeStr': '合计',
+                        'sendtotal': sum_sendTotal,
+                        'successRate': "-",
+                        'successTotal': sum_successTotal,
+                        'submitsuccess': sum_submitsuccess,
+                        'reportsuccess': sum_reportsuccess,
+                        'reportfail': sum_reportfail,
+                        'salefeeStr': sum_salefeeStr,
+                        'saletotalStr': sum_saletotalStr,
+                        'costpriceStr': '-',
+                        'recordChargeTotal': sum_recordChargeTotal,
+                        'recordCosttotalStr': sum_recordCosttotalStr,
+                        'profit': sum_profit,
+                        'profitRate': '-'
+                    });
+                }
+
+            });
+
+        }
+
+        $(window).bind("resize", function () {
+            var width = $(".jqGrid_wrapper").width();
+            $("#table_list").setGridWidth(width);
+        })
+
+
+        function keyUp(e) {
+            var currKey = 0, e = e || event;
+            currKey = e.keyCode || e.which || e.charCode;
+            var keyName = String.fromCharCode(currKey);
+            if (currKey == 13) {
+                search();
+            }
+        }
+
+        document.onkeyup = keyUp;
+
+
+        $("#table_list_sendTotal").attr("title","(1+3+6)");
+        $("#table_list_successRate").attr("title","(3/1+3+6)");
+        $("#table_list_sendtotal").attr("title","(1+3+6)");
+        $("#table_list_successTotal").attr("title","(1+3)");
+        $("#table_list_submitsuccess").attr("title","(1)");
+        $("#table_list_reportsuccess").attr("title","(3)");
+        $("#table_list_reportfail").attr("title","(6)");
+        $("#table_list_recordChargeTotal").attr("title","(1+2+3)");
+
+
+    });
+
+    //导出Excel文件
+    function exportExcel() {
+        var totalCount = $("#table_list").jqGrid('getGridParam', 'records');
+        if (totalCount == 0) {
+            layer.msg("共0条记录，将不导出Excel文件", {icon: 2});
+            return;
+        }
+        if (totalCount > max_export_num) {
+            layer.msg("导出Excel文件条数大于" + max_export_num + "条", {icon: 2});
+            return;
+        }
+        var msg = "正在生成报表，请稍后...";
+        layer.msg('<div style="color:#506470;font-family: "microsoft yahei","Arial Narrow",HELVETICA;">'+msg+'</div>', {icon: 16,shade: [0.5, '#f5f5f5'],scrollbar: false,offset: 'auto',time: 600000}) ;
+        var options = {
+            url:/*[[@{/statistic/exportChannelDetail?isInter=}+${isInter}]]*/'',
+            data:{
+                _clientName:$("#clientName").text(),
+                _smstype:$("#smstype").find("option:selected").text(),
+                _paytype:$("#paytype").find("option:selected").text()
+            },
+            success : function(result) {
+                layer.closeAll(); //疯狂模式，关闭所有层
+                if(result == null){
+                    layer.msg("导出错误，请稍后重试...", {icon:2});
+                }else if(result.success == true){
+                    var exportFileName = result.data;
+                    var turnForm = document.createElement("form");
+                    document.body.appendChild(turnForm);
+                    turnForm.method = 'post';
+                    turnForm.action = /*[[@{/statistic/downloadExcel}]]*/"";
+                    //创建表单
+                    var newElement = document.createElement("input");
+                    newElement.setAttribute("name","exportFileName");
+                    newElement.setAttribute("type","hidden");
+                    newElement.setAttribute("value",exportFileName);
+                    turnForm.appendChild(newElement);
+                    turnForm.submit();
+                }else{
+                    layer.msg(result.msg, {icon:2});
+
+                }
+            },
+            complete : function(XMLHttpRequest,status){
+
+            },
+            type : "post",
+            async: true,
+            timeout:30000
+        };
+        $("#mainForm").ajaxSubmit(options);
+    }
+    $(function () {
+        $.validator.defaults.ignore = "";
+
+    })
+    /*]]>*/
+</script>
+</body>
+</html>

@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:th="http://www.thymeleaf.org"
+	  lang="zh-cn">
+<head>
+	<meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+	<meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+	<title>短信云平台运营系统 - 客户财务</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+	<link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+	<link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+	<link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+	<link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+	<style>
+		/* Additional style to fix warning dialog position */
+		#alertmod_table_list_2 {
+			top: 900px !important;
+		}
+		.close{
+			opacity: 1;
+		}
+		.modal-content{
+			opacity: 1 !important;
+			border:none;
+		}
+	</style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="tabs-container">
+				<ul class="nav nav-tabs">
+					<li id="tabOne" class=""  th:if="${menus.dlscw}"><a  href="/finance/agentFinance" >客户财务</a>
+					</li>
+					<li id="tabTwo" class="active" onclick="doResize(2)" th:if="${menus.lssj}"><a  href="/finance/hisAgentFinance" >历史数据</a>
+					</li>
+					<li   th:if="${menus.yezd}"><a  href="/finance/bill/balanceBill?tab=1" > 余额账单</a>
+					</li>
+					<li class=""  th:if="${menus.yajinzd}"><a href="/finance/bill/balanceBill?tab=4"> 押金账单</a>
+					</li>
+				</ul>
+				<div class="tab-content">
+					<div id="tab-2" class="tab-pane active" th:if="${menus.lssj}">
+						<div class="panel-body">
+							<div class="ibox ">
+
+								<div class="col-sm-12">
+									<div class="ibox ">
+										<!-- 搜索条件 -->
+										<div class="ibox-content">
+
+											<div class="row">
+												<div class="col-sm-12">
+													<form class="form-inline" id="mainForm_2" >
+														<div class="form-group">
+															<input type="text"  style="width:250px;" placeholder="代理商ID/代理商名称/手机号码/邮箱" name="condition" id="condition_2" class="form-control" onkeydown="if(event.keyCode==13){return false;}" >
+														</div>
+														<div class="form-group">
+															<label for="agentType_2">代理商类型:</label>
+															<select id="agentType_2" name="agentType"  class="form-control">
+																<option value="">全部</option>
+																<option value="5">OEM代理商</option>
+																<option value="2">品牌代理商</option>
+																<option value="1">销售代理商</option>
+															</select>
+
+														</div>
+
+														<!-- 时间选择 -->
+														<div class="form-group" id="sandbox-container" style="margin-left:2.5%">
+															<div class="form-group pull-right"><span style="font-weight:700">时间:</span>
+																<input placeholder="起始时间" class="form-control layer-date" id="create_time" name="create_time" />
+															</div>
+														</div>
+
+
+
+														<div class="form-group">
+															<span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-danger" onclick="search1()">搜索</button></span>
+															<span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-primary" onclick="exportExcel(2)">导出Excel</button></span>
+														</div>
+													</form>
+												</div>
+											</div>
+										</div>
+
+										<div class="ibox-content">
+											<div class="jqGrid_wrapper">
+												<table id="table_list_2"></table>
+												<div id="pager_list_2"></div>
+											</div>
+											<p>&nbsp;</p>
+										</div>
+									</div>
+								</div>
+
+
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/auth.js}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:inline="javascript">
+
+
+    window.onload=function(){
+        //定时器每分钟调用一次getNowFormatDate()
+        setInterval(function(){
+            $("#create_time").val(getNowFormatDate());
+        },60000);
+    }
+
+    function total1() {
+
+        $("#table_list_2").data("isload",true);
+        debugger;
+        var balanceTotal=0.00 ;
+        var commissionTotal=0.00 ;
+        var rebateTotal=0.00 ;
+        var depositTotal=0.00 ;
+        //               var amountTotal=0.00;
+        $.ajax({
+            type : "post",
+            url : [[@{/finance/agentFinance/total1}]],
+        data : {
+            condition: $("#condition_2").val(),
+                agentType:$("#agentType_2").val(),
+                create_time: $("#create_time").val()
+        },
+        async:true,
+            success : function(data) {
+            if(data.success){
+                balanceTotal1 = Number(data.data.balance_total).toFixed(2);
+                commissionTotal1=Number(data.data.commission_income_total).toFixed(2);
+                rebateTotal1=Number(data.data.rebate_income_total).toFixed(2);
+                depositTotal1=Number(data.data.deposit_total).toFixed(2);
+                //           amountTotal1=Number(data.data.amount_total).toFixed(2);
+
+            }else{
+                layer.msg("计算总计失败", {icon: 2,time: msgTime});
+            }
+            $("#table_list_2").footerData('set', {
+                'mobile':"合计",
+                'balance':balanceTotal1,
+                'commission_income':commissionTotal1,
+                'rebate_income':rebateTotal1,
+                'deposit':depositTotal1,
+                //                 'amount':amountTotal1
+            });
+
+        }
+    });
+
+
+    }
+
+    var grid_width = 1200; // 默认宽度
+
+
+    //获取当前时间
+
+    $("#create_time").val(getNowFormatDate());
+    var start = {
+        elem: "#create_time",
+        format: "YYYY-MM-DD hh:mm:ss",
+        istoday: true,
+        start:laydate.now(),
+        istime: true,
+        choose: function (datas) {
+            end.min = datas;
+        }
+    };
+
+    laydate(start);
+    function getNowFormatDate() {
+        var date = new Date();
+        var seperator1 = "-";
+        var seperator2 = ":";
+        var month = date.getMonth() + 1;
+        var strDate = date.getDate();
+        var minutes = date.getMinutes();
+        var seconds = date.getSeconds();
+        if (month >= 1 && month <= 9) {
+            month = "0" + month;
+        }
+        if (minutes >= 1 && minutes <= 9) {
+            minutes = "0" + minutes;
+        }
+        if (strDate >= 0 && strDate <= 9) {
+            strDate = "0" + strDate;
+        }
+        if (seconds >= 0 && seconds <= 9) {
+            seconds = "0" + seconds;
+        }
+        var currentdate = date.getFullYear() + seperator1 + month + seperator1 + strDate
+            + " " + date.getHours() + seperator2 + minutes + seperator2 + seconds;
+        return currentdate;
+    }
+
+    $("#start_time_day").val(getNowFormatDate());
+
+
+
+    var max_export_num = [[${max_export_num}]];
+
+
+    function search1(){
+        $("#table_list_2").data("isload",false);
+        event.preventDefault();
+        $("#table_list_2").jqGrid('setGridParam',{
+            datatype:'json',
+            postData: {
+                condition: $("#condition_2").val(),
+                agentType:$("#agentType_2").val(),
+                create_time:$("#create_time").val()
+            }, //发送数据
+        }).trigger("reloadGrid"); //重新载入
+
+
+    }
+    function reload() {
+        event.preventDefault();
+        $("#table_list_2").jqGrid('setGridParam',{
+            datatype:'json',
+            postData: {
+                condition: $("#condition").val(),
+                agentType:$("#agentType").val(),
+                create_time:$("#create_time").val()
+            }, //发送数据
+        }).trigger("reloadGrid"); //重新载入
+    }
+
+    //解决合计精度问题
+    Math.add = function(v1, v2)
+    {
+        var r1, r2, m;
+        try
+        {
+            r1 = v1.toString().split(".")[1].length;
+        }
+        catch (e)
+        {
+            r1 = 0;
+        }
+        try
+        {
+            r2 = v2.toString().split(".")[1].length;
+        }
+        catch (e)
+        {
+            r2 = 0;
+        }
+        m = Math.pow(10, Math.max(r1, r2));
+
+        return (v1 * m + v2 * m) / m;
+    };
+
+    // 导出Excel文件
+    function exportExcel(type) {
+        var data1="";
+        var totalCount = $("#table_list_"+type).jqGrid('getGridParam','records');
+        if (totalCount == 0) {
+            layer.alert("共0条记录，导出Excel文件失败");
+            return;
+        }
+        if(totalCount > max_export_num){
+            layer.msg("导出Excel文件条数大于"+max_export_num+"条", {icon: 2});
+            return;
+        }
+        var mainForm = $("#mainForm_"+type);
+        var action = mainForm.attr("action");
+        var exporUrl = [[@{/finance/agentFinance/export}]];
+        mainForm.attr("method", "post");
+        mainForm.attr("action", exporUrl).submit();
+        mainForm.attr("action", action);
+
+//		if(type==2){
+//            data1=$("#create_time").val();
+//        }
+//        $.ajax({
+//            type : "post",
+//            url : [[@{/finance/agentFinance/export}]],
+//        data : {
+//            condition: $("#condition_"+type).val(),
+//			agentType:$("#agentType_"+type).val(),
+//			create_time: data1
+//
+//        },async:true,
+//           success : function(data) {
+//
+//
+//        }
+//		});
+
+    }
+
+    function doResize(type){
+        var width = $(".jqGrid_wrapper").width();
+        if(width > 0){
+            grid_width = width;
+        }
+        $("#table_list_"+ type).setGridWidth(grid_width);
+    }
+
+    $(document).ready(function () {
+        /*if(tab ==1){
+            $("#tabOne").addClass("active");
+            $("#tabTwo").removeClass("active");
+            $("#tab-1").addClass("active");
+            $("#tab-2").removeClass("active");
+        }else if(tab==2){
+            $("#tabTwo").addClass("active");
+            $("#tabOne").removeClass("active");
+            $("#tab-2").addClass("active");
+            $("#tab-1").removeClass("active");
+        }*/
+        $.jgrid.defaults.styleUI = "Bootstrap";
+        $("#table_list_2").jqGrid({
+            url:/*[[@{/finance/agentFinance/listhis}]]*/,
+            mtype: 'POST',
+            datatype: "json",
+            jsonReader : {
+                root:"list",
+                page: "currentPage",
+                total: "totalPage",
+                records: "totalCount",
+                balanceTotal: "balanceTotal",
+                commissionTotal: "commissionTotal",
+                rebateTotal: "rebateTotal",
+                depositTotal: "depositTotal",
+//                amountTotal: "amountTotal"
+            },
+            height: 'auto',
+            rownumbers:true,
+            autowidth: true,
+            shrinkToFit: true,
+            autoScroll: true,
+            footerrow:true,
+            rowNum: 20,
+            rowList: [10, 20, 30,50],
+            colNames: ["代理商ID","代理商名称","代理商类型","邮箱","手机号码","余额（元）","佣金剩余（元）","返点剩余（元）","押金（元）"],
+            colModel: [
+                {name: "agent_id",align: "left",sortable:false},
+                {name: "agent_name",align: "left",sortable:false},
+                {name: "agent_type",align: "left",sortable:false,
+                    formatter:function(cellvalue, options, rowObject){
+                        var type=cellvalue;
+
+                        if (type==1){
+                            return "销售代理商";
+                        } else if(type==2) {
+                            return "品牌代理商";
+                        } else if(type==3){
+                            return "资源合作商";
+                        }
+                        else if(type==4){
+                            return "代理商和资源合作";
+                        }
+                        else if(type==5){
+                            return "OEM代理商";
+                        }else {
+                            return "-";
+                        }
+
+                    }},
+                {name: "email",align: "left",sortable:false},
+                {name: "mobile",align: "left",sortable:false},
+                {name: "balance",align: "left",sortable:false, width: 100},
+                {name: "commission_income",align: "left",sortable:false, width: 100},
+                {name: "rebate_income",align: "left",sortable:false, width: 100},
+                {name: "deposit",align: "left",sortable:false, width: 100}
+//                {name: "amount",align: "left",sortable:false, width: 100}
+
+            ],
+			/*统计功能 */
+            footerrow:true,
+            gridComplete: function () {
+                if(!$("#table_list_2").data("isload")){
+                    $("#table_list_2").footerData('set', {
+                        'mobile':"合计中...",
+                        'balance':0,
+                        'commission_income':0,
+                        'rebate_income':0,
+                        'deposit':0,
+                        //                 'amount':amountTotal1
+                    });
+                    console.info("进入合计");
+                    setTimeout("total1()", 1000);
+                    //setTimeout(total1(),10000);
+
+
+
+
+                }
+
+
+
+            },
+
+            pager: "#pager_list_2",
+            viewrecords: true,
+            hidegrid: false
+        });
+
+        $(window).bind("resize", function () {
+            var width = $(".jqGrid_wrapper").width();
+            $("#table_list_2").setGridWidth(width);
+        })
+
+        function keyUp(e) {
+            var currKey=0,e=e||event;
+            currKey=e.keyCode||e.which||e.charCode;
+            var keyName = String.fromCharCode(currKey);
+            if (currKey == 13){
+                search();
+                e.stopPropagation()
+            }
+        }
+        document.onkeyup = keyUp;
+    });
+
+
+</script>
+
+</body>
+</html>

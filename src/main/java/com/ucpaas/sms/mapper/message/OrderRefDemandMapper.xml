@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ucpaas.sms.mapper.message.OrderRefDemandMapper">
+     
+        
+    <resultMap id="rowMapper" type="OrderRefDemand">
+        <result property="id" jdbcType="INTEGER" column="id"/>
+        <result property="orderId" jdbcType="VARCHAR" column="order_id"/>
+        <result property="demandId" jdbcType="VARCHAR" column="demand_id"/>
+        <result property="state" jdbcType="INTEGER" column="state"/>
+        <result property="createTime" jdbcType="TIMESTAMP" column="create_time"/>
+        <result property="updateTime" jdbcType="TIMESTAMP" column="update_time"/>
+    </resultMap> 
+     
+    <sql id="BASE_COLUMN_LIST">
+        id,
+        order_id,
+        demand_id,
+        state,
+        create_time,
+        update_time
+    </sql>
+
+    <insert id="insert" parameterType="OrderRefDemand" >
+        INSERT INTO t_sms_order_ref_demand 
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                id,
+            </if>
+            <if test="orderId != null" >
+                order_id,
+            </if>
+            <if test="demandId != null" >
+                demand_id,
+            </if>
+            <if test="state != null" >
+                state,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+            <if test="updateTime != null" >
+                update_time
+            </if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id},
+            </if>
+            <if test="orderId != null" >
+                #{orderId},
+            </if>
+            <if test="demandId != null" >
+                #{demandId},
+            </if>
+            <if test="state != null" >
+                #{state},
+            </if>
+            <if test="createTime != null" >
+                now(),
+            </if>
+            <if test="updateTime != null" >
+                now()
+            </if>
+        </trim>
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List" >
+        INSERT INTO t_sms_order_ref_demand (
+            id,
+            order_id,
+            demand_id,
+            state,
+            create_time,
+            update_time
+        )VALUES
+        <foreach collection="list" item="item" index="index" separator="," >  
+            (
+                #{item.id},
+                #{item.orderId},
+                #{item.demandId},
+                #{item.state},
+                now(),
+                now()
+            )
+        </foreach>
+    </insert>
+    
+    
+    <update id="delete" >
+        UPDATE  t_sms_order_ref_demand SET state = 0 WHERE id = #{id} 
+    </update>
+    
+
+    <!-- <update id="update" parameterType="OrderRefDemand">
+        UPDATE t_sms_order_ref_demand SET 
+            id=#{id},
+            order_id=#{orderId},
+            demand_id=#{demandId},
+            state=#{state},
+            create_time=#{createTime},
+            UPDATE_TIME = now(),
+            OPERATOR_ID = #{operatorId}
+        WHERE 
+            id = #{id} 
+    </update> -->
+    
+    <update id="update" parameterType="OrderRefDemand">
+        UPDATE t_sms_order_ref_demand SET 
+            order_id=#{orderId},
+            demand_id=#{demandId},
+            state=#{state},
+            create_time=#{createTime},
+            update_time=#{updateTime}
+        WHERE 
+            id = #{id} 
+    </update>
+    
+ 
+    
+    <update id="updateSelective" parameterType="OrderRefDemand">
+        UPDATE t_sms_order_ref_demand 
+            <set>
+                <if test="orderId != null and orderId != ''">
+                    order_id = #{orderId},
+                </if>
+                <if test="demandId != null and demandId != ''">
+                    demand_id = #{demandId},
+                </if>
+                <if test="state != null and state != ''">
+                    state = #{state},
+                </if>
+                <if test="createTime != null and createTime != ''">
+                    create_time = #{createTime},
+                </if>
+                <if test="updateTime != null and updateTime != ''">
+                    update_time = #{updateTime}
+                </if>
+            </set>
+        WHERE 
+            id = #{id} 
+    </update>
+
+    <select id="getById" resultMap="rowMapper">
+        SELECT 
+            <include refid="BASE_COLUMN_LIST" />
+        FROM t_sms_order_ref_demand
+        WHERE 
+            id = #{id}
+    </select>
+
+    <select id="queryList" parameterType="OrderRefDemand" resultMap="rowMapper">
+        SELECT 
+            <include refid="BASE_COLUMN_LIST" /> 
+        FROM t_sms_order_ref_demand 
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            <if test="params.id != null and params.id != ''">
+                and id = #{params.id}
+            </if>
+            <if test="params.orderId != null and params.orderId != ''">
+                and order_id = #{params.orderId}
+            </if>
+            <if test="params.demandId != null and params.demandId != ''">
+                and demand_id = #{params.demandId}
+            </if>
+            <if test="params.state != null and params.state != ''">
+                and state = #{params.state}
+            </if>
+            <if test="params.createTime != null and params.createTime != ''">
+                and create_time = #{params.createTime}
+            </if>
+            <if test="params.updateTime != null and params.updateTime != ''">
+                and update_time = #{params.updateTime}
+            </if>
+	     </trim>
+    </select>
+
+    <select id="count" parameterType="OrderRefDemand" resultType="int">
+        SELECT COUNT(0) 
+        FROM t_sms_order_ref_demand 
+        WHERE 
+            1 = 1
+            <if test="id != null and id != ''">
+                and id = #{id}
+            </if>
+            <if test="orderId != null and orderId != ''">
+                and order_id = #{orderId}
+            </if>
+            <if test="demandId != null and demandId != ''">
+                and demand_id = #{demandId}
+            </if>
+            <if test="state != null and state != ''">
+                and state = #{state}
+            </if>
+            <if test="createTime != null and createTime != ''">
+                and create_time = #{createTime}
+            </if>
+    </select>
+	 
+</mapper>
+

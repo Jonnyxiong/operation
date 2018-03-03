@@ -1,0 +1,587 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ucpaas.sms.mapper.message.UserMapper">
+     
+        
+    <resultMap id="rowMapper" type="User">
+        <result property="id" jdbcType="BIGINT" column="id"/>
+        <result property="sid" jdbcType="VARCHAR" column="sid"/>
+        <result property="username" jdbcType="VARCHAR" column="username"/>
+        <result property="email" jdbcType="VARCHAR" column="email"/>
+        <result property="password" jdbcType="VARCHAR" column="password"/>
+        <result property="userType" jdbcType="CHAR" column="user_type"/>
+        <result property="status" jdbcType="CHAR" column="status"/>
+        <result property="mobile" jdbcType="VARCHAR" column="mobile"/>
+        <result property="realname" jdbcType="VARCHAR" column="realname"/>
+        <result property="createDate" jdbcType="TIMESTAMP" column="create_date"/>
+        <result property="updateDate" jdbcType="TIMESTAMP" column="update_date"/>
+        <result property="loginTimes" jdbcType="INTEGER" column="login_times"/>
+        <result property="webId" jdbcType="INTEGER" column="web_id"/>
+        <result property="departmentId" jdbcType="INTEGER" column="department_id"/>
+        <result property="dataAuthority" jdbcType="INTEGER" column="data_authority"/>
+    </resultMap>
+     
+    <sql id="BASE_COLUMN_LIST">
+        id,
+        sid,
+        username,
+        email,
+        password,
+        user_type,
+        status,
+        mobile,
+        realname,
+        create_date,
+        update_date,
+        login_times,
+        web_id,
+        department_id,
+        data_authority
+    </sql>
+
+    <insert id="insert" parameterType="User" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_sms_user 
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="username != null and username != ''" >
+                username,
+            </if>
+            <if test="email != null and email != ''" >
+                email,
+            </if>
+            <if test="password != null and password != ''" >
+                password,
+            </if>
+            <if test="userType != null and userType != ''" >
+                user_type,
+            </if>
+            <if test="status != null and status != ''" >
+                status,
+            </if>
+            <if test="mobile != null and mobile != ''" >
+                mobile,
+            </if>
+            <if test="realname != null and realname !='' " >
+                realname,
+            </if>
+            <if test="createDate != null" >
+                create_date,
+            </if>
+            <if test="updateDate != null" >
+                update_date,
+            </if>
+            <if test="loginTimes != null" >
+                login_times,
+            </if>
+            <if test="webId != null" >
+                web_id,
+            </if>
+            <if test="departmentId != null" >
+                department_id,
+            </if>
+            <if test="dataAuthority != null" >
+                data_authority
+            </if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides="," >
+            <if test="username != null and username != ''" >
+                #{username},
+            </if>
+            <if test="email != null and email != ''" >
+                #{email},
+            </if>
+            <if test="password != null and password != ''" >
+                #{password},
+            </if>
+            <if test="userType != null and userType != ''" >
+                #{userType},
+            </if>
+            <if test="status != null and status != ''" >
+                #{status},
+            </if>
+            <if test="mobile != null and mobile != ''" >
+                #{mobile},
+            </if>
+            <if test="realname != null and realname != ''" >
+                #{realname},
+            </if>
+            <if test="createDate != null" >
+                #{createDate},
+            </if>
+            <if test="updateDate != null" >
+                #{updateDate},
+            </if>
+            <if test="loginTimes != null" >
+                #{loginTimes},
+            </if>
+            <if test="webId != null" >
+                #{webId},
+            </if>
+            <if test="departmentId != null" >
+                #{departmentId},
+            </if>
+            <if test="dataAuthority != null" >
+                #{dataAuthority}
+            </if>
+        </trim>
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List" >
+        INSERT INTO t_sms_user (
+            id,
+            sid,
+            username,
+            email,
+            password,
+            user_type,
+            status,
+            mobile,
+            realname,
+            create_date,
+            update_date,
+            login_times,
+            web_id,
+            department_id,
+            data_authority
+        )VALUES
+        <foreach collection="list" item="item" index="index" separator="," >  
+            (
+                #{item.id},
+                #{item.sid},
+                #{item.username},
+                #{item.email},
+                #{item.password},
+                #{item.userType},
+                #{item.status},
+                #{item.mobile},
+                #{item.realname},
+                #{item.createDate},
+                #{item.updateDate},
+                #{item.loginTimes},
+                #{item.webId},
+                #{item.departmentId},
+                #{item.dataAuthority}
+            )
+        </foreach>
+    </insert>
+    
+      
+
+    <!-- <update id="update" parameterType="User">
+        UPDATE t_sms_user SET 
+            id=#{id},
+            sid=#{sid},
+            username=#{username},
+            email=#{email},
+            password=#{password},
+            user_type=#{userType},
+            status=#{status},
+            mobile=#{mobile},
+            realname=#{realname},
+            create_date=#{createDate},
+            update_date=#{updateDate},
+            login_times=#{loginTimes},
+            web_id=#{webId}
+        WHERE 
+            id = #{id} 
+    </update> -->
+    
+    <update id="update" parameterType="User">
+        UPDATE t_sms_user SET 
+            sid=#{sid},
+            username=#{username},
+            email=#{email},
+            password=#{password},
+            user_type=#{userType},
+            status=#{status},
+            mobile=#{mobile},
+            realname=#{realname},
+            create_date=#{createDate},
+            update_date=#{updateDate},
+            login_times=#{loginTimes},
+            web_id=#{webId},
+            department_id=#{departmentId},
+            data_authority=#{dataAuthority}
+        WHERE
+            id = #{id} 
+    </update>
+
+    <update id="updateDept" parameterType="User">
+        UPDATE t_sms_user
+        SET
+            department_id = #{departmentId}
+        WHERE
+        id = #{id}
+    </update>
+
+    <update id="updateSelective" parameterType="User">
+        UPDATE t_sms_user 
+            <set>
+                <if test="username != null and username != ''">
+                    username = #{username},
+                </if>
+                <if test="email != null and email != ''">
+                    email = #{email},
+                </if>
+                <if test="password != null and password != ''">
+                    password = #{password},
+                </if>
+                <if test="userType != null and userType != ''">
+                    user_type = #{userType},
+                </if>
+                <if test="status != null and status != ''">
+                    status = #{status},
+                </if>
+                <if test="mobile != null and mobile != ''">
+                    mobile = #{mobile},
+                </if>
+                <if test="realname != null and realname != ''">
+                    realname = #{realname},
+                </if>
+                <if test="updateDate != null">
+                    update_date = #{updateDate},
+                </if>
+                <if test="loginTimes != null">
+                    login_times = #{loginTimes},
+                </if>
+                <if test="departmentId != null">
+                    department_id = #{departmentId},
+                </if>
+                <if test="dataAuthority != null">
+                    data_authority = #{dataAuthority}
+                </if>
+            </set>
+        WHERE 
+            id = #{id} 
+    </update>
+
+    <select id="getById" resultMap="rowMapper">
+        SELECT 
+            <include refid="BASE_COLUMN_LIST" />
+        FROM t_sms_user
+        WHERE 
+            id = #{id}
+    </select>
+
+    <select id="queryList" parameterType="User" resultMap="rowMapper">
+        SELECT 
+            <include refid="BASE_COLUMN_LIST" /> 
+        FROM t_sms_user 
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            <if test="params.id != null and params.id != ''">
+                and id = #{params.id}
+            </if>
+            <if test="params.sid != null and params.sid != ''">
+                and sid = #{params.sid}
+            </if>
+            <if test="params.username != null and params.username != ''">
+                and username = #{params.username}
+            </if>
+            <if test="params.email != null and params.email != ''">
+                and email = #{params.email}
+            </if>
+            <if test="params.password != null and params.password != ''">
+                and password = #{params.password}
+            </if>
+            <if test="params.userType != null and params.userType != ''">
+                and user_type = #{params.userType}
+            </if>
+            <if test="params.status != null and params.status != ''">
+                and status = #{params.status}
+            </if>
+            <if test="params.mobile != null and params.mobile != ''">
+                and mobile = #{params.mobile}
+            </if>
+            <if test="params.realname != null and params.realname != ''">
+                and realname = #{params.realname}
+            </if>
+            <if test="params.createDate != null and params.createDate != ''">
+                and create_date = #{params.createDate}
+            </if>
+            <if test="params.updateDate != null and params.updateDate != ''">
+                and update_date = #{params.updateDate}
+            </if>
+            <if test="params.loginTimes != null and params.loginTimes != ''">
+                and login_times = #{params.loginTimes}
+            </if>
+            <if test="params.webId != null and params.webId != ''">
+                and web_id = #{params.webId}
+            </if>
+            <if test="params.webIds != null">
+				and web_id in
+				  <foreach item="item" index="index" collection="params.webIds"
+				      open="(" separator="," close=")">
+				        #{item}
+				  </foreach>
+            </if>
+            
+	     </trim>
+    </select>
+
+    <select id="count" parameterType="User" resultType="int">
+        SELECT COUNT(0) 
+        FROM t_sms_user 
+        WHERE 
+            1 = 1
+            <if test="id != null and id != ''">
+                and id = #{id}
+            </if>
+            <if test="sid != null and sid != ''">
+                and sid = #{sid}
+            </if>
+            <if test="username != null and username != ''">
+                and username = #{username}
+            </if>
+            <if test="email != null and email != ''">
+                and email = #{email}
+            </if>
+            <if test="password != null and password != ''">
+                and password = #{password}
+            </if>
+            <if test="userType != null and userType != ''">
+                and user_type = #{userType}
+            </if>
+            <if test="status != null and status != ''">
+                and status = #{status}
+            </if>
+            <if test="mobile != null and mobile != ''">
+                and mobile = #{mobile}
+            </if>
+            <if test="realname != null and realname != ''">
+                and realname = #{realname}
+            </if>
+            <if test="createDate != null and createDate != ''">
+                and create_date = #{createDate}
+            </if>
+            <if test="updateDate != null and updateDate != ''">
+                and update_date = #{updateDate}
+            </if>
+            <if test="loginTimes != null and loginTimes != ''">
+                and login_times = #{loginTimes}
+            </if>
+            <if test="webId != null and webId != ''">
+                and web_id = #{webId}
+            </if>
+    </select>
+
+	  <select id="checkByMobile" resultMap="rowMapper">
+        SELECT 
+            <include refid="BASE_COLUMN_LIST" />
+        FROM t_sms_user
+        WHERE 
+            mobile = #{mobile}
+            <if test="webId != null and webId != ''">
+                and web_id = #{webId}
+            </if>
+    </select>
+
+    <select id="findUserListByDepartmentId" resultType="com.ucpaas.sms.entity.po.UserPo">
+        SELECT
+            id,
+            username,
+            email,
+            status,
+            mobile,
+            realname,
+            department_id as "departmentId",
+            data_authority as "dataAuthority"
+        FROM t_sms_user
+        WHERE department_id = #{departmentId} and web_id = 3
+    </select>
+
+    <select id="getUserCountByDepartmentId" resultType="java.lang.Integer">
+        SELECT
+          count(0) as count
+        FROM t_sms_user
+        WHERE department_id = #{departmentId} and web_id = 3
+    </select>
+
+    <select id="findRoleInfoByUserId" resultType="Role">
+        SELECT
+            b.id as "id",
+            b.role_name as "roleName",
+            b.web_id as "webId",
+            b.status as "status"
+        FROM t_sms_user_role a
+        JOIN t_sms_role b on b.id = a.role_id
+        WHERE a.user_id = #{id}
+    </select>
+
+    <select id="findRoleIdByUserId" resultType="java.lang.Integer">
+        SELECT
+        a.role_id as "id"
+        FROM t_sms_user_role a
+        WHERE a.user_id = #{id}
+    </select>
+
+    <select id="checkEmailAndMobile" resultType="User">
+        SELECT
+        IF(email = #{email},email,'') AS email,
+        IF(mobile = #{mobile},mobile,'') AS mobile
+        FROM
+        t_sms_user
+        WHERE
+        web_id = 3 and (email = #{email} OR mobile = #{mobile})
+        <if test="id != null">
+            and id <![CDATA[ <> ]]>  #{id}
+        </if>
+        LIMIT 1
+    </select>
+
+    <select id="getUserEmailAndMobile" resultType="User">
+        SELECT
+        <include refid="BASE_COLUMN_LIST" />
+        FROM
+        t_sms_user
+        WHERE
+       email = #{email} and mobile = #{mobile}
+
+    </select>
+
+    <!-- 添加角色和用户的关联表数据 -->
+    <insert id="insertRoleAssociationUser">
+        INSERT INTO t_sms_user_role(role_id, user_id)
+        <foreach collection="roles" item="role" separator=" union all ">
+            SELECT #{role.id}, #{id} FROM DUAL
+        </foreach>
+    </insert>
+
+    <!-- 删除角色和用户的关联表数据 -->
+    <delete id="deleteRoleAssociationUser">
+        DELETE FROM t_sms_user_role WHERE user_id = #{id}
+        <if test="roles != null and roles.size != 0">
+            and role_id in
+            <foreach collection="roles" item="item" open="(" close=")" separator=",">
+                #{item.id}
+            </foreach>
+        </if>
+    </delete>
+
+    <update id="disabled">
+        UPDATE t_sms_user SET
+            status = 2
+        WHERE id = #{id}
+    </update>
+
+    <update id="enabled">
+        UPDATE t_sms_user SET
+            status = 1
+        WHERE id = #{id}
+    </update>
+
+    <select id="getUserForLogin" resultType="com.ucpaas.sms.entity.po.UserPo">
+        SELECT
+            a.id,
+            a.`status`,
+            a.realname,
+            a.email,
+            a.mobile,
+            a.web_id as "webId",
+            a.department_id as "departmentId",
+            a.data_authority as "dataAuthority",
+            b.department_name as "departmentName"
+        FROM
+            t_sms_user a
+            join t_sms_department b on b.department_id = a.department_id
+        WHERE
+            a.user_type = 1
+            AND a.email = #{username}
+            AND a.`password` = #{password}
+            AND a.`web_id` = 3
+    </select>
+
+    <!-- 根据用户ID查找用户信息 -->
+    <select id="getUserStatusById" resultType="java.lang.String">
+        SELECT
+          u.status
+        FROM
+          t_sms_user u
+        WHERE
+          u.web_id = 3
+        AND u.id = #{id}
+        LIMIT 1
+    </select>
+
+    <select id="getUserAndDeptById" resultType="com.ucpaas.sms.entity.po.UserPo">
+        SELECT
+          a.id,
+          a.email,
+          a.status,
+          a.mobile,
+          a.realname,
+          a.web_id,
+          a.department_id as "departmentId",
+          a.data_authority as "dataAuthority",
+          b.department_name as "departmentName",
+          b.`level` as "departmentLevel"
+        FROM
+          t_sms_user a
+          join t_sms_department b on b.department_id = a.department_id
+        WHERE
+          a.id = #{id}
+    </select>
+
+    <select id="findSalesOrBusinessByDeptId" resultType="java.lang.Long">
+        SELECT
+          a.id
+        FROM
+          t_sms_user a
+        JOIN t_sms_user_role b on b.user_id = a.id
+        WHERE
+           a.web_id = 3
+            <if test="user.realname != null and user.realname != ''">
+                and a.realname like CONCAT('%',#{user.realname},'%')
+            </if>
+           and a.department_id in
+                <foreach collection="deptIds" index="index" item="item" open="(" close=")" separator=",">
+                    #{item}
+                </foreach>
+           and b.role_id in
+               (select
+                    id
+                from t_sms_role
+                where web_id = 3 and status = 1
+                and role_name in
+                <foreach collection="user.roles" item="item" open="(" close=")" separator=",">
+                    #{item.roleName}
+                </foreach>
+               )
+        group by a.id;
+    </select>
+
+
+    <!-- 更新登录信息 -->
+    <update id="updateLoginInfo">
+        UPDATE t_sms_user a
+          SET a.login_times = a.login_times + 1
+        WHERE
+          a.id = #{id}
+    </update>
+    
+    <select id="queryBelongInfo" parameterType="java.util.Set" resultType="User">
+        SELECT
+            u.id,
+            u.realname
+        FROM
+          t_sms_user u
+        WHERE
+            u.id IN (
+            <foreach collection="userIds" item="item" separator=",">
+                #{item}
+            </foreach>
+            )
+        AND web_id = 3
+    </select>
+
+    <select id="queryBelongIdByName" parameterType="string" resultType="long">
+        SELECT
+			id
+		FROM
+			t_sms_user
+		WHERE
+			`realname` LIKE CONCAT('%',#{name},'%')
+		AND web_id = 3
+    </select>
+</mapper>
+

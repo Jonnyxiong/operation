@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信平台运营系统 </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet">
+    <!-- jqgrid-->
+    <link th:href="@{/resources/css/plugins/jqgrid/ui.jqgridffe4.css?0820}" rel="stylesheet">
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+
+	<link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+	<link th:href="@{/resources/js/element-ui/element-ui.css?v=2.1}" rel="stylesheet">
+    <style>
+        /* Additional style to fix warning dialog position */
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+    </style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+	<div class="wrapper wrapper-content animated fadeInRight">
+	    <div class="row">
+	        <div class="col-sm-12">
+	            <div class="ibox "> 
+					<div class="ibox-title">
+						<h5>修改客户组</h5>
+					</div>
+					<div class="ibox-content" id="app">
+						<div class="row">
+							<div class="bg-fff form-horizontal">
+								<div class="form-group col-sm-12">
+									<label class="col-sm-2 control-label">客户组名称：</label>
+									<div class="col-sm-5">
+										<input type="text" class="form-control" id="name" v-model="accountGname">
+									</div>
+								</div>
+								<div class="form-group col-sm-12">
+									<label  class="col-sm-2 control-label">客户类型：</label>
+									<div class="col-sm-5">
+										<select class="form-control" v-model="type" id="type" @change="search">
+											<option value="">全部</option>
+											<option value="0">代理商子客户</option>
+											<option value="1">直客</option>
+										</select>
+									</div>
+								</div>
+								<div class="form-group col-sm-12">
+									<label class="col-sm-2 control-label">客户组内客户：</label>
+									<div class="col-sm-5">
+										<el-select v-model="value" multiple placeholder="可输入关键字搜索" style="width:100%;" filterable>
+											<el-option
+													v-for="item in options"
+													:key="item.value"
+													:label="item.label"
+													:value="item.value">
+											</el-option>
+										</el-select>
+									</div>
+								</div>
+
+								<div class="form-group col-sm-12">
+									<div class="col-sm-offset-2 col-sm-4">
+										<a class="btn btn-primary js-confirm" v-on:click="save">修改</a>
+										<a class="btn btn-primary" onclick="history.back()">返回</a>
+									</div>
+								</div>
+
+							</div>
+
+						</div>
+					</div>
+	            </div>
+	        </div>
+	    </div>
+	</div>
+	<script th:src="@{/resources/js/hex_ha_ha_ha_ha_ha.js}"></script>
+	<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+	<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+	<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+	<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+	<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+	<script th:src="@{/resources/js/jquery.form.js?v=1.0.0}"></script>
+
+	<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+	<script th:src="@{/resources/js/plugins/validate/jquery.validate.min.js}"></script>
+	<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+	<script th:src="@{/resources/js/layer/layer.js}"></script>
+	<script th:src="@{/resources/js/auth.js?v=1.0}"></script>
+	<script th:src="@{/resources/js/editClient.js?v=2.1}"></script>
+	<script th:src="@{/resources/js/element-ui/vue.min.js?v=2.1}"></script>
+	<script th:src="@{/resources/js/element-ui/element-ui.js?v=2.1}"></script>
+
+	<script th:inline="javascript">
+		/*<![CDATA[*/
+
+        function GetQueryString(name) {
+            var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+            var r = window.location.search.substr(1).match(reg);
+            if(r!=null)return  unescape(r[2]); return null;
+        }
+		$(function(){
+
+
+            var app = new Vue({
+                el: '#app',
+                data: {
+                    value: [],
+                    options : [],
+                    accountGid : '',
+                    accountGname : '',
+					type : ''
+
+                },
+				methods : {
+					save : function(){
+					    var obj = {};
+					    obj.accountGid = this.accountGid;
+					    obj.accountGname = this.accountGname;
+					    obj.type = this.type;
+					    obj.clients = [];
+
+                        if(this.accountGname.length > 10){
+                            layer.msg("客户组名称为10个字符以内",{icon:2});
+                            return;
+                        }
+					    var check = this.value;
+					    for(var i = 0; i<check.length; i++){
+					        obj.clients[i] = {};
+					        obj.clients[i]["clientid"] = check[i];
+						}
+
+						if(obj.accountGname === "" || obj.accountGname === null || obj.accountGname === undefined ){
+					        layer.msg("客户组名称不能为空",{icon:2});
+							return;
+						}
+						if(obj.clients.length == 0){
+						    layer.msg("请选择组内客户");
+						    return;
+						}
+						$.ajax({
+						    url : '/accountInfo/clientgroup/edit',
+							type : 'POST',
+							data : JSON.stringify(obj),
+                            contentType:"application/json",
+							success : function (res) {
+								if(res.code != 0){
+                                    layer.msg(res.msg ,{icon:2});
+								    return;
+								}
+								layer.msg("修改成功", {icon : 1});
+								setTimeout(function(){
+								    window.history.back();
+								}, 1200)
+                            }
+						})
+					},
+                    search : function(){
+                        var that = this;
+                        var cli_type = this.type;
+                        $.ajax({
+                            url : '/accountInfo/clientgroup/clientsbytype',
+                            data : {type : cli_type},
+                            dataType : 'json',
+                            success : function(res){
+                                if(res.code != 0){
+                                    layer.msg(res.msg, {icon: 2});
+                                    return
+                                }
+                                var accountGroup = res.data;
+
+
+
+                                var arr1 = [];
+                                for(var i = 0;i < accountGroup.length; i++){
+                                    arr1[i] = {};
+                                    arr1[i].value = accountGroup[i].clientid;
+                                    arr1[i].label = accountGroup[i].clientid + "-" + accountGroup[i].name;
+                                }
+
+                                that.options = arr1;
+                                that.value = [];
+
+                            }
+                        })
+                    }
+				},
+				mounted : function(){
+                    var that = this;
+                    var params = GetQueryString("accountGid");
+                    if(params === null || params === ""){
+                        layer.msg('参数错误', {icon: 2});
+                        return
+                    }
+                    $.ajax({
+                        url : '/accountInfo/clientgroup/edit/data',
+                        data : {accountGid : params},
+                        dataType : 'json',
+                        success : function(res){
+                            if(res.code != 0){
+                                layer.msg(res.msg, {icon: 2});
+                                return
+                            }
+                            var accountGroup = res.data.accountGroup;
+                            var client_other = res.data.clients;
+                            var client_check = accountGroup.clients;
+                            var client_total = client_check.concat(client_other);
+
+                            that.type = accountGroup.type || "";
+                            that.accountGid = accountGroup.accountGid;
+                            that.accountGname = accountGroup.accountGname;
+
+
+                            var arr1 = [];
+                            for(var i = 0;i < client_total.length; i++){
+                                arr1[i] = {};
+                                arr1[i].value = client_total[i].clientid;
+                                arr1[i].label = client_total[i].clientid + "-" + client_total[i].name;
+                            }
+                            var arr2 = [];
+                            for(var i = 0;i < client_check.length; i++){
+                                arr2[i] = client_check[i].clientid;
+                            }
+                            that.options = arr1;
+                            that.value = arr2;
+                        }
+                    })
+
+                }
+            })
+		})
+	    /*]]>*/
+	    
+	</script>
+</body>
+</html>

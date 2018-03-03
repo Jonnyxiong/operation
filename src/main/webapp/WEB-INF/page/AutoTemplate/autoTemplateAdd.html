@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信云平台运营系统 - 管理员中心</title>
+    <meta charset="UTF-8">
+    <meta name="content-type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+    <link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+    <link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/select2.css}" rel="stylesheet">
+    <style>
+        /* Additional style to fix warning dialog position */
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+        .close{
+            opacity: 1;
+        }
+        .modal-content{
+            opacity: 1 !important;
+            border:none;
+        }
+        .select2 span{
+            display:block !important;
+            margin-top: 0px !important;
+        }
+        .select2-container {
+            width: 171px !important;
+        }
+        .select2-dropdown {
+            width: 175px !important;
+        }
+        .select2-container .select2-selection--single{
+            width:175px;
+        }
+        input[type="radio"]{
+            margin-top:0 !important;
+        }
+        textarea{
+            resize:none;
+            height:200px !important;
+        }
+        .red{
+            color:#ff0000;
+        }
+    </style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <form class="form-horizontal" id="form">
+                <div class="form-group">
+                    <label class="col-sm-2 col-xs-2 control-label"><span class="red">*</span>用户账号：</label>
+                    <div class="col-sm-3 col-xs-6">
+                        <select name="clientId" id="clientId"></select>
+                        <input type="text" name="clientId" id="clientId1" style="display: none;" readonly>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2  col-xs-2 control-label"><span class="red">*</span>短信签名：</label>
+                    <div class="col-sm-3 col-xs-6">
+                        <input type="text" class="form-control" name="sign" id="sign" th:test="${content}" placeholder="限2-12个字，中文、英文和数字">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2  col-xs-2 control-label"><span class="red">*</span>模板属性：</label>
+                    <div class="col-sm-3 col-xs-6 js-radio-group">
+                        <label class="radio-inline">
+                            <input type="radio" name="smsType" value="10" class="js-radio" checked> 行业
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="smsType" value="11" class="js-radio"> 会员营销
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2  col-xs-2 control-label"><span class="red">*</span>模板类型：</label>
+                    <div class="col-sm-3 col-xs-6">
+                        <select class="form-control template" name="templateType">
+                            <option value="1">变量模板</option>
+                            <option value="0">固定模板</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2  col-xs-2 control-label">示例：</label>
+                    <div class="col-sm-3 col-xs-6">
+                        <span class="example">验证码示例：您的验证码是{}，如非本人操作，请忽略此条短信。
+                            <br>通知示例：尊敬的{}用户，您的账户已入账{}元，请及时查收，如有疑问请联系客服热线。</br></span>
+                    </div>
+                </div>
+                <div id="hiddenPar">
+                <input type="hidden" name="state" id="stateID">
+                <input type="hidden" name="templateId" id="templateId">
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2  col-xs-2 control-label"><span class="red">*</span>模板内容：</label>
+                    <div class="col-sm-3 col-xs-6">
+                        <textarea name="content" placeholder="请输入模板内容&#10;模板内容、短信签名的总长度不可超过500个字" class="form-control" id="temp_content"></textarea>
+                    </div>
+                </div>
+                <input type="hidden" name="smsType" id="smsTypeID">
+                <div class="form-group" id="button1">
+                    <div class="col-sm-offset-2 col-sm-4 col-xs-offset-2">
+                        <a class="btn btn-success js-save">保存</a>
+                        <a class="btn btn-success js-goon" id="goonAdd">保存并继续添加</a>
+                        <a href="javascript:;" class="btn btn-primary js-back">取消</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/auth.js}"></script>
+<script th:src="@{/resources/js/select2.min.js}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+
+
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+    //不同模板不同短信类型，示例不同
+    //key的第一位代表短信类型，第二位代表模板类型，验证码短信没有固定模板
+    var map = {
+        "101" : "验证码示例：您的验证码是{}，如非本人操作，请忽略此条短信。<br>通知示例：尊敬的{}用户，您的账户已入账{}元，请及时查收，如有疑问请联系客服热线。",        //行业变量模板
+        "100" : "因受台风天鸽影响，8月24日全市人民放假一天，请市民注意人身安全。",               //行业固定模板
+        "111" : "尊敬的{}用户，本店将于下周举行年中大促，退订回复TD。",                         //会员营销变量模板
+        "110" : "欢迎您成为酒店集团会员，我们将竭诚为您服务。如非本人操作，请致电如家客服热线。",   //会员营销固定模板
+    }
+    var  clientId = [[${clientId}]];
+    var templateId = [[${templateId}]];
+    var smsType = [[${smsType}]];
+    var sign = [[${sign}]];
+    var content = [[${content}]];
+    var templateType = [[${templateType}]];
+    var state = [[${state}]];
+    $(function(){
+        var select2Date;
+        if(clientId != "" && clientId != undefined && clientId != null){
+            //如果是编辑页面
+            $("#clientId").remove();
+            $("#clientId1").show();
+            $("#goonAdd").remove();
+            $("#hiddenPar").show();
+            insertData();
+        } else{
+            //如果是新增模板页面
+            $("#clientId1").remove();
+            $("#clientId").show();
+            $("#hiddenPar").remove();
+            //获取用户账号
+            $.ajax({
+                url : '/autoTemplate/autoTemplateAccounts',
+                dataType : 'json',
+                async : false,
+                success : function(res){
+                    for(var i = 0; i < res.length; i++){
+                        res[i].id = res[i].clientid;
+                        res[i].text = res[i].clientid + "-" + res[i].name;
+                    }
+                    res.unshift({id:"",text:""})
+                    select2Date = res;
+
+
+                }
+            })
+            $("#clientId").select2({
+                data : select2Date
+            })
+        }
+        //取消
+        $(".js-back").click(function(){
+            closePage()
+        })
+        //选择短信类型
+        $(".js-radio").click(function(){
+            var value = $(this).val();
+            var templateType = $(".template").val();
+
+            draw(value, templateType);
+
+
+        })
+        //选择模板类型
+        $(".template").change(function(){
+            var template = $(this).val();
+            var smstype = getSmsType();
+
+            if(smstype == "4" && template == "0"){
+                $(this).val(1);
+                template = "1";
+            }
+
+            draw(smstype, template);
+        })
+
+        //提交
+        $(".js-save").click(function(){
+            commit();
+        })
+
+        //继续提交
+        $(".js-goon").click(function(){
+            commit(1);
+        })
+    })
+    /*
+     * @params s  smstype
+     * @params t templateType
+     * */
+    function draw(s, t){
+        $("#smsTypeID").val(s);
+       // $("#templateTypeID").val(t);
+        var key = s + t;
+        $(".example").html(map[key]);
+    }
+    function closePage() {
+        var index = parent.layer.getFrameIndex(window.name); //获取当前窗体索引
+        parent.layer.close(index); //执行关闭
+    }
+
+    function getSmsType(){
+        var radio = $(".js-radio-group").find(".js-radio");
+        var smstype;
+        for(var i = 0; i < radio.length; i++){
+            if(radio[i].checked){
+                smstype = radio[i].value;
+                break;
+            }
+        }
+
+        return smstype;
+    }
+    function insertData(){
+        $("#clientId1").val(clientId);
+        $("#templateId").val(templateId);
+        $(".template").val(templateType);
+        $("#temp_content").val(content);
+        $("#sign").val(sign);
+        $("#stateID").val(state);
+        var radio = $(".js-radio-group").find(".js-radio");
+        for(var i = 0; i < radio.length; i++){
+            radio[i].checked = false;
+            $(radio[i]).closest("span").removeClass("checked");
+            if(radio[i].value == smsType){
+                radio[i].checked = true;
+                $(radio[i]).closest("span").addClass("checked");
+                break;
+            }
+        }
+        //修改示例
+        draw(smsType, templateType);
+    }
+    function commit(str){
+        var sign = $.trim($("#sign").val());
+        var sign_length = sign.length*1;
+        var content =  $.trim($("#temp_content").val());
+        var content_length = content.length*1;
+        var templateType = $(".template").val();
+        var isChineseSms = true;
+        if(sign_length > 12 || sign_length < 2){
+            parent.layer.msg("请输入正确的签名", {icon:2});
+            return false;
+        }
+        if(!/^([a-z0-9\u4E00-\u9FA5])+$/i.test(sign)){
+            parent.layer.msg("模板内容请勿输入特殊字符", {icon:2});
+            return false;
+        }
+        if((sign_length + content_length) > 500 ){
+            parent.layer.msg("模板内容+签名长度超过500", {icon:2});
+            return false;
+        }
+
+        if(/([\u4E00-\u9FA5]|[\（\）\《\》\——\；\，\。\“\”\！\【\】])/.test(content)){
+            //中文短信
+            if(content.indexOf('【') != -1 || content.indexOf('】') != -1 || content.indexOf('【】') != -1){
+                parent.layer.msg("中文短信模板内容不能包含【,】和【】", {icon:2});
+                return false;
+            }
+        } else {
+            if(content.indexOf('[') != -1 || content.indexOf(']') != -1 || content.indexOf('【') != -1 || content.indexOf('】') != -1){
+                parent.layer.msg("英文短信模板内容不能包含[,]和[]", {icon:2});
+                return false;
+            }
+        }
+
+        var placeHolderReg0 = RegExp("\\{.*?\\}","g");
+        //0是固定模板 1是变量模板
+        if(templateType == 0 && placeHolderReg0.test(content)){
+            parent.layer.msg("模板内容中包含变量，请修改模板类型", {icon:2});
+            return false;
+        }
+
+        var params = $("#form").serialize();
+        var _p = parent;
+        $.ajax( {
+            type : "POST",
+            url : "/autoTemplate/autoTemplateSave",
+            data : params,
+            success : function(res) {
+                if(res.code != 0){
+                    parent.layer.msg(res.msg, {icon:2})
+                    return;
+                }
+                if(str){
+                    parent.layer.msg(res.msg, {icon:1})
+                    $("#temp_content").val("");
+                    $("#sign").val("");
+
+                } else {
+                    parent.layer.msg(res.msg, {icon: 1,time: 2000},function(){
+                        _p.location.reload();
+                    })
+                    closePage()
+                   // parent.window.location.reload();
+                }
+
+
+            }
+        });
+    }
+    /*]]>*/
+</script>
+</body>
+</html>

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信云平台运营系统 </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+    <link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+    <link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+    <style>
+        /* Additional style to fix warning dialog position */
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+    </style>
+</head>
+<body class="gray-bg">
+<div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="tabs-container">
+                <ul class="nav nav-tabs">
+                    <li class="" id="agentTab" th:if="${menus.dlszzsh}">
+                        <a href="/opsAudit/agent/query" id="tab-1">客户资质审核</a>
+                    </li>
+                    <li class="" th:if="${menus.khzzsh}">
+                        <a href="/opsAudit/customer/query" id="tab-2">子账户资质审核 </a>
+                    </li>
+                    <li class="active" th:if="${menus.dxmbsh}">
+                        <a data-toggle="tab" href="#tab-3" aria-expanded="true">短信模板审核</a>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane active" th:if="${menus.dxmbsh}">
+                        <!-- 搜索条件 -->
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="ibox ">
+                                        <div class="ibox-content">
+                                            <form role="form" class="form-inline" id="mainForm">
+                                                <div class="form-group">
+                                                    <!-- <label for="example1" class="sr-only">用户名</label> -->
+                                                    <input type="text" placeholder="模板ID/归属客户ID" id="condition"
+                                                           class="form-control">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="oauth_status">审核状态:</label>
+                                                    <select id="oauth_status" class="form-control">
+                                                        <option value="-1">所有</option>
+                                                        <option value="0" selected="selected">待审核</option>
+                                                        <option value="2">审核中</option>
+                                                        <option value="1">审核通过</option>
+                                                        <option value="3">审核不通过</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                    <span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-danger"
+                                                              onclick="search()">搜索</button></span>
+                                                </div>
+                                            </form>
+                                        </div>
+                                        <div class="ibox-content">
+                                            <div class="jqGrid_wrapper">
+                                                <table id="table_list"></table>
+                                                <div id="pager_list"></div>
+                                            </div>
+                                            <p>&nbsp;</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+    function search() {
+
+        $("#table_list").jqGrid('setGridParam', {
+            datatype: 'json',
+            postData: {
+                condition: $("#condition").val(),
+                oauth_status: $("#oauth_status").val()
+            }, //发送数据
+//            page:1
+        }).trigger("reloadGrid"); //重新载入
+    }
+
+
+    $(document).ready(function () {
+        $.jgrid.defaults.styleUI = "Bootstrap";
+        $("#table_list").jqGrid({
+            url:/*[[@{/opsAudit/smsTemplate/list}]]*/,
+            mtype: 'POST',
+            datatype: "json",
+            postData: {
+                condition: $("#condition").val(),
+                oauth_status: $("#oauth_status").val()
+            },
+            jsonReader: {
+                root: "list",
+                page: "currentPage",
+                total: "totalPage",
+                records: "totalCount"
+            },
+            height: 'auto',
+            rownumbers: true,
+            autowidth: true,
+            shrinkToFit: false,
+            autoScroll: true,
+            rowNum: 20,
+            rowList: [10, 20, 30, 50],
+//            colNames: ["模板ID", "模板类型(隐藏)", "模板类型", "签名", "短信内容" , "归属客户ID", "归属客户名称",  "提交类型",  "提交时间",  "审核状态(隐藏)",  "审核状态",  "原模板审核状态(隐藏)", "操作"],
+            colModel: [
+                {label: "模板ID", name: "template_id", align: "left", sortable: false},
+                {label: "模板类型(隐藏)", name: "type", align: "left", sortable: false, hidden: true},
+                {label: "模板类型", name: "type_name", align: "left", sortable: false},
+                {label: "签名", name: "sign", align: "left", sortable: false},
+                {label: "短信内容", name: "content", align: "left", sortable: false},
+                {label: "归属客户ID", name: "client_id", align: "left", sortable: false},
+                {label: "归属客户名称", name: "name", align: "left", sortable: false},
+                {label: "提交类型", name: "submit_type_name", align: "left", sortable: false},
+                {label: "提交时间", name: "update_time", align: "left", sortable: false},
+                {label: "审核状态(隐藏)", name: "temp_check_status", align: "left", sortable: false, hidden: true},
+                {label: "审核状态", name: "check_status_name", align: "left", sortable: false},
+                {label: "原模板审核状态(隐藏)", name: "check_status", align: "left", sortable: false, hidden: true},
+                {
+                    label: "操作", name: "total", index: "total", align: "left", sortable: false, title: false,
+                    formatter: function (cellvalue, options, rowObject) {
+
+                        var templateId = rowObject.template_id;
+                        var status = rowObject.temp_check_status;
+                        var originalStatus = rowObject.check_status;
+                        var type = rowObject.type;
+                        var switcher = '';
+                        //0: 待审核
+                        switcher = "";
+                        if (status == 2) {
+                            switcher = "<button type='button' class='btn btn-link btn-xs'  onclick=\"view(this,'" + templateId + "',2)\" title='录入数据'>录入数据</button>";
+                        }
+                        else if ((status == 1 || status == 3) && (type != 7 && type != 8)) {
+                            switcher = "<button type='button' class='btn btn-link btn-xs'  onclick=\"view(this,'" + templateId + "',3)\" title='修改'>修改</button>";
+                        } else if ((status == 1 || status == 3) && (type == 7 || type == 8)) {
+                            switcher = "<button type='button' class='btn btn-link btn-xs'  onclick=\"view(this,'" + templateId + "',1)\" title='查看'>查看</button>";
+                        } else {
+                            switcher = "<button type='button' class='btn btn-link btn-xs'  onclick=\"view(this,'" + templateId + "',0)\" title='审核'>审核</button>";
+                            if (status != originalStatus && originalStatus == 1) {
+                                switcher += "&nbsp;<img alt=\"查看原模板\" class=\"old_template_q\" src=\"/resources/img/question.png\" onclick=\"view_old(this,'" + templateId + "')\"/>";
+                            }
+                        }
+                        return switcher;
+                    }
+                }
+            ],
+            pager: "#pager_list",
+            viewrecords: true,
+            hidegrid: false,
+            gridComplete: function () {
+                $(".old_template_q").hover(function () {
+                    layer.tips('点击查看原模板', this, {tips: [1, '#78BA32']});
+                }, function () {
+                    layer.tips('点击查看原模板', this, {tips: [1, '#78BA32'], time: 1});
+                });
+            }
+        });
+
+        $(window).bind("resize", function () {
+            var width = $(".jqGrid_wrapper").width();
+            $("#table_list").setGridWidth(width);
+        })
+
+
+        function keyUp(e) {
+            var currKey = 0, e = e || event;
+            currKey = e.keyCode || e.which || e.charCode;
+            var keyName = String.fromCharCode(currKey);
+            if (currKey == 13) {
+                search();
+            }
+        }
+
+        document.onkeyup = keyUp;
+
+
+    });
+
+
+    function view(btn, template_id, status) {
+        $(btn).attr("disabled", true);
+        $.ajax({
+            type: "post",
+            url: /*[[@{/opsAudit/smsTemplate/isSessionValid}]]*/,
+            success: function (data) {
+                var content;
+                if (status == 1 || status == 2) {
+                    var viewUrl = /*[[@{/opsAudit/smsTemplate/view?template_id=}]]*/;
+                    content = viewUrl + template_id + "&state=" + status;
+                } else {
+//     				var sign = $(btn).parents("tr").children(":nth-child(3)").text();
+//     				var smsContent = $(btn).parents("tr").children(":nth-child(4)").text();
+//     				var updateTime = $(btn).parents("tr").children(":nth-child(8)").text();
+//     				var type = $(btn).parents("tr").find("[class='type']").val();
+//     				var smsType = $(btn).parents("tr").find("[class='smsType']").val();
+                    var viewUrl = /*[[@{/opsAudit/smsTemplate/audit?template_id=}]]*/;
+                    content = viewUrl + template_id + "&state=" + status;
+//     						+ "&sign=" + encodeURI(encodeURI(sign)) 
+//     						+ "&content=" + encodeURI(encodeURI(smsContent)) + "&update_time=" + updateTime + "&type=" + type +"&sms_type="+smsType;
+                }
+                $(btn).attr("disabled", false);
+                if (data == true) {
+                    layer.open({
+                        type: 2,
+                        title: [$(btn).text(), 'font-size:18px;'],
+                        closeBtn: 2,
+                        area: ['800px', '500px'],
+                        fix: false, //不固定
+                        content: content
+                    });
+                } else {
+                    window.location.href = /*[[@{/}]]*/;
+                }
+            }
+        });
+    }
+
+    function view_old(btn, template_id) {
+        $(btn).attr("disabled", true);
+        $.ajax({
+            type: "post",
+            url: /*[[@{/opsAudit/smsTemplate/viewOriginal}]]*/,
+            data: {
+                template_id: template_id,
+                flag: true
+            },
+            success: function (result) {
+                if (result.success) {
+                    var data = result.data;
+                    $(btn).attr("disabled", false);
+                    var content = "<div style='margin:30px;'><h4>审核通过模板二次审核中...</h4><span>该模板上次审核通过的内容仍可使用</span><br/><br/><div style='font-size:14px;'><b>短信签名：&nbsp;</b>" +
+                        data.sign + "<br/><br/><b>模板类型：&nbsp;</b>" + data.type_name + (data.type == 9 ? (data.sms_type_name != null ? "&nbsp; - &nbsp;" + data.sms_type_name : "") : "") +
+                        "<br/><br/><b>短信内容：&nbsp;</b>" + data.content + "</div><br/></div>";
+                    layer.open({
+                        type: 1,
+                        title: ['原模板信息', 'font-size:18px;'],
+                        skin: 'layui-layer-demo', //样式类名
+                        closeBtn: 0, //不显示关闭按钮
+                        anim: 2,
+                        shadeClose: true, //开启遮罩关闭
+                        content: content
+                    });
+                } else {
+                    layer.msg(result.msg, {icon: 2});
+                }
+            }
+        });
+    }
+
+
+    /*]]>*/
+</script>
+</body>
+</html>

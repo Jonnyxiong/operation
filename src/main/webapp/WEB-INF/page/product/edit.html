@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信平台运营系统 </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet">
+    <!-- jqgrid-->
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+
+	<link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+    <style>
+        /* Additional style to fix warning dialog position */
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+    </style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+	<div class="wrapper wrapper-content animated fadeInRight">
+	    <div class="row">
+	        <div class="col-sm-12">
+	            <div class="ibox "> 
+	                <div class="ibox-content">
+
+						<div class="pull-right tooltip-demo">
+							<!--<a class="btn btn-danger btn-sm" data-toggle="tooltip" data-placement="top" title="返回" onclick="javascript:self.location=document.referrer;"><i class="fa fa-reply"></i>&nbsp;返回</a>-->
+						</div>
+	                    <div class="row">
+	                        <div class="col-sm-6 b-r">
+	                            <form class="form-horizontal m-t" method="post" action="#" id="mainForm">
+	                                <!--<div class="form-group">-->
+									    <!--<label class="col-sm-3 control-label">产品ID:</label>-->
+									    <!--<div class="col-sm-8">-->
+									      <!--<input type="text" class="form-control" th:disabled="${data.status} eq 2" id="product_code" name="product_id" th:value="${data.product_id}" maxlength="30" readonly="true"/>-->
+									    <!--</div> -->
+	                                <!--</div>-->
+									<input type="hidden" name="product_id" th:value="${data.product_id}">
+	                                <div class="form-group">
+									    <label class="col-sm-3 control-label">产品代码:</label>
+									    <div class="col-sm-8">
+									      <input type="text" class="form-control"  id="product_code" th:disabled="${data.status} eq 2" name="product_code" th:value="${data.product_code}"  maxlength="32" placeholder="请输入长度为1~32的字符" />
+									    </div> 
+	                                </div>
+	                                <div class="form-group">
+	                                	<label class="col-sm-3 control-label">产品名称:</label>
+	                                    <div class="col-sm-8">
+									      <input type="text" class="form-control" id="product_name" th:disabled="${data.status} eq 2" name="product_name" th:value="${data.product_name}" maxlength="50" placeholder="请输入长度为1~50的字符" />
+	                                    </div>
+	                                </div>
+	                                <div class="form-group">
+	                                	<label class="col-sm-3 control-label">产品描述:</label>
+	                                    <div class="col-sm-8">
+									      <input type="text" class="form-control" id="product_desc" th:disabled="${data.status} eq 2" name="product_desc" th:value="${data.product_desc}"  maxlength="50" placeholder="请输入长度为1~50的字符"/>
+								        </div>
+	                                </div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label">运营商:</label>
+										<div class="col-sm-8">
+											<select id="operator_code" class="form-control" th:disabled="${data.status} eq 2">
+												<option value="0" th:selected="(${data.operator_code} eq 0)">全网</option>
+												<option value="1" th:selected="(${data.operator_code} eq 1)">移动</option>
+												<option value="2" th:selected="(${data.operator_code} eq 2)">联通</option>
+												<option value="3" th:selected="(${data.operator_code} eq 3)">电信</option>
+												<option value="4" th:selected="(${data.operator_code} eq 4)">国际</option>
+											</select>
+											<input name="operator_code" type="hidden" value="0" />
+											<label id="operator_code-error" class="" for="" style="color: #f00;display: none;padding-left: 10px;font-size: 12px;"></label>
+										</div>
+									</div>
+									<div class="form-group">
+	                                	<label class="col-sm-3 control-label">产品类型:</label>
+	                                	<div class="col-sm-8">
+						                	<select id="product_type" name="product_type"  class="form-control" th:disabled="${data.status} eq 2">
+						                  		<option value="3" th:selected="(${data.product_type} eq 3)">验证码</option>
+						                  		<option value="4" th:selected="(${data.product_type} eq 4)">通知</option>
+						                  		<option value="1" th:selected="(${data.product_type} eq 1)">会员营销</option>
+						                  		<option value="2" th:selected="(${data.product_type} eq 2)">国际短信</option>
+												<option value="0" th:selected="(${data.product_type} eq 0)">行业</option>
+						                  		<option value="7" th:selected="(${data.product_type} eq 7)">USSD</option>
+						                  		<option value="8" th:selected="(${data.product_type} eq 8)">闪信</option>
+						                  		<option value="9" th:selected="(${data.product_type} eq 9)">挂机短信</option>
+						                  	</select>
+                  							<label id="product_type-error" class="" for="" style="color: #f00;display: inline;padding-left: 10px;font-size: 12px;"></label>
+	                                	</div>
+	                                </div>
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">适用区域:</label>
+	                                    <div class="col-sm-8">
+						                  	<select id="area_code" class="form-control" th:disabled="${data.status} eq 2">
+						                  		<option value="0" th:selected="(${data.area_code} eq 0)">全国</option>
+						                  		<option value="1" th:selected="(${data.area_code} eq 1)">国际</option>
+						                  	</select>
+                							<input name="area_code" type="hidden" value="0" />
+	                                    </div>
+	                                </div> 
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">有效期:</label>
+	                                    <div class="col-sm-8">
+									      <input type="text" class="form-control" id="active_period" name="active_period" th:value="${data.active_period}" maxlength="30" placeholder="请输入有效期，范围0~365天"  />
+	                                    </div>
+						                <div class="" >
+							                <label id="" class="" for="" style="color: #999;padding-left: 163px;font-size: 14px;">备注：单位(天)，0 表示无限期</label>
+						                </div>
+	                                </div>  
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">数量:</label>
+	                                    <div class="col-sm-8">
+									      <input type="text" class="form-control" id="quantity" name="quantity" th:value="${data.quantity}" maxlength="30" placeholder="请输入数量，范围1~1000000"/>
+	                                    </div>
+						                <div class="" >
+							                <label id="" class="" for="" style="color: #999;padding-left: 163px;font-size: 14px;">备注：普通产品：数量（条），国际产品：价格（元）</label>
+						                </div>
+	                                </div>  
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">产品定价:</label>
+	                                    <div class="col-sm-8">
+									      <input type="text" class="form-control isPrice" id="product_price" name="product_price" th:value="${data.product_type == 2}? ${data.product_price} : ${data.product_price_str}" maxlength="30"/>
+	                                    </div>
+						                <div class="">
+							                <label id="" class="" for="" style="color: #999;padding-left: 163px;font-size: 14px;">备注：普通产品：产品定价，国际产品：产品折扣率</label>
+						                </div>
+	                                </div>  
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">产品成本:</label>
+	                                    <div class="col-sm-8">
+									      <input type="text" class="form-control isCost" id="product_cost" name="product_cost" th:value="${data.product_type == 2}? ${data.product_cost} : ${data.product_cost_str}" maxlength="30"/>
+	                                    </div>
+						                <div class="">
+							                <label id="" class="" for="" style="color: #999;padding-left: 163px;font-size: 14px;">备注：普通产品：产品成本，国际产品：产品折扣率</label>
+						                </div>
+	                                </div>  
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">状态:</label>
+	                                    <div class="col-sm-8" th:switch="${data.status}"> 
+                							<input type="text" name="status"  class="form-control" value="待上架" maxlength="30" readOnly="readonly" th:case="0"/>
+                							<input type="text" name="status"  class="form-control" value="已上架" maxlength="30" readOnly="readonly" th:case="1"/>
+                							<input type="text" name="status"  class="form-control" value="已下架" maxlength="30" readOnly="readonly" th:case="2"/>
+	                                    </div>
+	                                </div> 
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">创建者:</label>
+	                                    <div class="col-sm-8">
+									      <input type="text" class="form-control" name="creator" th:value="${data.creator}" maxlength="30" readOnly="readonly"/>
+	                                    </div>
+	                                </div>  
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">创建时间:</label>
+	                                    <div class="col-sm-8">
+									      <input type="text" class="form-control" name="create_time" th:value="${data.createTime}" maxlength="30" readOnly="readonly"/>
+	                                    </div>
+	                                </div>  
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">备注:</label>
+	                                    <div class="col-sm-8">
+									      <input type="text" class="form-control" id="remark" name="remark" maxlength="50" th:value="${data.remark}"/>
+	                                    </div>
+	                                </div>  
+								     <div class="form-group">
+								        <div class="col-sm-12 col-sm-offset-3">
+								            <button type="button" class="btn btn-sm btn-success" onclick="edit(this)">保 存</button>
+								            <button type="button" class="btn btn-sm btn-error" onclick="goback()">返回</button> 
+								        </div>
+								    </div> 
+	                            </form>
+								<!-- 存放链接 -->
+								<input type="hidden" id="url">
+								<input type="hidden" id="ajaxurl">
+
+             					
+	                        </div>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	</div>
+	<script th:src="@{/resources/js/hex_ha_ha_ha_ha_ha.js}"></script>
+	<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+	<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+	<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+	<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+	<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+	<script th:src="@{/resources/js/jquery.form.js?v=1.0.0}"></script>
+
+	<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+	<script th:src="@{/resources/js/plugins/validate/jquery.validate.min.js}"></script>
+	<script th:src="@{/resources/js/layer/layer.js}"></script>
+	<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+	<script th:src="@{/resources/js/product.js?v=1.1.0}"></script>
+
+	<script th:inline="javascript">
+		/*<![CDATA[*/
+
+	$(function(){
+	    $("#url").val(/*[[@{/product/query}]]*/);
+	    $("#ajaxurl").val(/*[[@{/product/edit}]]*/);
+
+		var operator_code = /*[[${data.operator_code}]]*/;
+		var product_type = /*[[${data.product_type}]]*/; 
+		var area_code = /*[[${data.area_code}]]*/;
+		
+		$("#operator_code option[value="+operator_code+"]").attr("selected",true);
+		$("#product_type option[value="+product_type+"]").attr("selected",true);
+		$("#area_code option[value="+area_code+"]").attr("selected",true);
+		
+		$("input[name='operator_code']").val(operator_code);
+		$("input[name='area_code']").val(area_code);
+
+	});
+		
+
+	    /*]]>*/
+	    
+	</script>
+</body>
+</html>

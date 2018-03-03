@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+
+<head>
+	<link th:href="@{/resources/css/layui/css/layui.css}" media="all" rel="stylesheet">
+</head>
+<body><div th:replace="stat :: statCode"></div>
+	<div style="margin-top: 20px;">
+		<div class="layui-form-item">
+			<label class="layui-form-label">销售名字</label>
+			<div class="layui-input-block">
+				<input type="text" id="saleName" name="saleName" autocomplete="off" placeholder="请输入销售名字" class="layui-input" style="width: 250px;">
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label">手机号码</label>
+			<div class="layui-input-block">
+				<input type="text" id="saleMobile" name="saleMobile" placeholder="请输入手机号码" autocomplete="off" class="layui-input" style="width: 250px;">
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label">邮箱</label>
+			<div class="layui-input-block">
+				<input type="text" id="saleEmail" name="saleEmail" placeholder="请输入邮箱" autocomplete="off" class="layui-input" style="width: 250px;">
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<div class="layui-input-block">
+				<button class="layui-btn" onclick="addSale()">确定</button>
+				<button class="layui-btn layui-btn-primary" style="margin-left: 60px" onclick="closePage()">取消</button>
+			</div>
+		</div>
+	</div>
+
+
+
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+
+<script th:inline="javascript">
+	/*<![CDATA[*/
+
+    var index = parent.layer.getFrameIndex(window.name); //获取当前窗体索引
+    function closePage() {
+        parent.layer.close(index); //执行关闭
+    }
+
+
+    var msgTime = 1500;
+
+    //新增加销售
+    function addSale(){
+        var saleName = $("#saleName").val();
+        var saleMobile = $("#saleMobile").val();
+        var saleEmail = $("#saleEmail").val();
+
+        if(saleName=="" || saleName==null){
+            layer.msg("名字不能为空！", {icon: 2,time: msgTime});
+            return;
+        }
+
+        //验证名字的长度
+		if(saleName.length > 10){
+            layer.msg("名字的长度大于10，请重新输入！", {icon: 2,time: msgTime});
+            return;
+		}
+
+        if(saleMobile=="" || saleMobile==null){
+            layer.msg("电话号码不能为空！", {icon: 2,time: msgTime});
+            return;
+        }
+
+        //验证手机号码格式
+        var pattern = /[1-9]\d*/;//正整数
+		if(saleMobile.substring(0,1) != '1' || pattern.test(saleMobile) != true || saleMobile.length != 11){
+            layer.msg("手机号码格式不正确，请重新输入！", {icon: 2,time: msgTime});
+            return;
+		}
+
+        if(saleEmail=="" || saleEmail==null){
+            layer.msg("邮箱不能为空！", {icon: 2,time: msgTime});
+            return;
+        }
+
+        //验证邮箱格式
+        var pattern_email = /\w[-\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\.)+[A-Za-z]{2,14}/;
+        if(pattern_email.test(saleEmail) != true){
+            layer.msg("邮箱的格式不正确，请重新输入！", {icon: 2,time: msgTime});
+            return;
+		}
+
+
+        $.ajax({
+            url: /*[[@{/accountInfo/applyRecord/addSale}]]*/,
+            type:"POST",
+            data:{
+                username: saleName,
+                email:saleEmail,
+                mobile:saleMobile
+            },
+            success:function(data){
+                if(data == null){
+                    layer.msg(data.msg, {icon: 2,time: msgTime});
+                }else if(data.success == true){
+                    layer.msg(data.msg, {icon: 1,time: msgTime},function(){
+                        //刷新页面
+                        parent.location.reload();
+                    });
+                }else{
+                    layer.msg(data.msg, {icon: 2,time: msgTime});
+                }
+            }
+        });
+
+    }
+
+	/*]]>*/
+</script>
+
+
+
+
+</body>
+
+<head>
+	<title>添加销售</title>
+</head>
+</html>

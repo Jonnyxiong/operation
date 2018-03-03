@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:th="http://www.thymeleaf.org"
+	  lang="zh-cn">
+<head>
+	<meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+	<meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+	<title>短信云平台运营系统 - 销售财务</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+	<link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" href="/resources/css/bootstrap.min14ed.css" rel="stylesheet">
+	<link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" href="/resources/css/font-awesome.min93e3.css" rel="stylesheet"><!-- jqgrid-->
+	<link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" href="/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css" rel="stylesheet">
+	<link th:href="@{/resources/css/animate.min.css}" href="/resources/css/animate.min.css" rel="stylesheet">
+	<link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" href="/resources/css/style.min862f.css" rel="stylesheet">
+	<link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" href="/resources/css/plugins/sweetalert/sweetalert.css" rel="stylesheet">
+	<link th:href="@{/resources/css/select2.css}" rel="stylesheet">
+	<style>
+		/* Additional style to fix warning dialog position */
+		#alertmod_table_list_2 {
+			top: 900px !important;
+		}
+		.tac{
+			margin-left: 60px;
+		}
+		.layui-layer-btn{
+			text-align: center !important;
+		}
+		.layui-layer-btn0{
+			margin-right: 90px !important;
+			background-color: green !important;
+		}
+	</style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+
+
+					<div class="row">
+						<div class="col-sm-12">
+							<div class="tabs-container">
+
+								<ul class="nav nav-tabs">
+									<li th:if="${menus.wdsx}" class="" ><a href="/sellFinance/myCredit"> 我的授信</a>
+									</li>
+									<li th:if="${menus.khsx}" class="" ><a href="/sellFinance/credit4Customer">客户授信</a>
+									</li>
+									<li th:if="${menus.khlssx}" class=""  ><a href="/sellFinance/customerHisCredit">客户历史授信</a>
+									</li>
+									<li th:if="${menus.xscw}" class="active" ><a href="/sellFinance/saleFinance">销售财务</a>
+									</li>
+									<li th:if="${menus.xslscw}" class="" ><a  href="/sellFinance/salehisFinance">销售历史财务</a>
+									</li>
+									<li th:if="${menus.xssxzd}" class="" ><a  href="/sellFinance/saleCreditBill">销售授信账单</a>
+									</li>
+									<li th:if="${menus.khsxzd}" class="" ><a  href="/sellFinance/CustomerCreditBill">客户授信账单</a>
+									</li>
+								</ul>
+								<div class="tab-pane active" th:if="${menus.xscw}">
+									<div class="panel-body">
+										<form class="form-inline" method="post" id="mainForm" onkeydown="if(event.keyCode==13)return false;" style="margin-bottom:15px;">
+											<div class="form-group m-r-md">
+												<!--<input type="text" placeholder="订单号/产品ID/客户ID/代理商ID" name="condition" id="condition" class="form-control">-->
+												<input type="text" placeholder="销售ID/销售名称/邮箱/手机" name="condition" id="condition" class="form-control" style="width: 246px;">
+											</div>
+											<div class="form-group">
+												<span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-danger" onclick="search()">搜索</button></span>
+												<span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-primary" onclick="exportExcel()">导出Excel</button></span>
+											</div>
+										</form>
+
+										<div class="ibox-content">
+											<div class="jqGrid_wrapper">
+												<table id="table_list"></table>
+												<div id="pager_list"></div>
+											</div>
+											<p>&nbsp;</p>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+
+
+
+</div>
+<div id="addCredit" style="display: none">
+	<p style="background-color: #0a8000;color: white;padding: 5px;opacity: 0.6">销售授信情况评估</p>
+	<div class="form-group tac">
+		<label class="control-label"> &#12288;&#12288;历史授信额度：</label>
+		<span class="creditBalance">1000.0000</span>元
+	</div>
+	<div class="form-group tac">
+		<label class="control-label">历史授信回款额度：</label>
+		<span class="historyPayment">1000.0000</span>元
+	</div>
+	<div class="form-group tac">
+		<label class="control-label">&#12288;&#12288;&#12288;&#12288;授信余额：</label>
+		<span class="currentCredit">1000.0000</span>元
+	</div>
+	<div class="form-group tac">
+		<label class="control-label">&#12288;&#12288;&#12288;未回款额度：</label>
+		<span class="noBackPayment" style="color: red;font-weight: 900;font-size: 18px">1000.0000</span>元
+	</div>
+	<div class="form-group tac">
+		<label class="control-label isAdd">&#12288;&#12288;本次授信额度：</label>
+		<input id="amount" type="text" placeholder="授信额度（元）">元
+	</div>
+	<div class="form-group tac">
+		<label class="control-label">&#12288;&#12288;&#12288;&#12288;&#12288;&#12288;备注：</label>
+		<input type="text" id="remark">
+	</div>
+	<p  style="background-color: #0a8000;color: white;padding: 5px;opacity: 0.6;">*注意：授信前请评估该销售回款情况并得到该销售直属上级书面同意！</p>
+</div>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/auth.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/select2.min.js}"></script>
+<script th:inline="javascript">
+    var max_export_num = [[${max_export_num}]];
+
+
+    function search(){
+        $("#table_list").jqGrid('setGridParam',{
+            datatype:'json',
+            postData: {
+                condition: $("#condition").val()
+            }, //发送数据
+        }).trigger("reloadGrid"); //重新载入
+    }
+
+    // 导出Excel文件
+    function exportExcel() {
+        var totalCount = $("#table_list").jqGrid('getGridParam','records');
+        if (totalCount == 0) {
+            layer.alert("共0条记录，导出Excel文件失败");
+            return;
+        }
+        if(totalCount > max_export_num){
+            layer.msg("导出Excel文件条数大于"+max_export_num+"条", {icon: 2});
+            return;
+        }
+        var mainForm = $("#mainForm");
+        var action = mainForm.attr("action");
+        var exporUrl = /*[[@{/sellFinance/saleFinance/export}]]*/'';
+        mainForm.attr("action", exporUrl).submit();
+        mainForm.attr("action", action);
+    }
+
+    //添加授信
+    function addCredit(saleId) {
+         $("#amount").val('');
+         $("#remark").val('');
+        var content = '<span>&#12288;&#12288;本次授信额度：</span>'
+        var _saleId,_realName,_financialHistoryCredit,_agentHistoryPayment,_currentCredit,_noBackPayment;
+        $.ajax({
+            url : '/sellFinance/saleFinance/toOperation',
+            dataType : 'json',
+            data : {
+                saleId: saleId
+            },
+            async : false,
+            success : function(res){
+                if(res.code=='0'){
+                    _saleId=res.data.saleId;
+                    _realName=res.data.realName;
+                    _financialHistoryCredit=res.data.financialHistoryCredit;
+                    _agentHistoryPayment=res.data.agentHistoryPayment;
+                    _currentCredit=res.data.currentCredit;
+                    _noBackPayment=res.data.noBackPayment;
+                }else {
+                    layer.msg(res.msg, {icon: 2});
+                    return;
+                }
+
+            }
+        })
+        $(".historyPayment").text(_agentHistoryPayment);
+        $(".creditBalance").text(_financialHistoryCredit);
+        $(".currentCredit").text(_currentCredit);
+        $(".noBackPayment").text(_noBackPayment);
+        $(".isAdd").html(content);
+        var layIn;
+        layer.open({
+            type: 1,
+            title: ['<p>给【<span>'+saleId+'</span>—<span>'+_realName+'</span>】添加授信</p>','text-align:center;'],
+            shadeClose: true, //开启遮罩关闭
+            area:['450px'],
+            btn: ['确认', '取消'],
+            content: $("#addCredit"),
+            yes: function(index, layero){
+                var amount = $("#amount").val();
+                var remark = $("#remark").val();
+                if(!_Auth.isFourdecimal(amount)){
+                    layer.msg('请输入正确额度，最多保留四位小数')
+                    return false;
+                }
+                if(amount>1000000000){
+                    layer.msg('授信金额不能超过一亿')
+                    return false;
+                }
+                $.ajax({
+                    url : '/sellFinance/saleFinance/operationOfCredit',
+                    type:'post',
+                    dataType : 'json',
+                    data : {
+                        saleId: saleId,
+                        currentCredit: _currentCredit,
+                        operateType: '0',
+                        amount: amount,
+                        remark: remark
+                    },
+                    beforeSend:function(XMLHttpRequest){
+                        layIn = layer.load(1, {
+                        });
+                    },
+                    success : function(res){
+                        if(res.code=='0'){
+                            layer.msg(res.data.msg, {icon: 1},function () {
+                                layer.closeAll();
+                                search()
+                            });
+                        }else if(res.code== 405){
+                            layer.msg(res.msg, {icon: 2},function () {
+                                layer.closeAll();
+                                search()
+                            });
+                        }else{
+                            layer.msg(res.msg, {icon: 2});
+                            return;
+                        }
+
+                    }
+                })
+                setTimeout(function (e) {
+                    layer.close(layIn)
+                },1000)
+            },btn2: function(index, layero){
+                //按钮【取消】的回调
+            }
+        });
+    }
+    //降低授信
+    function reduceCredit(saleId) {
+        $("#amount").val('');
+        $("#remark").val('');
+        var _saleId,_realName,_financialHistoryCredit,_agentHistoryPayment,_currentCredit,_noBackPayment;
+        $.ajax({
+            url : '/sellFinance/saleFinance/toOperation',
+            dataType : 'json',
+            data : {
+                saleId: saleId
+            },
+            async : false,
+            success : function(res){
+                if(res.code=='0'){
+                    _saleId=res.data.saleId;
+                    _realName=res.data.realName;
+                    _financialHistoryCredit=res.data.financialHistoryCredit;
+                    _agentHistoryPayment=res.data.agentHistoryPayment;
+                    _currentCredit=res.data.currentCredit;
+                    _noBackPayment=res.data.noBackPayment;
+                }else {
+                    layer.msg(res.msg, {icon: 2});
+                    return;
+                }
+
+            }
+        })
+
+
+        $(".historyPayment").text(_agentHistoryPayment);
+        $(".creditBalance").text(_financialHistoryCredit);
+        $(".currentCredit").text(_currentCredit);
+        $(".noBackPayment").text(_noBackPayment);
+        $(".isAdd").text('本次降低授信额度：');
+        var layIn;
+
+        layer.open({
+            type: 1,
+            title: ['<p>给【<span>'+_saleId+'</span>—<span>'+_realName+'</span>】降低授信</p>','text-align:center;'],
+            shadeClose: true, //开启遮罩关闭
+            area:['450px'],
+            btn: ['确认', '取消'],
+            content: $("#addCredit"),
+            yes: function(index, layero){
+                var amount = $("#amount").val();
+                var remark = $("#remark").val();
+                if(!_Auth.isFourdecimal(amount)){
+                    layer.msg('请输入正确额度，最多保留四位小数')
+                    return false;
+                }
+                if(amount>1000000000){
+                    layer.msg('授信金额不能超过一亿')
+                    return false;
+                }
+                $.ajax({
+                    url : '/sellFinance/saleFinance/operationOfCredit',
+                    type:'post',
+                    dataType : 'json',
+                    data : {
+                        saleId: saleId,
+                        currentCredit: _currentCredit,
+                        operateType: '1',
+                        amount: amount,
+                        remark: remark
+                    },
+                    beforeSend:function(XMLHttpRequest){
+                        layIn = layer.load(1, {
+                        });
+                    },
+                    success : function(res){
+                        if(res.code=='0'){
+                            layer.msg(res.data.msg, {icon: 1},function () {
+                                layer.closeAll();
+                                search()
+                            });
+                        }else if(res.code== 405){
+                            layer.msg(res.msg, {icon: 2},function () {
+                                layer.closeAll();
+                                search()
+                            });
+                        }else{
+                            layer.msg(res.msg, {icon: 2});
+                            return;
+                        }
+
+                    }
+                })
+                setTimeout(function (e) {
+                    layer.close(layIn)
+                },100)
+            },btn2: function(index, layero){
+                //按钮【取消】的回调
+            }
+        });
+    }
+
+    $(document).ready(function () {
+
+        //获取用户账号
+        var select2Date;
+        $.ajax({
+            url : '/sellFinance/queryAllSales',
+            dataType : 'json',
+            async : false,
+            success : function(res){
+                for(var i = 0; i < res.length; i++){
+                    res[i].id = res[i].clientid;
+                    res[i].text = res[i].clientid+ "-" + res[i].name ;
+                }
+                res.unshift({id:"",text:""})
+                select2Date = res;
+            }
+        })
+        //初始化select2
+        $("#clientId").select2({
+            data : select2Date
+        })
+
+
+
+        $.jgrid.defaults.styleUI = "Bootstrap";
+        $("#table_list").jqGrid({
+        	url:/*[[@{/sellFinance/saleFinance/list}]]*/"",
+            mtype: 'POST',
+            datatype: "json",
+            jsonReader : {
+                root:"data.entityList",
+                page: "data.currentPage",
+                total: "data.totalPage",
+                records: "data.totalCount"
+            },
+            postData: {
+                condition: $("#condition").val()
+            }, //发送数据
+            height: 'auto',
+            rownumbers:true,
+            autowidth: true,
+            shrinkToFit: true,
+            autoScroll: true,
+            rowNum: 20,
+            rowList: [10, 20, 30,50],
+            colModel: [
+				{label:'销售ID',name: "saleId",align: "left",sortable:false},
+                {label:'销售名称',name: "realName",align: "left",sortable:false},
+                {label:'邮箱',name: "email",align: "left",sortable:false},
+                {label:'手机',name: "mobile",align: "left",sortable:false},
+                {label:'历史授信额度（元）',name: "financialHistoryCredit",align: "left",sortable:false},
+                {label:'销售历史授出额度（元）',name: "saleHistoryCredit",align: "left",sortable:false},
+                {label:'客户历史回款额度（元）',name: "agentHistoryPayment",align: "left",sortable:false},
+                {label:'授信余额（元）',name: "currentCredit",align: "left",sortable:false},
+                {label:'未回款额度（元）',name: "noBackPayment",align: "left",sortable:false},
+				{label:'操作',name: "op",index: "op",align: "left",sortable:false,title:false,
+					formatter:function(cellvalue, options, rowObject){
+                        var switcher = '';
+                        var _saleId = rowObject.saleId;
+                        var _realName = rowObject.realName;
+                        if(_saleId!=null && _saleId!='-'){
+                            switcher += "<button type='button' class='btn btn-link btn-xs '  onclick=\"addCredit('"+_saleId+"')\" >添加授信</button>";
+                            switcher += "<button type='button' class='btn btn-link btn-xs '  onclick=\"reduceCredit('"+_saleId+"')\" >降低授信</button>";
+//                        switcher = "<button type='button' class='btn btn-link btn-xs ' onclick=\"getDetail('"+_sub_id+"')\" title='详情'>降低授信</button>";
+                        }
+                        return switcher;
+
+					}
+				}
+            ],
+            pager: "#pager_list",
+            viewrecords: true,
+            hidegrid: false,
+            /*统计功能 */  
+            footerrow:true,
+            gridComplete:function(){
+                var financialHistoryCredit = 0;
+                var saleHistoryCredit = 0;
+                var agentHistoryPayment = 0;
+                var currentCredit = 0;
+                var noBackPayment = 0;
+            	$.ajax({
+        			type : "post",
+        			url : /*[[@{/sellFinance/saleFinance/total}]]*/'',
+        			data : {
+                        condition: $("#condition").val()
+        			},
+        			async:false,
+        			success : function(result) {
+        				if(result.code==0){
+                            financialHistoryCredit = result.data.sumFi.toFixed(4);
+                            saleHistoryCredit = result.data.sumHi.toFixed(4);
+                            agentHistoryPayment = result.data.sumAg.toFixed(4);
+                            currentCredit = result.data.sumCu.toFixed(4);
+                            noBackPayment = result.data.sumNo.toFixed(4);
+        				}else{
+        					layer.msg("计算总计失败", {icon: 2,time: msgTime});
+        				}
+        				
+        			}
+        		});
+            	$("#table_list").footerData('set', { "saleId": '-',
+             	   "realName": '-',
+             	   "email": '-',
+             	   "mobile": '合计',
+             	   "financialHistoryCredit": financialHistoryCredit,
+             	   "saleHistoryCredit": saleHistoryCredit,
+             	   "agentHistoryPayment": agentHistoryPayment,
+             	   "currentCredit":currentCredit,
+             	   "noBackPayment": noBackPayment,
+             	   "op": '-'} );
+                }
+        });
+
+        $(window).bind("resize", function () {
+            var width = $(".jqGrid_wrapper").width();
+            $("#table_list").setGridWidth(width);
+        })
+
+        function keyUp(e) {
+            var currKey=0,e=e||event;
+            currKey=e.keyCode||e.which||e.charCode;
+            var keyName = String.fromCharCode(currKey);
+            if (currKey == 13){
+                search();
+            }
+        }
+        document.onkeyup = keyUp;
+    });
+</script>
+
+</body>
+</html>

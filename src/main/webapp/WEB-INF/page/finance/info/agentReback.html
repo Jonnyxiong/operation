@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信云平台运营系统 - 客户财务</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+    <link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+    <link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/select2.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/inputNumber.css}" rel="stylesheet">
+    <style>
+        /* Additional style to fix warning dialog position */
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+        .close{
+            opacity: 1;
+        }
+        .modal-content{
+            opacity: 1 !important;
+            border:none;
+        }
+        .select2 span{
+            display:block !important;
+            margin-top: 0px !important;
+        }
+        .select2-container {
+            width: 171px !important;
+        }
+        .select2-dropdown {
+            width: 175px !important;
+        }
+        .select2-container .select2-selection--single{
+            width:175px;
+        }
+        .col-price{
+            color:red;
+        }
+        .confirm-table{
+            box-sizing:border-box;
+            padding:20px;
+        }
+        .grid-inputNumber{
+            width:95%;
+        }
+        html,body{
+            width:100%;
+            height:100%;
+        }
+        body{
+            overflow-y: auto;
+        }
+        *{
+            box-sizing: border-box;
+        }
+        .body-wrap{
+            position: relative;
+            width:100%;
+            height:100%;
+            padding-top:64px;
+
+        }
+        .wrap-top{
+            position: fixed;
+            top:0;
+            left:0;
+            width:100%;
+            z-index:100;
+        }
+        .wrap-ctx{
+            position: relative;
+            height:100%;
+
+            padding-bottom: 30px;
+            overflow-y: auto;
+            opacity:0.8;
+        }
+        .grid-bottom{
+            position: fixed;
+            width:100%;
+            left:0;
+            bottom:0;
+            z-index:100;
+            padding:0 25px;
+            background-color: #FFF;
+        }
+    </style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="container-fluid body-wrap">
+    <div class="row " style="height:100%;background-color: #FFF;">
+        <div class="col-sm-12" style="height:100%;">
+            <div class="ibox " style="height:100%;">
+                <div class="ibox-content wrap-top">
+                    <div class="row">
+                        <div class="col-sm-12 form-inline" >
+                            <div class="form-group">
+                                <label>用户账号:</label>
+                                <select name="clientId" id="clientId"  class="form-control"></select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ibox-content wrap-ctx" id="grid-radio">
+                    <div class="jqGrid_wrapper">
+                        <table id="table_list"></table>
+                        <div id="pager_list"></div>
+                    </div>
+                    <div style="text-align: right;" class="grid-bottom">
+                        <span>合计（元）：<span class="js-table-total" style="color:#1ab394;margin-right:10px;">0.0000</span></span>
+                        <a href="javascript:;" class="btn btn-md btn-primary js-reback">立即回退</a>
+                    </div>
+                    <p>&nbsp;</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div style="display: none;" id="confirm-table" class="confirm-table">
+
+</div>
+
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/auth.js}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/common.js?v=1.1.0}"></script>
+<script th:src="@{/resources/js/select2.min.js}"></script>
+<script th:src="@{/resources/js/grid-radio.js?v=1.0}"></script>
+<script th:src="@{/resources/js/template-web.js}"></script>
+<script id="test" type="text/html">
+    <table class="table table-hover table-bordered">
+        <thead>
+            <tr>
+                <th>订单编号</th>
+                <th>产品类型</th>
+                <th>运营商</th>
+                <th>区域</th>
+                <th>短信单价</th>
+                <th>有效期(天)</th>
+                <th>回退数量</th>
+                <th>金额</th>
+            </tr>
+        </thead>
+        <tbody id="confirm-cont">
+            {{each list}}
+            <tr>
+                <td>{{$value.orderId}}</td>
+                <td>{{$value.productTypeStr}}</td>
+                <td>{{$value.operatorCodeStr}}</td>
+                <td>{{$value.areaCodeStr}}</td>
+                <td>{{$value.unitPrice}}元</td>
+                <td>{{$value.activePeriodDesc}}</td>
+                <td><span style="color:#FF0000">{{$value.returnQuantity}}</span></td>
+                <td><span style="color:#FF0000">{{$value.price}}元</span></td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+    <p>合计金额为：<span style="color:#1ab394;">{{total}}</span>元，是否确定回退？</p>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-6 text-center">
+                <a href="javascript:;" class="btn btn-primary btn-md js-confirm">确认</a>
+            </div>
+            <div class="col-sm-6 text-center">
+                <a href="javascript:;" class="btn btn-default btn-md js-cancle">取消</a>
+            </div>
+        </div>
+    </div>
+</script>
+<script th:inline="javascript">
+$(function(){
+    var clientId_ = "";
+    var clientName_ = "";
+    var agentId = getQueryString("agentId");
+    var agentName = getQueryString("name");
+    //获取用户账号
+    var select2Date = [];
+    $.ajax({
+        url : '/finance/returnqty/clients',
+        dataType : 'json',
+        data : {agentId : agentId},
+        async : false,
+        success : function(res){
+            if(res.code == 0){
+                for(var i = 0; i < res.data.length; i++){
+                    select2Date[i] = {};
+                    select2Date[i].id = res.data[i].clientid;
+                    select2Date[i].text = res.data[i].clientid+ "-" + res.data[i].name ;
+                }
+                if(select2Date!=null){
+
+                    clientId_ = select2Date[0].id;
+                    clientName_ = select2Date[0].text;
+                }
+            } else {
+                layer.msg("获取用户账号失败",{icon:2})
+            }
+
+
+
+        }
+    })
+    //初始化select2
+    $("#clientId").select2({
+        data : select2Date
+    })
+    //getAgentOrders(agentId, select2Date[0].id);
+
+    $('#clientId').on('select2:select', function (evt) {
+        var clientId = evt.params.data.id || "";
+
+        clientId_ = clientId;
+        clientName_ = evt.params.data.text || "";
+        getAgentOrders(agentId, clientId)
+
+    });
+
+    function getAgentOrders(agentId, clientId){
+        var params_ =  {
+            clientId : clientId,
+            agentId : agentId
+        };
+        $("#table_list").jqGrid('setGridParam',{
+            datatype:'json',
+            postData: JSON.stringify(params_), //发送数据
+        }).trigger("reloadGrid"); //重新载入
+    }
+
+    //初始化表格
+    $.jgrid.defaults.styleUI = "Bootstrap";
+    var initdata = {
+        clientId : select2Date[0] ?  select2Date[0].id : "",
+        agentId : agentId
+    }
+   $("#grid-radio").countTable("#table_list");
+    $("#table_list").jqGrid({
+        url:/*[[@{/finance/returnqty/agentorders}]]*/,
+        mtype: 'POST',
+        datatype: "json",
+        ajaxGridOptions: { contentType: 'application/json; charset=utf-8' },
+        postData: JSON.stringify(initdata),
+        jsonReader : {
+            root:"data"
+        },
+        height: 'auto',
+        width:'100%',
+        autowidth: true,
+        shrinkToFit: false,
+        autoScroll: true,
+        multiselect : true,
+        colNames: ["订单编号", "产品类型", "运营商","区域", "短信单价", "有效期（天）", "剩余数量", "回退数量","金额(元)"],
+        colModel: [
+            {name: "orderId",align: "left",sortable:false,width:130},
+            {name: "productType",align: "left",sortable:false,width:70,
+                formatter:function(cellvalue, options, rowObject){
+                    var switcher,
+                        productType = rowObject.productType;
+                    if(productType == '0'){
+                        switcher = "行业"
+                    } else if(productType == 1){
+                        switcher = "营销"
+                    } else if(productType == 3){
+                        switcher = "验证码"
+                    } else if(productType == 4){
+                        switcher = "通知"
+                    } else if(productType == 7){
+                        switcher = "USSD"
+                    } else if(productType == 8){
+                        switcher = "闪信"
+                    } else if(productType == 9){
+                        switcher = "挂机短信"
+                    }
+
+                    return switcher;
+                }
+            },
+            {name: "operatorCode", align: "left",sortable:false,width:70,
+                formatter:function(cellvalue, options, rowObject){
+                    var switcher,
+                        operatorCode = rowObject.operatorCode;
+                    if(operatorCode == '0'){
+                        switcher = "全网"
+                    } else if(operatorCode == 1){
+                        switcher = "移动"
+                    } else if(operatorCode == 2){
+                        switcher = "联通"
+                    } else if(operatorCode == 3){
+                        switcher = "电信"
+                    } else if(operatorCode == 4){
+                        switcher = "国际"
+                    }
+
+                    return switcher;
+                }
+            },
+            {name: "areaCode", align: "left",sortable:false,width:70,
+                formatter:function(cellvalue, options, rowObject){
+                    var switcher,
+                        areaCode = rowObject.areaCode;
+                    if(areaCode == '0'){
+                        switcher = "全国"
+                    } else if(areaCode == 1){
+                        switcher = "国际"
+                    }
+
+                    return switcher;
+                }
+            },
+            {name: "unitPrice", align: "left",sortable:false,width:100,
+                formatter:function(cellvalue, options, rowObject){
+                    var switcher = '<span class="unit" data-price="'+ rowObject.unitPrice +'">' + rowObject.unitPrice + "元" + '</span>';
+
+                    return switcher;
+                }
+            },
+            {name: "activePeriodDesc", align: "left",sortable:false,width:100},
+            {name: "remainQuantity", align: "left",sortable:false,width:120,
+                formatter: function(ellvalue, options, rowObject){
+                    var switcher = rowObject.remainQuantity + "条";
+
+                    return switcher;
+                }
+            },
+            { align: "left",sortable:false,
+                formatter : function(ellvalue, options, rowObject){
+                    var switcher = "<div class='grid-inputNumber js-table-number'>" +
+                                        "<span class='sub js-table-sub' data-remain='"+ rowObject.remainQuantity +"'>-</span>" +
+                                        "<input type='text' class='num js-table-input' value='1' old='1' data-remain='"+ rowObject.remainQuantity +"' data-arr='"+ JSON.stringify(rowObject) + "' >" +
+                                        "<span class='add js-table-add' data-remain='"+ rowObject.remainQuantity +"'>+</span>" +
+                                    "</div>";
+                    return switcher;
+                }
+            },
+            {name: "credit_balance", align: "left",sortable:false,width:80,
+                formatter : function(ellvalue, options, rowObject){
+
+                    var now_price = (rowObject.unitPrice*1).toFixed(4);
+                    var switcher  = '<span class="price col-price">'+ now_price +'</span>';
+
+                    return switcher;
+
+                }
+            }
+        ],
+        rowNum: -1,
+        viewrecords: true,
+        hidegrid: false,
+
+        onSelectAll: function(){
+            total();
+        },
+        onSelectRow : function(){
+            total();
+        }
+    });
+
+    //合计
+    function total(){
+        var total = 0;
+        $("#table_list").find("input[type=checkbox]:checked").each(function(){
+            var num = $(this).closest("tr").find(".num").val(),
+                unit = $(this).closest("tr").find(".unit").data("price");
+
+            var t = num * unit;
+            total += t;
+        })
+        $(".js-table-total").text(total.toFixed(4));
+    }
+    var params = {
+        arr : []
+    }
+    $(".js-reback").click(function(){
+        var arr = [],arr_commit = [];
+        $("#table_list").find("input[type=checkbox]:checked").each(function(){
+            var input = $(this).closest("tr").find(".num");
+            var num   = input.val();
+            var child = input.data("arr");
+            child.returnQuantity = num*1;
+            arr_commit.push(child);
+            if(child.productType == '0'){
+                child.productTypeStr = "行业"
+            } else if(child.productType == 1){
+                child.productTypeStr = "营销"
+            } else if(child.productType == 3){
+                child.productTypeStr = "验证码"
+            } else if(child.productType == 4){
+                child.productTypeStr = "通知"
+            } else if(child.productType == 7){
+                child.productTypeStr = "USSD"
+            } else if(child.productType == 8){
+                child.productTypeStr = "闪信"
+            } else if(child.productType == 9){
+                child.productTypeStr = "挂机短信"
+            }
+            if(child.operatorCode == '0'){
+                child.operatorCodeStr = "全国"
+            } else if(child.operatorCode == 1){
+                child.operatorCodeStr = "移动"
+            } else if(child.operatorCode == 2){
+                child.operatorCodeStr = "联通"
+            } else if(child.operatorCode == 3){
+                child.operatorCodeStr = "电信"
+            } else if(child.operatorCode == 4){
+                child.operatorCodeStr = "国际"
+            }
+            if(child.areaCode == '0'){
+                child.areaCodeStr = "全国"
+            } else if(child.areaCode == 1){
+                child.areaCodeStr = "国际"
+            }
+            child.price = (child.unitPrice * num).toFixed(4);
+            arr.push(child);
+        })
+        params.arr = arr_commit;
+        var data = {
+            list : arr,
+            total : $(".js-table-total").text()
+        }
+        var html = template('test', data);
+        document.getElementById('confirm-table').innerHTML = html;
+
+        if(arr.length == 0){
+            layer.msg("请先选择需要回退的订单",{icon:2});
+            return;
+        }
+        var confirm_window = layer.open({
+            type: 1,
+            title: clientName_ + "&nbsp回退确认",
+            skin: 'layui-layer-rim', //加上边框
+            area: ['750px', '600px'], //宽高
+            content: $("#confirm-table")
+        });
+        $("#layui-layer" + confirm_window).find(".layui-layer-title").css("color","#003399");
+
+        var flag = false;
+        //确定提交
+        $("body").on("click", ".js-confirm", function(){
+            if(flag){
+                return;
+            }
+            flag = true;
+            var index = layer.load(1, {
+                shade: [0.1,'#fff'] //0.1透明度的白色背景
+            });
+            $.ajax({
+                url : '/finance/returnqty/agentorders/return',
+                contentType : 'application/json',
+                type : 'POST',
+                data : JSON.stringify(params.arr),
+                success : function(res){
+                    layer.close(index);
+                    if(res.code != 0){
+                        layer.msg(res.msg, {icon:2});
+                        return;
+                    }
+                    var _p = parent;
+                    layer.msg(res.msg, {icon:1, time:1500},function(){
+                        _p.location.reload();
+                        flag = false;
+                    })
+                }
+            })
+        })
+
+        //取消
+        $("body").on("click", ".js-cancle", function(){
+            layer.closeAll();
+        })
+    })
+})
+</script>
+
+</body>
+</html>

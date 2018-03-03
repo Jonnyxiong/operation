@@ -1,0 +1,1937 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信云平台运营系统 - 发票管理</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+    <link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+    <link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/select2.css}" rel="stylesheet">
+    <style>
+        /* Additional style to fix warning dialog position */
+        body {
+            font-size: 13px !important;
+        }
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+
+        .close {
+            opacity: 1;
+        }
+
+        .modal-content {
+            opacity: 1 !important;
+            border: none;
+        }
+
+        label {
+            font-weight: normal;
+            text-align: right !important;
+        }
+
+        #normal_msg .form-group {
+            margin-top: 20px;
+        }
+
+        #increment_msg .form-group {
+            margin-top: 15px;
+        }
+
+        #modify .form-group {
+            margin-top: 25px;
+        }
+
+        #addzp .form-group {
+            margin-top:25px;
+        }
+
+        .closemsg {
+            width: 300px;
+            background-color: green;
+            color: white;
+        }
+
+        #container-box {
+            border: 1px dashed #000;
+            height: 210px;
+            box-sizing: border-box;
+        }
+
+        #container {
+            border: 1px dashed #000;
+            height: 270px;
+            box-sizing: border-box;
+        }
+
+        #container-sand {
+            box-sizing: border-box;
+            padding: 20px;
+            padding-bottom: 0;
+        }
+
+        #Addressee {
+            border: 1px dashed #000;
+            height: 120px;
+            box-sizing: border-box;
+        }
+
+        #sjr_msg {
+            box-sizing: border-box;
+            padding: 20px;
+            padding-bottom: 0;
+        }
+
+        #code {
+            text-align: left !important;
+        }
+
+        .code {
+            text-align: left !important;
+        }
+
+        .mr30 {
+            margin-right: 30px;
+        }
+
+        .btn-green {
+            background-color: green;
+            color: #fff;
+        }
+
+        .btn-green:hover {
+            background-color: green;
+            color: #fff;
+        }
+
+        .btn-error {
+            background-color: grey;
+        }
+
+        .select2 span {
+            display: block !important;
+            margin-top: 0px !important;
+        }
+
+        .select2-container {
+            width: 195px !important;
+        }
+
+        .select2-dropdown {
+            width: 200px !important;
+        }
+
+        .select2-container .select2-selection--single {
+            width: 200px;
+        }
+
+        .select2-dropdown {
+            z-index: 20180129 !important;
+        }
+
+        #PoPy {
+            z-index: 20180130 !important;
+        }
+
+        * {
+            -ms-word-wrap: break-word;
+            word-wrap: break-word;
+        }
+
+        html {
+            -webkit-text-size-adjust: none;
+            text-size-adjust: none;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+        }
+
+        html, body, h1, h2, h3, h4, h5, h6, div, ul, ol, li, dl, dt, dd, iframe, textarea, input, button, p, strong, b, i, a, span, del, pre, table, tr, th, td, form, fieldset, .pr, .pc {
+            margin: 0;
+            padding: 0;
+            word-wrap: break-word;
+            font-family: verdana, Microsoft YaHei, Tahoma, sans-serif;
+            *font-family: Microsoft YaHei, verdana, Tahoma, sans-serif;
+        }
+
+        body, ul, ol, li, dl, dd, p, h1, h2, h3, h4, h5, h6, form, fieldset, .pr, .pc, em, del {
+            font-style: normal;
+            font-size: 100%;
+        }
+
+        ul, ol, dl {
+            list-style: none;
+        }
+
+        ._citys {
+            width: 450px;
+            display: inline-block;
+            border: 2px solid #eee;
+            padding: 5px;
+            position: relative;
+            background-color: gainsboro
+        }
+
+        ._citys span {
+            color: #56b4f8;
+            height: 15px;
+            width: 15px;
+            line-height: 15px;
+            text-align: center;
+            border-radius: 3px;
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            border: 1px solid #56b4f8;
+            cursor: pointer;
+        }
+
+        ._citys0 {
+            width: 100%;
+            height: 34px;
+            display: inline-block;
+            border-bottom: 2px solid #56b4f8;
+            padding: 0;
+            margin: 0;
+        }
+
+        ._citys0 li {
+            display: inline-block;
+            line-height: 34px;
+            font-size: 15px;
+            color: #888;
+            width: 80px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .citySel {
+            background-color: #56b4f8;
+            color: #fff !important;
+        }
+
+        ._citys1 {
+            width: 100%;
+            display: inline-block;
+            padding: 10px 0;
+        }
+
+        ._citys1 a {
+            width: 83px;
+            height: 35px;
+            display: inline-block;
+            background-color: #f5f5f5;
+            color: #666;
+            margin-left: 6px;
+            margin-top: 3px;
+            line-height: 35px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 13px;
+            overflow: hidden;
+        }
+
+        ._citys1 a:hover {
+            color: #fff;
+            background-color: #56b4f8;
+        }
+
+        .AreaS {
+            background-color: #56b4f8 !important;
+            color: #fff !important;
+        }
+        .sjAddress {
+            position: absolute;
+            width:350px !important;
+        }
+        #addzp input {
+            height: 25px;
+            padding: 6px 12px;
+        }
+        #modify input {
+            height: 25px;
+            padding: 6px 12px;
+        }
+    </style>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content  animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="tabs-container">
+                <!-- 搜索条件 -->
+                <input type="hidden" th:value="${jsmsMenu.menuId}" id="menuId">
+                <ul class="nav nav-tabs">
+                    <li class="" th:if="${menus.fpsq}">
+                        <a href="/finance/invoice/app" id="zkkh">发票申请</a>
+                    </li>
+                    <li class="" th:if="${menus.sqjl}">
+                        <a href="/finance/invoice/record/list" id="fpsq">申请记录</a>
+                    </li>
+                    <li class="active" th:if="${menus.fpxx}">
+                        <a href="/finance/invoice/info/list" id="fpxx">发票信息</a>
+                    </li>
+                    <li class="" th:if="${menus.fpsh}">
+                        <a href="/finance/invoice/audit/list" id="fpsh">发票审核</a>
+                    </li>
+                </ul>
+                <div id="tab-1" class="tab-pane active" th:if="${menus.fpxx}">
+                    <div class="panel-body">
+                        <div class="ibox ">
+                            <div class="col-sm-12">
+                                <div class="ibox ">
+                                    <div class="ibox-content">
+                                        <form class="form-inline" id="mainForm">
+                                            <div class="form-group">
+                                                <input type="text" style="width:245px;"
+                                                       placeholder="客户ID/客户名称/发票抬头/统一社会信用代码" name="fourItem" id="fourItem"
+                                                       class="form-control">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="belongSaleId">归属销售：</label>
+                                                <select id="belongSaleId" name="belongSaleId"
+                                                        class="form-control" style="width:55px"></select>
+                                            </div>
+                                            <div class="form-group" >
+                                                <label for="invoiceType">资质类型：</label>
+                                                <select id="invoiceType" name="invoiceType" class="form-control" style="width:130px;">
+                                                    <!--发票类型，1：普通发票（电子）2：增值税专票-->
+                                                    <option value="">全部</option>
+                                                    <option value="1">普通发票（电子）</option>
+                                                    <option value="2">增值税专票</option>
+                                                </select>
+                                            </div>
+                                            <!-- 时间选择 -->
+                                            <div class="form-group" id="sandbox-container">
+                                                <div class="form-group pull-right">更新时间:
+                                                    <input placeholder="开始时间" class="form-control layer-date"
+                                                           name="updateTimeStart" id="updateTimeStart" style="width:180px;"/>至
+                                                    <input placeholder="结束时间" class="form-control layer-date"
+                                                           name="updateTimeEnd" id="updateTimeEnd" style="width:180px;"/>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-danger"
+                                                                          onclick="search()">搜索</button></span>
+                                                <span>&nbsp;&nbsp;<a href="javascript:;" class="btn btn-sm btn-primary"
+                                                                     onclick="reset()">重置</a></span>
+
+                                                <span>&nbsp;&nbsp;<button type="button"
+                                                                          class="btn btn-sm btn-primary hide"
+                                                                          data-menuId='6317' onclick="exportExcel(1)">导出Excel</button></span>
+
+                                                <span>&nbsp;&nbsp;<button type="button"
+                                                                          class="btn btn-sm btn-primary hide"
+                                                                          data-menuId='6318' onclick="addNormal()">新增普票信息</button></span>
+                                                <span>&nbsp;&nbsp;<button type="button"
+                                                                          class="btn btn-sm btn-primary hide"
+                                                                          data-menuId='6319'
+                                                                          onclick="add()">新增增票信息</button></span>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="ibox-content">
+                                        <div class="jqGrid_wrapper">
+                                            <table id="table_list_1"></table>
+                                            <div id="pager_list"></div>
+                                        </div>
+                                        <p>&nbsp;</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+<!--查看普票信息-->
+<div class="pop-grid" id="normal_msg" style="display: none;">
+    <p style="margin:20px 0 0 20px">开票信息</p>
+    <div id="container-sand">
+        <div id="container-box">
+            <form role="form" class="form-inline" id="form_msg">
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">客户ID：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key agingId" data-key="agingId"></div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">发票信息ID：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key paymentAmount" data-key="id"></div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">客户名称：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key name" data-key="name"></div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">电子邮箱：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key email" data-key="email"></div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">归属销售：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key belongSaleStr" data-key="belongSaleStr"></div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">资质类型：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key invoiceType" data-key="invoiceType"></div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">发票抬头：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key sjAddress invoiceHead" data-key="invoiceHead"></div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">更新时间：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key updateTime" data-key="updateTime"></div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">统一社会信用代码：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key sjAddress" data-key="creditCode"></div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">操作者：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key operatorName" data-key="operatorName"></div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <form action="" id="form_change">
+        <div class="form-group col-sm-12" style="text-align: center;margin-top: 50px;">
+            <a href="javascript:;" class="btn btn-lg btn-green  closemsg" onclick="closemsg()">关闭</a>
+        </div>
+    </form>
+</div>
+<!--查看增票信息-->
+<div class="pop-grid" id="increment_msg" style="display: none;">
+    <p style="margin:20px 0 0 20px">开票信息</p>
+    <div id="container-sand">
+        <div id="container">
+            <form role="form" class="form-inline" id="form_msg">
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">发票信息ID：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key paymentId" data-key="id"></div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">客户名称：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key name" data-key="name"></div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">客户ID：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key name" data-key="agingId"></div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">归属销售：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key paymentMode" data-key="belongSaleStr"></div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">资质类型：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key invoiceType" data-key="invoiceType"></div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">统一社会信用代码：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key agentId" data-key="creditCode"></div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">发票抬头：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key sjAddress" data-key="invoiceHead"></div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">开户账号：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key paymentId" data-key="bankAccount"></div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">开户银行：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key paymentAmount" data-key="bank"></div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">更新时间：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key paymentMode" data-key="updateTime"></div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">公司固定电话：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key payTime" data-key="telphone"></div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">操作者：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key operatorName" data-key="operatorName"></div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">公司注册地址：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key sjAddress" data-key="companyRegAddr"></div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <p style="margin:20px 0 0 20px">收件人信息</p>
+    <div id="sjr_msg">
+        <div id="Addressee">
+            <form role="form" class="form-inline" id="form_msg">
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">收件人：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key name" data-key="toName"></div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">收件人手机：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key name" data-key="toPhone"></div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">收件人地址：</label>
+                    <div class="col-sm-7">
+                        <span class="from-control js-key name" data-key="toAddr"></span><span class="from-control js-key name" data-key="toAddrDetail"></span>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">收件人QQ：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key payTime" data-key="toQq"></div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <form action="" id="form_change">
+        <div class="form-group col-sm-12" style="text-align: center;margin-top: 50px;">
+            <a href="javascript:;" class="btn btn-lg btn-green  closemsg" onclick="closemsg()">关闭</a>
+        </div>
+    </form>
+</div>
+<!--修改增票-->
+<div id="modify" style="display: none;">
+    <form role="form" class="form-inline">
+        <div class="form-group col-sm-6">
+            <label class="col-sm-4 control-label">开票客户：</label>
+            <div class="col-sm-7">
+                <div class="from-control js-key paymentId" data-key="agingId"></div>
+            </div>
+        </div>
+        <div class="form-group col-sm-6">
+            <label class="col-sm-4 control-label">发票信息ID：</label>
+            <div class="col-sm-7 control-label">
+                <div class="from-control js-key name" data-key="id"></div>
+            </div>
+        </div>
+        <div class="form-group col-sm-6">
+            <label class="col-sm-4 control-label"><span style="color: red;">*</span>发票抬头：</label>
+            <div class="col-sm-7 control-label">
+                <input class="from-control js-key payTime" data-key="invoiceHead">
+            </div>
+        </div>
+        <div class="form-group col-sm-6">
+            <label class="col-sm-4 control-label"><span style="color: red;">*</span>开户银行：</label>
+            <div class="col-sm-7 control-label">
+                <input class="from-control js-key name" data-key="bank">
+            </div>
+        </div>
+        <div class="form-group col-sm-6">
+            <label class="col-sm-4 control-label code"><span style="color: red;">*</span>统一社会信用代码：</label>
+            <div class="col-sm-7 control-label">
+                <input class="from-control js-key payTime" data-key="creditCode">
+            </div>
+        </div>
+        <div class="form-group col-sm-6">
+            <label class="col-sm-4 control-label"><span style="color: red;">*</span>开户账号：</label>
+            <div class="col-sm-7 control-label">
+                <input class="from-control js-key payTime" data-key="bankAccount">
+            </div>
+        </div>
+        <div class="form-group col-sm-6">
+            <label class="col-sm-4 control-label "><span style="color: red;">*</span>公司注册地址：</label>
+            <div class="col-sm-7 control-label">
+                <input class="from-control js-key payTime" data-key="companyRegAddr">
+            </div>
+        </div>
+        <div class="form-group col-sm-6">
+            <label class="col-sm-4 control-label "><span style="color: red;">*</span>公司固定电话：</label>
+            <div class="col-sm-7 control-label">
+                <input class="from-control js-key payTime" data-key="telphone">
+            </div>
+        </div>
+        <div class="form-group col-sm-6">
+            <label class="col-sm-4 control-label "><span style="color: red;">*</span>收件人：</label>
+            <div class="col-sm-7 control-label">
+                <input class="from-control js-key payTime" data-key="toName">
+            </div>
+        </div>
+        <div class="form-group col-sm-6">
+            <label class="col-sm-4 control-label "><span style="color: red;">*</span>收件人地址：</label>
+            <div class="col-sm-7 control-label">
+                <input class="from-control js-key payTime" data-key="toAddr" id="city">
+            </div>
+        </div>
+        <div class="form-group col-sm-6">
+            <label class="col-sm-4 control-label "><span style="color: red;">*</span>收件人手机：</label>
+            <div class="col-sm-7 control-label">
+                <input class="from-control js-key payTime" data-key="toPhone">
+            </div>
+        </div>
+        <div class="form-group col-sm-6">
+            <label class="col-sm-4 control-label "><span style="color: red;">*</span>详细地址：</label>
+            <div class="col-sm-7 control-label">
+                <input class="from-control js-key payTime" data-key="toAddrDetail">
+            </div>
+        </div>
+        <div class="form-group col-sm-6">
+            <label class="col-sm-4 control-label ">收件人QQ：</label>
+            <div class="col-sm-7 control-label">
+                <input class="from-control js-key payTime" data-key="toQq">
+            </div>
+        </div>
+        <div class="form-group col-sm-12" style="text-align: center;">
+            <a href="javascript:;" class="btn btn-md btn-green mr30" onclick="modifymsg(1)">确定</a>
+            <a href="javascript:;" class="btn btn-md btn-danger " onclick="closemsg()">取消</a>
+        </div>
+    </form>
+</div>
+<!-- 普通电子发票（电子） -->
+<div id="addNormal" style="display: none;">
+    <div class="col-sm-10 col-sm-offset-2">
+        <div class="invoiceWrap">
+            <div class="backgroundBar"></div>
+            <div class="ctx">
+                <form id="mainForm" class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"><span class="red">*</span>开票客户:</label>
+                        <div class="col-sm-8 control-label" style="text-align: left;">
+                            <select class="" name="name" id="normalAgentId"></select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"><span class="red">*</span>开票主体:</label>
+                        <div class="col-sm-8 grid-add">
+                            <label class="radio-inline">
+                                <input type="radio" name="invoiceBody" class="invoiceType-body radio radio-2" value="2"
+                                       checked> 企业
+                            </label>
+                            <label class="radio-inline">
+                                <input type="radio" name="invoiceBody" class="invoiceType-body radio radio-1" value="1">
+                                个人
+                            </label>
+                        </div>
+                        <div class="col-sm-8 control-label grid-info hide" style="text-align: left;">
+                            <span class="js-invoiceBodyStr">个人</span>
+                            <input type="hidden" value="" class="js-invoiceBody">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"><span class="red">*</span>发票抬头:</label>
+                        <div class="col-sm-7 grid-add ">
+                            <input type="text" class="form-control js-key " data-key="invoiceHead">
+                        </div>
+                        <div class="col-sm-7 control-label grid-info hide" style="text-align: left;">
+                            <span class="js-invoiceHeadStr">个人</span>
+                            <input type="hidden" value="" class="js-invoiceHead">
+                        </div>
+                    </div>
+                    <div class="form-group creditCode">
+                        <label class="col-sm-3 control-label"><span class="red">*</span>统一社会信用代码:</label>
+                        <div class="col-sm-7 grid-add ">
+                            <input type="text" class="form-control js-key" data-key="creditCode">
+                        </div>
+                        <div class="col-sm-7 control-label grid-info hide" style="text-align: left;">
+                            <span class="js-creditCodeStr">统一社会信用代码</span>
+                            <input type="hidden" value="" class="js-creditCode">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"><span class="red">*</span>电子邮箱:</label>
+                        <div class="col-sm-7 grid-add ">
+                            <input type="text" class="form-control js-key" data-key="email">
+                        </div>
+                        <div class="col-sm-7 control-label grid-info hide" style="text-align: left;">
+                            <span class="js-emailStr"></span>
+                            <input type="hidden" value="" class="js-email">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-3 col-sm-7 grid-add ">
+                            <a href="javascript:;" class="btn btn-primary js-addNormal"
+                               onclick="addConfirmNormal()">确认</a>
+                            <a href="javascript:;" class="btn btn-md btn-danger " onclick="closemsg()">取消</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 增值税发票信息 -->
+<div id="add" style="display: none;">
+    <div class="col-sm-10 col-sm-offset-2">
+        <div class="invoiceWrap">
+            <div class="backgroundBar"></div>
+            <div class="ctx">
+                <h3 class="text-center">新增增值税发票信息</h3>
+                <div class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">开票客户:</label>
+                        <div class="col-sm-8 control-label" style="text-align: left;">
+                            <span class="js-clientid">客户123</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"><span class="red">*</span>发票抬头:</label>
+                        <div class="col-sm-7 grid-add ">
+                            <input type="text" class="form-control invoiceHead">
+                        </div>
+                        <div class="col-sm-7 control-label grid-info hide" style="text-align: left;">
+                            <span class="js-invoiceHeadStr">个人</span>
+                            <input type="hidden" value="" class="js-invoiceHead">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"><span class="red">*</span>统一社会信用代码:</label>
+                        <div class="col-sm-7 grid-add ">
+                            <input type="text" class="form-control name">
+                        </div>
+                        <div class="col-sm-7 control-label grid-info hide" style="text-align: left;">
+                            <span class="js-creditCodeStr">统一社会信用代码</span>
+                            <input type="hidden" value="" class="js-creditCode">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"><span class="red">*</span>公司注册地址:</label>
+                        <div class="col-sm-7 grid-add ">
+                            <input type="text" class="form-control companyRegAddr">
+                        </div>
+                        <div class="col-sm-7 control-label grid-info hide" style="text-align: left;">
+                            <span class="js-companyRegAddrStr"></span>
+                            <input type="hidden" value="" class="js-companyRegAddrCode">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"><span class="red">*</span>开户银行:</label>
+                        <div class="col-sm-7 grid-add ">
+                            <input type="text" class="form-control bank">
+                        </div>
+                        <div class="col-sm-7 control-label grid-info hide" style="text-align: left;">
+                            <span class="js-bankStr"></span>
+                            <input type="hidden" value="" class="js-bank">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"><span class="red">*</span>开户账号:</label>
+                        <div class="col-sm-7 grid-add ">
+                            <input type="text" class="form-control bankAccount">
+                        </div>
+                        <div class="col-sm-7 control-label grid-info hide" style="text-align: left;">
+                            <span class="js-bankAccountStr"></span>
+                            <input type="hidden" value="" class="js-bankAccount">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"><span class="red">*</span>公司固定电话:</label>
+                        <div class="col-sm-7 grid-add ">
+                            <input type="text" class="form-control telphone">
+                        </div>
+                        <div class="col-sm-7 control-label grid-info hide" style="text-align: left;">
+                            <span class="js-telphoneStr"></span>
+                            <input type="hidden" value="" class="js-telphone">
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"><span class="red">*</span>收件人:</label>
+                        <div class="col-sm-7 grid-add ">
+                            <input type="text" class="form-control toName">
+                        </div>
+                        <div class="col-sm-7 control-label grid-info hide" style="text-align: left;">
+                            <span class="js-toNameStr"></span>
+                            <input type="hidden" value="" class="js-toName">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"><span class="red">*</span>收件人地址:</label>
+                        <div class="col-sm-7 grid-add ">
+                            <input type="text" class="form-control toAddr">
+                        </div>
+                        <div class="col-sm-7 control-label grid-info hide" style="text-align: left;">
+                            <span class="js-toAddrStr"></span>
+                            <input type="hidden" value="" class="js-toAddr">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"><span class="red">*</span>详细地址:</label>
+                        <div class="col-sm-7 grid-add ">
+                            <input type="text" class="form-control toAddrDetail">
+                        </div>
+                        <div class="col-sm-7 control-label grid-info hide" style="text-align: left;">
+                            <span class="js-toAddrDetailStr"></span>
+                            <input type="hidden" value="" class="js-toAddrDetail">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"><span class="red">*</span>收件人手机:</label>
+                        <div class="col-sm-7 grid-add ">
+                            <input type="text" class="form-control toPhone">
+                        </div>
+                        <div class="col-sm-7 control-label grid-info hide" style="text-align: left;">
+                            <span class="js-toPhoneStr"></span>
+                            <input type="hidden" value="" class="js-toPhone">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"><span class="red">*</span>收件人QQ:</label>
+                        <div class="col-sm-7 grid-add ">
+                            <input type="text" class="form-control toQq">
+                        </div>
+                        <div class="col-sm-7 control-label grid-info hide" style="text-align: left;">
+                            <span class="js-toQqStr"></span>
+                            <input type="hidden" value="" class="js-toQq">
+                        </div>
+                    </div>
+                    <hr>
+                    <div style="padding-left:20px;margin-bottom:20px;">
+                        <span>为避免邮寄错误，请填写正确的收件信息，发票金额大于200元包邮寄送，小于200元邮费到付</span>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-3 col-sm-7">
+                            <button type="button" class="btn btn-primary">确认</button>
+                            <button type="button" class="btn btn-error js-cancelNormal">取消</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 新增增值税发票信息 end -->
+<div id="addzp" style="display: none;">
+    <form role="form" class="form-inline">
+        <div class="form-group col-sm-12">
+            <label class="col-sm-2 control-label">开票客户：</label>
+            <div class="col-sm-7">
+                <select class="from-control  agingId" id="selectAgentId"></select>
+            </div>
+        </div>
+        <div class="form-group col-sm-6">
+            <label class="col-sm-4 control-label"><span style="color: red;">*</span>发票抬头：</label>
+            <div class="col-sm-7 control-label">
+                <input class="from-control js-key invoiceHead" data-key="invoiceHead">
+            </div>
+        </div>
+        <div class="form-group col-sm-6">
+            <label class="col-sm-4 control-label"><span style="color: red;">*</span>开户银行：</label>
+            <div class="col-sm-7 control-label">
+                <input class="from-control js-key payTime" data-key="bank">
+            </div>
+        </div>
+        <div class="form-group col-sm-6">
+            <label class="col-sm-4 control-label code"><span style="color: red;">*</span>统一社会信用代码：</label>
+            <div class="col-sm-7 control-label">
+                <input class="from-control js-key payTime" data-key="creditCode">
+            </div>
+        </div>
+        <div class="form-group col-sm-6">
+            <label class="col-sm-4 control-label"><span style="color: red;">*</span>开户账号：</label>
+            <div class="col-sm-7 control-label">
+                <input class="from-control js-key payTime" data-key="bankAccount">
+            </div>
+        </div>
+        <div class="form-group col-sm-6">
+            <label class="col-sm-4 control-label "><span style="color: red;">*</span>公司注册地址：</label>
+            <div class="col-sm-7 control-label">
+                <input class="from-control js-key payTime" data-key="companyRegAddr">
+            </div>
+        </div>
+        <div class="form-group col-sm-6">
+            <label class="col-sm-4 control-label "><span style="color: red;">*</span>公司固定电话：</label>
+            <div class="col-sm-7 control-label">
+                <input class="from-control js-key payTime" data-key="telphone">
+            </div>
+        </div>
+        <div class="form-group col-sm-6">
+            <label class="col-sm-4 control-label "><span style="color: red;">*</span>收件人：</label>
+            <div class="col-sm-7 control-label">
+                <input class="from-control js-key payTime" data-key="toName">
+            </div>
+        </div>
+        <div class="form-group col-sm-6">
+            <label class="col-sm-4 control-label "><span style="color: red;">*</span>收件人地址：</label>
+            <div class="col-sm-7 control-label">
+                <input class="from-control js-key payTime" data-key="toAddr" id="city2">
+            </div>
+        </div>
+        <div class="form-group col-sm-6">
+            <label class="col-sm-4 control-label "><span style="color: red;">*</span>收件人手机：</label>
+            <div class="col-sm-7 control-label">
+                <input class="from-control js-key payTime" data-key="toPhone">
+            </div>
+        </div>
+        <div class="form-group col-sm-6">
+            <label class="col-sm-4 control-label "><span style="color: red;">*</span>详细地址：</label>
+            <div class="col-sm-7 control-label">
+                <input class="from-control js-key payTime" data-key="toAddrDetail">
+            </div>
+        </div>
+        <div class="form-group col-sm-6">
+            <label class="col-sm-4 control-label ">收件人QQ：</label>
+            <div class="col-sm-7 control-label">
+                <input class="from-control js-key payTime" data-key="toQq">
+            </div>
+        </div>
+        <div class="form-group col-sm-12" style="text-align: center;">
+            <a href="javascript:;" class="btn btn-md btn-green mr30" onclick="modifymsg(0)">确定</a>
+            <a href="javascript:;" class="btn btn-md btn-danger " onclick="closemsg()">取消</a>
+        </div>
+    </form>
+</div>
+<!-- 修改普通电子发票（电子） -->
+<div id="modifyNormal" style="display: none;">
+    <div class="col-sm-10 col-sm-offset-2">
+        <div class="invoiceWrap">
+            <div class="backgroundBar"></div>
+            <div class="ctx">
+                <div class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">发票信息ID:</label>
+                        <div class="col-sm-8 control-label" style="text-align: left;">
+                            <div class="js-clientid js-key" data-key="id"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">开票客户:</label>
+                        <div class="col-sm-8 control-label" style="text-align: left;">
+                            <div class="js-clientid  js-key" data-key="agingId"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"><span class="red">*</span>开票主体:</label>
+                        <div class="col-sm-8 grid-add">
+                            <label class="radio-inline">
+                                <input type="radio" name="invoiceBody" class="invoiceType-body radio radio-2" value="2"
+                                       checked> 企业
+                            </label>
+                            <label class="radio-inline">
+                                <input type="radio" name="invoiceBody" class="invoiceType-body radio radio-1" value="1">
+                                个人
+                            </label>
+                        </div>
+                        <div class="col-sm-8 control-label grid-info hide" style="text-align: left;">
+                            <span class="js-invoiceBodyStr">个人</span>
+                            <input type="hidden" value="" class="js-key" data-key="invoiceBody" id="invoiceBody">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"><span class="red">*</span>发票抬头:</label>
+                        <div class="col-sm-7 grid-add ">
+                            <input type="text" class="form-control js-key" data-key="invoiceHead">
+                        </div>
+                        <div class="col-sm-7 control-label grid-info hide" style="text-align: left;">
+                            <span class="js-invoiceHeadStr">个人</span>
+                            <input type="hidden" value="" class="js-invoiceHead">
+                        </div>
+                    </div>
+                    <div class="form-group creditCode">
+                        <label class="col-sm-3 control-label"><span class="red">*</span>统一社会信用代码:</label>
+                        <div class="col-sm-7 grid-add ">
+                            <input type="text" class="form-control js-key" data-key="creditCode">
+                        </div>
+                        <div class="col-sm-7 control-label grid-info hide" style="text-align: left;">
+                            <span class="js-creditCodeStr">统一社会信用代码</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"><span class="red">*</span>电子邮箱:</label>
+                        <div class="col-sm-7 grid-add ">
+                            <input type="text" class="form-control js-key" data-key="email">
+                        </div>
+                        <div class="col-sm-7 control-label grid-info hide" style="text-align: left;">
+                            <span class="js-emailStr"></span>
+                            <input type="hidden" value="" class="js-email">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-3 col-sm-7 grid-add ">
+                            <a href="javascript:;" class="btn btn-primary js-addNormal" onclick="confirmNormal()">确认</a>
+                            <a href="javascript:;" class="btn btn-md btn-danger " onclick="closemsg()">取消</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--新增收件人信息-->
+<div id="addsjr" style="display: none;">
+    <div class="col-sm-10 col-sm-offset-1" style="margin-top: 35px;">
+        <div class="invoiceWrap">
+            <div class="backgroundBar"></div>
+            <div class="ctx">
+                <div class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"><span class="red">*</span>收件人:</label>
+                        <div class="col-sm-7 grid-add ">
+                            <input type="text" class="form-control js-key" data-key="toName">
+                        </div>
+                    </div>
+                    <div class="form-group creditCode">
+                        <label class="col-sm-3 control-label"><span class="red">*</span>收件人手机:</label>
+                        <div class="col-sm-7 grid-add ">
+                            <input type="text" class="form-control js-key" data-key="toPhone">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"><span class="red">*</span>收件人地址:</label>
+                        <div class="col-sm-7 grid-add ">
+                            <input type="text" class="form-control js-key" data-key="toAddr" id="city">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label"><span class="red">*</span>详细地址:</label>
+                        <div class="col-sm-7 grid-add ">
+                            <input type="text" class="form-control js-key" data-key="toAddrDetail">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">收件人QQ:</label>
+                        <div class="col-sm-7 grid-add ">
+                            <input type="text" class="form-control js-key" data-key="toQq">
+                        </div>
+                    </div>
+                    <input type="hidden" id="sjrId">
+                    <div class="form-group">
+                        <div class="col-sm-offset-3 col-sm-7 grid-add ">
+                            <a href="javascript:;" class="btn btn-primary js-addNormal" onclick="addsjr()">确认</a>
+                            <a href="javascript:;" class="btn btn-md btn-danger " onclick="closemsg()">取消</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/auth.js}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/select2.min.js}"></script>
+<script th:src="@{/resources/js/city/Popt.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/city/cityJson.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/city/citySet.js?v=1.0.0}"></script>
+<script th:inline="javascript">
+
+
+    var grid_width = 1200; // 默认宽度
+
+
+    var max_export_num = [[${max_export_num}]];
+    var start = {
+        elem: "#updateTimeStart",
+        format: "YYYY-MM-DD hh:mm:ss",
+        max: laydate.now(),
+        istime: true,
+        istoday: true,
+        choose: function (datas) {
+            end.min = datas;
+        }
+    };
+
+    var end = {
+        elem: "#updateTimeEnd",
+        format: "YYYY-MM-DD hh:mm:ss",
+        min: "#start_time_day",
+        max: laydate.now(),
+        start:/*[[${end_time}]]*/,
+        istime: true,
+        istoday: true,
+        choose: function (datas) {
+            start.max = datas;
+        }
+    };
+    $("#updateTimeStart").val(laydate.now(-90,'YYYY-MM-DD hh:mm:ss'));
+    $("#updateTimeEnd").val(laydate.now(0,'YYYY-MM-DD hh:mm:ss'));
+
+    laydate(start);
+    laydate(end);
+
+    function reset() {
+        $("#mainForm").find("input").val("");
+        $("#mainForm").find("select").val("");
+        $("#belongSaleId").val(" ").trigger("change");
+        $("#updateTimeStart").val(laydate.now(-90,'YYYY-MM-DD hh:mm:ss'));
+        $("#updateTimeEnd").val(laydate.now(0,'YYYY-MM-DD hh:mm:ss'));
+    }
+
+    function search() {
+        event.preventDefault();
+        $("#table_list_1").jqGrid('setGridParam', {
+            datatype: 'json',
+            postData: {
+                fourItem: $("#fourItem").val(),
+                invoiceType: $("#invoiceType").val(),
+                updateTimeStart: $("#updateTimeStart").val(),
+                updateTimeEnd: $("#updateTimeEnd").val(),
+                belongSaleId: $("#belongSaleId").val()
+
+            }, //发送数据
+        }).trigger("reloadGrid"); //重新载入
+
+    }
+
+    function reload() {
+        event.preventDefault();
+        $("#table_list_1").jqGrid('setGridParam', {
+            datatype: 'json',
+            postData: {
+                fourItem: $("#fourItem").val(),
+                invoiceType: $("#invoiceType").val(),
+                updateTimeStart: $("#updateTimeStart").val(),
+                updateTimeEnd: $("#updateTimeEnd").val(),
+                belongSaleId: $("#belongSaleId").val()
+            }, //发送数据
+        }).trigger("reloadGrid"); //重新载入
+    }
+
+
+    // 导出Excel文件
+    function exportExcel(type) {
+        var data1 = "";
+        var totalCount = $("#table_list_" + type).jqGrid('getGridParam', 'records');
+        if (totalCount == 0) {
+            layer.alert("共0条记录，导出Excel文件失败");
+            return;
+        }
+        var mainForm = $("#mainForm");
+        var action = mainForm.attr("action");
+        var exporUrl = '/finance/invoice/info/invoice/export';
+        mainForm.attr("method", "post");
+        mainForm.attr("action", exporUrl).submit();
+        mainForm.attr("action", action);
+    }
+
+    function doResize(type) {
+        var width = $(".jqGrid_wrapper").width();
+        if (width > 0) {
+            grid_width = width;
+        }
+        $("#table_list_" + type).setGridWidth(grid_width);
+    }
+
+    $(document).ready(function () {
+        var agentList = [];
+        var agentList1 = [];
+        var sale_list = [];
+        $.ajax({
+            url: "/finance/invoice/info/agentList",
+            type: 'GET',
+            data:{
+                invoiceType:1
+            },
+            success: function (res) {
+                if (res.code != 0) {
+                    layer.msg(res.msg, {icon: 2});
+                    return;
+                }
+                var list = res.data;
+                for (var i = 0; i < list.length; i++) {
+                    agentList[i] = {};
+                    agentList[i].id = list[i].agentId;
+                    agentList[i].text = list[i].agentId + "-" + list[i].agentName;
+                }
+                //初始化select2
+                $("#normalAgentId").select2({
+                    data: agentList
+                })
+            }
+        });
+        $.ajax({
+            url: "/finance/invoice/info/agentList",
+            type: 'GET',
+            data:{
+                invoiceType:2
+            },
+            success: function (res) {
+                if (res.code != 0) {
+                    layer.msg(res.msg, {icon: 2});
+                    return;
+                }
+                var list = res.data;
+                for (var i = 0; i < list.length; i++) {
+                    agentList1[i] = {};
+                    agentList1[i].id = list[i].agentId;
+                    agentList1[i].text = list[i].agentId + "-" + list[i].agentName;
+                }
+                //初始化select2
+                $("#selectAgentId").select2({
+                    data: agentList1
+                })
+            }
+        });
+
+
+
+        $.ajax({
+            url: '/finance/invoice/record/queryUserByDataAuthority',
+            type: "GET",
+            success: function (res) {
+                for (var i = 0; i < res.length; i++) {
+                    sale_list[i] = {};
+                    sale_list[i].id = res[i].id + '';
+                    sale_list[i].text = res[i].realname;
+                }
+                sale_list.unshift({id: " ", text: "全部销售"});
+                //初始化select2
+                $("#belongSaleId").select2({
+                    data: sale_list
+                })
+
+            }
+        })
+        $("#city").click(function (e) {
+            SelCity(this, e);
+        });
+        $("#city2").click(function (e) {
+            SelCity(this, e);
+        });
+        $.jgrid.defaults.styleUI = "Bootstrap";
+        $("#table_list_1").jqGrid({
+            url:/*[[@{/finance/invoice/info/invoiceList}]]*/,
+            mtype: 'POST',
+            datatype: "json",
+            jsonReader: {
+                root: "data.data",
+                page: "data.page",
+                total: "data.totalPage",
+                records: "data.totalRecord"
+            },
+            postData: {
+                fourItem: $("#fourItem").val(),
+                invoiceType: $("#invoiceType").val(),
+                updateTimeStart: $("#updateTimeStart").val(),
+                updateTimeEnd: $("#updateTimeEnd").val(),
+                belongSaleId: $("#belongSaleId").val()
+            }, //发送数据
+            height: 'auto',
+            rownumbers: true,
+            autowidth: true,
+            shrinkToFit: true,
+            autoScroll: true,
+            footerrow: false,
+            rowNum: 20,
+            rowList: [10, 20, 30, 50],
+            colNames: ["数据ID", "客户ID", "客户名称", "归属销售", "发票抬头", "资质类型", "统一社会信用代码", "更新时间", "操作人", "操作"],
+            colModel: [
+                {name: "id", align: "left", sortable: false, hidden: true},
+                {name: "agingId", align: "left", sortable: false},
+                {name: "name", align: "left", sortable: false},
+                {name: "belongSaleStr", align: "left", sortable: false},
+                {name: "invoiceHead", align: "left", sortable: false,
+                    formatter:function(cellvalue, options, rowObject){
+                        if(cellvalue.length>20){
+                            var _invoiceHead=cellvalue.substr(0,20);
+                            return "<span title='"+cellvalue+"'>"+_invoiceHead+""+"..."+"</span>";
+                        }else{
+                            return "<span>"+cellvalue+"</span>";
+                        }
+                    }
+                },
+                {name: "invoiceType", align: "left", sortable: false, width: 100,
+                    formatter:function (cellvalue, options, rowObject) {
+                        if(cellvalue == 1){
+                            return "普通发票（电子）";
+                        }else if(cellvalue == 2){
+                            return "增值税专票";
+                        }
+                    }
+                },
+                {name: "creditCode", align: "left", sortable: false, width: 100},
+                {name: "updateTime", align: "left", sortable: false, width: 100},
+                {name: "operatorName", align: "left", sortable: false, width: 100},
+                {
+                    name: "bp", index: "bp", align: "left", sortable: false, title: false,
+                    formatter: function (cellvalue, options, rowObject) {
+                        var id = rowObject.id;
+                        var invoiceType = rowObject.invoiceType;
+                        var status = rowObject.status;
+                        var agingId = rowObject.agingId;
+                        var switcher = "";
+                        if (invoiceType == 1) {
+                            //发票类型，1：普通发票（电子）2：增值税专票
+                            switcher += "<button type='button' class='btn btn-link btn-xs hide' data-menuId='6316' onclick=\"check('" + id + "',this)\"   title='查看'>查看</button>";
+                            switcher += "<button type='button' class='btn btn-link btn-xs hide' data-menuId='6321' onclick=\"modifyNormal('" + id + "',this)\"   title='修改'>修改</button>";
+                        } else if (invoiceType == 2) {
+                            switcher += "<button type='button' class='btn btn-link btn-xs hide' data-menuId='6316' onclick=\"checkmsg('" + id + "',this)\"   title='查看'>查看</button>";
+                            switcher += "<button type='button' class='btn btn-link btn-xs hide' data-menuId='6321' onclick=\"modify('" + id + "',this)\"   title='修改'>修改</button>";
+//                            switcher += "<button type='button' class='btn btn-link btn-xs hide' data-menuId='6320' onclick=\"addsjrMsg('" + id + "',this)\"   title='收件人信息'>收件人信息</button>";
+                        }
+                        switcher += "<button type='button' class='btn btn-link btn-xs hide' data-menuId='6322' onclick=\"del('" + id + "','" + agingId + "',this)\"   title='删除'>删除</button>";
+                        return switcher;
+                    }
+                }
+            ],
+            gridComplete: completeMethod,
+            pager: "#pager_list",
+            viewrecords: true,
+            hidegrid: false
+        });
+
+
+        $(window).bind("resize", function () {
+            var width = $(".jqGrid_wrapper").width();
+            $("#table_list_1").setGridWidth(width);
+        })
+
+        function keyUp(e) {
+            var currKey = 0, e = e || event;
+            currKey = e.keyCode || e.which || e.charCode;
+            var keyName = String.fromCharCode(currKey);
+            if (currKey == 13) {
+                search();
+                e.stopPropagation()
+            }
+        }
+
+        document.onkeyup = keyUp;
+
+    });
+
+    //功能按钮权限
+    function completeMethod() {
+        var menuId = $("#menuId").val();
+        checkMenu(menuId);
+    }
+
+    function check(id) {
+        layer.open({
+            type: 1,
+            shadeClose: true,
+            title: "查看普票信息",
+            content: $("#normal_msg"),
+            area: ['1100px', '450px']
+
+        });
+        view(id)
+    }
+
+    function checkmsg(id) {
+        layer.open({
+            type: 1,
+            shadeClose: true,
+            title: "查看增票信息",
+            content: $("#increment_msg"),
+            area: ['1100px', '80%']
+        });
+        view(id)
+    }
+
+    //删除
+    function del(id, agingId) {
+        layer.confirm("您确定删除此发票信息？", {title: '删除提示'}, function () {
+            $.ajax({
+                type: 'post',
+                url: '/finance/invoice/info/optInvoice',
+                data: {
+                    id: id,
+                    optType: 3,
+                    agingId: agingId
+                },
+                cache: false,
+                dataType: 'json',
+                success: function (data) {
+                    if (data.code == 0) {
+                        layer.msg(data.msg);
+                        search();
+                    }
+                    layer.msg(data.msg, {icon: 1});
+                }
+            });
+            layer.closeAll();
+        })
+    }
+
+
+    //修改增票
+    function modify(id) {
+        layer.open({
+            type: 1,
+            shadeClose: true,
+            title: "修改增票信息",
+            content: $("#modify"),
+            area: ['1000px', '470px']
+        });
+        $.ajax({
+            type: 'post',
+            url: '/finance/invoice/info/invoiceById',
+            data: {
+                id: id
+            },
+            cache: false,
+            dataType: 'json',
+            success: function (data) {
+                if (data.code != 0) {
+                    layer.msg(data.msg);
+                    return;
+                } else {
+                    var params = data.data;
+                    $(".js-key").each(function () {
+                        var key = $(this).data("key");
+                        if (key == 'agingId' || key == 'id') {
+                            $(this).text(params[key])
+                        } else {
+                            $(this).val(params[key])
+                        }
+                    })
+                }
+            }
+        });
+    }
+
+
+    //修改普票
+    function modifyNormal(id) {
+        layer.open({
+            type: 1,
+            shadeClose: true,
+            title: "修改普通发票（电子）信息",
+            content: $("#modifyNormal"),
+            area: ['500px', '380px']
+        });
+        $.ajax({
+            type: 'post',
+            url: '/finance/invoice/info/invoiceById',
+            data: {
+                id: id
+            },
+            cache: false,
+            dataType: 'json',
+            success: function (data) {
+                if (data.code != 0) {
+                    layer.msg(data.msg);
+                    return;
+                } else {
+                    var params = data.data;
+                    $("#modifyNormal #invoiceBody").val(params.invoiceBody);
+                    if (params.invoiceBody == '2') {
+                        $(".radio-2").click()
+                        $("#creditCode").show()
+                    } else if (params.invoiceBody == '1') {
+                        $(".radio-1").click()
+                        $("#creditCode").hide()
+                    }
+                    $(".js-key").each(function () {
+                        var key = $(this).data("key");
+                        if (key == 'agingId' || key == 'id') {
+                            $(this).text(params[key])
+                        } else {
+                            $(this).val(params[key])
+                        }
+                    })
+                }
+            }
+        });
+        $(".invoiceType-body").click(function () {
+            var invoiceTypeRadio = $(this).val();
+            invoiceBodyChange(invoiceTypeRadio);
+        });
+    }
+
+
+    //确认修改增票
+    function modifymsg(type) {
+        if (type == 0) {
+            var params = {};
+            $("#addzp").find(".js-key").each(function () {
+                var key = $(this).data("key");
+                if ($(this).val()) {
+                    var key = $(this).data("key");
+                    params[key] = $(this).val();
+                }
+                if (key == 'agingId') {
+                    params[key] = $(this).text();
+                }
+            });
+            params.optType = 1;
+            params.agingId = $("#selectAgentId").val();
+            params.invoiceType = 2;
+
+
+        } else {
+            var params = {};
+            $("#modify").find(".js-key").each(function () {
+                var key = $(this).data("key");
+                if ($(this).val()) {
+                    var key = $(this).data("key");
+                    params[key] = $(this).val();
+                }
+                if (key == 'agingId' || key == 'id') {
+                    params[key] = $(this).text();
+                }
+            });
+            params.optType = 2;
+            params.invoiceType = 2;
+        }
+        var i =/^[0][1-9]{2,3}-[0-9]{5,10}$/;
+        if(params.invoiceHead == '' || !params.invoiceHead){
+            layer.msg("发票抬头不能为空", {icon: 2});
+            return;
+        }else if(params.bank == '' || !params.bank){
+            layer.msg("开户银行不能为空", {icon: 2});
+            return;
+        }else if(params.creditCode == '' || !params.creditCode){
+            layer.msg("统一社会信用代码不能为空", {icon: 2});
+            return;
+        }else if(params.bankAccount == ''  || !params.bankAccount){
+            layer.msg("开户账号不能为空", {icon: 2});
+            return;
+        }else if(params.companyRegAddr == ''  || !params.companyRegAddr){
+            layer.msg("公司注册地址不能为空", {icon: 2});
+            return;
+        }else if(params.telphone == ''  || !params.telphone){
+            layer.msg("公司固定电话不能为空", {icon: 2});
+            return;
+        }else if(params.toName == '' || !params.toName){
+            layer.msg("收件人不能为空", {icon: 2});
+            return;
+        }else if(params.toPhone == '' || !params.toPhone){
+            layer.msg("收件人手机不能为空", {icon: 2});
+            return;
+        }else if(params.toAddr == '' || !params.toAddr){
+            layer.msg("收件人地址不能为空", {icon: 2});
+            return;
+        }else if(params.toAddrDetail == '' || !params.toAddrDetail){
+            layer.msg("详细地址不能为空", {icon: 2});
+            return;
+        }else if(params.invoiceHead.length > 50){
+            layer.msg("发票抬头不能超过50个字符", {icon: 2});
+            return;
+        }else if(params.creditCode.length > 18){
+            layer.msg("统一社会信用代码不能超过18个字符", {icon: 2});
+            return;
+        }else if(params.companyRegAddr.length > 50){
+            layer.msg("公司注册地址不能超过50个字符", {icon: 2});
+            return;
+        }else if(params.bank.length > 20){
+            layer.msg("开户银行不能超过20个字符", {icon: 2});
+            return;
+        }else if(params.bankAccount.length > 20){
+            layer.msg("开户账户不能超过20个字符", {icon: 2});
+            return;
+        }else if(params.telphone.length > 20){
+            layer.msg("公司固话不能超过20个字符", {icon: 2});
+            return;
+        }else if(!i.test(params.telphone)){
+            layer.msg("公司固定电话格式不正确", {icon: 2});
+            return;
+        }else if(params.toName.length > 20){
+            layer.msg("收件人不能超过20个字符", {icon: 2});
+            return;
+        }else if(params.toAddrDetail.length > 50){
+            layer.msg("详细地址不能超过50个字符", {icon: 2});
+            return;
+        }else if(!_Auth.isNull(params.toPhone) && !_Auth.isMobile(params.toPhone)){
+            layer.msg('手机号码格式不正确', {icon: 2});
+            return;
+        }else if(params.toQq != '' && params.toQq){
+            if(params.toQq.length > 20 && params.toQq.length >0){
+                layer.msg('收件人QQ不能超过20个字符', {icon: 2});
+                return;
+            }
+        }
+        $.ajax({
+            type: 'post',
+            url: '/finance/invoice/info/optInvoice',
+            data: params,
+            cache: false,
+            dataType: 'json',
+            success: function (data) {
+                if (data.success != true) {
+                    layer.msg(data.msg);
+                    window.location.reload();
+                    return;
+                }
+                layer.msg(data.msg, {icon: 1});
+                window.location.reload();
+            }
+        });
+        layer.closeAll();
+    }
+
+    //确认修改普票
+    function confirmNormal() {
+        var params = {};
+        $("#modifyNormal").find(".js-key").each(function () {
+            var key = $(this).data("key");
+            console.log(key);
+            if ($(this).val() && $("#modifyNormal input[name=invoiceBody]:checked").val() == 2) {
+                params[key] = $(this).val();
+                params.invoiceBody = 2;
+            } else {
+                if (key != 'creditCode') {
+                    params[key] = $(this).val();
+                }
+                params.invoiceBody = 1;
+            }
+            if (key == 'agingId' || key == 'id') {
+                params[key] = $(this).text();
+
+            }
+        });
+        params.optType = 2;
+        params.invoiceType = 1;
+        debugger
+        if(params.invoiceHead == ''){
+            layer.msg("发票抬头不能为空", {icon: 2});
+            return;
+        }else if($("#modifyNormal input[name=invoiceBody]:checked").val() == 2){
+            if(params.creditCode == "" || !params.creditCode){
+                layer.msg("统一社会信用代码不能为空", {icon: 2});
+                return;
+            }else if(params.creditCode.length > 18){
+                layer.msg("统一社会信用代码不能超过18个字符", {icon: 2});
+                return;
+            }else if(params.email == ''){
+                layer.msg("电子邮箱不能为空", {icon: 2});
+                return;
+            }else if(!_Auth.isNull(params.email) && !_Auth.isEmail(params.email)){
+                layer.msg('邮箱格式不正确', {icon: 2});
+                return;
+            }else if(params.invoiceHead.length > 50){
+                layer.msg("发票抬头不能超过50个字符", {icon: 2});
+                return;
+            }
+        }else if(params.email == ''){
+            layer.msg("电子邮箱不能为空", {icon: 2});
+            return;
+        }else if(!_Auth.isNull(params.email) && !_Auth.isEmail(params.email)){
+            layer.msg('邮箱格式不正确', {icon: 2});
+            return;
+        }else if(params.invoiceHead.length > 50){
+            layer.msg("发票抬头不能超过50个字符", {icon: 2});
+            return;
+        }
+        $.ajax({
+            type: 'post',
+            url: '/finance/invoice/info/optInvoice',
+            data: params,
+            cache: false,
+            dataType: 'json',
+            success: function (data) {
+                if (data.success != true) {
+                    layer.msg(data.msg, {icon: 1,time:1500},function () {
+                        window.location.reload();
+                    });
+                    return;
+                }
+                layer.msg(data.msg, {icon: 1,time:1500},function () {
+                    window.location.reload();
+                });
+            }
+        });
+        layer.closeAll();
+    }
+
+    //新增普票
+    function addNormal() {
+        layer.open({
+            type: 1,
+            shadeClose: true,
+            title: "新增普通发票（电子）信息",
+            content: $("#addNormal"),
+            area: ['500px', '400px']
+        });
+        $("#addNormal").find("input").val("");
+        $(".radio-2").val('2');
+        $(".radio-1").val('1');
+        $(".radio-2").click();
+        $("#addNormal").find("select option:first").prop("selected", 'selected');
+
+
+
+        $(".invoiceType-body").click(function () {
+            var invoiceTypeRadio = $(this).val();
+            invoiceBodyChange(invoiceTypeRadio);
+        });
+    }
+    //确认新增普票
+    function addConfirmNormal() {
+        var params = {};
+        $("#addNormal").find(".js-key").each(function () {
+            var key = $(this).data("key");
+            if ($(this).val() && $("input[name=invoiceBody]:checked").val() == 2) {
+                params[key] = $(this).val();
+                params.invoiceBody = 2;
+            } else {
+                if (key != 'creditCode') {
+                    params[key] = $(this).val();
+                }
+                params.invoiceBody = 1;
+
+            }
+            params.agingId = $("#normalAgentId").val()
+        });
+        params.optType = 1;
+        params.invoiceType = 1;
+        if(params.invoiceHead == ''){
+            layer.msg("发票抬头不能为空", {icon: 2});
+            return;
+        }else if($("input[name=invoiceBody]:checked").val() == 2){
+            if(params.creditCode == "" || !params.creditCode){
+                layer.msg("统一社会信用代码不能为空", {icon: 2});
+                return;
+            }else if(params.creditCode.length > 18){
+                layer.msg("统一社会信用代码不能超过18个字符", {icon: 2});
+                return;
+            }else if(params.email == ''){
+                layer.msg("电子邮箱不能为空", {icon: 2});
+                return;
+            }else if(!_Auth.isNull(params.email) && !_Auth.isEmail(params.email)){
+                layer.msg('邮箱格式不正确', {icon: 2});
+                return;
+            }else if(params.invoiceHead.length > 50){
+                layer.msg("发票抬头不能超过50个字符", {icon: 2});
+                return;
+            }
+        }else if(params.email == ''){
+            layer.msg("电子邮箱不能为空", {icon: 2});
+            return;
+        }else if(!_Auth.isNull(params.email) && !_Auth.isEmail(params.email)){
+            layer.msg('邮箱格式不正确', {icon: 2});
+            return;
+        }else if(params.invoiceHead.length > 50){
+            layer.msg("发票抬头不能超过50个字符", {icon: 2});
+            return;
+        }
+        $.ajax({
+            type: 'post',
+            url: '/finance/invoice/info/optInvoice',
+            data: params,
+            cache: false,
+            dataType: 'json',
+            success: function (data) {
+                if (data.success != true) {
+                    layer.msg(data.msg, {icon: 1,time:1500},function () {
+                        window.location.reload();
+                    });
+                    return;
+
+                }
+                layer.msg(data.msg, {icon: 1,time:1500},function () {
+                    window.location.reload();
+                });
+            }
+        });
+        layer.closeAll();
+    }
+
+    //新增增票
+    function add() {
+        layer.open({
+            type: 1,
+            shadeClose: true,
+            title: "新增增票信息",
+            content: $("#addzp"),
+            area: ['1000px', '470px']
+        });
+        $("#addzp").find("input").val("");
+        $("#addzp").find("select option:first").prop("selected", 'selected');
+
+    }
+
+    //新增收件人信息
+    function addsjrMsg(id) {
+        layer.open({
+            type: 1,
+            shadeClose: true,
+            title: "新增收件人信息",
+            content: $("#addsjr"),
+            area: ['600px', '400px']
+        });
+        $.ajax({
+            type: 'post',
+            url: '/finance/invoice/info/invoiceById',
+            data: {
+                id: id
+            },
+            cache: false,
+            dataType: 'json',
+            success: function (data) {
+                if (data.code != 0) {
+                    layer.msg(data.msg);
+                    return;
+                } else {
+                    var params = data.data;
+                    $("#addsjr .js-key").each(function () {
+
+                        var key = $(this).data("key");
+                        $(this).val(params[key])
+                    })
+                }
+            }
+        });
+        $("#sjrId").val(id);
+    }
+
+    //确认新增收件人信息
+    function addsjr() {
+        var params = {};
+        $("#addsjr").find(".js-key").each(function () {
+            var key = $(this).data("key");
+            params[key] = $(this).val();
+        });
+        params.id = $("#sjrId").val();
+        if(params.toName == ''){
+            layer.msg("收件人不能为空", {icon: 2});
+            return;
+        }else if(params.toPhone == ''){
+            layer.msg("收件人手机不能为空", {icon: 2});
+            return;
+        }else if(params.toAddr == ''){
+            layer.msg("收件人地址不能为空", {icon: 2});
+            return;
+        }else if(params.toAddrDetail == ''){
+            layer.msg("详细地址不能为空", {icon: 2});
+            return;
+        }else if(params.toName.length > 20){
+            layer.msg("收件人不能超过20个字符", {icon: 2});
+            return;
+        }else if(params.toAddrDetail.length > 50){
+            layer.msg("详细地址不能超过50个字符", {icon: 2});
+            return;
+        }else if(!_Auth.isNull(params.toPhone) && !_Auth.isMobile(params.toPhone)){
+            layer.msg('手机号码格式不正确', {icon: 2});
+            return;
+        }else if(params.toQq.length > 20 && params.toQq.length >0){
+            layer.msg('收件人QQ不能超过20个字符', {icon: 2});
+            return;
+        }
+        $.ajax({
+            type: 'post',
+            url: '/finance/invoice/info/receiverInfo',
+            data: params,
+            cache: false,
+            dataType: 'json',
+            success: function (data) {
+                if (data.success != true) {
+                    layer.msg(data.msg);
+                    reload();
+                    return;
+                }
+                layer.msg(data.msg, {icon: 1});
+            }
+        });
+        layer.closeAll();
+    }
+
+    function closemsg() {
+        layer.closeAll();
+    }
+
+    // 查看详情
+    function view(id) {
+        $.ajax({
+            type: 'post',
+            url: '/finance/invoice/info/invoiceById',
+            data: {
+                id: id
+            },
+            cache: false,
+            dataType: 'json',
+            success: function (data) {
+                if (data.code != 0) {
+                    layer.msg(data.msg);
+                    return;
+                } else {
+                    var params = data.data;
+                    $(".js-key").each(function () {
+
+                        var key = $(this).data("key");
+                        if(key == 'invoiceType'){
+                            if(params[key] == '1'){
+                                $(this).text("普通发票（电子）")
+
+                            }else if(params[key] == '2'){
+                                $(this).text("增值税专票")
+                            }
+                        }else {
+                            $(this).text(params[key])
+                        }
+                    })
+                }
+            }
+        });
+    }
+
+
+    function invoiceBodyChange(invoiceBody) {
+        if (invoiceBody == 2) {
+            $(".creditCode").show();
+        } else {
+            $(".creditCode").hide();
+        }
+    }
+</script>
+
+</body>
+</html>

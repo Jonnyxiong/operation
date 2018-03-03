@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- SMSP运营平台:账户信息管理  - > 代理商申请记录 -->
+<mapper namespace="agentApplyRecord">
+	<sql id="queryCondition">
+		<if test="agentInfo != null and agentInfo!=''">
+			and (
+					a.email like concat('%',#{agentInfo},'%') 
+					or a.mobile like concat('%',#{agentInfo},'%') 
+				)
+		</if>
+		<if test="start_time_day != null and start_time_day!=''">
+			and a.create_time >= STR_TO_DATE(#{start_time_day},'%Y-%m-%d')
+		</if>
+		<if test="end_time_day != null and end_time_day!=''">
+			and a.create_time <![CDATA[<= STR_TO_DATE(#{end_time_day},'%Y-%m-%d %T') ]]>
+		</if>
+		<if test="applyStatus != null">
+			and a.status = #{applyStatus}
+		</if>
+	</sql>
+	<!-- 查询代理商申请记录 (分页查询) -->
+	<select id="query" resultType="map">
+		SELECT 
+			a.id,
+		a.company,
+		a.address,
+		a.realname,
+		a.email,
+		a.mobile,
+		a.city,
+		u.realname as userRealName,
+		a.remark,
+		a.status,
+		CASE a.status
+		WHEN 0 THEN '待受理'
+		WHEN 1 THEN '受理不通过'
+		WHEN 2 THEN '已受理'
+		END AS statusName,
+		a.reason,
+		DATE_FORMAT(a.create_time,'%Y-%m-%d %T')AS create_time
+		FROM
+		t_sms_agent_apply a
+		LEFT JOIN t_sms_user u ON a.belong_sale = u.id
+		<where>
+			<include refid="queryCondition" />
+		</where>
+		ORDER BY a.create_time desc
+		${limit}
+	</select>
+	<!-- 获取代理商申请记录的总数据量 -->
+	<select id="queryCount" resultType="map">
+		SELECT
+			COUNT(0) as totalCount
+		FROM
+			t_sms_agent_apply a
+		LEFT JOIN t_sms_user u ON a.belong_sale = u.id
+		<where>
+			<include refid="queryCondition" />
+		</where>
+	</select>
+	
+	<update id="acceptOrNot">
+		UPDATE 
+			t_sms_agent_apply
+		SET
+			status = #{status}
+		<if test="reason != null and reason != ''">
+			,reason = #{reason}
+		</if>
+		WHERE
+			email = #{email}
+	</update>
+
+	<update id="updateApplyInfoById">
+		UPDATE
+			t_sms_agent_apply
+		<set>
+			<if test="status != null and status != ''">
+				status = #{status},
+			</if>
+			<if test="belongSale != null and belongSale != ''">
+				belong_sale = #{belongSale},
+			</if>
+			<if test="reason != null and reason != ''">
+				reason = #{reason}
+			</if>
+		</set>
+		WHERE
+			id = #{applyId}
+	</update>
+
+
+
+
+	
+	<select id="checkAgentApplyStatus" resultType="java.lang.Integer">
+		SELECT COUNT(1) FROM t_sms_agent_apply WHERE email = #{email} AND status = 0
+	</select>
+
+
+
+
+	<select id="checkAgentApplyStatusById" resultType="java.lang.Integer">
+		SELECT COUNT(1) FROM t_sms_agent_apply WHERE id = #{applyId} AND status = 0
+	</select>
+
+
+	<select id="getAgentApplyInfoById" parameterType="java.lang.String" resultType="map">
+		SELECT
+		a.id,
+		a.company,
+		a.address,
+		a.realname,
+		a.email,
+		a.mobile,
+		a.city,
+		a.remark,
+		CASE a.status
+		WHEN 0 THEN '待受理'
+		WHEN 1 THEN '受理不通过'
+		WHEN 2 THEN '已受理'
+		END AS status,
+		a.reason,
+		DATE_FORMAT(a.create_time,'%Y-%m-%d %T')AS create_time
+		FROM
+		t_sms_agent_apply a
+		<where>
+			a.id = #{id}
+		</where>
+	</select>
+
+	<select id="getCountForUserInfo" resultType="java.lang.Integer">
+		SELECT
+			count(id)
+		FROM t_sms_user
+		<where>
+			1 = 1
+			<if test="username != null and username != '' ">
+				AND username = #{username}
+			</if>
+			<if test="email != null and email != '' ">
+				AND email = #{email}
+			</if>
+			<if test="mobile != null and mobile != '' ">
+				AND mobile = #{mobile}
+			</if>
+		</where>
+	</select>
+
+
+
+
+
+	<insert id="insertUserForSale" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO `t_sms_user` (
+			`id`,
+			`sid`,
+			`username`,
+			`email`,
+			`password`,
+			`user_type`,
+			`status`,
+			`mobile`,
+			`realname`,
+			`create_date`,
+			`update_date`,
+			`login_times`,
+			`web_id`
+		)
+		VALUES
+			(
+				#{id},
+				#{sid},
+				#{username},
+				#{email},
+				#{password},
+				#{user_type},
+				#{status},
+				#{mobile},
+				#{realname},
+				#{create_date},
+				#{update_date},
+				#{login_times},
+				#{web_id}
+			)
+	</insert>
+	
+	
+	<select id="getSaleRoleId" resultType="java.lang.String">
+		SELECT
+			id
+		FROM
+			t_sms_role
+		WHERE
+			role_name = '销售人员'
+	</select>
+
+	<select id="getUserIdFromUserRoleByRoleId" resultType="map">
+		SELECT
+			user_id
+		FROM
+			t_sms_user_role
+		WHERE
+			role_id = #{roleId}
+	</select>
+
+	<select id="getSaleInfoByUserId" resultType="map">
+		SELECT
+		  	id,
+			realname
+		FROM
+			t_sms_user
+		WHERE
+			status = '1'
+			AND id IN
+			<foreach collection="userIdList" item="item" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		ORDER BY convert(realname using gbk) collate gbk_chinese_ci <!-- 英文是排在中文前面的，而且是根据拼音排序的 -->
+	</select>
+
+	<insert id="insertUserRole">
+		INSERT INTO `t_sms_user_role` (
+			`role_id`,
+			`user_id`
+		)
+		VALUES
+			(#{role_id}, #{user_id});
+	</insert>
+	
+	<select id="getProductInfo" resultType="map">
+
+		SELECT
+			product_id as productId,
+			product_name as productName,
+			due_time
+		FROM
+			t_sms_oem_product_info
+		<where>
+			1 = 1
+			and product_type = #{productType}
+			and operator_code = #{operatorCode}
+			and area_code = #{areaCode}
+			and status = #{status}
+			<![CDATA[
+				and due_time > NOW()
+			]]>
+		</where>
+
+	</select>
+
+	<insert id="insertOemDataConfig">
+		INSERT INTO `t_sms_oem_data_config` (
+			`id`,
+			`domain_name`,
+			`agent_id`,
+			`copyright_text`,
+			`tab_logo_url`,
+			`logo_url`,
+			`company_logo_url`,
+			`api_document_url`,
+			`FAQ_document_url`,
+			`navigation_backcolor`,
+			`navigation_text_color`,
+			`hy_sms_discount`,
+			`yx_sms_discount`,
+			`gj_sms_discount`,
+			`test_product_id`,
+			`test_sms_number`
+		)
+		VALUES
+			(
+				#{id},
+				#{domain_name},
+				#{agent_id},
+				#{copyright_text},
+				#{tab_logo_url},
+				#{logo_url},
+				#{company_logo_url},
+				#{api_document_url},
+				#{FAQ_document_url},
+				#{navigation_backcolor},
+				#{navigation_text_color},
+				#{hy_sms_discount},
+				#{yx_sms_discount},
+				#{gj_sms_discount},
+				#{test_product_id},
+				#{test_sms_number}
+			)
+	</insert>
+
+
+
+ 
+</mapper> 

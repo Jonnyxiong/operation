@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org" lang="zh-cn">
+<head>
+<meta content="云之讯,云通讯,云通讯平台" name="keywords" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport"
+	content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1" />
+<title>短信云平台运营系统 - 管理员中心</title>
+<meta charset="utf-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}"
+	rel="stylesheet">
+<link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}"
+	rel="stylesheet">
+<!-- jqgrid-->
+<link
+	th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}"
+	rel="stylesheet">
+<link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+<link th:href="@{/resources/css/style.min862f.css?v=4.1.0}"
+	rel="stylesheet">
+
+<style>
+/* Additional style to fix warning dialog position */
+/* #alertmod_table_list_2 { */
+/* 	top: 900px !important; */
+/* } */
+
+.grid-detail {
+	background-color: #FFF;
+}
+
+.grid-icon {
+	font-size: 30px;
+	line-height: 80px;
+}
+
+.grid-icon span:before {
+	color: green;
+}
+.form-title{
+	padding-top:7px;
+}
+.margin-left30{
+	margin-left:30px
+}
+</style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+	<div class="wrapper wrapper-content  animated fadeInRight"
+		style="width: 1200px;">
+
+		<div class="container-fluid grid-detail">
+			<div class="row">
+				<ul class="nav nav-tabs myTabs" role="tablist">
+					<li role="presentation onclick="doResize(1)" class="active"><a
+						href="#isOnline" class="text-center" aria-controls="home" role="tab"
+						data-toggle="tab">已接入</a></li>
+					<li role="presentation" onclick="doResize(2)"><a href="#isWaitOnline"
+						class="text-center" aria-controls="profile" role="tab"
+						data-toggle="tab">待接入</a></li>
+					<a href="javascript:;" class="btn btn-sm btn-primary pull-right" style="margin-top:5px;margin-right:15px;" onclick="addResource()">提交新资源</a>
+				</ul>
+				<div class="col-xs-12" >
+					<div class="tab-content">
+						<!-- 已接入Tab页 -->
+						<div role="tabpanel" class="tab-pane active" id="isOnline">
+							<div class="ibox-content">
+								<div class="jqGrid_wrapper">
+									<table id="table_list_1"></table>
+								</div>
+							</div>
+						</div>
+						<!-- 待接入Tab页 -->
+						<div role="tabpanel" class="tab-pane" id="isWaitOnline">
+							<div class="ibox-content">
+								<div class="jqGrid_wrapper">
+									<table id="table_list_2"></table>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-sm-12 text-center">
+					<button type="button" class="btn btn-primary" onclick="save()">确定</button>
+					<button type="button" class="btn btn-default margin-left30" onclick="cancel()">取消</button>
+				</div>
+			</div>
+		</div>
+	</div>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+
+<script th:inline="javascript">
+/*<![CDATA[*/
+	$(document).ready(function() {
+		$.jgrid.defaults.styleUI = "Bootstrap";
+
+		$('#myTabs a').click(function(e) {
+			e.preventDefault()
+			$(this).tab('show')
+		})
+		
+		var isOnlineRes;
+		var isWaitOnlineRes;
+		try {
+			isOnlineRes = [[${isOnlineRes}]];
+			isWaitOnlineRes = [[${isWaitOnlineRes}]];
+		} catch (e) {
+
+			isOnlineRes = [];
+			isWaitOnlineRes = [];
+		}
+		
+		// “已接入”和“待接入”表单的jqGrid表头定义
+		var tableColModel = [
+			{ label: "资源编号",name: "resourceId",align: "left",sortable:false, width:110, key:true},
+			{ label:"通道号",name: "channelId",align: "left",sortable:false, width:70},
+			{ label:"通道类型",name: "channelType",align: "left",sortable:false, width:100,
+				formatter:function (cellvalue) {
+                    var arr = cellvalue.split(",");
+                    var channelType = '';
+                    for(var i in arr){
+                        switch (arr[i]){
+                            case '0':
+                                channelType += channelType.length > 0 ? ' , 三网合一' :'三网合一';
+                                break;
+                            case '1':
+                                channelType += channelType.length > 0 ? ' , 移动':'移动';
+                                break;
+                            case '2':
+                                channelType += channelType.length > 0 ? ' , 电信':'电信';
+                                break;
+                            case '3':
+                                channelType += channelType.length > 0 ? ' , 联通':'联通';
+                                break;
+                            case '4':
+                                channelType += channelType.length > 0 ? ' , 全网':'全网';
+                                break;
+                        }
+                    }
+                    return channelType;
+                }
+			},
+			{ label:"发送类型",name: "smsType",align: "left",sortable:false,width:100},
+			{ label:"发送内容属性",name: "contentProp",align: "left",sortable:false,width:100},
+			{ label:"是否直连",name: "directConnect",align: "left",sortable:false,width:80,formatter:"select",editoptions:{value:"0:直连;1:第三方"}},
+			{ label:"是否保底",name: "minimumGuarantee",align: "left",sortable:false,width:80,
+				formatter:function(cellvalue){
+                    if(/^[1-9]\d*$/.test(cellvalue)){
+                        cellvalue += '万条/月';
+                    }else{
+                        cellvalue = '不承诺保底';
+                    }
+                    return cellvalue;
+                }
+			},
+			{ label:"是否授信",name: "isCredit",align: "left",sortable:false,width:80,
+				formatter:function(cellvalue){
+                    if(/^[1-9]\d*$/.test(cellvalue)){
+                        cellvalue += '万条/月';
+                    }else{
+                        cellvalue = '不授信';
+                    }
+                    return cellvalue;
+                }
+			},
+			{ label:"扩展位",name: "extendSize",align: "left",sortable:false,width:60},
+			{ label:"速率",name: "rate",align: "left",sortable:false,width:80,
+				formatter:function(cellvalue){
+                    if(/^\d+$/.test(cellvalue)){
+                        cellvalue += ' TPS';
+                    }else{
+                        cellvalue = '-';
+                    }
+                    return cellvalue;
+                }
+			},
+			{ label:"签名",name: "signType",align: "left",sortable:false,width:80,
+				formatter:function (cellvalue) {
+                    var arr = cellvalue.split(",");
+                    var signType = '';
+                    for(var i in arr){
+                        switch (arr[i]){
+                            case '0':
+                                signType += signType.length > 0 ? ' , 自定义' :'自定义';
+                                break;
+                            case '1':
+                                signType += signType.length > 0 ? ' , 报备签名':'报备签名';
+                                break;
+                            case '2':
+                                signType += signType.length > 0 ? ' , 固签':'固签';
+                                break;
+                        }
+                    }
+                    return signType;
+                }
+			},
+			{ label:"采购价格（元/条）",name: "purchasePrice",align: "left",width:110,sortable:false},
+			{ label:"状态",name: "state",align: "left",width:110,hidden:true}
+		];
+		
+		$("#table_list_1").jqGrid({
+			datatype: "local",
+			data : isOnlineRes,
+			height: 'auto',
+			autowidth: true,
+			shrinkToFit: false,
+			autoScroll: true,
+			rowNum: 20,
+			rowList: [10, 20, 30,50],
+			colModel: [
+						{ label: "资源编号",name: "resourceId",align: "left",sortable:false, width:110, key:true, hidden:true},
+						{ label:"通道号",name: "channelId",align: "left",sortable:false, width:80},
+						{ label:"通道类型",name: "channelType",align: "left",sortable:false, width:120,
+							formatter:function (cellvalue) {
+			                    var arr = cellvalue.split(",");
+			                    var channelType = '';
+			                    for(var i in arr){
+			                        switch (arr[i]){
+			                            case '0':
+			                                channelType += channelType.length > 0 ? ' , 三网合一' :'三网合一';
+			                                break;
+			                            case '1':
+			                                channelType += channelType.length > 0 ? ' , 移动':'移动';
+			                                break;
+			                            case '2':
+			                                channelType += channelType.length > 0 ? ' , 电信':'电信';
+			                                break;
+			                            case '3':
+			                                channelType += channelType.length > 0 ? ' , 联通':'联通';
+			                                break;
+			                            case '4':
+			                                channelType += channelType.length > 0 ? ' , 全网':'全网';
+			                                break;
+			                        }
+			                    }
+			                    return channelType;
+			                }
+						},
+						{ label:"发送类型",name: "smsType",align: "left",sortable:false,width:120,
+							formatter:function(cellvalue){
+								var reg = new RegExp("\\$\\#","g"); 
+		                        return cellvalue.replace(reg, "，");
+		                    }
+						},
+						{ label:"发送内容属性",name: "contentProp",align: "left",sortable:false,width:110},
+						{ label:"是否直连",name: "directConnect",align: "left",sortable:false,width:80,formatter:"select",editoptions:{value:"0:直连;1:第三方"}},
+						{ label:"是否保底",name: "minimumGuarantee",align: "left",sortable:false,width:80,
+							formatter:function(cellvalue){
+			                    if(/^[1-9]\d*$/.test(cellvalue)){
+			                        cellvalue += '万条/月';
+			                    }else{
+			                        cellvalue = '不承诺保底';
+			                    }
+			                    return cellvalue;
+			                }
+						},
+						{ label:"是否授信",name: "isCredit",align: "left",sortable:false,width:80,
+							formatter:function(cellvalue){
+			                    if(/^[1-9]\d*$/.test(cellvalue)){
+			                        cellvalue += '万条/月';
+			                    }else{
+			                        cellvalue = '不授信';
+			                    }
+			                    return cellvalue;
+			                }
+						},
+						{ label:"扩展位",name: "extendSize",align: "left",sortable:false,width:60},
+						{ label:"速率",name: "rate",align: "left",sortable:false,width:80,
+							formatter:function(cellvalue){
+			                    if(/^\d+$/.test(cellvalue)){
+			                        cellvalue += ' TPS';
+			                    }else{
+			                        cellvalue = '-';
+			                    }
+			                    return cellvalue;
+			                }
+						},
+						{ label:"签名",name: "signType",align: "left",sortable:false,width:120,
+							formatter:function (cellvalue) {
+			                    var arr = cellvalue.split(",");
+			                    var signType = '';
+			                    for(var i in arr){
+			                        switch (arr[i]){
+			                            case '0':
+			                                signType += signType.length > 0 ? ' , 自定义' :'自定义';
+			                                break;
+			                            case '1':
+			                                signType += signType.length > 0 ? ' , 报备签名':'报备签名';
+			                                break;
+			                            case '2':
+			                                signType += signType.length > 0 ? ' , 固签':'固签';
+			                                break;
+			                        }
+			                    }
+			                    return signType;
+			                }
+						},
+						{ label:"采购价格（元/条）",name: "purchasePrice",align: "left",width:110,sortable:false},
+						{ label:"状态",name: "state",align: "left",width:110,hidden:true}
+					],
+			viewrecords: true,
+			hidegrid: false,
+			multiselect : true,
+			height: 330,
+			gridComplete: function(){
+				var selectedRes = parent.selectedRes;
+				$(selectedRes).each(function(index, obj){
+					if(obj.state == 1){
+						$("#table_list_1").jqGrid('setSelection', obj.resourceId);
+					}
+				});
+			}
+	  	});
+		
+		$("#table_list_2").jqGrid({
+			datatype: "local",
+			data : isWaitOnlineRes,
+			height: 'auto',
+			autowidth: true,
+			shrinkToFit: false,
+			autoScroll: true,
+			rowNum: 20,
+			rowList: [10, 20, 30,50],
+			colModel: [
+						{ label: "资源编号",name: "resourceId",align: "left",sortable:false, width:110, key:true},
+// 						{ label:"通道号",name: "channelId",align: "left",sortable:false, width:70},
+						{ label:"通道类型",name: "channelType",align: "left",sortable:false, width:100,
+							formatter:function (cellvalue) {
+			                    var arr = cellvalue.split(",");
+			                    var channelType = '';
+			                    for(var i in arr){
+			                        switch (arr[i]){
+			                            case '0':
+			                                channelType += channelType.length > 0 ? ' , 三网合一' :'三网合一';
+			                                break;
+			                            case '1':
+			                                channelType += channelType.length > 0 ? ' , 移动':'移动';
+			                                break;
+			                            case '2':
+			                                channelType += channelType.length > 0 ? ' , 电信':'电信';
+			                                break;
+			                            case '3':
+			                                channelType += channelType.length > 0 ? ' , 联通':'联通';
+			                                break;
+			                            case '4':
+			                                channelType += channelType.length > 0 ? ' , 全网':'全网';
+			                                break;
+			                        }
+			                    }
+			                    return channelType;
+			                }
+						},
+						{ label:"发送类型",name: "smsType",align: "left",sortable:false,width:100},
+						{ label:"发送内容属性",name: "contentProp",align: "left",sortable:false,width:100},
+						{ label:"是否直连",name: "directConnect",align: "left",sortable:false,width:80,formatter:"select",editoptions:{value:"0:直连;1:第三方"}},
+						{ label:"是否保底",name: "minimumGuarantee",align: "left",sortable:false,width:80,
+							formatter:function(cellvalue){
+			                    if(/^[1-9]\d*$/.test(cellvalue)){
+			                        cellvalue += '万条/月';
+			                    }else{
+			                        cellvalue = '不承诺保底';
+			                    }
+			                    return cellvalue;
+			                }
+						},
+						{ label:"是否授信",name: "isCredit",align: "left",sortable:false,width:80,
+							formatter:function(cellvalue){
+			                    if(/^[1-9]\d*$/.test(cellvalue)){
+			                        cellvalue += '万条/月';
+			                    }else{
+			                        cellvalue = '不授信';
+			                    }
+			                    return cellvalue;
+			                }
+						},
+						{ label:"扩展位",name: "extendSize",align: "left",sortable:false,width:60},
+						{ label:"速率",name: "rate",align: "left",sortable:false,width:80,
+							formatter:function(cellvalue){
+			                    if(/^\d+$/.test(cellvalue)){
+			                        cellvalue += ' TPS';
+			                    }else{
+			                        cellvalue = '-';
+			                    }
+			                    return cellvalue;
+			                }
+						},
+						{ label:"签名",name: "signType",align: "left",sortable:false,width:80,
+							formatter:function (cellvalue) {
+			                    var arr = cellvalue.split(",");
+			                    var signType = '';
+			                    for(var i in arr){
+			                        switch (arr[i]){
+			                            case '0':
+			                                signType += signType.length > 0 ? ' , 自定义' :'自定义';
+			                                break;
+			                            case '1':
+			                                signType += signType.length > 0 ? ' , 报备签名':'报备签名';
+			                                break;
+			                            case '2':
+			                                signType += signType.length > 0 ? ' , 固签':'固签';
+			                                break;
+			                        }
+			                    }
+			                    return signType;
+			                }
+						},
+						{ label:"待接入时间",name: "onlineDate",align: "left",sortable:false,width:'100',formatter:'date',formatoptions: {newformat:'Y-m-d'}},
+						{ label:"采购价格（元/条）",name: "purchasePrice",align: "left",width:110,sortable:false},
+						{ label:"状态",name: "state",align: "left",width:110,hidden:true}
+					],
+			viewrecords: true,
+			hidegrid: false,
+			multiselect : true,
+			height: 330,
+			gridComplete: function(){
+				var selectedRes = parent.selectedRes;
+				$(selectedRes).each(function(index, obj){
+					if(obj.state == 0){
+						$("#table_list_2").jqGrid('setSelection', obj.resourceId);
+					}
+				});
+			}
+	  	});
+	});
+	
+	// 获得jqGrid表单中的选中行的数据对象
+	function getSelectedRowsData($grid) {
+		var rowsData = [];
+		var selectedRowArr = $grid.getGridParam("selarrrow");
+		$(selectedRowArr).each(function(index, value){
+			var cruRowId = value;
+			curRowData = $grid.jqGrid('getRowData', cruRowId);
+			rowsData.push(curRowData);
+		});
+		return rowsData;
+    }
+	
+	function save(){
+		var selectedRes = [];
+		var table1SelectRow = getSelectedRowsData($("#table_list_1")); // 已接入资源
+		var table2SelectRow = getSelectedRowsData($("#table_list_2")); // 待接入资源
+		
+		// 将所有选中的资源放到一个数组对象中
+		selectedRes = selectedRes.concat(table1SelectRow);
+		selectedRes = selectedRes.concat(table2SelectRow);
+		if(selectedRes.length == 0){
+			layer.msg("请选择资源");
+			return ;
+		}
+		
+		// 将所有选中的资源列表值传递给 demand-hasRes.html 页面
+		parent.selectedRes = selectedRes;
+		parent.reloadGridData(selectedRes);
+		
+		parent.layer.closeAll();
+	}
+	
+	function cancel(){
+		parent.layer.closeAll();
+	}
+	
+	function addResource(){
+		parent.location.href = /*[[@{/order/resource/add}]]*/;
+	}
+	
+	function doResize(type){
+        var width = $(".jqGrid_wrapper").width();
+        if(width > 0){
+			grid_width = width;
+        }
+        $("#table_list_" + type).setGridWidth(grid_width);
+    }
+	
+/*]]>*/
+</script>
+
+</body>
+</html>

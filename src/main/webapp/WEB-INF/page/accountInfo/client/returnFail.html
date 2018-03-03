@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:th="http://www.thymeleaf.org"
+	  lang="zh-cn">
+<head>
+	<meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+	<meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+	<title>短信云平台运营系统 </title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+	<link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" href="/resources/css/bootstrap.min14ed.css?v=3.3.6" rel="stylesheet">
+	<link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" href="/resources/css/font-awesome.min93e3.css?v=4.4.0" rel="stylesheet"><!-- jqgrid-->
+	<link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" href="/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css" rel="stylesheet">
+	<link th:href="@{/resources/css/animate.min.css}" href="/resources/css/animate.min.css" rel="stylesheet">
+	<link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" href="/resources/css/style.min862f.css?v=4.1.0" rel="stylesheet">
+	<link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" href="/resources/css/plugins/sweetalert/sweetalert.css" rel="stylesheet">
+	<link th:href="@{/resources/css/doublebox-bootstrap.css}" href="/resources/css/doublebox-bootstrap.css" rel="stylesheet">
+	<style>
+		/* Additional style to fix warning dialog position */
+		#alertmod_table_list_2 {
+			top: 900px !important;
+		}
+		._green_link {
+			color: #008000;
+		}
+		._green_link:hover {
+			color: #008000;
+			text-decoration:underline;
+		}
+		.modal-content{
+			opacity: 1 !important;
+			border:none;
+		}
+		.bootstrap-duallistbox-container label{
+			text-align: center;
+		}
+		.filter{
+			text-align: center;
+		}
+		.demo{
+			height: 322px !important;
+		}
+		.green{
+			color:#008000;
+		}
+		.pop-grid{
+			padding-left:30px;
+			padding-top:30px;
+		}
+	</style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+	<div class="row">
+		<div class="col-sm-12">
+
+			<div class="ibox" >
+				<!-- 搜索条件 -->
+				<div class="ibox-title">
+					<h3>
+						<span class="m-l-sm" th:text="${clientid}">ID</span>
+						<span class="m-l-sm" th:text="${name}">客户</span>
+						<span class="m-l-sm">短信失败待返还</span>
+						<input type="hidden" th:value="${clientid}" id="clientid">
+					</h3>
+				</div>
+				<div class="ibox-content">
+					<form role="form" class="form-inline" id="mainForm">
+
+						<!-- 时间选择 -->
+						<div class="form-group" id="sandbox-container" >
+							<div class="form-group pull-right"><span style="font-weight:700">消费日期:</span>
+								<input placeholder="起始时间" class="form-control layer-date" id="start_time_day" name="start_time_day" style="width:102px;"/>至
+								<input placeholder="截止时间" class="form-control layer-date" id="end_time_day" name="end_time_day" style="width:102px;"/>
+							</div>
+						</div>
+						<div class="form-group">
+							<span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-danger" onclick="search()">搜索</button></span>
+						</div>
+					</form>
+				</div>
+
+				<div class="ibox-content">
+					<div class="jqGrid_wrapper">
+                        <!-- OEM 代理商-->
+						<table id="table_list1" class="table_list" th:if="${agentType} eq 5"></table>
+                        <!-- 品牌 代理商-->
+						<table id="table_list2" class="table_list" th:if="${agentType} eq 2"></table>
+						<!-- 销售 代理商-->
+						<table id="table_list3" class="table_list" th:if="${agentType} eq 1"></table>
+						<div id="pager_list"></div>
+					</div>
+					<div class="text-right">
+						合计：<span class="green"><span class="js-totalreturn">0</span>条</span> <a href="javascript:;" class="btn btn-primary btn-md js-return" style="margin-left:50px;">立即返还</a>
+					</div>
+					<p>&nbsp;</p>
+				</div>
+			</div>
+		</div>
+	</div>
+<div>
+
+</div>
+
+</div>
+<div class="pop-grid" id="pop" style="display: none;">
+	<p class="">客户ID：<span th:text="${clientid}"></span></p>
+	<p class="">客户名称：<span th:text="${name}"></span></p>
+	<p class="green">返回条数：<span class="js-totalreturn"></span></p>
+	<p>是否确认返还？</p>
+	<a href="javascript:;" class="btn btn-primary js-confirm">确认</a>
+	<a href="javascript:;" class="btn btn-default js-cancel">取消</a>
+</div>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/js/doublebox-bootstrap.js}"></script>
+
+<script th:inline="javascript">
+	/*<![CDATA[*/
+    $("#end_time_day").val(laydate.now(-4));
+    var start = {
+        elem: "#start_time_day",
+        format: "YYYY-MM-DD",
+        min: halfYearAgo("yyyy-MM-dd"),
+        max: laydate.now(-4),
+        istoday: false,
+        choose: function (datas) {
+            end.min = datas;
+        }
+    };
+    var end = {
+        elem: "#end_time_day",
+        format: "YYYY-MM-DD",
+//        min: halfYearAgo("yyyy-MM-dd"),
+        max: laydate.now(-4),
+        istoday: false,
+        choose: function (datas) {
+            start.max = datas;
+        }
+    };
+    laydate(start);
+    laydate(end);
+
+    function search(){
+
+        $(".table_list").jqGrid('setGridParam',{
+            datatype:'json',
+            postData: {
+                startDate: $("#start_time_day").val(),
+                endDate: $("#end_time_day").val()
+            }, //发送数据
+        }).trigger("reloadGrid"); //重新载入
+    }
+	var submit_flag = false;
+	function commitReturnFail(){
+        var params = {};
+        params.clientId = $("#clientid").val();
+        params.failReturnList = failReturnList;
+		if(submit_flag){
+		    return;
+		}
+		submit_flag = true;
+        $.ajax({
+            url : '/accountInfo/returnFail/confirmReturn',
+            type:'POST',
+            dataType : 'json',
+            data: JSON.stringify(params),
+            contentType: "application/json",
+            success : function(result){
+                submit_flag = false;
+                if(result == null){
+                    layer.msg("请求超时");
+                }else if(result.success == null){
+					layer.closeAll();
+                    layer.alert("系统错误，请稍后再试...", {icon: 2});
+                }else if(result.success){
+                    layer.msg(result.msg,{icon: 1,time: 1000},function(){
+						layer.closeAll();
+					});
+                }else{
+                    layer.alert(result.msg, {icon: 2});
+                }
+				search();
+            }
+        })
+	}
+	var failReturnList = [];
+    $(document).ready(function () {
+        var clientid = $("#clientid").val();
+        var url = /*[[@{/accountInfo/{clientid}/returnFail}]]*/'';
+        url = url.replace('{clientid}',clientid);
+        $.jgrid.defaults.styleUI = "Bootstrap";
+        //OEM代理商表格
+        $("#table_list1").jqGrid({
+            url:url,
+            mtype: 'POST',
+            datatype: "json",
+            jsonReader : {
+                root:"entityList",
+                page: "currentPage",
+                total: "totalPage",
+                records: "totalCount"
+            },
+            postData: {
+                startDate: $("#start_time_day").val(),
+                endDate: $("#end_time_day").val()
+            },
+            height: 'auto',
+            rownumbers:true,
+            autowidth: true,
+            shrinkToFit: true,
+            multiselect: true,
+            autoScroll: true,
+            rowNum: 20,
+            rowList: [10, 20, 30,50],
+            colModel: [
+                {label:"消费日期",name: "dateStr",align: "left",sortable:false,width:80},
+                {label:"计费规则",name: "chargeRuleStr",align: "left",sortable:false,width:150},
+                {label:"产品类型",name: "productTypeStr", align: "left",sortable:false,width:120},
+                {label:"运营商类型",name: "operatorCodeStr", align: "left",sortable:false,width:80},
+                {label:"区域",name: "areaCodeStr", align: "left",sortable:false,width:80},
+                {label:"单价(元)",name: "unitPriceStr", align: "left",sortable:false,width:120},
+                {label:"到期时间",name: "dueTimeStr", align: "left",sortable:false,width:120},
+                {label:"未知条数(条)",name: "submitsuccess", align: "left",sortable:false,width:80},
+                {label:"失败条数(条)",name: "failTotal", align: "left",sortable:false,width:80},
+                {label:"待返还条数",name: "returnNumber", align: "left",sortable:false,width:160},
+                {label:"subId",name: "subId", align: "left",sortable:false,width:160,hidden:true},
+                {label:"id",name: "id", align: "left",sortable:false,width:160,hidden:true}
+            ],
+            pager: "#pager_list",
+            viewrecords: true,
+            hidegrid: false,
+            onSelectRow : function(rowid, status){
+                failReturnList = [];
+                var arr = countTotal("table_list1"),total=0;
+                for(var i =0; i < arr.length; i++){
+                    total += parseInt(arr[i].returnNumber);
+                    failReturnList[i] = {};
+                    failReturnList[i].subId = arr[i].subId;
+                    failReturnList[i].id = arr[i].id;
+
+                }
+                $(".js-totalreturn").text(total);
+			},
+            onSelectAll : function(aRowids,status){
+                failReturnList = [];
+                var arr = countTotal("table_list1"),total=0;
+                for(var i =0; i < arr.length; i++){
+                    total += parseInt(arr[i].returnNumber);
+                    failReturnList[i] = {};
+                    failReturnList[i].subId = arr[i].subId;
+                    failReturnList[i].id = arr[i].id;
+
+                }
+                $(".js-totalreturn").text(total);
+			}
+        });
+        //品牌代理商表格
+        $("#table_list2").jqGrid({
+            url:url,
+            mtype: 'POST',
+            datatype: "json",
+            jsonReader : {
+                root:"entityList",
+                page: "currentPage",
+                total: "totalPage",
+                records: "totalCount"
+            },
+            height: 'auto',
+            rownumbers:true,
+            autowidth: true,
+            shrinkToFit: true,
+            multiselect: true,
+            autoScroll: true,
+            rowNum: 20,
+            rowList: [10, 20, 30,50],
+            colModel: [
+                {label:"消费日期",name: "dateStr",align: "left",sortable:false,width:100},
+                {label:"计费规则",name: "chargeRuleStr",align: "left",sortable:false,width:150},
+                {label:"订单号",name: "subId",align: "left",sortable:false,width:200},
+                {label:"产品类型",name: "productTypeStr", align: "left",sortable:false,width:120},
+                {label:"运营商类型",name: "operatorCodeStr", align: "left",sortable:false,width:80},
+                {label:"区域",name: "areaCodeStr", align: "left",sortable:false,width:80},
+                {label:"单价(元)",name: "unitPriceStr", align: "left",sortable:false,width:120},
+                {label:"到期时间",name: "dueTimeStr", align: "left",sortable:false,width:120},
+                {label:"未知条数(条)",name: "submitsuccess", align: "left",sortable:false,width:80},
+                {label:"失败条数(条)",name: "failTotal", align: "left",sortable:false,width:80},
+                {label:"待返还条数",name: "returnNumber", align: "left",sortable:false,width:160},
+                {label:"subId",name: "subId", align: "left",sortable:false,width:160,hidden:true},
+                {label:"id",name: "id", align: "left",sortable:false,width:160,hidden:true}
+            ],
+            pager: "#pager_list",
+            viewrecords: true,
+            hidegrid: false,
+            onSelectRow : function(rowid, status){
+                failReturnList = [];
+                var arr = countTotal("table_list2"),total=0;
+                for(var i =0; i < arr.length; i++){
+                    total += parseInt(arr[i].returnNumber);
+                    failReturnList[i] = {};
+                    failReturnList[i].subId = arr[i].subId;
+                    failReturnList[i].id = arr[i].id;
+
+                }
+                $(".js-totalreturn").text(total);
+            },
+            onSelectAll : function(aRowids,status){
+                failReturnList = [];
+                var arr = countTotal("table_list2"),total=0;
+                for(var i =0; i < arr.length; i++){
+                    total += parseInt(arr[i].returnNumber);
+                    failReturnList[i] = {};
+                    failReturnList[i].subId = arr[i].subId;
+                    failReturnList[i].id = arr[i].id;
+
+                }
+                $(".js-totalreturn").text(total);
+            }
+        });
+        //销售代理商表格
+        $("#table_list3").jqGrid({
+            url:url,
+            mtype: 'POST',
+            datatype: "json",
+            jsonReader : {
+                root:"entityList",
+                page: "currentPage",
+                total: "totalPage",
+                records: "totalCount"
+            },
+            height: 'auto',
+            rownumbers:true,
+            autowidth: true,
+            shrinkToFit: true,
+            multiselect: true,
+            autoScroll: true,
+            rowNum: 20,
+            rowList: [10, 20, 30,50],
+            colModel: [
+                {label:"消费日期",name: "dateStr",align: "left",sortable:false,width:100},
+                {label:"计费规则",name: "chargeRuleStr",align: "left",sortable:false,width:150},
+                {label:"订单号",name: "subId",align: "left",sortable:false,width:200},
+                {label:"产品类型",name: "productTypeStr", align: "left",sortable:false,width:120},
+                {label:"运营商类型",name: "operatorCodeStr", align: "left",sortable:false,width:80},
+                {label:"区域",name: "areaCodeStr", align: "left",sortable:false,width:80},
+                {label:"单价(元)",name: "unitPriceStr", align: "left",sortable:false,width:120},
+                {label:"到期时间",name: "dueTimeStr", align: "left",sortable:false,width:120},
+                {label:"未知条数(条)",name: "submitsuccess", align: "left",sortable:false,width:80},
+                {label:"失败条数(条)",name: "failTotal", align: "left",sortable:false,width:80},
+                {label:"待返还条数",name: "returnNumber", align: "left",sortable:false,width:160},
+                {label:"subId",name: "subId", align: "left",sortable:false,width:160,hidden:true},
+                {label:"id",name: "id", align: "left",sortable:false,width:160,hidden:true}
+            ],
+            pager: "#pager_list",
+            viewrecords: true,
+            hidegrid: false,
+            onSelectRow : function(rowid, status){
+                failReturnList = [];
+                var arr = countTotal("table_list3"),total=0;
+                for(var i =0; i < arr.length; i++){
+                    total += parseInt(arr[i].returnNumber);
+                    failReturnList[i] = {};
+                    failReturnList[i].subId = arr[i].subId;
+                    failReturnList[i].id = arr[i].id;
+
+                }
+                $(".js-totalreturn").text(total);
+            },
+            onSelectAll : function(aRowids,status){
+                failReturnList = [];
+                var arr = countTotal("table_list3"),total=0;
+                for(var i =0; i < arr.length; i++){
+                    total += parseInt(arr[i].returnNumber);
+                    failReturnList[i] = {};
+                    failReturnList[i].subId = arr[i].subId;
+                    failReturnList[i].id = arr[i].id;
+
+                }
+                $(".js-totalreturn").text(total);
+            }
+        });
+        //所有选中数据
+		function countTotal(id){
+			var ids = $('#' + id).jqGrid('getGridParam','selarrrow');
+			var arr = [];
+			for(var i = 0; i < ids.length; i++){
+				var rowData = $("#" + id).jqGrid('getRowData',ids[i]);
+				arr.push(rowData)
+			}
+			return arr;
+
+		}
+        $(window).bind("resize", function () {
+            var width = $(".jqGrid_wrapper").width();
+            $("#table_list").setGridWidth(width);
+        })
+
+
+        function keyUp(e) {
+            var currKey=0,e=e||event;
+            currKey=e.keyCode||e.which||e.charCode;
+            var keyName = String.fromCharCode(currKey);
+            if (currKey == 13){
+                search();
+            }
+        }
+        document.onkeyup = keyUp;
+
+		$(".js-return").click(function(){
+		    if(failReturnList.length == 0){
+				layer.msg("请选择要返还的产品",{icon:2});
+			} else {
+                layer.open({
+                    title:'返还确认',
+                    type: 1,
+                    area: ['420px', '240px'], //宽高
+                    content: $("#pop")
+                });
+			}
+
+		})
+		$(".js-cancel").click(function(){
+		    layer.closeAll();
+		})
+		$(".js-confirm").click(function(){
+            commitReturnFail();
+
+		})
+        //冒泡提示 页面加载完成后手动抓取元素，修改title值，达到冒泡提示效果
+
+        $("#table_list1_submitsuccess").attr("title","(未知条数计费规则：1)");
+        $("#table_list2_submitsuccess").attr("title","(未知条数计费规则：1)");
+        $("#table_list1_failTotal").attr("title","（失败条数计费规则：4+6）");
+        $("#table_list2_failTotal").attr("title","（失败条数计费规则：4+6）");
+
+    });
+
+
+
+	/*]]>*/
+</script>
+</body>
+</html>

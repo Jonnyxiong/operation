@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信平台运营系统 - 管理员中心</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    <!--<link th:href="@{/resources/css/jquery.datetimepicker.css}" rel="stylesheet">-->
+
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+    <link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/timePicker.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+    <link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+
+    <style>
+        /* Additional style to fix warning dialog position */
+
+        ul {
+            list-style: none;
+        }
+        li{
+            height: 28px;
+            line-height: 28px;
+            text-align: left;
+        }
+        li:hover{
+            color: #0d8ddb;
+        }
+        ._green_link {
+            color: #008000;
+        }
+        ._green_link:hover {
+            color: #008000;
+            text-decoration:underline;
+        }
+
+    </style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <a href="/index/welcome" class="btn btn-white">返回</a>
+            <div class=" contact-box">
+                <div>
+                    <h5 style="border-left: 2px solid green;padding-left: 5px;">公告列表</h5>
+                </div>
+                <div class="ibox-content">
+                    <div class="jqGrid_wrapper">
+                        <table id="table_list"></table>
+                        <div id="pager_list"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script th:src="@{/resources/js/jquery.1.7.2.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/jquery.datetimepicker.full.min.js}"></script>
+<script th:src="@{/resources/js/plugins/timePicker/jquery.timePicker.js}"></script>
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/auth.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    $(document).ready(function () {
+
+        $.jgrid.defaults.styleUI = "Bootstrap";
+        $("#table_list").jqGrid({
+            url:/*[[@{/notice/list}]]*/,
+            mtype: 'POST',
+            datatype: "json",
+            jsonReader : {
+                root:"list",
+                page: "currentPage",
+                total: "totalPage",
+                records: "totalCount",
+            },
+            height: 'auto',
+            rownumbers:true,
+            autowidth: true,
+            shrinkToFit: true,
+            autoScroll: true,
+            footerrow:true,
+            rowNum: 20,
+            rowList: [10, 20, 30,50],
+            colNames: ["公告",'操作时间'],
+            colModel: [
+                {name: "noticeName + noticeContent",align: "left",sortable:false,width:500,
+                    formatter:function(cellvalue, options, rowObject){
+                        var _noticeName = rowObject.noticeName;
+                        var _id = rowObject.id;
+                        var _noticeContent = rowObject.noticeContent;
+                        var switcher = _noticeName ;
+                        var detail = "<a class='_green_link'onclick=\"details('"+_id+"')\" >"+switcher+"</a>";
+                        return detail;
+                    }},
+                {name: "releaseTimeToStr",align: "left",sortable:false,width:120}
+            ],
+            pager: "#pager_list",
+            viewrecords: true,
+            hidegrid: false,
+            footerrow:true
+        });
+
+
+        $(window).bind("resize", function () {
+            var width = $(".jqGrid_wrapper").width();
+            $("#table_list_1").setGridWidth(width);
+        })
+
+        function keyUp(e) {
+            var currKey=0,e=e||event;
+            currKey=e.keyCode||e.which||e.charCode;
+            var keyName = String.fromCharCode(currKey);
+            if (currKey == 13){
+                search();
+                e.stopPropagation()
+            }
+        }
+        document.onkeyup = keyUp;
+    });
+    function details(id) {
+        window.location.href = '/notice/noticeDetails?id='+id;
+    }
+
+
+    /*]]>*/
+</script>
+</body>
+</html>

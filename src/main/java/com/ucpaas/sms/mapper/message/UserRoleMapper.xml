@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ucpaas.sms.mapper.message.UserRoleMapper">
+     
+        
+    <resultMap id="rowMapper" type="UserRole">
+        <result property="ruId" jdbcType="INTEGER" column="ru_id"/>
+        <result property="roleId" jdbcType="INTEGER" column="role_id"/>
+        <result property="userId" jdbcType="BIGINT" column="user_id"/>
+    </resultMap> 
+     
+    <sql id="BASE_COLUMN_LIST">
+        ru_id,
+        role_id,
+        user_id
+    </sql>
+
+    <insert id="insert" parameterType="UserRole" >
+        INSERT INTO t_sms_user_role 
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="ruId != null" >
+                ru_id,
+            </if>
+            <if test="roleId != null" >
+                role_id,
+            </if>
+            <if test="userId != null" >
+                user_id
+            </if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides="," >
+            <if test="ruId != null" >
+                #{ruId},
+            </if>
+            <if test="roleId != null" >
+                #{roleId},
+            </if>
+            <if test="userId != null" >
+                #{userId}
+            </if>
+        </trim>
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List" >
+        INSERT INTO t_sms_user_role (
+            ru_id,
+            role_id,
+            user_id
+        )VALUES
+        <foreach collection="list" item="item" index="index" separator="," >  
+            (
+                #{item.ruId},
+                #{item.roleId},
+                #{item.userId}
+            )
+        </foreach>
+    </insert>
+     
+    <update id="update" parameterType="UserRole">
+        UPDATE t_sms_user_role SET 
+            role_id=#{roleId},
+            user_id=#{userId}
+        WHERE 
+            ru_id = #{ruId} 
+    </update>
+    
+ 
+    
+    <update id="updateSelective" parameterType="UserRole">
+        UPDATE t_sms_user_role 
+            <set>
+                <if test="roleId != null and roleId != ''">
+                    role_id = #{roleId},
+                </if>
+                <if test="userId != null and userId != ''">
+                    user_id = #{userId}
+                </if>
+            </set>
+        WHERE 
+            ru_id = #{ruId} 
+    </update>
+
+    <select id="getByRuId" resultMap="rowMapper">
+        SELECT 
+            <include refid="BASE_COLUMN_LIST" />
+        FROM t_sms_user_role
+        WHERE 
+            ru_id = #{ruId}
+    </select>
+
+    <select id="queryList" parameterType="UserRole" resultMap="rowMapper">
+        SELECT 
+            <include refid="BASE_COLUMN_LIST" /> 
+        FROM t_sms_user_role 
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            <if test="params.ruId != null and params.ruId != ''">
+                and ru_id = #{params.ruId}
+            </if>
+            <if test="params.roleId != null and params.roleId != ''">
+                and role_id = #{params.roleId}
+            </if>
+            <if test="params.userId != null and params.userId != ''">
+                and user_id = #{params.userId}
+            </if>
+	     </trim>
+    </select>
+
+    <select id="count" parameterType="UserRole" resultType="int">
+        SELECT COUNT(0) 
+        FROM t_sms_user_role 
+        WHERE 
+            1 = 1
+            <if test="ruId != null and ruId != ''">
+                and ru_id = #{ruId}
+            </if>
+            <if test="roleId != null and roleId != ''">
+                and role_id = #{roleId}
+            </if>
+            <if test="userId != null and userId != ''">
+                and user_id = #{userId}
+            </if>
+    </select>
+	 
+</mapper>
+

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信平台运营系统 - 管理员中心</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    <!--<link th:href="@{/resources/css/jquery.datetimepicker.css}" rel="stylesheet">-->
+
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+    <link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/timePicker.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+    <link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+
+    <style>
+        /* Additional style to fix warning dialog position */
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+        .remind{
+            margin-top:6px;
+        }
+        .time-picker{
+            z-index: 1111111 !important;
+        }
+        .time-picker>ul>li{
+            height:25px !important;
+        }
+        .selected{
+            height:25px !important;
+        }
+        .modal-content{
+            opacity: 1 !important;
+            border:none;
+        }
+        #taskMin{
+            margin-top: 9px;
+        }
+        .tip{
+            background-color: #00a2d4;
+            color:#FFF;
+            line-height: 35px;
+        }
+    </style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox ">
+                <div class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">子账号：</label>
+                        <div class="col-sm-6">
+                            <div class="remind " id="clientname"></div>
+                            <input type="hidden" id="clientid">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">验证码短信低于：</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control" id="yzmAlarmNumber">
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="remind">条时，提醒一次。</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">通知短信低于：：</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control" id="tzAlarmNumber">
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="remind">条时，提醒一次。</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">营销短信低于：</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control" id="yxAlarmNumber">
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="remind">条时，提醒一次。</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">国际短信低于：</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control" id="gjAlarmAmount">
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="remind">元时，提醒一次。</div>
+                        </div>
+                    </div>
+                    <div class="form-group text-center tip">
+                        <div>提示：设置为0时默认不提醒</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">短信提醒：</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control" placeholder="手机号码1" id="phone1">
+                        </div>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control" placeholder="手机号码2" id="phone2">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">邮件提醒：</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control" placeholder="邮箱1" id="email1">
+                        </div>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control" placeholder="邮箱2" id="email2">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-4 col-sm-10">
+                            <a class="btn btn-primary" id="operateOne" onclick="editRemind()">确定</a>
+                            <a class="btn btn-default col-sm-offset-4" onclick="cancel()">取消</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>-->
+<script th:src="@{/resources/js/jquery.1.7.2.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/auth.js}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var id = "";
+    $(function(){
+        var clientid = getQueryString("clientid");
+        var name = getQueryString("name");
+
+        $("#clientname").text(clientid + "-" + name);
+        $("#clientid").val(clientid);
+
+        $.ajax({
+            url :'/accountInfo/client/balancealarm/' + clientid,
+            type:'GET',
+            dataType :'json',
+            async: false,
+            success : function(res){
+                if(res.code != 0){
+                    layer.msg(res.msg, {icon:2})
+                    return;
+                }
+                if(res.data.balanceAlarm){
+                    id = res.data.balanceAlarm.id;
+                    $("#yzmAlarmNumber").val(res.data.balanceAlarm.yzmAlarmNumber);
+                    $("#yxAlarmNumber").val(res.data.balanceAlarm.yxAlarmNumber);
+                    $("#tzAlarmNumber").val(res.data.balanceAlarm.tzAlarmNumber);
+                    $("#gjAlarmAmount").val(res.data.balanceAlarm.gjAlarmAmount);
+                    $("#phone1").val(res.data.balanceAlarm.alarmPhone.split(",")[0]);
+                    $("#phone2").val(res.data.balanceAlarm.alarmPhone.split(",")[1]);
+                    $("#email1").val(res.data.balanceAlarm.alarmEmail.split(",")[0]);
+                    $("#email2").val(res.data.balanceAlarm.alarmEmail.split(",")[1]);
+
+                } else {
+                    $("#yzmAlarmNumber").val('500');
+                    $("#yxAlarmNumber").val('500');
+                    $("#tzAlarmNumber").val('500');
+                    $("#gjAlarmAmount").val('10');
+                }
+
+            }
+
+        })
+    })
+    function cancel(){
+        parent.layer.closeAll();
+    }
+    function editRemind(){
+        var params = {};
+        params.clientid = $("#clientid").val();
+        params.yzmAlarmNumber = $("#yzmAlarmNumber").val(); //验证码告警阀值
+        params.tzAlarmNumber = $("#tzAlarmNumber").val(); //通知告警阀值
+        params.yxAlarmNumber = $("#yxAlarmNumber").val(); //营销告警阀值
+        params.gjAlarmAmount = $("#gjAlarmAmount").val(); //国际告警阀值
+        params.alarmPhone = "";
+        params.alarmEmail = "";
+        params.id = id;
+        var phone1 = $("#phone1").val();
+        var phone2 = $("#phone2").val();
+        var email1 = $("#email1").val();
+        var email2 = $("#email2").val();
+        if(!_Auth.isNum(params.yzmAlarmNumber)){
+            layer.msg("验证码短信告警阀值必须为正整数，且不能为空",{icon:2});
+            return;
+        }
+        if(!_Auth.isNum(params.tzAlarmNumber)){
+            layer.msg("通知短信告警阀值必须为正整数，且不能为空",{icon:2});
+            return;
+        }
+        if(!_Auth.isNum(params.yxAlarmNumber)){
+            layer.msg("营销短信告警阀值必须为正整数，且不能为空",{icon:2});
+            return;
+        }
+        if(!_Auth.isFloat2(params.gjAlarmAmount)){
+            layer.msg("国际短信告警阀值必须为正数字，最多保留两位小数，不能为空",{icon:2});
+            return;
+        }
+
+        if(!_Auth.isEmail(email1) && !_Auth.isNull(email1)){
+            layer.msg("邮箱格式不正确,且不能为空",{icon:2});
+            return;
+        }
+        if(!_Auth.isEmail(email2) && !_Auth.isNull(email2)){
+            layer.msg("邮箱格式不正确,且不能为空",{icon:2});
+            return;
+        }
+        if(!_Auth.isMobile(phone1) && !_Auth.isNull(phone1)){
+            layer.msg("手机号码不正确,且不能为空",{icon:2});
+            return;
+        }
+        if(!_Auth.isMobile(phone2) && !_Auth.isNull(phone2)){
+            layer.msg("手机号码不正确,且不能为空",{icon:2});
+            return;
+        }
+        if (_Auth.isNull(phone1) && _Auth.isNull(phone2)) {
+            layer.msg("至少填一个手机号码",{icon:2});
+            return;
+        }
+        if (_Auth.isNull(email1) && _Auth.isNull(email2)) {
+            layer.msg("至少填一个邮件信息",{icon:2});
+            return;
+        }
+        if(_Auth.isNull(email1)){
+            params.alarmEmail = email2;
+        } else if(_Auth.isNull(email2)){
+            params.alarmEmail = email1;
+        } else {
+            params.alarmEmail = email1 + "," + email2;
+        }
+        if(_Auth.isNull(phone1)){
+            params.alarmPhone = phone2;
+        } else if(_Auth.isNull(phone2)){
+            params.alarmPhone = phone1;
+        } else {
+            params.alarmPhone = phone1 + "," + phone2;
+        }
+
+
+        $.ajax({
+            url:"/accountInfo/client/balancealarm/save",
+            type:"POST",
+            contentType:"application/json",
+            data : JSON.stringify(params),
+            success : function(res){
+                if(res.code != 0){
+                    layer.msg(res.msg, {icon:2});
+                    return;
+                }
+                var _p = parent;
+                parent.layer.msg(res.msg, {icon: 1,time: 1000},function(){
+                    _p.location.reload();
+                });
+            }
+        })
+    }
+
+    /*]]>*/
+</script>
+</body>
+</html>

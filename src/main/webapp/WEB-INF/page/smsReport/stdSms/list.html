@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:th="http://www.thymeleaf.org"
+	  lang="zh-cn">
+<head>
+	<meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+	<meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+	<title>短信云平台运营系统 - 传统短信发送统计</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+	<link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+	<link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+	<link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+	<link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+	<style>
+		/* Additional style to fix warning dialog position */
+		#alertmod_table_list_2 {
+			top: 900px !important;
+		}
+	</style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="ibox ">
+				<!-- 搜索条件 -->
+				<div class="ibox-content">
+
+					<div class="row">
+						<div class="col-sm-12">
+							<form class="form-inline" method="post" id="mainForm" >
+								<div class="form-group">
+									<input type="text" placeholder="客户ID/客户名称/代理商ID/销售名字" name="condition" id="condition" class="form-control" style="width:248px">
+								</div>
+
+								<!-- 时间选择 -->
+								<div class="form-group" id="sandbox-container" style="margin-left:2.5%">
+									<div class="form-group pull-right">统计时间:
+										<input placeholder="起始时间" class="form-control layer-date" name="start_time" id="start_time" />至
+										<input placeholder="截止时间" class="form-control layer-date" name="end_time" id="end_time" />
+									</div>
+								</div>
+								<img th:src="@{/resources/img/question.png}" alt="" id="time_range_q" />
+								<div class="form-group">
+									<span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-danger" onclick="search()">搜索</button></span>
+									<span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-primary" onclick="exportExcel()">导出Excel</button></span>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+
+				<div class="ibox-content">
+					<div class="jqGrid_wrapper">
+						<table id="table_list"></table>
+						<div id="pager_list"></div>
+					</div>
+					<p>&nbsp;</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+
+<script th:inline="javascript">
+    var max_export_num = [[${max_export_num}]];
+
+    $("#start_time").val(laydate.now(-1));
+    $("#end_time").val(laydate.now(-1));
+
+    var start = {
+        elem: "#start_time",
+        format: "YYYY-MM-DD",
+    	min: halfYearAgo("yyyy-MM-dd"),
+        max: laydate.now(),
+        istoday: true,
+        choose: function (datas) {
+            end.min = datas;
+        }
+    };
+
+    var end = {
+        elem: "#end_time",
+        format: "YYYY-MM-DD",
+    	min: halfYearAgo("yyyy-MM-dd"),
+        max: laydate.now(),
+        istoday: true,
+        choose: function (datas) {
+            start.max = datas;
+        }
+    };
+    laydate(start);
+    laydate(end);
+
+    function search(){
+        $("#table_list").jqGrid('setGridParam',{
+            datatype:'json',
+            postData: {
+                condition: $("#condition").val(),
+                start_time: $("#start_time").val(),
+                end_time: $("#end_time").val(),
+            }, //发送数据
+        }).trigger("reloadGrid"); //重新载入
+    }
+
+    // 导出Excel文件
+    function exportExcel() {
+        var totalCount = $("#table_list").jqGrid('getGridParam','records');
+        if (totalCount == 0) {
+            layer.alert("共0条记录，导出Excel文件失败");
+            return;
+        }
+        if(totalCount > max_export_num){
+            layer.msg("导出Excel文件条数大于"+max_export_num+"条", {icon: 2});
+            return;
+        }
+        var mainForm = $("#mainForm");
+        var action = mainForm.attr("action");
+        var exporUrl = [[@{/stdSms/list/export}]];
+        mainForm.attr("action", exporUrl).submit();
+        mainForm.attr("action", action);
+    }
+
+    $(document).ready(function () {
+        $.jgrid.defaults.styleUI = "Bootstrap";
+        $("#table_list").jqGrid({
+            url:[[@{/stdSms/list}]],
+            mtype: 'POST',
+            datatype: "json",
+            jsonReader : {
+                root:"list",
+                page: "currentPage",
+                total: "totalPage",
+                records: "totalCount"
+            },
+            height: 'auto',
+            rownumbers:true,
+            autowidth: true,
+            shrinkToFit: false,
+            autoScroll: true,
+            rowNum: 20,
+            rowList: [10, 20, 30,50],
+            colNames: ["序号","客户ID","客户名称","客户注册时间","所属代理商ID","代理商名称","代理商类型","归属销售","提交条数","成功条数","失败条数","计费条数","待发送条数","未知条数","消费金额(元)","消耗成本(元)","通道成本(元)"],
+            colModel: [
+				{name: "rownum",align: "left",sortable:false},
+				{name: "clientid",align: "left",sortable:false},
+				{name: "name",align: "left",sortable:false},<!-- 客户名称 -->
+				{name: "createtime",align: "left",sortable:false},<!-- 客户注册时间 -->
+				{name: "agent_id",align: "left",sortable:false},
+				{name: "agent_name",align: "left",sortable:false},<!-- 代理商名称 -->
+				{name: "agent_type_name",align: "left",sortable:false},<!-- 代理商类型 -->
+				{name: "belong_sale_name",align: "left",sortable:false},<!-- 归属销售 -->
+				{name: "cusSubTotal",align: "left",sortable:false},<!-- 提交条数 -->
+				{name: "successTotal",align: "left",sortable:false},<!-- 成功条数 -->
+				{name: "failTotal",align: "left",sortable:false},<!-- 失败条数 -->
+				{name: "chargetotal",align: "left",sortable:false},<!-- 计费条数 -->
+				{name: "notsend",align: "left",sortable:false},<!-- 待发送条数 -->
+				{name: "submitsuccess",align: "left",sortable:false},<!-- 未知条数 -->
+				{name: "salefee",align: "left",sortable:false},<!-- 消费金额 -->
+				{name: "productfee",align: "left",sortable:false},<!-- 消费成本 -->
+				{name: "costfee",align: "left",sortable:false},<!-- 通道成本 -->
+            ],
+            pager: "#pager_list",
+            viewrecords: true,
+            hidegrid: false,
+            /*统计功能 */  
+            footerrow:true,
+            gridComplete:function(){
+            	var cusSubTotal = 0;
+            	var successTotal = 0;
+            	var failTotal = 0;
+            	var chargetotal = 0;
+            	var notsend = 0;
+            	var submitsuccess = 0;
+            	var salefee = 0;
+            	var productfee = 0;
+            	var costfee = 0;
+            	$.ajax({
+        			type : "post",
+        			url : [[@{/stdSms/total}]],
+        			data : {
+                        condition: $("#condition").val(),
+                        start_time: $("#start_time").val(),
+                        end_time: $("#end_time").val(),
+        			},
+        			async:false,
+        			success : function(result) {
+        				if(result.success){
+        					data = result.data;
+        	            	cusSubTotal = data.cusSubTotal;
+        	            	successTotal = data.successTotal;
+        	            	failTotal = data.failTotal;
+        	            	chargetotal = data.chargetotal;
+        	            	notsend = data.notsend;
+        	            	submitsuccess = data.submitsuccess;
+        	            	salefee = data.salefee;
+        	            	productfee = data.productfee;
+        	            	costfee = data.costfee;
+        				}else{
+        					layer.msg("计算总计失败", {icon: 2,time: msgTime}); 
+        				}
+        				
+        			}
+        		});
+            	$("#table_list").footerData('set', { "rownum": '', 
+             	   "clientid": '', 
+             	   "name": '', 
+             	   "createtime": '', 
+             	   "agent_id": '总计', 
+             	   "agent_name": '', 
+             	   "agent_type_name": '', 
+             	   "cusSubTotal": cusSubTotal, 
+             	   "successTotal": successTotal, 
+             	   "failTotal": failTotal, 
+             	   "chargetotal": chargetotal, 
+             	   "notsend": notsend, 
+             	   "submitsuccess": submitsuccess, 
+             	   "salefee": salefee, 
+             	   "productfee": productfee, 
+             	   "costfee": costfee } );  
+                }
+        });
+
+        $(window).bind("resize", function () {
+            var width = $(".jqGrid_wrapper").width();
+            $("#table_list").setGridWidth(width);
+        })
+
+        function keyUp(e) {
+            var currKey=0,e=e||event;
+            currKey=e.keyCode||e.which||e.charCode;
+            var keyName = String.fromCharCode(currKey);
+            if (currKey == 13){
+                search();
+            }
+        }
+        document.onkeyup = keyUp;
+
+        $("#time_range_q").hover(function(){
+            layer.tips('<b>统计数据以三天前的为准，三天内的数据仅供参考</b>', this, {tips: [1, '#78BA32']});
+        },function(){
+            layer.closeAll();
+        });
+    });
+</script>
+
+</body>
+</html>

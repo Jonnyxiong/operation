@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 管理员中心-系统通知管理 -->
+<mapper namespace="sysNotice">
+	
+	<!-- 分页查询系统通知时段 -->
+	<select id="query" resultType="map">
+		SELECT
+			n.notice_id,
+			n.`name`,
+			n.start_date,
+			n.end_date,
+			date_format(
+				n.update_date,
+				'%Y-%m-%d %H:%i:%S'
+			) AS update_date,
+			n.`status`,
+			(
+				SELECT
+					group_concat(
+						us.realname,
+						'（',
+						us.mobile,
+						'）'
+					)
+				FROM
+					t_sms_sys_notice_user u,
+					t_sms_user us
+				WHERE
+					u.notice_id = n.notice_id
+				AND us.id = u.user_id
+			) AS mobile,
+			(
+				SELECT
+					u.alarm_type
+				FROM
+					t_sms_sys_notice_user u
+				WHERE
+					u.notice_id = n.notice_id
+				LIMIT 1
+			) AS alarm_type
+		FROM
+			t_sms_sys_notice n
+		WHERE 1=1
+		<if test="text != null">
+			AND (
+				n.notice_id LIKE concat('%', #{text}, '%')
+				OR n.`name` LIKE concat('%', #{text}, '%')
+			)
+		</if>
+		<if test="start_date != null">
+			AND n.start_date >= #{start_date}
+		</if>
+		<if test="end_date !=null">
+			<![CDATA[ AND n.start_date <= #{end_date} ]]>
+		</if>
+		<if test="status != null">
+			AND n.`status` = #{status}
+		</if>
+		ORDER BY
+			n.start_date
+		${limit}
+	</select>
+	
+	<!-- 分页查询系统通知时段 记录总数 -->
+	<select id="queryCount" resultType="map">
+		SELECT
+			count(0) AS totalCount
+		FROM
+			t_sms_sys_notice n
+		WHERE
+			1 = 1
+		<if test="text != null">
+			AND (
+				n.notice_id LIKE concat('%', #{text}, '%')
+				OR n.`name` LIKE concat('%', #{text}, '%')
+			)
+		</if>
+		<if test="start_date != null">
+			AND n.start_date >= #{start_date}
+		</if>
+		<if test="end_date !=null">
+			<![CDATA[ AND n.start_date <= #{end_date} ]]>
+		</if>
+		<if test="status != null">
+			AND n.`status` = #{status}
+		</if>
+	</select>
+	
+	<!-- 查看系统通知时段 -->
+	<select id="view" resultType="map">
+		SELECT
+			n.notice_id,
+			n.`name`,
+			n.start_date,
+			n.end_date,
+			date_format(
+				n.update_date,
+				'%Y-%m-%d %H:%i:%S'
+			) AS update_date,
+			n.`status`,
+			(
+				SELECT
+					group_concat(
+						us.realname,
+						'（',
+						us.mobile,
+						'）'
+					)
+				FROM
+					t_sms_sys_notice_user u,
+					t_sms_user us
+				WHERE
+					u.notice_id = n.notice_id
+				AND us.id = u.user_id
+			) AS mobile,
+			(
+				SELECT
+					convert(group_concat(u.user_id), char)
+				FROM
+					t_sms_sys_notice_user u
+				WHERE
+					u.notice_id = n.notice_id
+			) AS user_id,
+			(
+				SELECT
+					u.alarm_type
+				FROM
+					t_sms_sys_notice_user u
+				WHERE
+					u.notice_id = n.notice_id
+				LIMIT 1
+			) AS alarm_type
+		FROM
+			t_sms_sys_notice n
+		WHERE
+			n.notice_id = #{notice_id}
+	</select>
+	
+	<!-- 获取所有的时段 -->
+	<select id="allTimeRange" resultType="map">
+		SELECT
+			n.notice_id,
+			n.`name`,
+			n.start_date,
+			n.end_date
+		FROM
+			t_sms_sys_notice n
+		ORDER BY
+			n.start_date
+	</select>
+	
+	<!-- 添加、修改系统通知时段之前查重 -->
+	<select id="check" resultType="map">
+		SELECT
+			count(0) AS totalCount
+		FROM
+			t_sms_sys_notice n
+		WHERE
+			n.`name` = #{name}
+		<if test="notice_id != null">
+			AND n.notice_id != #{notice_id}
+		</if>
+	</select>
+	
+	<!-- 添加系统通知时段 -->
+	<insert id="insert">
+		INSERT INTO t_sms_sys_notice (
+			`name`,
+			start_date,
+			end_date,
+			`status`,
+			create_date,
+			update_date
+		)
+		VALUES
+			(#{name}, #{start_date}, #{end_date}, 0, now(), now())
+	</insert>
+	
+	<!-- 查看系统通知时段id -->
+	<select id="getId" resultType="map">
+		SELECT
+			n.notice_id
+		FROM
+			t_sms_sys_notice n
+		WHERE
+			n.`name` = #{name}
+		LIMIT 1
+	</select>
+	
+	<!-- 添加系统通知时段和用户的关系表 -->
+	<insert id="insertNoticeUser">
+		INSERT INTO t_sms_sys_notice_user (notice_id, user_id, user_mobile, user_email, alarm_type)
+		VALUES
+		<foreach collection="list" item="item" separator="," >
+			(#{item.notice_id}, #{item.user_id},#{item.user_mobile},#{item.user_email},#{item.alarm_type})
+		</foreach> 
+	</insert>
+	
+	<!-- 删除系统通知时段和用户的关系 -->
+	<delete id="deleteNoticeUser">
+		DELETE
+		FROM
+			t_sms_sys_notice_user
+		WHERE
+			notice_id = #{notice_id}
+	</delete>
+	
+	<!-- 修改系统通知时段 -->
+	<update id="update">
+		UPDATE t_sms_sys_notice n
+		SET n.`name` = #{name},
+		 n.start_date = #{start_date},
+		 n.end_date = #{end_date},
+		 n.update_date = now()
+		WHERE
+			n.notice_id = #{notice_id}
+	</update>
+	
+	<!-- 修改系统通知时段状态 -->
+	<update id="updateStatus">
+		UPDATE t_sms_sys_notice n
+		SET n.`status` = #{status}
+		WHERE
+			n.notice_id = #{notice_id}
+	</update>
+	
+	<!-- 修改系告警方式 -->
+	<update id="updateAlarmType">
+        UPDATE t_sms_sys_notice_user n 
+        SET n.`alarm_type` = #{alarm_type}
+        WHERE n.notice_id = #{notice_id}
+	</update>
+</mapper> 

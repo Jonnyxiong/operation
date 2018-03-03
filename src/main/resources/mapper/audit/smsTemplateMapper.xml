@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 短信模板审核 -->
+<mapper namespace="smsTemplate">
+
+	<resultMap type="com.ucpaas.sms.entity.Template" id="template">
+		<id column="template_id" property="templateId"/>
+		<result column="type" property="type"/>
+		<result column="type_name" property="typeName"/>
+		<result column="sms_type" property="smsType"/>
+		<result column="sms_type_name" property="smsTypeName"/>
+		<result column="content" property="content"/>
+		<result column="sign" property="sign"/>
+		<result column="client_id" property="clientId"/>
+		<result column="check_status"  jdbcType="INTEGER"  property="checkStatus"/>
+		<result column="check_status_name" property="checkStatusName"/>
+		<result column="create_time" property="createTime"/>
+		<result column="submit_type" property="submitType"/>
+		<result column="update_time" property="updateTime"/>
+	</resultMap>
+	
+	<sql id="queryCommon">
+		<where>
+			<if test="text != null and text!=''">
+				(
+					p.template_id LIKE CONCAT('%', #{text}, '%')
+					OR
+					p.client_id LIKE CONCAT('%', #{text}, '%')
+				)
+			</if>
+			<if test="oauth_status != null and oauth_status != -1">
+				AND p.check_status = #{oauth_status}
+			</if>
+		</where>
+	</sql>
+
+	<!-- 查询短信模板审核记录 -->
+	<select id="query" resultType="map">
+		SELECT
+			a.name,
+			p.template_id,
+			p.type,
+			CASE p.type
+				WHEN 0 THEN '通知模板'
+				WHEN 4 THEN '验证码模板'
+				WHEN 5 THEN '营销模板'
+				WHEN 7 THEN 'USSD模板'
+				WHEN 8 THEN '闪信模板'
+				WHEN 9 THEN '挂机短信模板'
+			END AS type_name,
+			p.sms_type,
+			CASE p.sms_type
+				WHEN 0 THEN '通知短信'
+				WHEN 4 THEN '验证码短信'
+				WHEN 5 THEN '营销短信'
+				WHEN 6 THEN '告警短信'
+				WHEN 7 THEN 'USSD'
+				WHEN 8 THEN '闪信'
+			END AS sms_type_name,
+			p.content,
+			p.sign,
+			p.client_id,
+			p.admin_id,
+			p.check_status AS temp_check_status,
+			t.check_status,
+			CASE p.check_status
+				WHEN 0 THEN '待审核'
+				WHEN 1 THEN '审核通过'
+				WHEN 2 THEN '审核中'
+				WHEN 3 THEN '审核不通过' 
+				WHEN 4 THEN '删除' 
+			END AS check_status_name,
+			p.admin_id,
+			p.submit_type,
+			CASE p.submit_type
+				WHEN 0 THEN '客户提交'
+				WHEN 1 THEN '代理商提交'
+			END AS submit_type_name,
+			DATE_FORMAT(p.create_time,'%Y-%m-%d %T') AS create_time,
+			DATE_FORMAT(p.update_time,'%Y-%m-%d %T') AS update_time
+		FROM t_sms_template_temporary p
+		INNER JOIN t_sms_template t
+		ON p.template_id = t.template_id
+		INNER JOIN t_sms_account a
+		ON a.clientid = p.client_id
+		<include refid="queryCommon" />
+		ORDER BY p.update_time DESC
+		${limit}
+	</select>
+	
+	
+	<!-- 查询短信模板审核记录总数 -->
+	<select id="queryCount" resultType="map">
+		SELECT
+			COUNT(0) AS totalCount
+		FROM t_sms_template_temporary p
+		INNER JOIN t_sms_account a
+		ON a.clientid = p.client_id
+		<include refid="queryCommon" />
+	</select>
+	
+	<!-- 获取模板信息 -->
+	<select id="getTemplateInfo" resultType="map">
+		SELECT
+			a.name,
+			p.template_id,
+			p.type,
+			CASE p.type
+				WHEN 0 THEN '通知模板'
+				WHEN 4 THEN '验证码模板'
+				WHEN 5 THEN '营销模板'
+				WHEN 7 THEN 'USSD模板'
+				WHEN 8 THEN '闪信模板'
+				WHEN 9 THEN '挂机短信模板'
+			END AS type_name,
+			IFNULL(p.sms_type,'') AS sms_type,
+			CASE p.sms_type
+				WHEN 0 THEN '通知短信'
+				WHEN 4 THEN '验证码短信'
+				WHEN 5 THEN '营销短信'
+				WHEN 6 THEN '告警短信'
+				WHEN 7 THEN 'USSD'
+				WHEN 8 THEN '闪信'
+			END AS sms_type_name,
+			p.content,
+			p.sign,
+			p.client_id,
+			p.admin_id,
+			p.check_status AS temp_check_status,
+			t.check_status,
+			CASE p.check_status
+				WHEN 0 THEN '待审核'
+				WHEN 1 THEN '审核通过'
+				WHEN 2 THEN '审核中'
+				WHEN 3 THEN '审核不通过' 
+				WHEN 4 THEN '删除'
+			END AS check_status_name,
+			p.admin_id,
+			p.submit_type,
+			CASE p.submit_type
+				WHEN 0 THEN '客户提交'
+				WHEN 1 THEN '代理商提交'
+			END AS submit_type_name,
+			DATE_FORMAT(p.create_time,'%Y-%m-%d %T') AS create_time,
+			DATE_FORMAT(p.update_time,'%Y-%m-%d %T') AS update_time
+		FROM t_sms_template_temporary p
+		INNER JOIN t_sms_template t
+		ON p.template_id = t.template_id
+		INNER JOIN t_sms_account a
+		ON a.clientid = p.client_id
+		WHERE p.template_id = #{template_id}
+	</select>
+	
+	<!-- 获取模板的详细信息(包含审核信息) -->
+	<select id="getDetailInfo" resultType="map">
+		SELECT
+			a.channel_tempid,
+			a.channelid,
+			a.result,
+			a.remark,
+			p.template_id,
+			p.type,
+			CASE p.type
+				WHEN 0 THEN '通知模板'
+				WHEN 4 THEN '验证码模板'
+				WHEN 5 THEN '营销模板'
+				WHEN 7 THEN 'USSD模板'
+				WHEN 8 THEN '闪信模板'
+				WHEN 9 THEN '挂机短信模板'
+			END AS type_name,
+			p.sms_type,
+			CASE p.sms_type
+				WHEN 0 THEN '通知短信'
+				WHEN 4 THEN '验证码短信'
+				WHEN 5 THEN '营销短信'
+				WHEN 6 THEN '告警短信'
+				WHEN 7 THEN 'USSD'
+				WHEN 8 THEN '闪信'
+			END AS sms_type_name,
+			p.content,
+			p.sign,
+			p.client_id,
+			p.admin_id,
+			p.check_status AS temp_check_status,
+			t.check_status,
+			CASE p.check_status
+				WHEN 0 THEN '待审核'
+				WHEN 1 THEN '审核通过'
+				WHEN 2 THEN '审核中'
+				WHEN 3 THEN '审核不通过' 
+				WHEN 4 THEN '删除'
+			END AS check_status_name,
+			p.admin_id,
+			p.submit_type,
+			CASE p.submit_type
+				WHEN 0 THEN '客户提交'
+				WHEN 1 THEN '代理商提交'
+			END AS submit_type_name,
+			DATE_FORMAT(p.create_time,'%Y-%m-%d %T') AS create_time,
+			DATE_FORMAT(p.update_time,'%Y-%m-%d %T') AS update_time
+		FROM t_sms_template_temporary p
+		INNER JOIN t_sms_template t
+		ON p.template_id = t.template_id
+		LEFT JOIN t_sms_template_audit a
+		ON a.template_id = p.template_id
+		AND a.create_time
+             = (SELECT MAX(create_time) FROM t_sms_template_audit  WHERE template_id = #{template_id})
+		WHERE p.template_id = #{template_id}
+	</select>
+	
+	<select id="getOldTemplateInfo" resultType="map">
+		SELECT
+			t.template_id,
+			t.type,
+			CASE t.type
+				WHEN 0 THEN '通知模板'
+				WHEN 4 THEN '验证码模板'
+				WHEN 5 THEN '营销模板'
+				WHEN 7 THEN 'USSD模板'
+				WHEN 8 THEN '闪信模板'
+				WHEN 9 THEN '挂机短信模板'
+			END AS type_name,
+			t.sms_type,
+			CASE t.sms_type
+				WHEN 0 THEN '通知短信'
+				WHEN 4 THEN '验证码短信'
+				WHEN 5 THEN '营销短信'
+				WHEN 6 THEN '告警短信'
+				WHEN 7 THEN 'USSD'
+				WHEN 8 THEN '闪信'
+			END AS sms_type_name,
+			t.content,
+			t.sign,
+			t.client_id,
+			t.check_status,
+			CASE t.check_status
+				WHEN 0 THEN '待审核'
+				WHEN 1 THEN '审核通过'
+				WHEN 2 THEN '审核中'
+				WHEN 3 THEN '审核不通过' 
+				WHEN 4 THEN '删除'
+			END AS check_status_name
+		FROM t_sms_template t
+		WHERE t.template_id = #{template_id}
+	</select>
+	
+	<update id="updateTempStatus">
+		UPDATE `t_sms_template_temporary`
+		<set>
+			<if test="type != null and type != ''">
+				`type` = #{type},
+			</if>
+			<if test="sms_type != null and sms_type != ''">
+				`sms_type` = #{sms_type},
+			</if>
+			<if test="content != null and content != ''">
+				`content` = #{content},
+			</if>
+			<if test="check_status != null and check_status != ''">
+				`check_status` = #{check_status},
+			</if>
+			<if test="admin_id != null and admin_id != ''">
+				`admin_id` = #{admin_id},
+			</if>
+			<if test="update_time != null and update_time != ''">
+				`update_time` = #{update_time},
+			</if>
+			<if test="update_type != null and update_type != ''">
+				`update_type` = #{update_type}
+			</if>
+		</set>
+			WHERE (`template_id`=#{template_id})
+			AND `update_time` = #{last_time}
+ 			AND NOT(check_status IN  (1,3) AND type IN (7,8))
+	</update>
+	
+	<update id="updateStatus">
+		UPDATE `t_sms_template`
+		<set>
+			<if test="type != null and type != ''">
+				`type` = #{type},
+			</if>
+			<if test="sms_type != null and sms_type != ''">
+				`sms_type` = #{sms_type},
+			</if>
+			<if test="content != null and content != ''">
+				`content` = #{content},
+			</if>
+			<if test="check_status != null and check_status != ''">
+				`check_status` = #{check_status},
+			</if>
+			<if test="admin_id != null and admin_id != ''">
+				`admin_id` = #{admin_id},
+			</if>
+			<if test="update_time != null and update_time != ''">
+				`update_time` = #{update_time},
+			</if>
+			<if test="update_type != null and update_type != ''">
+				`update_type` = #{update_type}
+			</if>
+		</set>
+		WHERE (`template_id`=#{template_id})
+		AND NOT(check_status IN  (1,3) AND type IN (7,8))
+	</update>
+	
+	<insert id="insertAuditTransfer">
+		INSERT INTO `t_sms_template_audit` (
+			`template_id`,
+			`channelid`,
+			`status`,
+			`result`,
+			`channel_tempid`,
+			`remark`,
+			`create_time`
+		)
+		VALUES
+			(
+				#{template_id},
+				#{channelid},
+				#{check_status},
+				#{result},
+				#{channel_tempid},
+				#{remark},
+				NOW()
+			)
+	</insert>
+	
+	<!-- 获取通知回调地址 -->
+	<select id="queryNoticeUrl" resultType="String">
+		SELECT `noticeurl` FROM t_sms_account WHERE `clientid` = #{clientId} LIMIT 1
+	</select>
+	
+	<!-- 获取template模板 -->
+	<select id="queryTemplateTemporary" resultMap="template">
+		SELECT
+			`template_id`,
+			`type`,
+				case type
+				when 0 then '通知模板'
+				when 4 then '验证码模板'
+				when 5 then '营销模板'
+				when 7 then 'USSD模板'
+				when 8 then '闪信模板'
+				when 9 then '挂机短信模板'
+				end as type_name,
+			`sms_type`,
+				case sms_type
+				when 0 then '通知'
+				when 4 then '验证码'
+				when 5 then '会员营销'
+				when 6 then '告警短信'
+				when 7 then 'USSD'
+				when 8 then '闪信'
+				end as sms_type_name,
+			`content`,
+			`sign`,
+			`client_id`,
+			`agent_id`,
+			`check_status`,
+				case check_status
+					when 0 then '待审核'
+					when 1 then '审核通过'
+					when 2 then '审核中' 
+					when 3 then '审核不通过' 
+					when 4 then '删除'
+					else '审核不通过'
+				end as check_status_name,
+			`admin_id`,
+			date_format(create_time,'%Y-%m-%d %H:%i:%S') as create_time,
+			`submit_type`,
+			date_format(update_time,'%Y-%m-%d %H:%i:%S') as update_time,
+			`update_type`
+		FROM
+			t_sms_template_temporary
+		WHERE
+			template_id = #{templateId}
+	</select>
+	
+		
+</mapper> 

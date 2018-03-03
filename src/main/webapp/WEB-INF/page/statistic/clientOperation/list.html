@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信云平台运营系统 </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+    <link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+    <link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/doublebox-bootstrap.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/select2.css}" rel="stylesheet">
+    <style>
+        /* Additional style to fix warning dialog position */
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+
+        ._green_link {
+            color: #008000;
+        }
+
+        ._green_link:hover {
+            color: #008000;
+            text-decoration: underline;
+        }
+
+        .modal-content {
+            opacity: 1 !important;
+            border: none;
+        }
+
+        .bootstrap-duallistbox-container label {
+            text-align: center;
+        }
+
+        .filter {
+            text-align: center;
+        }
+
+        .demo {
+            height: 322px !important;
+        }
+
+        .select2 span {
+            display: block !important;
+            margin-top: 0px !important;
+        }
+
+        .select2-container {
+            width: 171px !important;
+        }
+
+        .select2-dropdown {
+            width: 175px !important;
+        }
+
+        .select2-container .select2-selection--single {
+            width: 175px;
+        }
+        .complaintNumber{
+            text-decoration: underline;
+            color:green;
+        }
+    </style>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content  animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="tabs-container">
+                <ul class="nav nav-tabs">
+                    <li class="active" id="agentTab"><a data-toggle="tab" href="#tab-1" aria-expanded="true">账户运营分析</a>
+                    </li>
+                </ul>
+                <!-- 搜索条件 -->
+                <div class="ibox-content">
+                    <input type="hidden" th:value="${jsmsMenu.menuId}" id="menuId">
+                    <form role="form" class="form-inline" id="mainForm" method="POST">
+                        <div class="form-group">
+                            <label for="smstype">短信类型:</label>
+                            <select id="smstype" class="form-control" name="smstype">
+                                <option value="">全部</option>
+                                <option value="0">通知</option>
+                                <option value="4">验证码</option>
+                                <option value="5">营销</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="operatorstype">运营商:</label>
+                            <select id="operatorstype" class="form-control" name="operatorstype">
+                                <option value="">全部运营商</option>
+                                <option value="0">全网</option>
+                                <option value="1">移动</option>
+                                <option value="2">联通</option>
+                                <option value="3">电信</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="beginTime">时间：</label>
+                            <input type="text" class="form-control" id="beginTime" name="beginTime">
+                            <label for="endTime">至</label>
+                            <input type="text" class="form-control" id="endTime" name="endTime">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="clientName">客户：</label>
+                            <select class="form-control" id="clientName" name="client.name"></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="belongSaleName">归属销售：</label>
+                            <select class="form-control" id="belongSaleName" name="user.realname"></select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="orderBy">排序:</label>
+                            <select id="orderBy" class="form-control" name="orderBy">
+                                <option value="1">按投诉率由高到低</option>
+                                <option value="2">按投诉率由低到高</option>
+                                <option value="3">按明确成功条数由高到低</option>
+                                <option value="4">按明确成功条数由低到高</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                        	<span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-danger"
+                                                      onclick="search()">搜索</button>
+                            <span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-primary hide"
+                                                      onclick="exportExcel()" data-menuId='6709'>导出Excel</button></span>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="ibox-content">
+                    <div class="jqGrid_wrapper">
+                        <table id="table_list"></table>
+                        <div id="pager_list"></div>
+                    </div>
+                    <p>&nbsp;</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<!--<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>-->
+<script th:src="@{/resources/js/plugins/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/js/doublebox-bootstrap.js}"></script>
+<script th:src="@{/resources/js/select2.min.js}"></script>
+
+<script th:inline="javascript">
+    laydate.render({
+        elem: '#beginTime',
+        type: 'month'
+    });
+    laydate.render({
+        elem: '#endTime',
+        type: 'month'
+    });
+    function search() {
+        $("#table_list").jqGrid('setGridParam', {
+            datatype: 'json',
+            postData: {
+                smstype: $("#smstype").val(),
+                operatorstype: $("#operatorstype").val(),
+                beginTime: $("#beginTime").val(),
+                endTime: $("#endTime").val(),
+                clientId: $("#clientName").val(),
+                belongSale: $("#belongSaleName").val(),
+                orderBy: $("#orderBy").val()
+            }, //发送数据
+            page: 1
+        }).trigger("reloadGrid"); //重新载入
+    }
+
+    //功能按钮权限
+    function completeMethod(){
+        var menuId = $("#menuId").val();
+        checkMenu(menuId);
+    }
+
+    var max_export_num = /*[[${max_export_num}]]*/;
+
+    //导出Excel文件
+    function exportExcel() {
+        var totalCount = $("#table_list").jqGrid('getGridParam', 'records');
+        if (totalCount == 0) {
+            layer.msg("共0条记录，将不导出Excel文件", {icon: 2});
+            return;
+        }
+        if (totalCount > max_export_num) {
+            layer.msg("导出Excel文件条数大于" + max_export_num + "条", {icon: 2});
+            return;
+        }
+        var mainForm = $("#mainForm");
+        var action = mainForm.attr("action");
+        var exporUrl = /*[[@{/operation/statistics/client/export}]]*/;
+        mainForm.attr("action", exporUrl).submit();
+        mainForm.attr("action", action);
+    }
+
+    $(document).ready(function () {
+
+        //获取三个下拉搜索
+        var select2Date1;
+        var select2Date2;
+        /*$.ajax({
+            url: '/operation/statistics/complaint/queryListForAccount',
+            dataType: 'json',
+            type: 'post',
+            async: false,
+            success: function (res) {
+                for (var i = 0; i < res.length; i++) {
+                    res[i].id = res[i].clientid;
+                    res[i].text = res[i].clientid + "-" + res[i].name;
+                }
+                res.unshift({id: " ", text: "全部客户"});
+                select2Date1 = res;
+            }
+        });*/
+        $("select#clientName").select2({
+            minimumInputLength:1,// 最少输入一个字符才开始检索
+            placeholder:'',
+            allowClear:true,
+            ajax: {
+                url : '/operation/statistics/complaint/queryListForAccount',
+                dataType : 'json',
+                delay : 250,// 延迟显示
+                type:'post',
+                data : function(params) {
+                    return {
+                        condition : params.term, // 搜索框内输入的内容，传递到Java后端的parameter为username
+                        page : params.page,// 第几页，分页哦
+                        rows : 10// 每页显示多少行
+                    };
+                },
+                // 分页
+                processResults : function(data, params) {
+                    params.page = params.page || 1;
+                    return {
+                        results : data.data,// 后台返回的数据集
+                        pagination : {
+                            more : params.page < data.totalPage// 总页数为10，那么1-9页的时候都可以下拉刷新
+                        }
+                    };
+                },
+                cache : false
+            },
+            escapeMarkup : function(markup) {
+                return markup;
+            },
+            templateResult : function(repo){// 显示的结果集格式，这里需要自己写css样式，可参照demo
+                // 正在检索
+                if (repo.loading){
+                    return repo.text;
+                }
+                var markup = repo.clientid+"-"+repo.name;
+                return markup;
+            },
+            templateSelection : function(repo) {
+                if(repo.clientid){
+                    return (repo.clientid+"-"+repo.name);
+                }
+                return "请输入客户id或名称";
+            }// 列表中选择某一项后显示到文本框的内容
+        });
+        /*$.ajax({
+            url: '/operation/statistics/complaint/queryListForUser',
+            dataType: 'json',
+            type: 'post',
+            async: false,
+            success: function (res) {
+                for (var i = 0; i < res.length; i++) {
+                    res[i].id = res[i].id;
+                    res[i].text = res[i].realname;
+                }
+                res.unshift({id: " ", text: "全部销售"});
+                select2Date2 = res;
+            }
+        });*/
+        $("select#belongSaleName").select2({
+            minimumInputLength:1,// 最少输入一个字符才开始检索
+            placeholder:'',
+            allowClear:true,
+            ajax: {
+                url : '/operation/statistics/complaint/queryListForUser',
+                dataType : 'json',
+                delay : 250,// 延迟显示
+                type:'post',
+                data : function(params) {
+                    return {
+                        condition : params.term, // 搜索框内输入的内容，传递到Java后端的parameter为username
+                        page : params.page,// 第几页，分页哦
+                        rows : 10// 每页显示多少行
+                    };
+                },
+                // 分页
+                processResults : function(data, params) {
+                    params.page = params.page || 1;
+                    return {
+                        results : data.data,// 后台返回的数据集
+                        pagination : {
+                            more : params.page < data.totalPage// 总页数为10，那么1-9页的时候都可以下拉刷新
+                        }
+                    };
+                },
+                cache : false
+            },
+            escapeMarkup : function(markup) {
+                return markup;
+            },
+            templateResult : function(repo){// 显示的结果集格式，这里需要自己写css样式，可参照demo
+                // 正在检索
+                if (repo.loading){
+                    return repo.text;
+                }
+                var markup = repo.id+"-"+repo.realname;
+                return markup;
+            },
+            templateSelection : function(repo) {
+                if(repo.id){
+                    return repo.realname;
+                }
+                return "请输入通道号或通道名称";
+            }// 列表中选择某一项后显示到文本框的内容
+        });
+
+        //初始化select2
+        /*$("#clientName").select2({
+            data: select2Date1
+        });
+        $("#belongSaleName").select2({
+            data: select2Date2
+        });*/
+        $.jgrid.defaults.styleUI = "Bootstrap";
+        $("#table_list").jqGrid({
+            url: /*[[@{/operation/statistics/client/list}]]*/'',
+            mtype: 'POST',
+            datatype: "json",
+            jsonReader: {
+                root: "data",
+                page: "currentPage",
+                total: "totalPage",
+                records: "totalRecord"
+            },
+            height: 'auto',
+            rownumbers: true,
+            autowidth: true,
+            shrinkToFit: false,
+            autoScroll: true,
+            rowNum: 20,
+            rowList: [10, 20, 30, 50],
+            colModel: [
+                {label: "客户ID", name: "clientId", align: "left", sortable: false, width: 70},
+                {label: "客户名称", name: "client.name", align: "left", sortable: false, width: 120},
+                {label: '运营商', name: "operatorstypeDesc", align: "left", sortable: false, width: 60},
+                {label: '运营商', name: "operatorstype", align: "left", sortable: false, hidden: true},
+                {label: "短信类型", name: "smstypeDesc", align: "left", sortable: false, width: 60},
+                {label: "短信类型", name: "smstype", align: "left", sortable: false, hidden: true},
+                {label: "提交条数", name: "submitTotal", align: "left", sortable: false, width: 100},
+                {label: "明确成功条数", name: "reportsuccess", align: "left", sortable: false, width: 100},
+                {
+                    label: "发送成功率", name: "sendSuccessRatioStr", align: "left", sortable: false, width: 100,
+                    formatter: function (cellvalue, options, rowObject) {
+                        if (cellvalue == '0') {
+                            return "";
+                        } else {
+                            return cellvalue + '%';
+                        }
+                    }
+                },
+                {
+                    label: "投诉个数", name: "complaintNumber", align: "left", sortable: false, width: 100,
+                    formatter: function (cellvalue, options, rowObject) {
+                        var switcher = "";
+                        var clientid = rowObject.clientId;
+                        var name = rowObject.client.name;
+                        var date = rowObject.dateStr;
+                        var operatorstype = rowObject.operatorstype;
+                        var operatorstypeDesc = rowObject.operatorstypeDesc;
+                        var smstype = rowObject.smstype;
+                        var smstypeDesc = rowObject.smstypeDesc;
+                        var complaintNumber = rowObject.complaintNumber;
+
+                        //用户ID、日期、运营商、短信类型
+                        switcher = "<a href='javascript:;' class='complaintNumber' onclick=\"goDetail('" + clientid + "','" + name + "','" + date + "','" + operatorstype + "','" + operatorstypeDesc + "','" + smstype + "','" + smstypeDesc + "')\" title='" + complaintNumber + "'>" + complaintNumber + "</a>";
+                        return switcher;
+                    }
+                },
+                {label: "投诉率（百万分之一）", name: "complaintRatioStr", align: "left", sortable: false, width: 100},
+                {label: "投诉系数（百万分之一）", name: "complaintCoefficientStr", align: "left", sortable: false, width: 100},
+                {
+                    label: "投诉差异值（百万分之一）", name: "complaintDifferenceStr", align: "left", sortable: false, width: 100,
+                    formatter: function (cellvalue, options, rowObject) {
+                        var complaintDifference = rowObject.complaintDifferenceStr;
+                        if (complaintDifference < 0) {
+                            return "<div style='background-color: red;color:#FFF;'>" + complaintDifference + "</div>"
+                        } else {
+                            return "<div>" + complaintDifference + "</div>"
+                        }
+                    }
+                },
+                {label: "销售单价", name: "salefeeStr", align: "left", sortable: false, width: 100},
+                {label: "所属销售", name: "user.realname", align: "left", sortable: false, width: 100},
+                {
+                    label: "日期", name: "dateStr", align: "left", sortable: false, width: 100
+                }
+            ],
+            gridComplete: completeMethod,
+            pager: "#pager_list",
+            viewrecords: true,
+            hidegrid: false
+        });
+
+        $(window).bind("resize", function () {
+            var width = $(".jqGrid_wrapper").width();
+            $("#table_list").setGridWidth(width);
+        })
+
+        function keyUp(e) {
+            var currKey = 0, e = e || event;
+            currKey = e.keyCode || e.which || e.charCode;
+            var keyName = String.fromCharCode(currKey);
+            if (currKey == 13) {
+                search();
+            }
+        }
+
+        document.onkeyup = keyUp;
+    });
+
+
+    function goDetail(clientid, name, date, operatorstype, operatorstypeDesc, smstype, smstypeDesc) {
+        window.location.href = '/operation/statistics/complaint/complaints?clientId=' + clientid + "&name=" + name + "&dateStr=" + date + "&operatorstype=" + operatorstype + "&operatorstypeDesc=" + operatorstypeDesc + "&smstype=" + smstype + "&smstypeDesc=" + smstypeDesc;
+    }
+
+    /*]]>*/
+</script>
+</body>
+</html>

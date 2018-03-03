@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 账户管理  / 代理商申请,受理代理商账号  -->
+<mapper namespace="agentCommon">
+	
+	<select id="queryAgentApplyByEmail" resultType="map">
+		SELECT
+			id,
+			company,
+			address,
+			realname,
+			email,
+			mobile,
+			city,
+			remark,
+			status,
+			reason,
+			create_time
+		FROM 
+			t_sms_agent_apply
+		WHERE 
+			email = #{email}
+<!-- 			 and mobile = #{mobile} -->
+			
+	</select>
+
+	<select id="queryAgentApplyById" resultType="map">
+		SELECT
+			id,
+			company,
+			address,
+			realname,
+			email,
+			mobile,
+			city,
+			remark,
+			status,
+			reason,
+			create_time
+		FROM
+			t_sms_agent_apply
+		WHERE
+			id = #{applyId}
+	</select>
+
+
+
+
+
+
+	
+	<select id="querySmsUserCountByMobileEmail" resultType="int">
+		SELECT 
+			count(id) 
+		FROM 
+			t_sms_user
+		WHERE 
+		1 = 1
+		and
+		(email = #{email} or mobile = #{mobile})
+		and
+		web_id = 2
+	</select>
+	
+	<select id="querySmsUserCountByEmail" resultType="int">
+		SELECT 
+			count(id) 
+		FROM 
+			t_sms_user
+		WHERE 
+		1 = 1
+		and 
+		email = #{email}
+		and
+		web_id = 2
+	</select>
+
+	<select id="queryOemRoleId" resultType="int">
+		SELECT
+			id
+		FROM
+			t_sms_role
+		WHERE
+			role_name = 'OEM代理商'
+	</select>
+
+
+
+
+
+	<insert id="insertSmsUser" keyProperty="id" useGeneratedKeys="true">
+		
+		INSERT INTO t_sms_user(
+			sid,
+			username,
+			email,
+			password,
+			user_type,
+			status,
+			mobile,
+			realname,
+			create_date,
+			update_date,
+			login_times,
+			web_id
+		) VALUES(
+			#{sid},
+			#{username},
+			#{email},
+			#{password},
+			#{user_type},
+			#{status},
+			#{mobile},
+			#{realname},
+			#{create_date},
+			#{update_date},
+			#{login_times},
+			#{web_id}
+		)
+	
+	</insert>
+	
+	<insert id="insertSmsAgentInfo">
+		INSERT INTO 
+		t_sms_agent_info(
+			agent_id,
+			admin_id,
+			agent_name,
+			shorter_name,
+			agent_type,
+			status,
+			oauth_status,
+			oauth_date,
+			address,
+			company,
+			company_nbr,
+			mobile,
+			belong_sale,
+			create_time,
+			update_time,
+			remark
+		) values(
+			#{agent_id},
+			#{admin_id},
+			#{agent_name},
+			#{shorter_name},
+			#{agent_type},
+			#{status},
+			#{oauth_status},
+			#{oauth_date},
+			#{address},
+			#{company},
+			#{company_nbr},
+			#{mobile},
+			#{belong_sale},
+			#{create_time},
+			#{update_time},
+			#{remark}
+		)
+	
+	</insert>
+	
+	<insert id="insertSmsAgentAccount">
+		INSERT INTO 
+		t_sms_agent_account(
+			agent_id,
+			balance,
+			credit_balance,
+			accumulated_income,
+			commission_income,
+			accumulated_recharge
+		)values(
+			#{agent_id},
+			#{balance},
+			#{credit_balance},
+			#{accumulated_income},
+			#{commission_income},
+			#{accumulated_recharge}
+		)
+	</insert>
+	
+	
+	<select id="getMostAgentNumForMonth" resultType="string">
+	  	SELECT 
+	  		MAX(substring(CONCAT(t.agent_id,""),7)) AS num
+	  	FROM 
+	  		t_sms_agent_info t
+	  	WHERE 1 = 1 
+	  	AND t.agent_id like CONCAT('${agentIdPre}','%' )
+    </select>
+
+	<select id="getMostAgentNumForMonthNew" resultType="string">
+
+		SELECT MAX(e.num) AS num
+		FROM(
+			SELECT
+			SUBSTRING(CONCAT(t.agent_id,""),7) AS num
+			FROM
+			t_sms_agent_info t
+			WHERE 1 = 1 AND t.agent_id LIKE CONCAT('${agentIdPre}','%' )
+		) e
+		WHERE
+			<![CDATA[
+				e.num < 5000
+			]]>
+	</select>
+    <update id="confirmResetPwd">
+	  	UPDATE 
+	  		t_sms_user
+	  	SET 
+	  		password = #{password}
+	  	WHERE 
+	  		email = #{email}
+	  		and
+	  		web_id = 2
+    </update>
+    
+    <select id="querySmsRoleById" resultType="map">
+    	SELECT 
+    		id,
+    		role_name,
+    		welcome_page,
+    		create_date,
+    		update_date,
+    		status
+    	FROM 
+    		t_sms_role
+    	WHERE 
+    		id = #{id}
+    </select>
+    
+    
+    
+    <insert id="insertSmsUserRole">
+    	INSERT INTO 
+    	t_sms_user_role(
+    		ru_id,
+    		role_id,
+    		user_id
+    	)VALUES(
+    		null,
+    		#{role_id},
+    		#{user_id}
+    	)
+    </insert>
+    
+    <select id="querySmsMailprop" resultType="map">
+    	SELECT 
+    		frm,
+    		tonbr,
+    		subject,
+    		text,
+    		type
+    	FROM 
+    		t_sms_mailprop
+    	WHERE 
+    		id = #{id}
+    </select>
+    
+    
+    
+    
+
+</mapper> 

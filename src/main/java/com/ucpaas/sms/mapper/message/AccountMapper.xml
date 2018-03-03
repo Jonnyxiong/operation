@@ -1,0 +1,1313 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ucpaas.sms.mapper.message.AccountMapper">
+    
+	<sql id="accountColumns">
+		a.id AS "id",
+		a.clientid AS "clientid",
+		a.password AS "password",
+		a.name AS "name",
+		a.sid AS "sid",
+		a.status AS "status",
+		a.agent_id AS "agentId",
+		a.oauth_status AS "oauthStatus",
+		a.oauth_date AS "oauthDate",
+		a.mobile AS "mobile",
+		a.email AS "email",
+		a.province AS "province",
+		a.city AS "city",
+		a.area AS "area",
+		a.address AS "address",
+		a.realname AS "realname",
+		a.client_level AS "clientLevel",
+		a.client_type AS "clientType",
+		a.needreport AS "needreport",
+		a.needmo AS "needmo",
+		a.needaudit AS "needaudit",
+		a.createtime AS "createtime",
+		a.ip AS "ip",
+		a.deliveryurl AS "deliveryurl",
+		a.mourl AS "mourl",
+		a.nodenum AS "nodenum",
+		a.paytype AS "paytype",
+		a.needextend AS "needextend",
+		a.signextend AS "signextend",
+		a.belong_sale AS "belongSale",
+		a.agent_owned AS "agentOwned",
+		a.remarks AS "remarks",
+		a.smstype AS "smstype",
+		a.smsfrom AS "smsfrom",
+		a.http_protocol_type AS "httpProtocolType",
+		a.isoverratecharge AS "isoverratecharge",
+		a.updatetime AS "updatetime",
+		a.spnum AS "spnum",
+		a.getreport_interval AS "getreportInterval",
+		a.getreport_maxsize AS "getreportMaxsize",
+		a.moip AS "moip",
+		a.moport AS "moport",
+		a.nodeid AS "nodeid",
+		a.identify AS "identify",
+		a.access_speed AS "accessSpeed",
+		a.noticeurl AS "noticeurl",
+		a.extend_size AS "extendSize",
+		a.client_ascription AS "clientAscription",
+		a.extendtype AS "extendtype",
+		a.extendport AS "extendport",
+		a.signportlen AS "signportlen"
+	</sql>
+	
+	<sql id="accountJoins">
+	</sql>
+    
+	<select id="get" resultType="Account">
+		SELECT 
+			<include refid="accountColumns"/>
+		FROM t_sms_account a
+		<include refid="accountJoins"/>
+		WHERE a.id = #{id}
+	</select>
+
+	<select id="getAccount" resultType="Account">
+		SELECT
+		<include refid="accountColumns"/>
+		FROM t_sms_account a
+		<include refid="accountJoins"/>
+		WHERE a.clientid = #{clientId}
+	</select>
+	
+	<select id="findList" resultType="com.ucpaas.sms.entity.po.AccountPo">
+		SELECT
+		a.clientid,
+		a.name,
+		a.mobile,
+		a.status,
+		tc.ext_value,
+		CASE tc.ext_value
+		WHEN 0 THEN '不支持'
+		WHEN 1 THEN '支持'
+		END AS extValueStr,
+		tc.star_level,
+		CASE tc.star_level
+		WHEN 1 THEN '1星'
+		WHEN 2 THEN '2星'
+		WHEN 3 THEN '3星'
+		WHEN 4 THEN '4星'
+		WHEN 5 THEN '5星'
+		END AS starLevelStr,
+		CASE a.status
+		WHEN 0 THEN '未激活'
+		WHEN 1 THEN '已启用'
+		WHEN 5 THEN '已冻结'
+		WHEN 6 THEN '已注销'
+		WHEN 7 THEN '已锁定'
+		END AS statusName,
+		CASE
+		WHEN a.oauth_status IS NULL THEN '待认证'
+		WHEN a.oauth_status = 2 THEN '待认证'
+		WHEN a.oauth_status = 3 THEN '已认证'
+		WHEN a.oauth_status = 4 THEN '认证不通过'
+		END AS oauthStatusDesc,
+		u.realname as userRealName,
+		a.paytype,
+		CASE a.paytype
+		WHEN 0 THEN '预付'
+		WHEN 1 THEN '后付'
+		END AS paytypeDesc,
+		a.smsfrom,
+		CASE a.smsfrom
+		WHEN 2 THEN 'SMPP'
+		WHEN 3 THEN 'CMPP'
+		WHEN 4 THEN 'SGIP'
+		WHEN 5 THEN 'SMGP'
+		WHEN 6 THEN 'HTTPS'
+		END AS smsfromDesc,
+		a.smstype,
+		CASE a.smstype
+		WHEN 0 THEN '通知'
+		WHEN 4 THEN '验证码'
+		WHEN 5 THEN '营销'
+		END AS smstypeDesc,
+		upl.`value`,
+		CASE upl.`value`
+		WHEN 0 THEN '提交量'
+		WHEN 1 THEN '成功量'
+		WHEN 2 THEN '明确成功量'
+		ELSE
+			CASE WHEN IFNULL(a.agent_id,0) &gt; 10 THEN '提交量'
+			ELSE '成功量' END
+		END AS valueStr,
+		(select count(0) from t_sms_oauth_pic tp where tp.client_id = a.clientid ) as flag,
+		DATE_FORMAT(a.createtime,'%Y-%m-%d %T') AS createtime
+		FROM t_sms_account a
+		<include refid="accountJoins"/>
+		LEFT JOIN t_sms_user u ON a.belong_sale = u.id
+		LEFT JOIN t_sms_client_info_ext tc on tc.clientid = a.clientid
+		LEFT JOIN
+		(	SELECT
+		tmp1.effect_date,property,`value`,tmp1.clientid
+		FROM
+		t_sms_user_property_log tmp1
+		JOIN (
+		SELECT MAX(effect_date) AS effect_date,clientid FROM t_sms_user_property_log
+		WHERE effect_date &lt; NOW() AND property = 'charge_rule'
+		GROUP BY clientid
+		) tmp2 ON tmp1.effect_date = tmp2.effect_date AND tmp1.clientid = tmp2.clientid
+		)upl on upl.clientid = a.clientid
+		<where>
+			((a.agent_id is null) or a.agent_id in(0,1,2))
+			<if test="params.condition != null and params.condition!=''">
+				and (
+				a.clientid like CONCAT('%',#{params.condition},'%')
+				or a.name like CONCAT('%',#{params.condition},'%')
+				or a.mobile like CONCAT('%',#{params.condition},'%')
+				or u.realname like CONCAT('%',#{params.condition},'%')
+				)
+			</if>
+			<if test="params.status != null and params.status!=''">
+				and a.status = #{params.status}
+			</if>
+			<if test="params.starLevel != null and params.starLevel!=''">
+				and tc.star_level = #{params.starLevel}
+			</if>
+			<if test="params.paytype != null and params.paytype!=''">
+				and a.paytype = #{params.paytype}
+			</if>
+			<if test="params.extValue != null and params.extValue!=''">
+				and tc.ext_value = #{params.extValue}
+			</if>
+			<if test="params.start_time_day != null and params.start_time_day!=''">
+				and a.createtime >= STR_TO_DATE(#{params.start_time_day},'%Y-%m-%d')
+			</if>
+			<if test="params.end_time_day != null and params.end_time_day!=''">
+				and a.createtime <![CDATA[<= STR_TO_DATE(#{params.end_time_day},'%Y-%m-%d %T') ]]>
+			</if>
+			<if test="params.value == 0">
+				AND ((property = 'charge_rule'
+				AND value = #{params.value})  or (value is null and  IFNULL(agent_id,0) &gt; 10))
+			</if>
+			<if test="params.value == 1">
+				AND ((property = 'charge_rule'
+				AND value = #{params.value})  or (value is null and IFNULL(agent_id,0) &lt; 10))
+			</if>
+			<if test="params.value == 2">
+				AND property = 'charge_rule'
+				AND value = #{params.value}
+			</if>
+			<if test="params.dataAuthorityCondition != null">
+				<choose>
+					<when test="params.dataAuthorityCondition.needQuerySaleIsNullData">
+						AND(
+						a.belong_sale in
+						<foreach collection="params.dataAuthorityCondition.ids" index="index" item="item" open="(" close=")" separator=",">
+							#{item}
+						</foreach>
+						OR
+						ISNULL(a.belong_sale)
+						)
+					</when>
+					<otherwise>
+						AND a.belong_sale in
+						<foreach collection="params.dataAuthorityCondition.ids" index="index" item="item" open="(" close=")" separator=",">
+							#{item}
+						</foreach>
+					</otherwise>
+				</choose>
+			</if>
+		</where>
+		ORDER BY a.createtime desc
+	</select>
+
+	 <select id="findAllListOfMap" resultType="map">
+		 SELECT
+		 a.clientid,
+		 a.name,
+		 a.mobile,
+		 a.status,
+		 tc.ext_value,
+		 CASE tc.ext_value
+		 WHEN 0 THEN '不支持'
+		 WHEN 1 THEN '支持'
+		 END AS extValueStr,
+		 tc.star_level,
+		 CASE tc.star_level
+		 WHEN 1 THEN '1星'
+		 WHEN 2 THEN '2星'
+		 WHEN 3 THEN '3星'
+		 WHEN 4 THEN '4星'
+		 WHEN 5 THEN '5星'
+		 END AS starLevelStr,
+		 CASE a.status
+		 WHEN 0 THEN '未激活'
+		 WHEN 1 THEN '已启用'
+		 WHEN 5 THEN '已冻结'
+		 WHEN 6 THEN '已注销'
+		 WHEN 7 THEN '已锁定'
+		 END AS statusName,
+		 CASE
+		 WHEN a.oauth_status IS NULL THEN '待认证'
+		 WHEN a.oauth_status = 2 THEN '待认证'
+		 WHEN a.oauth_status = 3 THEN '已认证'
+		 WHEN a.oauth_status = 4 THEN '认证不通过'
+		 END AS oauthStatusDesc,
+		 u.realname as userRealName,
+		 a.paytype,
+		 CASE a.paytype
+		 WHEN 0 THEN '预付'
+		 WHEN 1 THEN '后付'
+		 END AS paytypeDesc,
+		 a.smsfrom,
+		 CASE a.smsfrom
+		 WHEN 1 THEN 'CMPP3.0'
+		 WHEN 2 THEN 'SMPP'
+		 WHEN 3 THEN 'CMPP2.0'
+		 WHEN 4 THEN 'SGIP'
+		 WHEN 5 THEN 'SMGP'
+		 WHEN 6 THEN 'HTTPS'
+		 END AS smsfromDesc,
+		 a.smstype,
+		 CASE a.smstype
+		 WHEN 0 THEN '通知'
+		 WHEN 4 THEN '验证码'
+		 WHEN 5 THEN '营销'
+		 END AS smstypeDesc,
+		 upl.`value`,
+		 CASE upl.`value`
+		 WHEN 0 THEN '提交量'
+		 WHEN 1 THEN '成功量'
+		 WHEN 2 THEN '明确成功量'
+		 ELSE
+		 CASE WHEN IFNULL(a.agent_id,0) &gt; 10 THEN '提交量'
+		 ELSE '成功量' END
+		 END AS valueStr,
+		 (select count(0) from t_sms_oauth_pic tp where tp.client_id = a.clientid ) as flag,
+		 DATE_FORMAT(a.createtime,'%Y-%m-%d %T') AS createtime
+		 FROM t_sms_account a
+		 LEFT JOIN t_sms_user u ON a.belong_sale = u.id
+		 LEFT JOIN t_sms_client_info_ext tc on tc.clientid = a.clientid
+		 LEFT JOIN
+		 (	SELECT
+		 tmp1.effect_date,property,`value`,tmp1.clientid
+		 FROM
+		 t_sms_user_property_log tmp1
+		 JOIN (
+		 SELECT MAX(effect_date) AS effect_date,clientid FROM t_sms_user_property_log
+		 WHERE effect_date &lt; NOW() AND property = 'charge_rule'
+		 GROUP BY clientid
+		 ) tmp2 ON tmp1.effect_date = tmp2.effect_date AND tmp1.clientid = tmp2.clientid
+		 )upl on upl.clientid = a.clientid
+		 <where>
+			 ((a.agent_id is null) or a.agent_id in(0,1,2))
+			 <if test="condition != null and condition!=''">
+				 and (
+				 a.clientid like CONCAT('%',#{condition},'%')
+				 or a.name like CONCAT('%',#{condition},'%')
+				 or a.mobile like CONCAT('%',#{condition},'%')
+				 or u.realname like CONCAT('%',#{condition},'%')
+				 )
+			 </if>
+			 <if test="status != null and status!=''">
+				 and a.status = #{status}
+			 </if>
+			 <if test="starLevel != null and starLevel!=''">
+				 and tc.star_level = #{starLevel}
+			 </if>
+			 <if test="paytype != null and paytype!=''">
+				 and a.paytype = #{paytype}
+			 </if>
+			 <if test="extValue != null and extValue!=''">
+				 and tc.ext_value = #{extValue}
+			 </if>
+			 <if test="start_time_day != null and start_time_day!=''">
+				 and a.createtime >= STR_TO_DATE(#{start_time_day},'%Y-%m-%d')
+			 </if>
+			 <if test="end_time_day != null and end_time_day!=''">
+				 and a.createtime <![CDATA[<= STR_TO_DATE(#{end_time_day},'%Y-%m-%d %T') ]]>
+			 </if>
+			 <if test="value == 0">
+				 AND ((property = 'charge_rule'
+				 AND value = #{value})  or (value is null and  IFNULL(agent_id,0) &gt; 10))
+			 </if>
+			 <if test="value == 1">
+				 AND ((property = 'charge_rule'
+				 AND value = #{value})  or (value is null and IFNULL(agent_id,0) &lt; 10))
+			 </if>
+			 <if test="value == 2">
+				 AND property = 'charge_rule'
+				 AND value = #{value}
+			 </if>
+			 <if test="dataAuthorityCondition != null">
+				 <choose>
+					 <when test="dataAuthorityCondition.needQuerySaleIsNullData">
+						 AND(
+						 a.belong_sale in
+						 <foreach collection="dataAuthorityCondition.ids" index="index" item="item" open="(" close=")" separator=",">
+							 #{item}
+						 </foreach>
+						 OR
+						 ISNULL(a.belong_sale)
+						 )
+					 </when>
+					 <otherwise>
+						 AND a.belong_sale in
+						 <foreach collection="dataAuthorityCondition.ids" index="index" item="item" open="(" close=")" separator=",">
+							 #{item}
+						 </foreach>
+					 </otherwise>
+				 </choose>
+			 </if>
+		 </where>
+		 ORDER BY a.createtime desc
+	</select>
+
+	<select id="getOemDomainNameByAgentId" resultType="String">
+		SELECT
+			domain_name
+		FROM
+			t_sms_oem_data_config
+		WHERE
+			agent_id = #{agentId}
+	</select>
+
+	<select id="checkAccount" resultType="int">
+		SELECT count(0) as count
+		FROM t_sms_account
+		WHERE clientid = TRIM(#{clientid})
+		<if test="id != null">
+			AND id != #{id}
+		</if>
+	</select>
+
+	<!-- 查询客户的手机号码和邮件是否在account表中已存在 -->
+	<select id="accountApplyCheckInAcc" resultType="Account">
+		SELECT
+		IF(email = #{email},email,'') AS email,
+		IF(mobile = #{mobile},mobile,'') AS mobile
+		FROM
+		t_sms_account
+		WHERE
+		(email = #{email} OR mobile = #{mobile})
+		<if test="clientid != null">
+			and clientid <![CDATA[ <> ]]>  #{clientid}
+		</if>
+		LIMIT 1
+	</select>
+
+	<select id="getExtendportAssign" resultType="map">
+		SELECT
+			`extendtype`,
+			`extendname`,
+			`startnumber`,
+			`endnumber`,
+			`currentnumber`,
+			`reusenumber`,
+			`status`,
+			`remark`,
+			`updatetime`
+		FROM
+			t_sms_extendport_assign
+		WHERE
+			extendtype = #{extendtype}
+		and status = 0
+		limit 1
+	</select>
+
+	<select id="getForUpdate" resultType="com.ucpaas.sms.entity.po.AccountPo">
+		SELECT
+			a.clientid,
+			a.paytype,
+			a.smstype,
+			a.smsfrom
+		FROM t_sms_account a
+		WHERE a.clientid = #{clientId}
+	</select>
+
+	<select id="getClientInfo" resultType="com.ucpaas.sms.entity.po.AccountPo">
+		SELECT
+			a.clientid,
+			i.agent_type as "agentType",
+			CASE i.agent_type
+				WHEN 1 THEN '销售代理商'
+				WHEN 2 THEN '品牌代理商'
+				WHEN 3 THEN '资源合作商'
+				WHEN 4 THEN '代理商和资源合作'
+				WHEN 5 THEN 'OEM代理商'
+			END AS agentTypeDesc,
+			a.agent_id AS "agentId",
+			a.belong_sale as "belongSale",
+			u.realname as userRealName,
+			a.paytype,
+			CASE a.paytype
+				WHEN 0 THEN '预付'
+				WHEN 1 THEN '后付'
+			END AS paytypeDesc,
+			a.client_type,
+			CASE a.client_type
+				WHEN 1 THEN '个人用户'
+				WHEN 2 THEN '企业用户'
+			END AS clientTypeDesc,
+			a.client_type,
+			a.name,
+			a.email,
+			a.mobile,
+			a.address,
+			a.needaudit,
+			CASE a.needaudit
+				WHEN 0 THEN '不需要'
+				WHEN 1 THEN '营销需要'
+				WHEN 2 THEN '全部需要'
+				WHEN 3 THEN '审核关键字'
+			END AS needAuditDesc,
+			a.smsfrom,
+			CASE a.smsfrom
+				WHEN 1 THEN 'CMPP3.0'
+				WHEN 2 THEN 'SMPP'
+				WHEN 3 THEN 'CMPP2.0'
+				WHEN 4 THEN 'SGIP'
+				WHEN 5 THEN 'SMGP'
+				WHEN 6 THEN 'HTTPS'
+			END AS smsfromDesc,
+			a.needreport,
+			a.http_protocol_type AS 'httpProtocolType',
+			CASE a.needreport
+				WHEN 0 THEN '不获取'
+				WHEN 1 THEN '推送简单状态报告'
+				WHEN 2 THEN '推送透传状态报告'
+				WHEN 3 THEN '用户主动拉取'
+			END AS needreportDesc,
+			a.needmo,
+			CASE a.needmo
+				WHEN 0 THEN '不获取'
+				WHEN 1 THEN 'SMSP推送'
+				WHEN 3 THEN '用户主动拉取'
+			END AS needmoDesc,
+			a.deliveryurl,
+			a.mourl,
+			a.noticeurl,
+			a.smstype,
+			CASE a.smstype
+			WHEN 0 THEN '通知'
+			WHEN 4 THEN '验证码'
+			WHEN 5 THEN '营销'
+			END AS smstypeDesc,
+			a.moip,
+			a.moport,
+			a.nodeid,
+			CASE
+				WHEN a.ip = '*' THEN ''
+				ELSE ip
+			END AS ip,
+			a.needextend,
+			CASE a.needextend
+				WHEN 0 THEN '不支持'
+				WHEN 1 THEN '支持'
+			END AS needextendDesc,
+			te.star_level,
+		 CASE te.star_level
+		 WHEN 1 THEN '1星'
+		 WHEN 2 THEN '2星'
+		 WHEN 3 THEN '3星'
+		 WHEN 4 THEN '4星'
+		 WHEN 5 THEN '5星'
+		 END AS starLevelStr,
+			a.extend_size as "extendSize",
+			a.access_speed as "accessSpeed",
+			a.oauth_status as "oauthStatus",
+			CASE
+				WHEN a.oauth_status IS NULL THEN '待认证'
+				WHEN a.oauth_status = 2 THEN '待认证'
+				WHEN a.oauth_status = 3 THEN '已认证'
+				WHEN a.oauth_status = 4 THEN '认证不通过'
+			END AS oauthStatusDesc,
+			a.oauth_date as "oauthDate",
+			a.remarks,
+			a.status,
+			CASE a.status
+				WHEN 0 THEN '未激活'
+				WHEN 1 THEN '已启用'
+				WHEN 5 THEN '已冻结'
+				WHEN 6 THEN '已注销'
+				WHEN 7 THEN '已锁定'
+			END AS statusName,
+			a.agent_owned agentOwned,
+			CASE te.ext_value
+			WHEN 0 THEN '不支持'
+			WHEN 1 THEN '支持'
+			END AS extValueStr,
+			te.ext_value,
+			a.nodenum,
+			a.extendport,
+			a.createtime
+		FROM
+			t_sms_account a
+		JOIN t_sms_agent_info i ON a.agent_id = i.agent_id
+		LEFT JOIN t_sms_user u ON a.belong_sale = u.id
+		LEFT JOIN t_sms_client_info_ext te ON  a.clientid = te.clientid
+		WHERE
+			a.clientid = #{clientId}
+	</select>
+
+	<select id="getDirectclientInfo" resultType="com.ucpaas.sms.entity.po.AccountPo">
+		SELECT
+			a.clientid,
+			a.belong_sale as "belongSale",
+			u.realname as "userRealName",
+			a.paytype,
+			CASE a.paytype
+				WHEN 0 THEN '预付'
+				WHEN 1 THEN '后付'
+			END AS paytypeDesc,
+			a.client_type,
+			CASE a.client_type
+				WHEN 1 THEN '个人用户'
+				WHEN 2 THEN '企业用户'
+			END AS clientTypeDesc,
+			a.name,
+			a.email,
+			a.mobile,
+			a.address,
+			a.needaudit,
+			CASE a.needaudit
+				WHEN 0 THEN '不需要'
+				WHEN 1 THEN '营销需要'
+				WHEN 2 THEN '全部需要'
+				WHEN 3 THEN '审核关键字'
+			END AS needAuditDesc,
+			te.star_level,
+		 CASE te.star_level
+		 WHEN 1 THEN '1星'
+		 WHEN 2 THEN '2星'
+		 WHEN 3 THEN '3星'
+		 WHEN 4 THEN '4星'
+		 WHEN 5 THEN '5星'
+		 END AS starLevelStr,
+			a.smsfrom,
+			a.http_protocol_type AS 'httpProtocolType',
+			CASE a.smsfrom
+				WHEN 1 THEN 'CMPP3.0'
+				WHEN 2 THEN 'SMPP'
+				WHEN 3 THEN 'CMPP2.0'
+				WHEN 4 THEN 'SGIP'
+				WHEN 5 THEN 'SMGP'
+				WHEN 6 THEN 'HTTPS'
+			END AS smsfromDesc,
+			a.smstype,
+			CASE a.smstype
+				WHEN 0 THEN '通知'
+				WHEN 4 THEN '验证码'
+				WHEN 5 THEN '营销'
+			END AS smstypeDesc,
+			a.moip,
+			a.moport,
+			a.nodeid,
+			CASE
+				WHEN a.ip = '*' THEN ''
+				ELSE ip
+			END AS ip,
+			a.needextend,
+			CASE a.needextend
+				WHEN 0 THEN '不支持'
+				WHEN 1 THEN '支持'
+			END AS needextendDesc,
+			a.extend_size as "extendSize",
+			a.access_speed as "accessSpeed",
+			a.oauth_status as "oauthStatus",
+			CASE
+				WHEN a.oauth_status IS NULL THEN '待认证'
+				WHEN a.oauth_status = 2 THEN '待认证'
+				WHEN a.oauth_status = 3 THEN '已认证'
+				WHEN a.oauth_status = 4 THEN '认证不通过'
+			END AS oauthStatusDesc,
+			a.oauth_date as "oauthDate",
+			a.remarks,
+			a.status,
+			CASE a.status
+				WHEN 0 THEN '未激活'
+				WHEN 1 THEN '已启用'
+				WHEN 5 THEN '已冻结'
+				WHEN 6 THEN '已注销'
+				WHEN 7 THEN '已锁定'
+			END AS statusName,
+			a.nodenum,
+			a.extendport,
+			a.createtime,
+			a.mourl,
+			a.deliveryurl,
+			a.noticeurl,
+			a.needmo,
+			CASE a.needmo
+			WHEN 0 THEN '不获取'
+			WHEN 1 THEN 'SMSP推送'
+			WHEN 3 THEN '用户主动拉取'
+			END AS needmoDesc,
+			CASE te.ext_value
+			WHEN 0 THEN '不支持'
+			WHEN 1 THEN '支持'
+			END AS extValueStr,
+			te.ext_value,
+			a.needreport
+		FROM
+			t_sms_account a
+		LEFT JOIN t_sms_user u ON a.belong_sale = u.id
+		LEFT JOIN t_sms_client_info_ext te ON  a.clientid = te.clientid
+		WHERE
+			a.clientid = #{clientId}
+	</select>
+
+	<update id="updateExtendportAssign">
+		UPDATE
+			t_sms_extendport_assign
+		<set>
+			<if test="reusenumber != null">
+				reusenumber = #{reusenumber},
+			</if>
+			<if test="currentnumber != null">
+				currentnumber = #{currentnumber},
+			</if>
+			<if test="status != null">
+				status = #{status}
+			</if>
+		</set>
+		<where>
+			extendtype = #{extendtype}
+			<if test="oldReusenumber != null">
+				and reusenumber = #{oldReusenumber}
+			</if>
+			<if test="oldCurrentnumber != null">
+				and currentnumber = #{oldCurrentnumber}
+			</if>
+			<if test="oldStatus != null">
+				and status = #{oldStatus}
+			</if>
+		</where>
+	</update>
+
+	<insert id="insert">
+		INSERT INTO t_sms_account(
+			id,
+			clientid,
+			password,
+			name,
+			status,
+			agent_id,
+			oauth_status,
+			oauth_date,
+			mobile,
+			email,
+			province,
+			city,
+			area,
+			address,
+			realname,
+			client_level,
+			client_type,
+			needreport,
+			needmo,
+			needaudit,
+			createtime,
+			ip,
+			deliveryurl,
+			mourl,
+			nodenum,
+			paytype,
+			needextend,
+			signextend,
+			belong_sale,
+			agent_owned,
+			remarks,
+			smstype,
+			smsfrom,
+			http_protocol_type,
+			isoverratecharge,
+			updatetime,
+			spnum,
+			getreport_interval,
+			getreport_maxsize,
+			moip,
+			moport,
+			nodeid,
+			identify,
+			access_speed,
+			noticeurl,
+			extend_size,
+			client_ascription,
+			extendtype,
+			extendport,
+			signportlen
+		) VALUES (
+			#{id},
+			#{clientid},
+			#{password},
+			#{name},
+			#{status},
+			#{agentId},
+			#{oauthStatus},
+			#{oauthDate},
+			#{mobile},
+			#{email},
+			#{province},
+			#{city},
+			#{area},
+			#{address},
+			#{realname},
+			#{clientLevel},
+			#{clientType},
+			#{needreport},
+			#{needmo},
+			#{needaudit},
+			#{createtime},
+			#{ip},
+			#{deliveryurl},
+			#{mourl},
+			#{nodenum},
+			#{paytype},
+			#{needextend},
+			#{signextend},
+			#{belongSale},
+			#{agentOwned},
+			#{remarks},
+			#{smstype},
+			#{smsfrom},
+			#{httpProtocolType},
+			#{isoverratecharge},
+			#{updatetime},
+			#{spnum},
+			#{getreportInterval},
+			#{getreportMaxsize},
+			#{moip},
+			#{moport},
+			#{nodeid},
+			#{identify},
+			#{accessSpeed},
+			#{noticeurl},
+			#{extendSize},
+			#{clientAscription},
+			#{extendtype},
+			#{extendport},
+			#{signportlen}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE t_sms_account SET 	
+			clientid = #{clientid},
+			password = #{password},
+			name = #{name},
+			sid = #{sid},
+			status = #{status},
+			agent_id = #{agentId},
+			oauth_status = #{oauthStatus},
+			oauth_date = #{oauthDate},
+			mobile = #{mobile},
+			email = #{email},
+			province = #{province},
+			city = #{city},
+			area = #{area},
+			address = #{address},
+			realname = #{realname},
+			client_level = #{clientLevel},
+			client_type = #{clientType},
+			needreport = #{needreport},
+			needmo = #{needmo},
+			needaudit = #{needaudit},
+			createtime = #{createtime},
+			ip = #{ip},
+			deliveryurl = #{deliveryurl},
+			mourl = #{mourl},
+			nodenum = #{nodenum},
+			paytype = #{paytype},
+			needextend = #{needextend},
+			signextend = #{signextend},
+			belong_sale = #{belongSale},
+			agent_owned = #{agentOwned},
+			remarks = #{remarks},
+			smstype = #{smstype},
+			smsfrom = #{smsfrom},
+			isoverratecharge = #{isoverratecharge},
+			updatetime = #{updatetime},
+			spnum = #{spnum},
+			getreport_interval = #{getreportInterval},
+			getreport_maxsize = #{getreportMaxsize},
+			moip = #{moip},
+			moport = #{moport},
+			nodeid = #{nodeid},
+			identify = #{identify},
+			access_speed = #{accessSpeed},
+			noticeurl = #{noticeurl},
+			extend_size = #{extendSize},
+			client_ascription = #{clientAscription},
+			extendtype = #{extendtype},
+			extendport = #{extendport},
+			signportlen = #{signportlen}
+		WHERE id = #{id}
+	</update>
+
+	<update id="updateSelective" parameterType="Account">
+		UPDATE t_sms_account
+		<set>
+			<if test="agentOwned != null">
+				agent_owned = #{agentOwned},
+			</if>
+			<if test="password != null and password != ''">
+				password = #{password},
+			</if>
+			<if test="name != null and name != ''">
+				name = #{name},
+			</if>
+			<if test="agentId != null">
+				agent_id = #{agentId},
+			</if>
+			<if test="mobile != null and mobile != ''">
+				mobile = #{mobile},
+			</if>
+			<if test="email != null and email != ''">
+				email = #{email},
+			</if>
+			<if test="address != null and address != ''">
+				address = #{address},
+			</if>
+			<if test="realname != null and realname != ''">
+				realname = #{realname},
+			</if>
+			<if test="clientType != null">
+				client_type = #{clientType},
+			</if>
+			<if test="needreport != null">
+				needreport = #{needreport},
+			</if>
+			<if test="needmo != null">
+				needmo = #{needmo},
+			</if>
+			<if test="ip != null and ip != ''">
+				ip = #{ip},
+			</if>
+			<if test="deliveryurl != null and deliveryurl != ''">
+				deliveryurl = #{deliveryurl},
+			</if>
+			<if test="mourl != null and mourl != ''">
+				mourl = #{mourl},
+			</if>
+			<if test="nodenum != null">
+				nodenum = #{nodenum},
+			</if>
+			<if test="paytype != null">
+				paytype = #{paytype},
+			</if>
+			<if test="needextend != null">
+				needextend = #{needextend},
+			</if>
+			<if test="belongSale != null">
+				belong_sale = #{belongSale},
+			</if>
+			<if test="remarks != null and remarks != ''">
+				remarks = #{remarks},
+			</if>
+			<choose>
+				<when test="smstype != null and smstype ==9 ">
+					 smstype = null,
+				</when>
+				<when test="smstype != null">
+					smstype = #{smstype},
+				</when>
+			</choose>
+			<if test="smsfrom != null">
+				smsfrom = #{smsfrom},
+			</if>
+			<if test="httpProtocolType != null">
+				http_protocol_type = #{httpProtocolType},
+			</if>
+			<if test="updatetime != null">
+				updatetime = #{updatetime},
+			</if>
+			<if test="moip != null and moip != ''">
+				moip = #{moip},
+			</if>
+			<if test="moport != null and moport != ''">
+				moport = #{moport},
+			</if>
+			<if test="nodeid != null">
+				nodeid = #{nodeid},
+			</if>
+			<if test="accessSpeed != null">
+				access_speed = #{accessSpeed},
+			</if>
+			<if test="noticeurl != null and noticeurl != ''">
+				noticeurl = #{noticeurl},
+			</if>
+			<if test="extendSize != null">
+				extend_size = #{extendSize},
+			</if>
+			<if test="oauthDate != null">
+				oauth_date = #{oauthDate},
+			</if>
+			<if test="oauthStatus != null">
+				oauth_status = #{oauthStatus}
+			</if>
+		</set>
+		WHERE clientid = #{clientid}
+	</update>
+
+	<update id="delete">
+		DELETE FROM t_sms_account
+		WHERE id = #{id}
+	</update>
+
+	<insert id="batchAddUserPrice">
+		INSERT INTO
+			t_sms_user_price_log (clientid,smstype,effect_date,user_price,create_time,update_time)
+		VALUES
+		<foreach collection="list" item="item" separator=",">
+			(#{item.clientid},#{item.smstype},#{item.effectDate},#{item.userPrice},#{item.createTime},#{item.updateTime})
+		</foreach>
+	</insert>
+
+	<select id="getAccountsForAccountGroup" resultType="Account">
+		SELECT
+			a.clientid,
+			a.name
+		FROM t_sms_account a
+		WHERE
+			a.status in (1,5,7) and a.clientid not in (select clientid from t_sms_accountgr_ref_account)
+			<if test="clientType != null and clientType == 0">
+				AND !ISNULL(a.agent_id)
+			</if>
+			<if test="clientType != null and clientType == 1">
+				AND ISNULL(a.agent_id)
+			</if>
+	</select>
+
+	<select id="queryStatisticClientInfo" resultType="com.ucpaas.sms.dto.ClientConsumeVO" parameterType="java.util.Set">
+		SELECT
+			acc.clientid,
+			acc.`name` 'clientName',
+			acc.createtime 'clientCreateTime',
+			ai.agent_id 'agentId',
+			ai.agent_name 'agentName',
+			ai.agent_type 'agentType',
+			u.id 'belongSale',
+			u.realname 'belongSaleStr',
+			ag.account_gname 'accountGname'
+		FROM
+			t_sms_account acc
+		LEFT JOIN t_sms_user u ON acc.belong_sale = u.id
+		LEFT JOIN t_sms_agent_info ai ON acc.agent_id = ai.agent_id
+		LEFT JOIN t_sms_accountgr_ref_account arg  ON arg.clientid = acc.clientid
+		LEFT JOIN t_sms_account_group ag ON arg.account_gid = ag.account_gid
+		WHERE
+			acc.clientid IN(
+			<foreach collection="clientids" item="item" separator=",">
+				#{item}
+			</foreach>
+			)
+	</select>
+
+	<select id="queryIdByName" resultType="string">
+		SELECT
+			clientid
+		FROM
+			t_sms_account
+		WHERE
+			`name` LIKE CONCAT('%',#{clientName},'%')
+
+	</select>
+	<!-- 5. 添加用户资质 -->
+	<insert id="addCerInfo">
+		INSERT INTO t_sms_oauth_pic (
+		agent_id,
+		client_id,
+		id_nbr,
+		img_url,
+		id_type,
+		create_date,
+		update_date,
+		oauth_type
+		)
+		VALUE
+		(
+		#{agentId},
+		#{clientId},
+		#{idNbr},
+		#{imgUrl},
+		#{idType},
+		NOW(),
+		#{updateDate},
+		#{oauthType}
+		)
+
+	</insert>
+	<!-- 6. 添加用户资质 -->
+	<update id="updateCerInfo">
+		UPDATE
+		t_sms_oauth_pic p
+		<set>
+			<if test="idNbr != null and idNbr != ''">
+				p.id_nbr = #{idNbr},
+			</if>
+			<if test="imgUrl != null and imgUrl != ''">
+				p.img_url = #{imgUrl},
+			</if>
+			<if test="idType != null and idType != ''">
+				p.id_type = #{idType},
+			</if>
+			p.update_date = #{updateDate}
+		</set>
+		WHERE
+		p.client_id = #{clientId}
+
+	</update>
+	<!-- 6. 添加用户资质 -->
+	<update id="updateInfo">
+		UPDATE
+		t_sms_oauth_pic p
+		<set>
+			<if test="idNbr != null and idNbr != ''">
+				p.id_nbr = #{idNbr},
+			</if>
+			<if test="imgUrl != null and imgUrl != ''">
+				p.img_url = #{imgUrl},
+			</if>
+			<if test="idType != null and idType != ''">
+				p.id_type = #{idType},
+			</if>
+			p.update_date = #{updateDate}
+		</set>
+		WHERE
+		p.agent_id = #{agentId}
+
+	</update>
+	<!-- 7. 修改客户资质同时修改客户的更新信息(将客户资质认证状态更新至待认证) -->
+	<update id="updateAccWithCer">
+		UPDATE
+		t_sms_account
+		SET
+		client_type = #{clientType},realname = #{realName},oauth_status = #{oauthStatus}
+		WHERE
+		clientid = #{clientId}
+	</update>
+	<select id="getAllSubAccount" resultType="Account">
+		SELECT
+		t.clientid,concat(t.clientid,'-',t.name) as name
+		FROM
+		t_sms_account t
+		left join t_sms_client_info_ext te on t.clientid = te.clientid
+		WHERE
+		te.ext_value =0 and te.parent_id is null and t.status != 6
+	</select>
+	<select id="getAllBindingSubAccount" parameterType="java.lang.String" resultType="Account">
+		SELECT
+		t.clientid,concat(t.clientid,'-',t.name) as name
+		FROM
+		t_sms_account t
+		left join t_sms_client_info_ext te on t.clientid = te.clientid
+		WHERE
+		 te.parent_id is not null and t.status != 6 and  te.parent_id=#{clientid}
+	</select>
+	<update id="updateBindingSubAccountNull" parameterType="java.lang.String">
+		UPDATE
+		t_sms_client_info_ext
+		SET
+		parent_id = null
+		WHERE
+		clientid in (${clientId})
+	</update>
+	<update id="updateBindingSubAccount"  parameterType="java.lang.String">
+		UPDATE
+		t_sms_client_info_ext
+		SET
+		parent_id = #{parentId}
+		WHERE
+		clientid in (${clientId})
+	</update>
+
+	<update id="updateExtValue" >
+		UPDATE
+		t_sms_client_info_ext
+		SET
+		ext_value = #{extValue}
+		WHERE
+		clientid = (#{clientId})
+	</update>
+	<select id="getparentId" parameterType="java.lang.String" resultType="int">
+		SELECT
+		count(0)
+		FROM
+		t_sms_client_info_ext te
+		WHERE
+		te.parent_id is not null  and  te.clientid=#{clientId}
+	</select>
+
+	<!-- 7. 修改客户资质同时修改客户的更新信息(将客户资质认证状态更新至待认证) 代理商-->
+	<update id="updateAccWithCerOfInfo">
+		UPDATE
+		t_sms_agent_info
+		SET
+		update_time = #{updateDate},oauth_status = #{oauthStatus}
+		WHERE
+		agent_id = #{agentId}
+	</update>
+
+
+	<!-- 5. 添加用户资质  直客 -->
+	<insert id="addCerInfoOfZK">
+		INSERT INTO t_sms_oauth_pic (
+		agent_id,
+		client_id,
+		id_nbr,
+		img_url,
+		id_type,
+		create_date,
+		update_date,
+		oauth_type
+		)
+		VALUE
+		(
+		0,
+		#{clientId},
+		#{idNbr},
+		#{imgUrl},
+		#{idType},
+		NOW(),
+		#{updateDate},
+		#{oauthType}
+		)
+
+	</insert>
+	<select id="getAccountOfSize" resultType="int">
+		SELECT
+		count(1)
+		FROM t_sms_oauth_pic a
+		WHERE a.client_id = #{clientid}
+	</select>
+	<select id="getCerInfo" resultType="int">
+		SELECT
+		count(1)
+		FROM t_sms_oauth_pic a
+		WHERE a.agent_id = #{agentid}
+	</select>
+	<!-- 6. 添加用户资质 -->
+	<insert id="updateCerInfoOfZK">
+		UPDATE
+		t_sms_oauth_pic p
+		<set>
+			<if test="idNbr != null and idNbr != ''">
+				p.id_nbr = #{idNbr},
+			</if>
+			<if test="imgUrl != null and imgUrl != ''">
+				p.img_url = #{imgUrl},
+			</if>
+			<if test="idType != null and idType != ''">
+				p.id_type = #{idType},
+			</if>
+			p.update_date = #{updateDate}
+		</set>
+		WHERE
+		p.client_id = #{clientId}
+
+	</insert>
+
+	<select id="getAccountPoOfStarLevel" resultType="com.ucpaas.sms.entity.po.AccountPo">
+		SELECT
+		a.clientid,
+		a.name,
+		te.star_level as starLevel
+		FROM t_sms_account a
+		left JOIN  t_sms_client_info_ext te ON  a.clientid = te.clientid
+		WHERE
+		a.clientid = #{clientId}
+	</select>
+	<!--根据代理商id,客户id,认证类型获取资质认证数据-->
+	<select id="getSmsOauthpic" resultType="com.ucpaas.sms.model.SmsOauthpic">
+		SELECT
+		id id,
+		agent_id agentId,
+		client_id clientId,
+		id_nbr idNbr,
+		img_url imgUrl,
+		id_type idType,
+		oauth_type oauthType,
+		STATUS STATUS,
+		create_date createDate,
+		update_date updateDate
+		FROM t_sms_oauth_pic
+		<trim prefix="WHERE" prefixOverrides="AND |OR ">
+			<if test="agentId != null and agentId != ''">
+			AND agent_id =#{agentId}
+			</if>
+			<if test="oauthType != null and oauthType != ''">
+			AND oauth_type =#{oauthType}
+			</if>
+			<choose>
+			<when test="clientid != null and clientid!=''">
+			AND client_id=#{clientid}
+			</when>
+			<otherwise>
+			AND client_id IS NULL
+			</otherwise>
+			</choose>
+		</trim>
+	</select>
+	<!--根据资质表id删除一条资质-->
+	<delete id="deleteSmsOauthpic">
+		DELETE FROM t_sms_oauth_pic WHERE id=#{id}
+	</delete>
+	<select id="countClientOrder" resultType="int">
+		SELECT
+  COUNT(0)
+FROM
+  t_sms_oem_client_order
+WHERE product_type = 0
+  AND operator_code = 0
+  AND area_code = 0
+  AND order_type = 1
+  AND client_id =#{clientId}
+	</select>
+
+	<!--按权限获取获取客户总数和本月新增客户个数(needQuerySaleIsNullData)-->
+	<select id="getAgentUserNum" resultType="int">
+		SELECT COUNT(0) AS user_num_total FROM t_sms_account
+			WHERE (belong_sale IN
+				<foreach collection="ids" index="index" item="item" open="(" close=")" separator=",">
+					#{item}
+				</foreach>
+				<if test="needQuerySaleIsNullData">
+					OR belong_sale IS NULL
+				</if>
+				)
+		<if test="startTime !=null">
+			AND createtime >=#{startTime}
+			AND createtime &lt; #{endTime}
+		</if>
+	</select>
+
+    <select id="findAllListByBelongSales" resultType="java.lang.String" parameterType="com.ucpaas.sms.entity.po.DataAuthorityCondition">
+        SELECT
+        clientid
+        FROM t_sms_account a
+        WHERE 1 = 1
+        <choose>
+            <when test="needQuerySaleIsNullData">
+                AND(
+                a.belong_sale in
+                <foreach collection="ids" index="index" item="item" open="(" close=")" separator=",">
+                    #{item}
+                </foreach>
+                OR
+                ISNULL(a.belong_sale)
+                )
+            </when>
+            <otherwise>
+                AND a.belong_sale in
+                <foreach collection="ids" index="index" item="item" open="(" close=")" separator=",">
+                    #{item}
+                </foreach>
+            </otherwise>
+        </choose>
+    </select>
+
+	<select id="getCountByBelongSale" resultType="int">
+		SELECT COUNT(0)
+        FROM t_sms_account
+        WHERE
+			belong_sale = #{belongSale}
+			and status != #{notStatus}
+	</select>
+</mapper>

@@ -1,0 +1,1226 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ucpaas.sms.mapper.accessSlave.AccessChannelStatisticsMapper">
+     
+        
+    <resultMap id="rowMapper" type="AccessChannelStatistics">
+        <result property="id" jdbcType="BIGINT" column="id"/>
+        <result property="agentId" jdbcType="INTEGER" column="agent_id"/>
+        <result property="clientid" jdbcType="VARCHAR" column="clientid"/>
+        <result property="name" jdbcType="VARCHAR" column="name"/>
+        <result property="sid" jdbcType="VARCHAR" column="sid"/>
+        <result property="paytype" jdbcType="INTEGER" column="paytype"/>
+        <result property="operatorstype" jdbcType="INTEGER" column="operatorstype"/>
+        <result property="channelid" jdbcType="INTEGER" column="channelid"/>
+        <result property="remark" jdbcType="VARCHAR" column="remark"/>
+        <result property="chargetotal" jdbcType="INTEGER" column="chargetotal"/>
+        <result property="overrateChargeTotal" jdbcType="INTEGER" column="overrate_charge_total"/>
+        <result property="subId" jdbcType="VARCHAR" column="sub_id"/>
+        <result property="costfee" jdbcType="DECIMAL" column="costfee"/>
+        <result property="salefee" jdbcType="DECIMAL" column="salefee"/>
+        <result property="productfee" jdbcType="DECIMAL" column="productfee"/>
+        <result property="productType" jdbcType="INTEGER" column="product_type"/>
+        <result property="sendtotal" jdbcType="INTEGER" column="sendtotal"/>
+        <result property="usersmstotal" jdbcType="INTEGER" column="usersmstotal"/>
+        <result property="notsend" jdbcType="INTEGER" column="notsend"/>
+        <result property="submitsuccess" jdbcType="INTEGER" column="submitsuccess"/>
+        <result property="reportsuccess" jdbcType="INTEGER" column="reportsuccess"/>
+        <result property="submitfail" jdbcType="INTEGER" column="submitfail"/>
+        <result property="subretfail" jdbcType="INTEGER" column="subretfail"/>
+        <result property="reportfail" jdbcType="INTEGER" column="reportfail"/>
+        <result property="auditfail" jdbcType="INTEGER" column="auditfail"/>
+        <result property="recvintercept" jdbcType="INTEGER" column="recvintercept"/>
+        <result property="sendintercept" jdbcType="INTEGER" column="sendintercept"/>
+        <result property="overrateintercept" jdbcType="INTEGER" column="overrateintercept"/>
+        <result property="belongSale" jdbcType="BIGINT" column="belong_sale"/>
+        <result property="smstype" jdbcType="INTEGER" column="smstype"/>
+        <result property="stattype" jdbcType="INTEGER" column="stattype"/>
+        <result property="date" jdbcType="INTEGER" column="date"/>
+        <result property="createtime" jdbcType="TIMESTAMP" column="createtime"/>
+    </resultMap> 
+     
+    <sql id="BASE_COLUMN_LIST">
+        id,
+        agent_id,
+        clientid,
+        name,
+        sid,
+        paytype,
+        operatorstype,
+        channelid,
+        remark,
+        chargetotal,
+        overrate_charge_total,
+        sub_id,
+        costfee,
+        salefee,
+        productfee,
+        product_type,
+        sendtotal,
+        usersmstotal,
+        notsend,
+        submitsuccess,
+        reportsuccess,
+        submitfail,
+        subretfail,
+        reportfail,
+        auditfail,
+        recvintercept,
+        sendintercept,
+        overrateintercept,
+        belong_sale,
+        smstype,
+        stattype,
+        date,
+        createtime
+    </sql>
+
+    <insert id="insert" parameterType="AccessChannelStatistics" >
+        INSERT INTO t_sms_access_channel_statistics 
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                id,
+            </if>
+            <if test="agentId != null" >
+                agent_id,
+            </if>
+            <if test="clientid != null" >
+                clientid,
+            </if>
+            <if test="name != null" >
+                name,
+            </if>
+            <if test="sid != null" >
+                sid,
+            </if>
+            <if test="paytype != null" >
+                paytype,
+            </if>
+            <if test="operatorstype != null" >
+                operatorstype,
+            </if>
+            <if test="channelid != null" >
+                channelid,
+            </if>
+            <if test="remark != null" >
+                remark,
+            </if>
+            <if test="chargetotal != null" >
+                chargetotal,
+            </if>
+            <if test="overrateChargeTotal != null" >
+                overrate_charge_total,
+            </if>
+            <if test="subId != null" >
+                sub_id,
+            </if>
+            <if test="costfee != null" >
+                costfee,
+            </if>
+            <if test="salefee != null" >
+                salefee,
+            </if>
+            <if test="productfee != null" >
+                productfee,
+            </if>
+            <if test="productType != null" >
+                product_type,
+            </if>
+            <if test="sendtotal != null" >
+                sendtotal,
+            </if>
+            <if test="usersmstotal != null" >
+                usersmstotal,
+            </if>
+            <if test="notsend != null" >
+                notsend,
+            </if>
+            <if test="submitsuccess != null" >
+                submitsuccess,
+            </if>
+            <if test="reportsuccess != null" >
+                reportsuccess,
+            </if>
+            <if test="submitfail != null" >
+                submitfail,
+            </if>
+            <if test="subretfail != null" >
+                subretfail,
+            </if>
+            <if test="reportfail != null" >
+                reportfail,
+            </if>
+            <if test="auditfail != null" >
+                auditfail,
+            </if>
+            <if test="recvintercept != null" >
+                recvintercept,
+            </if>
+            <if test="sendintercept != null" >
+                sendintercept,
+            </if>
+            <if test="overrateintercept != null" >
+                overrateintercept,
+            </if>
+            <if test="belongSale != null" >
+                belong_sale,
+            </if>
+            <if test="smstype != null" >
+                smstype,
+            </if>
+            <if test="stattype != null" >
+                stattype,
+            </if>
+            <if test="date != null" >
+                date,
+            </if>
+            <if test="createtime != null" >
+                createtime
+            </if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id},
+            </if>
+            <if test="agentId != null" >
+                #{agentId},
+            </if>
+            <if test="clientid != null" >
+                #{clientid},
+            </if>
+            <if test="name != null" >
+                #{name},
+            </if>
+            <if test="sid != null" >
+                #{sid},
+            </if>
+            <if test="paytype != null" >
+                #{paytype},
+            </if>
+            <if test="operatorstype != null" >
+                #{operatorstype},
+            </if>
+            <if test="channelid != null" >
+                #{channelid},
+            </if>
+            <if test="remark != null" >
+                #{remark},
+            </if>
+            <if test="chargetotal != null" >
+                #{chargetotal},
+            </if>
+            <if test="overrateChargeTotal != null" >
+                #{overrateChargeTotal},
+            </if>
+            <if test="subId != null" >
+                #{subId},
+            </if>
+            <if test="costfee != null" >
+                #{costfee},
+            </if>
+            <if test="salefee != null" >
+                #{salefee},
+            </if>
+            <if test="productfee != null" >
+                #{productfee},
+            </if>
+            <if test="productType != null" >
+                #{productType},
+            </if>
+            <if test="sendtotal != null" >
+                #{sendtotal},
+            </if>
+            <if test="usersmstotal != null" >
+                #{usersmstotal},
+            </if>
+            <if test="notsend != null" >
+                #{notsend},
+            </if>
+            <if test="submitsuccess != null" >
+                #{submitsuccess},
+            </if>
+            <if test="reportsuccess != null" >
+                #{reportsuccess},
+            </if>
+            <if test="submitfail != null" >
+                #{submitfail},
+            </if>
+            <if test="subretfail != null" >
+                #{subretfail},
+            </if>
+            <if test="reportfail != null" >
+                #{reportfail},
+            </if>
+            <if test="auditfail != null" >
+                #{auditfail},
+            </if>
+            <if test="recvintercept != null" >
+                #{recvintercept},
+            </if>
+            <if test="sendintercept != null" >
+                #{sendintercept},
+            </if>
+            <if test="overrateintercept != null" >
+                #{overrateintercept},
+            </if>
+            <if test="belongSale != null" >
+                #{belongSale},
+            </if>
+            <if test="smstype != null" >
+                #{smstype},
+            </if>
+            <if test="stattype != null" >
+                #{stattype},
+            </if>
+            <if test="date != null" >
+                #{date},
+            </if>
+            <if test="createtime != null" >
+                #{createtime}
+            </if>
+        </trim>
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List" >
+        INSERT INTO t_sms_access_channel_statistics (
+            id,
+            agent_id,
+            clientid,
+            name,
+            sid,
+            paytype,
+            operatorstype,
+            channelid,
+            remark,
+            chargetotal,
+            overrate_charge_total,
+            sub_id,
+            costfee,
+            salefee,
+            productfee,
+            product_type,
+            sendtotal,
+            usersmstotal,
+            notsend,
+            submitsuccess,
+            reportsuccess,
+            submitfail,
+            subretfail,
+            reportfail,
+            auditfail,
+            recvintercept,
+            sendintercept,
+            overrateintercept,
+            belong_sale,
+            smstype,
+            stattype,
+            date,
+            createtime
+        )VALUES
+        <foreach collection="list" item="item" index="index" separator="," >  
+            (
+                #{item.id},
+                #{item.agentId},
+                #{item.clientid},
+                #{item.name},
+                #{item.sid},
+                #{item.paytype},
+                #{item.operatorstype},
+                #{item.channelid},
+                #{item.remark},
+                #{item.chargetotal},
+                #{item.overrateChargeTotal},
+                #{item.subId},
+                #{item.costfee},
+                #{item.salefee},
+                #{item.productfee},
+                #{item.productType},
+                #{item.sendtotal},
+                #{item.usersmstotal},
+                #{item.notsend},
+                #{item.submitsuccess},
+                #{item.reportsuccess},
+                #{item.submitfail},
+                #{item.subretfail},
+                #{item.reportfail},
+                #{item.auditfail},
+                #{item.recvintercept},
+                #{item.sendintercept},
+                #{item.overrateintercept},
+                #{item.belongSale},
+                #{item.smstype},
+                #{item.stattype},
+                #{item.date},
+                #{item.createtime}
+            )
+        </foreach>
+    </insert>
+    
+    
+    <delete id="delete" parameterType="java.lang.Long">
+        DELETE FROM t_sms_access_channel_statistics WHERE id = #{id} 
+    </delete>
+    
+
+    <!-- <update id="update" parameterType="AccessChannelStatistics">
+        UPDATE t_sms_access_channel_statistics SET 
+            id=#{id},
+            agent_id=#{agentId},
+            clientid=#{clientid},
+            name=#{name},
+            sid=#{sid},
+            paytype=#{paytype},
+            operatorstype=#{operatorstype},
+            channelid=#{channelid},
+            remark=#{remark},
+            chargetotal=#{chargetotal},
+            overrate_charge_total=#{overrateChargeTotal},
+            sub_id=#{subId},
+            costfee=#{costfee},
+            salefee=#{salefee},
+            productfee=#{productfee},
+            product_type=#{productType},
+            sendtotal=#{sendtotal},
+            usersmstotal=#{usersmstotal},
+            notsend=#{notsend},
+            submitsuccess=#{submitsuccess},
+            reportsuccess=#{reportsuccess},
+            submitfail=#{submitfail},
+            subretfail=#{subretfail},
+            reportfail=#{reportfail},
+            auditfail=#{auditfail},
+            recvintercept=#{recvintercept},
+            sendintercept=#{sendintercept},
+            overrateintercept=#{overrateintercept},
+            belong_sale=#{belongSale},
+            smstype=#{smstype},
+            stattype=#{stattype},
+            date=#{date},
+            createtime=#{createtime}
+        WHERE 
+            id = #{id} 
+    </update> -->
+    
+    <update id="update" parameterType="AccessChannelStatistics">
+        UPDATE t_sms_access_channel_statistics SET 
+            agent_id=#{agentId},
+            clientid=#{clientid},
+            name=#{name},
+            sid=#{sid},
+            paytype=#{paytype},
+            operatorstype=#{operatorstype},
+            channelid=#{channelid},
+            remark=#{remark},
+            chargetotal=#{chargetotal},
+            overrate_charge_total=#{overrateChargeTotal},
+            sub_id=#{subId},
+            costfee=#{costfee},
+            salefee=#{salefee},
+            productfee=#{productfee},
+            product_type=#{productType},
+            sendtotal=#{sendtotal},
+            usersmstotal=#{usersmstotal},
+            notsend=#{notsend},
+            submitsuccess=#{submitsuccess},
+            reportsuccess=#{reportsuccess},
+            submitfail=#{submitfail},
+            subretfail=#{subretfail},
+            reportfail=#{reportfail},
+            auditfail=#{auditfail},
+            recvintercept=#{recvintercept},
+            sendintercept=#{sendintercept},
+            overrateintercept=#{overrateintercept},
+            belong_sale=#{belongSale},
+            smstype=#{smstype},
+            stattype=#{stattype},
+            date=#{date},
+            createtime=#{createtime}
+        WHERE 
+            id = #{id} 
+    </update>
+    
+    
+    
+    
+<!-- 
+    <update id="updateStatus" parameterType="AccessChannelStatistics">
+        UPDATE t_sms_access_channel_statistics 
+            <set>
+                STATUS = #{status}
+            </set>
+        WHERE 
+            ID = #{id} 
+    </update>
+ -->
+ 
+    <!-- <update id="updateSelective" parameterType="AccessChannelStatistics">
+        UPDATE t_sms_access_channel_statistics 
+            <set>
+                <if test="id != null and id != ''">
+                    id = #{id},
+                </if>
+                <if test="agentId != null and agentId != ''">
+                    agent_id = #{agentId},
+                </if>
+                <if test="clientid != null and clientid != ''">
+                    clientid = #{clientid},
+                </if>
+                <if test="name != null and name != ''">
+                    name = #{name},
+                </if>
+                <if test="sid != null and sid != ''">
+                    sid = #{sid},
+                </if>
+                <if test="paytype != null and paytype != ''">
+                    paytype = #{paytype},
+                </if>
+                <if test="operatorstype != null and operatorstype != ''">
+                    operatorstype = #{operatorstype},
+                </if>
+                <if test="channelid != null and channelid != ''">
+                    channelid = #{channelid},
+                </if>
+                <if test="remark != null and remark != ''">
+                    remark = #{remark},
+                </if>
+                <if test="chargetotal != null and chargetotal != ''">
+                    chargetotal = #{chargetotal},
+                </if>
+                <if test="overrateChargeTotal != null and overrateChargeTotal != ''">
+                    overrate_charge_total = #{overrateChargeTotal},
+                </if>
+                <if test="subId != null and subId != ''">
+                    sub_id = #{subId},
+                </if>
+                <if test="costfee != null and costfee != ''">
+                    costfee = #{costfee},
+                </if>
+                <if test="salefee != null and salefee != ''">
+                    salefee = #{salefee},
+                </if>
+                <if test="productfee != null and productfee != ''">
+                    productfee = #{productfee},
+                </if>
+                <if test="productType != null and productType != ''">
+                    product_type = #{productType},
+                </if>
+                <if test="sendtotal != null and sendtotal != ''">
+                    sendtotal = #{sendtotal},
+                </if>
+                <if test="usersmstotal != null and usersmstotal != ''">
+                    usersmstotal = #{usersmstotal},
+                </if>
+                <if test="notsend != null and notsend != ''">
+                    notsend = #{notsend},
+                </if>
+                <if test="submitsuccess != null and submitsuccess != ''">
+                    submitsuccess = #{submitsuccess},
+                </if>
+                <if test="reportsuccess != null and reportsuccess != ''">
+                    reportsuccess = #{reportsuccess},
+                </if>
+                <if test="submitfail != null and submitfail != ''">
+                    submitfail = #{submitfail},
+                </if>
+                <if test="subretfail != null and subretfail != ''">
+                    subretfail = #{subretfail},
+                </if>
+                <if test="reportfail != null and reportfail != ''">
+                    reportfail = #{reportfail},
+                </if>
+                <if test="auditfail != null and auditfail != ''">
+                    auditfail = #{auditfail},
+                </if>
+                <if test="recvintercept != null and recvintercept != ''">
+                    recvintercept = #{recvintercept},
+                </if>
+                <if test="sendintercept != null and sendintercept != ''">
+                    sendintercept = #{sendintercept},
+                </if>
+                <if test="overrateintercept != null and overrateintercept != ''">
+                    overrateintercept = #{overrateintercept},
+                </if>
+                <if test="belongSale != null and belongSale != ''">
+                    belong_sale = #{belongSale},
+                </if>
+                <if test="smstype != null and smstype != ''">
+                    smstype = #{smstype},
+                </if>
+                <if test="stattype != null and stattype != ''">
+                    stattype = #{stattype},
+                </if>
+                <if test="date != null and date != ''">
+                    date = #{date},
+                </if>
+                <if test="createtime != null and createtime != ''">
+                    createtime = #{createtime},
+                </if>
+            </set>
+        WHERE 
+            id = #{id} 
+    </update> -->
+    
+    
+    <update id="updateSelective" parameterType="AccessChannelStatistics">
+        UPDATE t_sms_access_channel_statistics 
+            <set>
+                <if test="agentId != null and agentId != ''">
+                    agent_id = #{agentId},
+                </if>
+                <if test="clientid != null and clientid != ''">
+                    clientid = #{clientid},
+                </if>
+                <if test="name != null and name != ''">
+                    name = #{name},
+                </if>
+                <if test="sid != null and sid != ''">
+                    sid = #{sid},
+                </if>
+                <if test="paytype != null and paytype != ''">
+                    paytype = #{paytype},
+                </if>
+                <if test="operatorstype != null and operatorstype != ''">
+                    operatorstype = #{operatorstype},
+                </if>
+                <if test="channelid != null and channelid != ''">
+                    channelid = #{channelid},
+                </if>
+                <if test="remark != null and remark != ''">
+                    remark = #{remark},
+                </if>
+                <if test="chargetotal != null and chargetotal != ''">
+                    chargetotal = #{chargetotal},
+                </if>
+                <if test="overrateChargeTotal != null and overrateChargeTotal != ''">
+                    overrate_charge_total = #{overrateChargeTotal},
+                </if>
+                <if test="subId != null and subId != ''">
+                    sub_id = #{subId},
+                </if>
+                <if test="costfee != null and costfee != ''">
+                    costfee = #{costfee},
+                </if>
+                <if test="salefee != null and salefee != ''">
+                    salefee = #{salefee},
+                </if>
+                <if test="productfee != null and productfee != ''">
+                    productfee = #{productfee},
+                </if>
+                <if test="productType != null and productType != ''">
+                    product_type = #{productType},
+                </if>
+                <if test="sendtotal != null and sendtotal != ''">
+                    sendtotal = #{sendtotal},
+                </if>
+                <if test="usersmstotal != null and usersmstotal != ''">
+                    usersmstotal = #{usersmstotal},
+                </if>
+                <if test="notsend != null and notsend != ''">
+                    notsend = #{notsend},
+                </if>
+                <if test="submitsuccess != null and submitsuccess != ''">
+                    submitsuccess = #{submitsuccess},
+                </if>
+                <if test="reportsuccess != null and reportsuccess != ''">
+                    reportsuccess = #{reportsuccess},
+                </if>
+                <if test="submitfail != null and submitfail != ''">
+                    submitfail = #{submitfail},
+                </if>
+                <if test="subretfail != null and subretfail != ''">
+                    subretfail = #{subretfail},
+                </if>
+                <if test="reportfail != null and reportfail != ''">
+                    reportfail = #{reportfail},
+                </if>
+                <if test="auditfail != null and auditfail != ''">
+                    auditfail = #{auditfail},
+                </if>
+                <if test="recvintercept != null and recvintercept != ''">
+                    recvintercept = #{recvintercept},
+                </if>
+                <if test="sendintercept != null and sendintercept != ''">
+                    sendintercept = #{sendintercept},
+                </if>
+                <if test="overrateintercept != null and overrateintercept != ''">
+                    overrateintercept = #{overrateintercept},
+                </if>
+                <if test="belongSale != null and belongSale != ''">
+                    belong_sale = #{belongSale},
+                </if>
+                <if test="smstype != null and smstype != ''">
+                    smstype = #{smstype},
+                </if>
+                <if test="stattype != null and stattype != ''">
+                    stattype = #{stattype},
+                </if>
+                <if test="date != null and date != ''">
+                    date = #{date},
+                </if>
+                <if test="createtime != null and createtime != ''">
+                    createtime = #{createtime}
+                </if>
+            </set>
+        WHERE 
+            id = #{id} 
+    </update>
+
+    <select id="getById" parameterType="java.lang.Long" resultMap="rowMapper">
+        SELECT 
+            <include refid="BASE_COLUMN_LIST" />
+        FROM t_sms_access_channel_statistics
+        WHERE 
+            id = #{id}
+    </select>
+
+    <select id="queryList" parameterType="AccessChannelStatistics" resultMap="rowMapper">
+        SELECT 
+            <include refid="BASE_COLUMN_LIST" /> 
+        FROM t_sms_access_channel_statistics 
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            <if test="params.id != null and params.id != ''">
+                and id = #{params.id}
+            </if>
+            <if test="params.agentId != null and params.agentId != ''">
+                and agent_id = #{params.agentId}
+            </if>
+            <if test="params.clientid != null and params.clientid != ''">
+                and clientid = #{params.clientid}
+            </if>
+            <if test="params.name != null and params.name != ''">
+                and name = #{params.name}
+            </if>
+            <if test="params.sid != null and params.sid != ''">
+                and sid = #{params.sid}
+            </if>
+            <if test="params.paytype != null and params.paytype != ''">
+                and paytype = #{params.paytype}
+            </if>
+            <if test="params.operatorstype != null and params.operatorstype != ''">
+                and operatorstype = #{params.operatorstype}
+            </if>
+            <if test="params.channelid != null and params.channelid != ''">
+                and channelid = #{params.channelid}
+            </if>
+            <if test="params.remark != null and params.remark != ''">
+                and remark = #{params.remark}
+            </if>
+            <if test="params.chargetotal != null and params.chargetotal != ''">
+                and chargetotal = #{params.chargetotal}
+            </if>
+            <if test="params.overrateChargeTotal != null and params.overrateChargeTotal != ''">
+                and overrate_charge_total = #{params.overrateChargeTotal}
+            </if>
+            <if test="params.subId != null and params.subId != ''">
+                and sub_id = #{params.subId}
+            </if>
+            <if test="params.costfee != null and params.costfee != ''">
+                and costfee = #{params.costfee}
+            </if>
+            <if test="params.salefee != null and params.salefee != ''">
+                and salefee = #{params.salefee}
+            </if>
+            <if test="params.productfee != null and params.productfee != ''">
+                and productfee = #{params.productfee}
+            </if>
+            <if test="params.productType != null and params.productType != ''">
+                and product_type = #{params.productType}
+            </if>
+            <if test="params.sendtotal != null and params.sendtotal != ''">
+                and sendtotal = #{params.sendtotal}
+            </if>
+            <if test="params.usersmstotal != null and params.usersmstotal != ''">
+                and usersmstotal = #{params.usersmstotal}
+            </if>
+            <if test="params.notsend != null and params.notsend != ''">
+                and notsend = #{params.notsend}
+            </if>
+            <if test="params.submitsuccess != null and params.submitsuccess != ''">
+                and submitsuccess = #{params.submitsuccess}
+            </if>
+            <if test="params.reportsuccess != null and params.reportsuccess != ''">
+                and reportsuccess = #{params.reportsuccess}
+            </if>
+            <if test="params.submitfail != null and params.submitfail != ''">
+                and submitfail = #{params.submitfail}
+            </if>
+            <if test="params.subretfail != null and params.subretfail != ''">
+                and subretfail = #{params.subretfail}
+            </if>
+            <if test="params.reportfail != null and params.reportfail != ''">
+                and reportfail = #{params.reportfail}
+            </if>
+            <if test="params.auditfail != null and params.auditfail != ''">
+                and auditfail = #{params.auditfail}
+            </if>
+            <if test="params.recvintercept != null and params.recvintercept != ''">
+                and recvintercept = #{params.recvintercept}
+            </if>
+            <if test="params.sendintercept != null and params.sendintercept != ''">
+                and sendintercept = #{params.sendintercept}
+            </if>
+            <if test="params.overrateintercept != null and params.overrateintercept != ''">
+                and overrateintercept = #{params.overrateintercept}
+            </if>
+            <if test="params.belongSale != null and params.belongSale != ''">
+                and belong_sale = #{params.belongSale}
+            </if>
+            <if test="params.smstype != null and params.smstype != ''">
+                and smstype = #{params.smstype}
+            </if>
+            <if test="params.stattype != null and params.stattype != ''">
+                and stattype = #{params.stattype}
+            </if>
+            <if test="params.date != null and params.date != ''">
+                and date = #{params.date}
+            </if>
+            <if test="params.createtime != null and params.createtime != ''">
+                and createtime = #{params.createtime}
+            </if>
+	     </trim>
+    </select>
+
+    <select id="count" parameterType="AccessChannelStatistics" resultType="int">
+        SELECT COUNT(0) 
+        FROM t_sms_access_channel_statistics 
+        WHERE 
+            1 = 1
+            <if test="id != null and id != ''">
+                and id = #{id}
+            </if>
+            <if test="agentId != null and agentId != ''">
+                and agent_id = #{agentId}
+            </if>
+            <if test="clientid != null and clientid != ''">
+                and clientid = #{clientid}
+            </if>
+            <if test="name != null and name != ''">
+                and name = #{name}
+            </if>
+            <if test="sid != null and sid != ''">
+                and sid = #{sid}
+            </if>
+            <if test="paytype != null and paytype != ''">
+                and paytype = #{paytype}
+            </if>
+            <if test="operatorstype != null and operatorstype != ''">
+                and operatorstype = #{operatorstype}
+            </if>
+            <if test="channelid != null and channelid != ''">
+                and channelid = #{channelid}
+            </if>
+            <if test="remark != null and remark != ''">
+                and remark = #{remark}
+            </if>
+            <if test="chargetotal != null and chargetotal != ''">
+                and chargetotal = #{chargetotal}
+            </if>
+            <if test="overrateChargeTotal != null and overrateChargeTotal != ''">
+                and overrate_charge_total = #{overrateChargeTotal}
+            </if>
+            <if test="subId != null and subId != ''">
+                and sub_id = #{subId}
+            </if>
+            <if test="costfee != null and costfee != ''">
+                and costfee = #{costfee}
+            </if>
+            <if test="salefee != null and salefee != ''">
+                and salefee = #{salefee}
+            </if>
+            <if test="productfee != null and productfee != ''">
+                and productfee = #{productfee}
+            </if>
+            <if test="productType != null and productType != ''">
+                and product_type = #{productType}
+            </if>
+            <if test="sendtotal != null and sendtotal != ''">
+                and sendtotal = #{sendtotal}
+            </if>
+            <if test="usersmstotal != null and usersmstotal != ''">
+                and usersmstotal = #{usersmstotal}
+            </if>
+            <if test="notsend != null and notsend != ''">
+                and notsend = #{notsend}
+            </if>
+            <if test="submitsuccess != null and submitsuccess != ''">
+                and submitsuccess = #{submitsuccess}
+            </if>
+            <if test="reportsuccess != null and reportsuccess != ''">
+                and reportsuccess = #{reportsuccess}
+            </if>
+            <if test="submitfail != null and submitfail != ''">
+                and submitfail = #{submitfail}
+            </if>
+            <if test="subretfail != null and subretfail != ''">
+                and subretfail = #{subretfail}
+            </if>
+            <if test="reportfail != null and reportfail != ''">
+                and reportfail = #{reportfail}
+            </if>
+            <if test="auditfail != null and auditfail != ''">
+                and auditfail = #{auditfail}
+            </if>
+            <if test="recvintercept != null and recvintercept != ''">
+                and recvintercept = #{recvintercept}
+            </if>
+            <if test="sendintercept != null and sendintercept != ''">
+                and sendintercept = #{sendintercept}
+            </if>
+            <if test="overrateintercept != null and overrateintercept != ''">
+                and overrateintercept = #{overrateintercept}
+            </if>
+            <if test="belongSale != null and belongSale != ''">
+                and belong_sale = #{belongSale}
+            </if>
+            <if test="smstype != null and smstype != ''">
+                and smstype = #{smstype}
+            </if>
+            <if test="stattype != null and stattype != ''">
+                and stattype = #{stattype}
+            </if>
+            <if test="date != null and date != ''">
+                and date = #{date}
+            </if>
+            <if test="createtime != null and createtime != ''">
+                and createtime = #{createtime}
+            </if>
+    </select>
+
+    <sql id="SUM_COLUMN_LIST">
+        id,
+        agent_id,
+        clientid,
+        name,
+        sid,
+        paytype,
+        operatorstype,
+        channelid,
+        remark,
+        SUM(chargetotal)  AS 'chargetotal',
+        SUM(overrate_charge_total) AS 'overrate_charge_total',
+        sub_id,
+        SUM(costfee) AS 'costfee',
+        SUM(salefee) AS 'salefee',
+        SUM(productfee) AS 'productfee',
+        product_type,
+        SUM(sendtotal) AS 'sendtotal',
+        SUM(usersmstotal) AS 'usersmstotal',
+        SUM(notsend) AS 'notsend',
+        SUM(submitsuccess) AS 'submitsuccess',
+        SUM(reportsuccess) AS 'reportsuccess',
+        SUM(submitfail) AS 'submitfail',
+        SUM(subretfail) AS 'subretfail',
+        SUM(reportfail) AS 'reportfail',
+        SUM(auditfail) AS 'auditfail',
+        SUM(recvintercept) AS 'recvintercept',
+        SUM(sendintercept) AS 'sendintercept',
+        SUM(overrateintercept) AS 'overrateintercept',
+        stattype,
+        date,
+        createtime,
+        belong_sale,
+        smstype
+    </sql>
+
+    <select id="queryListByClientids" resultMap="rowMapper" parameterType="map">
+        SELECT
+        <include refid="BASE_COLUMN_LIST" />
+        FROM t_sms_access_channel_statistics
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            <if test="params.id != null and params.id != ''">
+                and id = #{params.id}
+            </if>
+            <if test="params.agentId != null and params.agentId != ''">
+                and agent_id = #{params.agentId}
+            </if>
+            <if test="params.clientid != null and params.clientid != ''">
+                and clientid = #{params.clientid}
+            </if>
+            <if test="params.name != null and params.name != ''">
+                and name = #{params.name}
+            </if>
+            <if test="params.sid != null">
+                and sid = #{params.sid}
+            </if>
+            <if test="params.paytype != null and params.paytype != ''">
+                and paytype = #{params.paytype}
+            </if>
+            <if test="params.smstype != null and params.smstype != ''">
+                and smstype = #{params.smstype}
+            </if>
+            <if test="params.operatorstype != null ">
+                and operatorstype = #{params.operatorstype}
+            </if>
+            <if test="params.channelid != null">
+                and channelid = #{params.channelid}
+            </if>
+            <if test="params.remark != null ">
+                and remark = #{params.remark}
+            </if>
+            <if test="params.chargetotal != null and params.chargetotal != ''">
+                and chargetotal = #{params.chargetotal}
+            </if>
+            <if test="params.overrateChargeTotal != null and params.overrateChargeTotal != ''">
+                and overrate_charge_total = #{params.overrateChargeTotal}
+            </if>
+            <if test="params.subId != null and params.subId != ''">
+                and sub_id = #{params.subId}
+            </if>
+            <if test="params.costfee != null">
+                and costfee = #{params.costfee}
+            </if>
+            <if test="params.salefee != null">
+                and salefee = #{params.salefee}
+            </if>
+            <if test="params.productfee != null">
+                and productfee = #{params.productfee}
+            </if>
+            <if test="params.productType != null">
+                and product_type = #{params.productType}
+            </if>
+            <if test="params.sendtotal != null">
+                and sendtotal = #{params.sendtotal}
+            </if>
+            <if test="params.usersmstotal != null">
+                and usersmstotal = #{params.usersmstotal}
+            </if>
+            <if test="params.notsend != null">
+                and notsend = #{params.notsend}
+            </if>
+            <if test="params.submitsuccess != null">
+                and submitsuccess = #{params.submitsuccess}
+            </if>
+            <if test="params.reportsuccess != null">
+                and reportsuccess = #{params.reportsuccess}
+            </if>
+            <if test="params.submitfail != null">
+                and submitfail = #{params.submitfail}
+            </if>
+            <if test="params.subretfail != null">
+                and subretfail = #{params.subretfail}
+            </if>
+            <if test="params.reportfail != null ">
+                and reportfail = #{params.reportfail}
+            </if>
+            <if test="params.auditfail != null">
+                and auditfail = #{params.auditfail}
+            </if>
+            <if test="params.recvintercept != null">
+                and recvintercept = #{params.recvintercept}
+            </if>
+            <if test="params.sendintercept != null ">
+                and sendintercept = #{params.sendintercept}
+            </if>
+            <if test="params.overrateintercept != null">
+                and overrateintercept = #{params.overrateintercept}
+            </if>
+            <if test="params.stattype != null and params.stattype != ''">
+                and stattype = #{params.stattype}
+            </if>
+            <if test="params.belongSale != null and params.belongSale != ''">
+                and belong_sale = #{params.belongSale}
+            </if>
+            <if test="params.belongSale != null and params.belongSale == ''">
+                and ISNULL(belong_sale)
+            </if>
+            <if test="params.date != null and params.date != ''">
+                and date = #{params.date}
+            </if>
+            <if test="params.excludeIntercept != null and params.excludeIntercept == true">
+                and channelid &gt; 0
+            </if>
+            <if test="params.createtime != null">
+                and createtime = #{params.createtime}
+            </if>
+            <if test="params.clientids != null and params.clientids != ''">
+                AND clientid in
+                <foreach item="item" index="index" collection="params.clientids"
+                         open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="params.startTime != null and params.startTime != ''">
+                and date &gt;= #{params.startTime}
+            </if>
+            <if test="params.endTime != null and params.endTime != ''">
+                and date &lt;= #{params.endTime}
+            </if>
+            <if test="params.dataAuthorityCondition != null">
+                <choose>
+                    <when test="params.dataAuthorityCondition.needQuerySaleIsNullData">
+                        AND(
+                        belong_sale in
+                        <foreach collection="params.dataAuthorityCondition.ids" index="index" item="item" open="(" close=")" separator=",">
+                            #{item}
+                        </foreach>
+                        OR
+                        ISNULL(belong_sale)
+                        )
+                    </when>
+                    <otherwise>
+                        AND belong_sale in
+                        <foreach collection="params.dataAuthorityCondition.ids" index="index" item="item" open="(" close=")" separator=",">
+                            #{item}
+                        </foreach>
+                    </otherwise>
+                </choose>
+            </if>
+        </trim>
+        <if test="params.groupParams != null and params.groupParams != ''">
+            GROUP BY ${params.groupParams}
+        </if>
+    </select>
+
+    <select id="querySumByClientids" resultMap="rowMapper" parameterType="map">
+        SELECT
+        <include refid="SUM_COLUMN_LIST" />
+        FROM t_sms_access_channel_statistics
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            <if test="params.id != null and params.id != ''">
+                and id = #{params.id}
+            </if>
+            <if test="params.agentId != null and params.agentId != ''">
+                and agent_id = #{params.agentId}
+            </if>
+            <if test="params.clientid != null and params.clientid != ''">
+                and clientid = #{params.clientid}
+            </if>
+            <if test="params.name != null and params.name != ''">
+                and name = #{params.name}
+            </if>
+            <if test="params.sid != null">
+                and sid = #{params.sid}
+            </if>
+            <if test="params.paytype != null and params.paytype != ''">
+                and paytype = #{params.paytype}
+            </if>
+            <if test="params.smstype != null and params.smstype != ''">
+                and smstype = #{params.smstype}
+            </if>
+            <if test="params.operatorstype != null ">
+                and operatorstype = #{params.operatorstype}
+            </if>
+            <if test="params.channelid != null">
+                and channelid = #{params.channelid}
+            </if>
+            <if test="params.remark != null ">
+                and remark = #{params.remark}
+            </if>
+            <if test="params.chargetotal != null and params.chargetotal != ''">
+                and chargetotal = #{params.chargetotal}
+            </if>
+            <if test="params.overrateChargeTotal != null and params.overrateChargeTotal != ''">
+                and overrate_charge_total = #{params.overrateChargeTotal}
+            </if>
+            <if test="params.subId != null and params.subId != ''">
+                and sub_id = #{params.subId}
+            </if>
+            <if test="params.costfee != null">
+                and costfee = #{params.costfee}
+            </if>
+            <if test="params.salefee != null">
+                and salefee = #{params.salefee}
+            </if>
+            <if test="params.productfee != null">
+                and productfee = #{params.productfee}
+            </if>
+            <if test="params.productType != null">
+                and product_type = #{params.productType}
+            </if>
+            <if test="params.sendtotal != null">
+                and sendtotal = #{params.sendtotal}
+            </if>
+            <if test="params.usersmstotal != null">
+                and usersmstotal = #{params.usersmstotal}
+            </if>
+            <if test="params.notsend != null">
+                and notsend = #{params.notsend}
+            </if>
+            <if test="params.submitsuccess != null">
+                and submitsuccess = #{params.submitsuccess}
+            </if>
+            <if test="params.reportsuccess != null">
+                and reportsuccess = #{params.reportsuccess}
+            </if>
+            <if test="params.submitfail != null">
+                and submitfail = #{params.submitfail}
+            </if>
+            <if test="params.subretfail != null">
+                and subretfail = #{params.subretfail}
+            </if>
+            <if test="params.reportfail != null ">
+                and reportfail = #{params.reportfail}
+            </if>
+            <if test="params.auditfail != null">
+                and auditfail = #{params.auditfail}
+            </if>
+            <if test="params.recvintercept != null">
+                and recvintercept = #{params.recvintercept}
+            </if>
+            <if test="params.sendintercept != null ">
+                and sendintercept = #{params.sendintercept}
+            </if>
+            <if test="params.overrateintercept != null">
+                and overrateintercept = #{params.overrateintercept}
+            </if>
+            <if test="params.stattype != null and params.stattype != ''">
+                and stattype = #{params.stattype}
+            </if>
+            <if test="params.belongSale != null and params.belongSale != ''">
+                and belong_sale = #{params.belongSale}
+            </if>
+            <if test="params.belongSale != null and params.belongSale == ''">
+                and ISNULL(belong_sale)
+            </if>
+            <if test="params.date != null and params.date != ''">
+                and date = #{params.date}
+            </if>
+            <if test="params.excludeIntercept != null and params.excludeIntercept == true">
+                and channelid &gt; 0
+            </if>
+            <if test="params.createtime != null">
+                and createtime = #{params.createtime}
+            </if>
+            <if test="params.clientids != null and params.clientids != ''">
+                AND clientid in
+                <foreach item="item" index="index" collection="params.clientids"
+                         open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="params.startTime != null and params.startTime != ''">
+                and date &gt;= #{params.startTime}
+            </if>
+            <if test="params.endTime != null and params.endTime != ''">
+                and date &lt;= #{params.endTime}
+            </if>
+            <if test="params.dataAuthorityCondition != null">
+                <choose>
+                    <when test="params.dataAuthorityCondition.needQuerySaleIsNullData">
+                        AND(
+                        belong_sale in
+                        <foreach collection="params.dataAuthorityCondition.ids" index="index" item="item" open="(" close=")" separator=",">
+                            #{item}
+                        </foreach>
+                        OR
+                        ISNULL(belong_sale)
+                        )
+                    </when>
+                    <otherwise>
+                        AND belong_sale in
+                        <foreach collection="params.dataAuthorityCondition.ids" index="index" item="item" open="(" close=")" separator=",">
+                            #{item}
+                        </foreach>
+                    </otherwise>
+                </choose>
+            </if>
+        </trim>
+        <if test="params.groupParams != null and params.groupParams != ''">
+            GROUP BY ${params.groupParams}
+        </if>
+    </select>
+
+</mapper>
+

@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:th="http://www.thymeleaf.org"
+	  lang="zh-cn">
+<head>
+	<meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+	<meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+	<title>短信云平台运营系统 - 账单信息</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+	<link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+	<link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+	<link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+	<link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+	<style>
+		/* Additional style to fix warning dialog position */
+		#alertmod_table_list_2 {
+			top: 900px !important;
+		}
+	</style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="tabs-container">
+				<ul class="nav nav-tabs">
+					<li  class=""  th:if="${menus.dlscw}"><a  href="/finance/agentFinance?tab=1">客户财务</a>
+					</li>
+					<li  class=""  th:if="${menus.lssj}"><a  href="/finance/agentFinance?tab=2">历史财务</a>
+
+					<li  id="tabA"  onclick="doResize(1)" th:if="${menus.yezd}"><a data-toggle="tab" href="#tab-1" aria-expanded="true"> 余额账单</a>
+					</li>
+					<!--<li id="tabB" class="" onclick="doResize(2)" th:if="${menus.yjzd}"><a data-toggle="tab" href="#tab-2" aria-expanded="false">佣金账单</a>
+					</li>
+					<li id="tabC"  class="" onclick="doResize(3)" th:if="${menus.fdzd}"><a data-toggle="tab" href="#tab-3" aria-expanded="false">返点账单</a>
+					</li>-->
+					<li id="tabD" class="" onclick="doResize(4)" th:if="${menus.yajinzd}"><a data-toggle="tab" href="#tab-4" aria-expanded="false">押金账单</a>
+					</li>
+					<!--<li id="tabE" class="" onclick="doResize(5)" th:if="${menus.sxzd}"><a data-toggle="tab" href="#tab-5" aria-expanded="false">授信账单</a>-->
+					<!--</li>-->
+				</ul>
+				<div class="tab-content">
+					<!-- 余额账单 -->
+					<div id="tab-1" class="tab-pane active" th:if="${menus.yezd}">
+						<div class="panel-body">
+							<div class="ibox ">
+								<!-- 搜索条件 -->
+								<div class="row">
+									<div class="col-sm-12">
+										<form class="form-inline" method="post" id="mainForm_1" >
+											<div class="form-group">
+												<input type="text" placeholder="业务单号/客户ID/订单编号" name="condition" id="condition_1" class="form-control" style="width:210px;">
+											</div>
+
+											<div class="form-group">
+												<label for="financialType_1">财务类型:</label>
+												<select id="financialType_1" name="financialType" class="form-control">
+													<option value="">全部</option>
+													<option value="0">入账</option>
+													<option value="1">出账</option>
+												</select>
+											</div>
+
+											<div class="form-group">
+												<label for="agentType_1">客户类型:</label>
+												<select id="agentType_1" name="agentType" class="form-control">
+													<option value="">全部</option>
+													<option value="1">销售代理商</option>
+													<option value="2">品牌代理商</option>
+													<option value="5">OEM代理商</option>
+												</select>
+											</div>
+
+											<div class="form-group">
+												<label for="paymentType_1">业务类型:</label>
+												<select id="paymentType_1" name="paymentType" class="form-control">
+													<option value="">全部</option>
+													<option value="0">充值</option>
+													<option value="1">扣减</option>
+													<option value="3">购买产品包</option>
+													<option value="6">后付费客户消耗</option>
+													<option value="4">退款</option>
+													<option value="5">赠送</option>
+													<option value="7">回退条数</option>
+												</select>
+											</div>
+
+											<!-- 时间选择 -->
+											<div class="form-group" style="margin-left:2.5%">
+												<div class="form-group pull-right">生成时间:
+													<input placeholder="开始时间" class="form-control layer-date" name="start_time_day" id="start_time_day_1" style="width:100px"/>至
+													<input placeholder="结束时间" class="form-control layer-date" name="end_time_day" id="end_time_day_1" style="width:100px" />
+												</div>
+											</div>
+											<div class="form-group">
+												<span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-danger" onclick="search(1)">搜索</button></span>
+												<span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-primary" onclick="exportExcel(1)">导出Excel</button></span>
+											</div>
+										</form>
+									</div>
+								</div>
+							</div>
+
+							<div class="ibox-content">
+								<div class="jqGrid_wrapper">
+									<table id="table_list_1"></table>
+									<div id="pager_list_1"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<!-- 佣金账单 -->
+					<div id="tab-2" class="tab-pane" th:if="${menus.yjzd}">
+						<div class="panel-body">
+							<div class="ibox ">
+								<!-- 搜索条件 -->
+								<div class="row">
+									<div class="col-sm-12">
+										<form class="form-inline" method="post" id="mainForm_2" >
+											<div class="form-group">
+												<input type="text" placeholder="业务单号/代理商ID" name="condition" id="condition_2" class="form-control">
+											</div>
+
+											<div class="form-group">
+												<label for="financialType_2">财务类型:</label>
+												<select id="financialType_2" name="financialType" class="form-control">
+													<option value="">全部</option>
+													<option value="0">入账</option>
+													<option value="1">出账</option>
+												</select>
+											</div>
+
+											<div class="form-group">
+												<label for="agentType_2">代理商类型:</label>
+												<select id="agentType_2" name="agentType" class="form-control">
+													<option value="">全部</option>
+													<option value="1">销售代理商</option>
+													<option value="2">品牌代理商</option>
+													<option value="5">OEM代理商</option>
+												</select>
+											</div>
+
+											<!-- 时间选择 -->
+											<div class="form-group" style="margin-left:2.5%">
+												<div class="form-group pull-right">生成时间:
+													<input placeholder="开始时间" class="form-control layer-date" name="start_time_day" id="start_time_day_2" style="width:100px"/>至
+													<input placeholder="结束时间" class="form-control layer-date" name="end_time_day" id="end_time_day_2" style="width:100px"/>
+												</div>
+											</div>
+											<div class="form-group">
+												<span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-danger" onclick="search(2)">搜索</button></span>
+												<span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-primary" onclick="exportExcel(2)">导出Excel</button></span>
+											</div>
+										</form>
+									</div>
+								</div>
+							</div>
+
+							<div class="ibox-content">
+								<div class="jqGrid_wrapper">
+									<table id="table_list_2"></table>
+									<div id="pager_list_2"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!--返点账单-->
+					<div id="tab-3" class="tab-pane" th:if="${menus.fdzd}">
+						<div class="panel-body">
+							<div class="ibox ">
+								<!-- 搜索条件 -->
+								<div class="row">
+									<div class="col-sm-12">
+										<form class="form-inline" method="post" id="mainForm_3" >
+											<div class="form-group">
+												<input type="text" placeholder="业务单号/代理商ID" name="condition" id="condition_3" class="form-control">
+											</div>
+
+											<div class="form-group">
+												<label for="financialType_3">财务类型:</label>
+												<select id="financialType_3" name="financialType" class="form-control">
+													<option value="">全部</option>
+													<option value="0">入账</option>
+													<option value="1">出账</option>
+												</select>
+											</div>
+
+											<div class="form-group">
+												<label for="agentType_3">代理商类型:</label>
+												<select id="agentType_3" name="agentType" class="form-control">
+													<option value="">全部</option>
+													<option value="1">销售代理商</option>
+													<option value="2">品牌代理商</option>
+													<option value="5">OEM代理商</option>
+												</select>
+											</div>
+
+											<!-- 时间选择 -->
+											<div class="form-group" style="margin-left:2.5%">
+												<div class="form-group pull-right">生成时间:
+													<input placeholder="开始时间" class="form-control layer-date" name="start_time_day" id="start_time_day_3" style="width:100px"/>至
+													<input placeholder="结束时间" class="form-control layer-date" name="end_time_day" id="end_time_day_3" style="width:100px"/>
+												</div>
+											</div>
+											<div class="form-group">
+												<span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-danger" onclick="search(3)">搜索</button></span>
+												<span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-primary" onclick="exportExcel(3)">导出Excel</button></span>
+											</div>
+										</form>
+									</div>
+								</div>
+							</div>
+
+							<div class="ibox-content">
+								<div class="jqGrid_wrapper">
+									<table id="table_list_3"></table>
+									<div id="pager_list_3"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<!--押金账单-->
+					<div id="tab-4" class="tab-pane" th:if="${menus.yajinzd}">
+						<div class="panel-body">
+							<div class="ibox ">
+								<!-- 搜索条件 -->
+								<div class="row">
+									<div class="col-sm-12">
+										<form class="form-inline" method="post" id="mainForm_4" >
+											<div class="form-group">
+												<input type="text" placeholder="业务单号/代理商ID" name="condition" id="condition_4" class="form-control">
+											</div>
+
+											<div class="form-group">
+												<label for="financialType_4">财务类型:</label>
+												<select id="financialType_4" name="financialType" class="form-control">
+													<option value="">全部</option>
+													<option value="0">入账</option>
+													<option value="1">出账</option>
+												</select>
+											</div>
+
+											<div class="form-group">
+												<label for="agentType_4">代理商类型:</label>
+												<select id="agentType_4" name="agentType" class="form-control">
+													<option value="">全部</option>
+													<option value="1">销售代理商</option>
+													<option value="2">品牌代理商</option>
+													<option value="5">OEM代理商</option>
+												</select>
+											</div>
+
+											<!-- 时间选择 -->
+											<div class="form-group" style="margin-left:2.5%">
+												<div class="form-group pull-right">生成时间:
+													<input placeholder="开始时间" class="form-control layer-date" name="start_time_day" id="start_time_day_4" style="width:100px"/>至
+													<input placeholder="结束时间" class="form-control layer-date" name="end_time_day" id="end_time_day_4" style="width:100px"/>
+												</div>
+											</div>
+											<div class="form-group">
+												<span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-danger" onclick="search(4)">搜索</button></span>
+												<span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-primary" onclick="exportExcel(4)">导出Excel</button></span>
+											</div>
+										</form>
+									</div>
+								</div>
+							</div>
+
+							<div class="ibox-content">
+								<div class="jqGrid_wrapper">
+									<table id="table_list_4"></table>
+									<div id="pager_list_4"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<!--授信账单-->
+					<!--<div id="tab-5" class="tab-pane" th:if="${menus.sxzd}">
+						<div class="panel-body">
+							<div class="ibox ">
+								&lt;!&ndash; 搜索条件 &ndash;&gt;
+								<div class="row">
+									<div class="col-sm-12">
+										<form class="form-inline" method="post" id="mainForm_5" >
+											<div class="form-group">
+												<input type="text" placeholder="业务单号/代理商ID" name="condition" id="condition_5" class="form-control">
+											</div>
+											&lt;!&ndash;
+											<div class="form-group">
+												<label for="financialType_5">财务类型:</label>
+												<select id="financialType_5" name="financialType" class="form-control">
+													<option value="">全部</option>
+													<option value="0">入账</option>
+													<option value="1">出账</option>
+												</select>
+											</div>
+											&ndash;&gt;
+											<div class="form-group">
+												<label for="agentType_5">代理商类型:</label>
+												<select id="agentType_5" name="agentType" class="form-control">
+													<option value="">全部</option>
+													<option value="1">销售代理商</option>
+													<option value="2">品牌代理商</option>
+													<option value="5">OEM代理商</option>
+												</select>
+											</div>
+
+											&lt;!&ndash; 时间选择 &ndash;&gt;
+											<div class="form-group" style="margin-left:2.5%">
+												<div class="form-group pull-right">生成时间:
+													<input placeholder="开始时间" class="form-control layer-date" name="start_time_day" id="start_time_day_5" style="width:100px"/>至
+													<input placeholder="结束时间" class="form-control layer-date" name="end_time_day" id="end_time_day_5" style="width:100px"/>
+												</div>
+											</div>
+											<div class="form-group">
+												<span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-danger" onclick="search(5)">搜索</button></span>
+												<span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-primary" onclick="exportExcel(5)">导出Excel</button></span>
+											</div>
+										</form>
+									</div>
+								</div>
+							</div>
+
+							<div class="ibox-content">
+								<div class="jqGrid_wrapper">
+									<table id="table_list_5"></table>
+									<div id="pager_list_5"></div>
+								</div>
+							</div>
+						</div>
+					</div>-->
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+
+<script th:inline="javascript">
+    var max_export_num = [[${max_export_num}]];
+    var tab = [[${tab}]];
+    if(tab ==1 ){
+        $("#tabA").trigger("click");
+        $("#tab-1").addClass("active");
+        $("#tab-4").removeClass("active");
+    }else if(tab == 4){
+        $("#tabD").trigger("click");
+        $("#tab-4").addClass("active");
+        $("#tab-1").removeClass("active");
+    }
+
+
+    var grid_width = 1200; // 默认宽度
+
+
+    var build2 = false;
+    var build3 = false;
+    var build4 = false;
+    var build5 = false;
+
+    var start_1 = {
+        elem: "#start_time_day_1",
+        format: "YYYY-MM-DD",
+        min: halfYearAgo("yyyy-MM-dd"),
+        max: laydate.now(),
+        istoday: true,
+        choose: function (datas) {
+            end_1.min = datas;
+        }
+    };
+
+    var end_1 = {
+        elem: "#end_time_day_1",
+        format: "YYYY-MM-DD",
+        min: halfYearAgo("yyyy-MM-dd"),
+        max: laydate.now(),
+        istoday: true,
+        choose: function (datas) {
+            start_1.max = datas;
+        }
+    };
+
+    var start_2 = {
+        elem: "#start_time_day_2",
+        format: "YYYY-MM-DD",
+        min: halfYearAgo("yyyy-MM-dd"),
+        max: laydate.now(),
+        istoday: true,
+        choose: function (datas) {
+            end_2.min = datas;
+        }
+    };
+
+    var end_2 = {
+        elem: "#end_time_day_2",
+        format: "YYYY-MM-DD",
+        min: halfYearAgo("yyyy-MM-dd"),
+        max: laydate.now(),
+        istoday: true,
+        choose: function (datas) {
+            start_2.max = datas;
+        }
+    };
+
+    var start_3 = {
+        elem: "#start_time_day_3",
+        format: "YYYY-MM-DD",
+        min: halfYearAgo("yyyy-MM-dd"),
+        max: laydate.now(),
+        istoday: true,
+        choose: function (datas) {
+            end_3.min = datas;
+        }
+    };
+
+    var end_3 = {
+        elem: "#end_time_day_3",
+        format: "YYYY-MM-DD",
+        min: halfYearAgo("yyyy-MM-dd"),
+        max: laydate.now(),
+        istoday: true,
+        choose: function (datas) {
+            start_3.max = datas;
+        }
+    };
+
+    var start_4 = {
+        elem: "#start_time_day_4",
+        format: "YYYY-MM-DD",
+        min: halfYearAgo("yyyy-MM-dd"),
+        max: laydate.now(),
+        istoday: true,
+        choose: function (datas) {
+            end_4.min = datas;
+        }
+    };
+
+    var end_4 = {
+        elem: "#end_time_day_4",
+        format: "YYYY-MM-DD",
+        min: halfYearAgo("yyyy-MM-dd"),
+        max: laydate.now(),
+        istoday: true,
+        choose: function (datas) {
+            start_4.max = datas;
+        }
+    };
+
+    //    var start_5 = {
+    //        elem: "#start_time_day_5",
+    //        format: "YYYY-MM-DD",
+    //    	min: halfYearAgo("yyyy-MM-dd"),
+    //        max: laydate.now(),
+    //        istoday: true,
+    //        choose: function (datas) {
+    //            end_5.min = datas;
+    //        }
+    //    };
+    //
+    //    var end_5 = {
+    //        elem: "#end_time_day_5",
+    //        format: "YYYY-MM-DD",
+    //    	min: halfYearAgo("yyyy-MM-dd"),
+    //        max: laydate.now(),
+    //        istoday: true,
+    //        choose: function (datas) {
+    //            start_5.max = datas;
+    //        }
+    //    };
+
+    laydate(start_1);
+    //    laydate(start_2);
+    //    laydate(start_3);
+    laydate(start_4);
+    //    laydate(start_5);
+    laydate(end_1);
+    //    laydate(end_2);
+    //    laydate(end_3);
+    laydate(end_4);
+    //   laydate(end_5);
+
+    function doSearch(oper){
+        if ($("#tab-1").hasClass("active")){
+            search(1);
+        } else if ($("#tab-2").hasClass("active")){
+            search(2);
+        } else if ($("#tab-3").hasClass("active")){
+            search(3);
+        } else if ($("#tab-4").hasClass("active")){
+            search(4);
+        }
+//        } else {
+//            search(5);
+//        }
+    }
+    function search(type){
+        if(type == 5){
+            $("#table_list_" + type).jqGrid('setGridParam',{
+                datatype:'json',
+                postData: {
+                    condition: $("#condition_"+type).val(),
+                    agentType:$("#orderType_"+type).val(),
+                    start_time_day: $("#start_time_day_"+type).val(),
+                    end_time_day: $("#end_time_day_"+type).val(),
+                }, //发送数据
+            }).trigger("reloadGrid"); //重新载入
+        } else {
+            $("#table_list_" + type).jqGrid('setGridParam',{
+                datatype:'json',
+                postData: {
+                    condition: $("#condition_"+type).val(),
+                    financialType:$("#financialType_"+type).val(),
+                    agentType:$("#agentType_"+type).val(),
+                    paymentType:$("#paymentType_"+type).val(),
+                    start_time_day: $("#start_time_day_"+type).val(),
+                    end_time_day: $("#end_time_day_"+type).val(),
+                }, //发送数据
+            }).trigger("reloadGrid"); //重新载入
+        }
+    }
+
+    // 导出Excel文件
+    function exportExcel(type) {
+        var totalCount = $("#table_list_"+type).jqGrid('getGridParam','records');
+        if (totalCount == 0) {
+            layer.alert("共0条记录，导出Excel文件失败");
+            return;
+        }
+        if(totalCount > max_export_num){
+            layer.msg("导出Excel文件条数大于"+max_export_num+"条", {icon: 2});
+            return;
+        }
+        var mainForm = $("#mainForm_"+type);
+        var action = mainForm.attr("action");
+
+        var exporUrl = "";
+        switch (type)
+        {
+            case 1:
+                exporUrl = [[@{/finance/bill/balance/export}]];
+                break;
+            case 2:
+                exporUrl = [[@{/finance/bill/commission/export}]];
+                break;
+            case 3:
+                exporUrl = [[@{/finance/bill/rebate/export}]];
+                break;
+            case 4:
+                exporUrl = [[@{/finance/bill/deposit/export}]];
+                break;
+//            case 5:
+//        		exporUrl = [[@{/finance/bill/credit/export}]];
+//                break;
+        }
+
+        mainForm.attr("action", exporUrl).submit();
+        mainForm.attr("action", action);
+    }
+
+    function doResize(type){
+        $.jgrid.defaults.styleUI = "Bootstrap";
+        switch (type)
+        {
+            case 1:
+                $("#table_list_1").jqGrid({
+                    url:/*[[@{/finance/bill/balance/list}]]*/'',
+                    mtype: 'POST',
+                    datatype: "json",
+                    jsonReader : {
+                        root:"list",
+                        page: "currentPage",
+                        total: "totalPage",
+                        records: "totalCount"
+                    },
+                    height: 'auto',
+                    rownumbers:true,
+                    autowidth: true,
+                    shrinkToFit: false,
+                    autoScroll: true,
+                    rowNum: 20,
+                    rowList: [10, 20, 30,50],
+//			colNames: ["业务单号","业务类型","财务类型","财务类型(隐藏)","金额（元）","余额剩余（元）","订单编号", "代理商ID", "客户ID", "客户名称", "代理商类型", "操作者", "备注", "生成时间"],
+                    colModel: [
+                        {label:"业务单号",name: "id",align: "left",sortable:false, width:80},
+                        {label:"业务类型",name: "payment_type_name",align: "left",sortable:false, width:100},
+                        {label:"财务类型",name: "financial_type_name",align: "left",sortable:false, width:100},
+                        {label:"财务类型(隐藏)",name: "financial_type",align: "left",sortable:false, width:100,hidden:true},
+                        {label:"付费id",name: "paymentId",align: "left",sortable:false, width:100,hidden:true},
+                        {label:"金额（元）",name: "amount",align: "left",sortable:false,width:100, formatter:function(cellvalue, options, rowObject){
+                            var financial_type = rowObject.financial_type;
+                            if(financial_type == 1){//出账
+                                return (0-cellvalue).toFixed(4);
+                            }
+                            return cellvalue;
+                        }},
+                        {label:"余额剩余（元）",name: "balance",align: "left",sortable:false,width:100},
+                        {label:"订单编号",name: "order_id",align: "left",sortable:false,
+                            formatter:function(cellvalue, options, rowObject){
+                                var id = rowObject.id;
+                                if(id!='总计'){
+                                    var _payment_type = rowObject.payment_type;
+                                    var switcher = "";
+                                    if(_payment_type == 3 || _payment_type == 7){
+                                        switcher += rowObject.order_id;
+                                    }else if(_payment_type == 11){
+                                        switcher += rowObject.paymentId;
+                                    }else {
+                                        switcher += "-";
+                                    }
+                                    return switcher;
+                                }
+                                return cellvalue
+                            }
+                        },
+                        {label:"客户ID",name: "agent_id",align: "left",sortable:false, width:100},
+                        {label:"子账户ID",name: "client_id",align: "left",sortable:false,width:100,
+                            formatter:function(cellvalue, options, rowObject){
+                                var id = rowObject.id;
+                                if(id=='总计'){
+                                    var _payment_type = rowObject.payment_type;
+                                    var _agent_type = rowObject.agent_type;
+                                    var switcher = "";
+                                    if(_agent_type == 1 && _payment_type != 3 && _payment_type != 2){
+                                        switcher += rowObject.client_id;
+                                    }else {
+                                        switcher += "-";
+                                    }
+                                    return switcher;
+                                }
+                                var tempId = cellvalue;
+                                if(!(tempId) || tempId == ""){
+                                    tempId = "-";
+                                }
+                                return tempId;
+                            }
+                        },
+                        {label:"子账户名称",name: "name",align: "left",sortable:false,
+                            formatter:function(cellvalue, options, rowObject){
+                                var id = rowObject.id;
+                                if(id=='总计'){
+                                    var _payment_type = rowObject.payment_type;
+                                    var _agent_type = rowObject.agent_type;
+                                    var switcher = "";
+                                    if(_agent_type == 1 && _payment_type != 3 && _payment_type != 2){
+                                        switcher += rowObject.name;
+                                    }else {
+                                        switcher += "-";
+                                    }
+                                    return switcher;
+                                }
+                                var tempName = cellvalue;
+                                if(!(tempName) || tempName == ""){
+                                    tempName = "-";
+                                }
+                                return tempName;
+                            }
+                        },
+                        {label:"客户类型",name: "agent_type_name",align: "left",sortable:false, width:100},
+                        {label:"操作者",name: "admin_id",align: "left",sortable:false, width:80},
+                        {label:"备注",name: "remark",align: "left",sortable:false},
+                        {label:"生成时间",name: "create_time",align: "left",sortable:false}
+                    ],
+                    pager: "#pager_list_1",
+                    viewrecords: true,
+                    hidegrid: false,
+                    /*统计功能 */
+                    footerrow:true,
+                    gridComplete:function(){
+                        var sum_amount = 0;
+                        $.ajax({
+                            type : "post",
+                            url : [[@{/finance/bill/balance/total}]],
+                        data : {
+                            condition: $("#condition_1").val(),
+                                financialType:$("#financialType_1").val(),
+                                agentType:$("#agentType_1").val(),
+                                paymentType:$("#paymentType_1").val(),
+                                start_time_day: $("#start_time_day_1").val(),
+                                end_time_day: $("#end_time_day_1").val(),
+                        },
+                        async:false,
+                            success : function(data) {
+                            if(data.success){
+                                sum_amount = data.data.sum_amount.toFixed(2);
+                            }else{
+                                layer.msg("计算总计失败", {icon: 2,time: msgTime});
+                            }
+
+                        }
+                    });
+                        $("#table_list_1").footerData('set', { "id": '总计',
+                            "payment_type_name": '-',
+                            "financial_type_name": '-',
+                            "financial_type": '-',
+                            "amount": sum_amount,
+                            "balance": '-',
+                            "order_id": '-',
+                            "agent_id": '-',
+                            "client_id": '-',
+                            "name": '-',
+                            "agent_type_name": '-',
+                            "admin_id": '-',
+                            "remark": '-',
+                            "create_time": '-' } );
+                    }
+
+                });
+                break;
+            case 2:
+                if (!build2){
+                    build2JGrid();
+                    build2=true;
+                }
+                break;
+            case 3:
+                if (!build3){
+                    build3JGrid();
+                    build3=true;
+                }
+                break;
+            case 4:
+                if (!build4){
+                    build4JGrid();
+                    build4=true;
+                }
+                break;
+            case 5:
+                if (!build5){
+                    build5JGrid();
+                    build5=true;
+                }
+                break;
+        }
+
+        var width = $(".jqGrid_wrapper").width();
+        if(width > 0){
+            grid_width = width;
+        }
+        $.jgrid.defaults.styleUI = "Bootstrap";
+        $("#table_list_"+ type).setGridWidth(grid_width);
+
+    }
+
+    function build2JGrid(){
+        $("#table_list_2").jqGrid({
+            url:/*[[@{/finance/bill/commission/list}]]*/,
+            mtype: 'POST',
+            datatype: "json",
+            jsonReader : {
+                root:"list",
+                page: "currentPage",
+                total: "totalPage",
+                records: "totalCount"
+            },
+            height: 'auto',
+            rownumbers:true,
+            autowidth: true,
+            shrinkToFit: false,
+            autoScroll: true,
+            rowNum: 20,
+            rowList: [10, 20, 30,50],
+            colNames: ["业务单号","业务类型","财务类型","金额（元）","剩余佣金（元）", "代理商ID", "代理商类型", "备注", "生成时间"],
+            colModel: [
+                {name: "id",align: "left",sortable:false, width:80},
+                {name: "payment_type",align: "left",sortable:false, width:100},
+                {name: "financial_type",align: "left",sortable:false, width:100},
+                {name: "amount",align: "left",sortable:false,width:100},
+                {name: "balance",align: "left",sortable:false,width:100},
+                {name: "agent_id",align: "left",sortable:false,width:100},
+                {name: "agent_type_name",align: "left",sortable:false,width:200},
+                {name: "remark",align: "left",sortable:false,width:350},
+                {name: "create_time",align: "left",sortable:false}
+            ],
+            pager: "#pager_list_2",
+            viewrecords: true,
+            hidegrid: false
+        });
+    }
+
+    function build3JGrid(){
+        $("#table_list_3").jqGrid({
+            url:/*[[@{/finance/bill/rebate/list}]]*/,
+            mtype: 'POST',
+            datatype: "json",
+            jsonReader : {
+                root:"list",
+                page: "currentPage",
+                total: "totalPage",
+                records: "totalCount"
+            },
+            height: 'auto',
+            rownumbers:true,
+            autowidth: true,
+            shrinkToFit: false,
+            autoScroll: true,
+            rowNum: 20,
+            rowList: [10, 20, 30,50],
+            colNames: ["业务单号","业务类型","财务类型","金额（元）","返点剩余（元）", "订单编号", "代理商ID", "代理商类型", "生成时间"],
+            colModel: [
+                {name: "id",align: "left",sortable:false, width:80},
+                {name: "payment_type_name",align: "left",sortable:false, width:100},
+                {name: "financial_type_name",align: "left",sortable:false, width:100},
+                {name: "amount",align: "left",sortable:false},
+                {name: "balance",align: "left",sortable:false},
+                {name: "order_id",align: "left",sortable:false,width:200},
+                {name: "agent_id",align: "left",sortable:false,width:150},
+                {name: "agent_type_name",align: "left",sortable:false,width:150},
+                {name: "create_time",align: "left",sortable:false,width:150}
+            ],
+            pager: "#pager_list_3",
+            viewrecords: true,
+            hidegrid: false
+        });
+    }
+
+    function build4JGrid(){
+        $("#table_list_4").jqGrid({
+            url:/*[[@{/finance/bill/deposit/list}]]*/,
+            mtype: 'POST',
+            datatype: "json",
+            jsonReader : {
+                root:"list",
+                page: "currentPage",
+                total: "totalPage",
+                records: "totalCount"
+            },
+            height: 'auto',
+            rownumbers:true,
+            autowidth: true,
+            shrinkToFit: false,
+            autoScroll: true,
+            rowNum: 20,
+            rowList: [10, 20, 30,50],
+            colNames: ["业务单号","业务类型","财务类型","金额（元）","剩余押金（元）", "代理商ID", "代理商类型", "操作者", "备注", "生成时间"],
+            colModel: [
+                {name: "id",align: "left",sortable:false, width:80},
+                {name: "payment_type_name",align: "left",sortable:false, width:100},
+                {name: "financial_type_name",align: "left",sortable:false, width:100},
+                {name: "amount",align: "left",sortable:false},
+                {name: "balance",align: "left",sortable:false},
+                {name: "agent_id",align: "left",sortable:false,width:150},
+                {name: "agent_type_name",align: "left",sortable:false,width:150},
+                {name: "admin_id",align: "left",sortable:false,width:150},
+                {name: "remark",align: "left",sortable:false,width:150},
+                {name: "create_time",align: "left",sortable:false,width:150}
+            ],
+            pager: "#pager_list_4",
+            viewrecords: true,
+            hidegrid: false
+        });
+    }
+
+    function build5JGrid(){
+        $("#table_list_5").jqGrid({
+            url:/*[[@{/finance/bill/credit/list}]]*/,
+            mtype: 'POST',
+            datatype: "json",
+            jsonReader : {
+                root:"list",
+                page: "currentPage",
+                total: "totalPage",
+                records: "totalCount"
+            },
+            height: 'auto',
+            rownumbers:true,
+            autowidth: true,
+            shrinkToFit: false,
+            autoScroll: true,
+            rowNum: 20,
+            rowList: [10, 20, 30,50],
+            colNames: ["业务单号","业务类型","金额（元）", "代理商ID", "代理商类型", "操作者", "备注", "生成时间"],
+            colModel: [
+                {name: "id",align: "left",sortable:false, width:80},
+                {name: "payment_type_name",align: "left",sortable:false, width:100},
+                {name: "amount",align: "left",sortable:false},
+                {name: "agent_id",align: "left",sortable:false,width:150},
+                {name: "agent_type_name",align: "left",sortable:false,width:200},
+                {name: "admin_id",align: "left",sortable:false,width:150},
+                {name: "remark",align: "left",sortable:false,width:150},
+                {name: "create_time",align: "left",sortable:false,width:150}
+            ],
+            pager: "#pager_list_5",
+            viewrecords: true,
+            hidegrid: false
+        });
+    }
+
+    $(document).ready(function () {
+
+        if(tab ==1){
+            $("#tabA").addClass("active");
+            $("#tabB").removeClass("active");
+            $("#tabC").removeClass("active");
+            $("#tabD").removeClass("active");
+//            $("#tabE").removeClass("active");
+            $("#tab-1").addClass("active");
+            $("#tab-2").removeClass("active");
+            $("#tab-3").removeClass("active");
+            $("#tab-4").removeClass("active");
+            //  $("#tab-5").removeClass("active");
+        }else if(tab==2){
+            $("#tabA").addClass("active");
+            $("#tabB").removeClass("active");
+            $("#tabC").removeClass("active");
+            $("#tabD").removeClass("active");
+            //     $("#tabE").removeClass("active");
+            $("#tab-1").addClass("active");
+            $("#tab-2").removeClass("active");
+            $("#tab-3").removeClass("active");
+            $("#tab-4").removeClass("active");
+            //    $("#tab-5").removeClass("active");
+        }else if(tab ==3){
+            $("#tabC").addClass("active");
+            $("#tabB").removeClass("active");
+            $("#tabA").removeClass("active");
+            $("#tabD").removeClass("active");
+            //   $("#tabE").removeClass("active");
+            $("#tab-3").addClass("active");
+            $("#tab-1").removeClass("active");
+            $("#tab-2").removeClass("active");
+            $("#tab-4").removeClass("active");
+            //   $("#tab-5").removeClass("active");
+        }else if(tab ==4){
+            $("#tabD").addClass("active");
+            $("#tabB").removeClass("active");
+            $("#tabC").removeClass("active");
+            $("#tabA").removeClass("active");
+            //    $("#tabE").removeClass("active");
+            $("#tab-4").addClass("active");
+            $("#tab-2").removeClass("active");
+            $("#tab-3").removeClass("active");
+            $("#tab-1").removeClass("active");
+            //    $("#tab-5").removeClass("active");
+        }
+//		}else if(tab==5){
+//            $("#tabE").addClass("active");
+//            $("#tabB").removeClass("active");
+//            $("#tabC").removeClass("active");
+//            $("#tabD").removeClass("active");
+//            $("#tabA").removeClass("active");
+//            $("#tab-5").addClass("active");
+//            $("#tab-2").removeClass("active");
+//            $("#tab-3").removeClass("active");
+//            $("#tab-4").removeClass("active");
+//            $("#tab-1").removeClass("active");
+//		}
+
+
+        $.jgrid.defaults.styleUI = "Bootstrap";
+
+        $("#table_list_1").jqGrid({
+            url:/*[[@{/finance/bill/balance/list}]]*/'',
+            mtype: 'POST',
+            datatype: "json",
+            jsonReader : {
+                root:"list",
+                page: "currentPage",
+                total: "totalPage",
+                records: "totalCount"
+            },
+            height: 'auto',
+            rownumbers:true,
+            autowidth: true,
+            shrinkToFit: false,
+            autoScroll: true,
+            rowNum: 20,
+            rowList: [10, 20, 30,50],
+//			colNames: ["业务单号","业务类型","财务类型","财务类型(隐藏)","金额（元）","余额剩余（元）","订单编号", "代理商ID", "客户ID", "客户名称", "代理商类型", "操作者", "备注", "生成时间"],
+            colModel: [
+                {label:"业务单号",name: "id",align: "left",sortable:false, width:80},
+                {label:"业务类型",name: "payment_type_name",align: "left",sortable:false, width:100},
+                {label:"财务类型",name: "financial_type_name",align: "left",sortable:false, width:100},
+                {label:"财务类型(隐藏)",name: "financial_type",align: "left",sortable:false, width:100,hidden:true},
+                {label:"金额（元）",name: "amount",align: "left",sortable:false,width:100, formatter:function(cellvalue, options, rowObject){
+                    var financial_type = rowObject.financial_type;
+                    if(financial_type == 1){//出账
+                        return (0-cellvalue).toFixed(4);
+                    }
+                    return cellvalue;
+                }},
+                {label:"余额剩余（元）",name: "balance",align: "left",sortable:false,width:100},
+                {label:"订单编号",name: "order_id",align: "left",sortable:false,
+                    formatter:function(cellvalue, options, rowObject){
+                        var id = rowObject.id;
+                        if(id!='总计'){
+                            var _payment_type = rowObject.payment_type;
+                            var switcher = "";
+                            if(_payment_type == 3 || _payment_type == 7){
+                                switcher += rowObject.order_id;
+                            }else {
+                                switcher += "-";
+                            }
+                            return switcher;
+                        }
+                        return cellvalue
+                    }
+                },
+                {label:"客户ID",name: "agent_id",align: "left",sortable:false, width:100},
+                {label:"子账户ID",name: "client_id",align: "left",sortable:false,width:100,
+                    formatter:function(cellvalue, options, rowObject){
+                        var id = rowObject.id;
+                        if(id=='总计'){
+                            var _payment_type = rowObject.payment_type;
+                            var _agent_type = rowObject.agent_type;
+                            var switcher = "";
+                            if(_agent_type == 1 && _payment_type != 3 && _payment_type != 2){
+                                switcher += rowObject.client_id;
+                            }else {
+                                switcher += "-";
+                            }
+                            return switcher;
+                        }
+                        var tempId = cellvalue;
+                        if(!(tempId) || tempId == ""){
+                            tempId = "-";
+                        }
+                        return tempId;
+                    }
+                },
+                {label:"子账户名称",name: "name",align: "left",sortable:false,
+                    formatter:function(cellvalue, options, rowObject){
+                        var id = rowObject.id;
+                        if(id=='总计'){
+                            var _payment_type = rowObject.payment_type;
+                            var _agent_type = rowObject.agent_type;
+                            var switcher = "";
+                            if(_agent_type == 1 && _payment_type != 3 && _payment_type != 2){
+                                switcher += rowObject.name;
+                            }else {
+                                switcher += "-";
+                            }
+                            return switcher;
+                        }
+                        var tempName = cellvalue;
+                        if(!(tempName) || tempName == ""){
+                            tempName = "-";
+                        }
+                        return tempName;
+                    }
+                },
+                {label:"客户类型",name: "agent_type_name",align: "left",sortable:false, width:100},
+                {label:"操作者",name: "admin_id",align: "left",sortable:false, width:80},
+                {label:"备注",name: "remark",align: "left",sortable:false},
+                {label:"生成时间",name: "create_time",align: "left",sortable:false}
+            ],
+            pager: "#pager_list_1",
+            viewrecords: true,
+            hidegrid: false,
+            /*统计功能 */
+            footerrow:true,
+            gridComplete:function(){
+                var sum_amount = 0;
+                $.ajax({
+                    type : "post",
+                    url : [[@{/finance/bill/balance/total}]],
+                data : {
+                    condition: $("#condition_1").val(),
+                        financialType:$("#financialType_1").val(),
+                        agentType:$("#agentType_1").val(),
+                        paymentType:$("#paymentType_1").val(),
+                        start_time_day: $("#start_time_day_1").val(),
+                        end_time_day: $("#end_time_day_1").val(),
+                },
+                async:false,
+                    success : function(data) {
+                    if(data.success){
+                        sum_amount = data.data.sum_amount.toFixed(2);
+                    }else{
+                        layer.msg("计算总计失败", {icon: 2,time: msgTime});
+                    }
+
+                }
+            });
+                $("#table_list_1").footerData('set', { "id": '总计',
+                    "payment_type_name": '-',
+                    "financial_type_name": '-',
+                    "financial_type": '-',
+                    "amount": sum_amount,
+                    "balance": '-',
+                    "order_id": '-',
+                    "agent_id": '-',
+                    "client_id": '-',
+                    "name": '-',
+                    "agent_type_name": '-',
+                    "admin_id": '-',
+                    "remark": '-',
+                    "create_time": '-' } );
+            }
+
+        });
+
+        $(window).bind("resize", function () {
+            var width = $(".jqGrid_wrapper").width();
+
+            $("#table_list_1").setGridWidth(width);
+        })
+
+        function keyUp(e) {
+            var currKey=0,e=e||event;
+            currKey=e.keyCode||e.which||e.charCode;
+            var keyName = String.fromCharCode(currKey);
+            if (currKey == 13){
+                doSearch();
+            }
+        }
+        document.onkeyup = keyUp;
+    });
+</script>
+
+</body>
+</html>

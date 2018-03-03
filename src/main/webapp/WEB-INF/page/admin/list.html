@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信平台运营系统 - 管理员中心</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    <link th:href="@{/resources/css/plugins//sweetalert/sweetalert.css}" rel="stylesheet">
+    
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+    <link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+    <link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+
+    <style>
+        /* Additional style to fix warning dialog position */
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+    </style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox ">
+                <div class="ibox-title">
+                    <h5>管理员列表</h5>
+                </div>
+                <div class="col-sm-3 float-e-margins row">
+                    <div class="input-group ">
+                        <input type="text" id="condition" placeholder="管理员账号/联系手机/真实姓名" class="input-sm form-control" style="width:220px">
+                        <span class="input-group-btn">
+                            <button type="button" class="btn btn-sm btn-primary" id="searchButton" onclick="reload()"> 搜索</button>
+                        </span>
+                        &nbsp;&nbsp;
+                        <span class="input-group-btn">
+                        	<a type="button" class="btn btn-sm btn-success" th:href="@{/admin/add}">添加管理员</a>
+                        </span>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <div class="jqGrid_wrapper">
+                        <table id="table_list"></table>
+                        <div id="pager_list"></div>
+                    </div>
+                    <p>&nbsp;</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+        function windowReload(){
+            window.location.reload();
+        }
+        function reload(){
+            $("#table_list").jqGrid('setGridParam',{
+                datatype:'json',
+                postData: {
+                	text: $("#condition").val()
+
+                }, //发送数据
+//            page:1
+            }).trigger("reloadGrid"); //重新载入
+        }
+
+        function edit(id,btn){
+            var url = /*[[@{/admin/edit}]]*/;
+            window.location.href=url + '?id=' + id;
+        }
+
+        function switchers (id,status,btn){
+            var msg = $(btn).text();
+            swal({
+                title: "您确定要"+msg+"这个管理员吗？",
+                text: "",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: msg,
+                cancelButtonText: "让我再考虑一下…",
+                closeOnConfirm: false
+            }, function () {
+                $.ajax({
+                    url:/*[[@{/admin/updateStatus}]]*/,
+                    type:"POST",
+                    data:{
+                        id: id,
+                        status:status
+                    },
+                    success:function(data){
+                        if(data == null){
+                            swal(msg + "失败！", "系统错误，请稍后再试！", "error")
+                        }else if(data.success == true){
+                            swal(msg + "成功！", "管理员已"+msg, "success")
+                        }else{
+                            swal(msg + "失败！", data.msg, "error")
+                        }
+                        reload ();
+                    }
+                });
+            });
+        }
+
+        function del(id, btn){
+            var msg = $(btn).text();
+            swal({
+                title: "您确定要永久删除该管理员吗？",
+                text: "删除后，该管理员将无法使用！",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: msg,
+                cancelButtonText: "让我再考虑一下…",
+                closeOnConfirm: false
+            }, function () {
+                $.ajax({
+                    url:/*[[@{/admin/delete}]]*/"/admin/delete",
+                    type:"POST",
+                    data:{
+                        id: id
+                    },
+                    success:function(data){
+                        if(data == null){
+                            swal(msg + "失败！", "系统错误，请稍后再试！", "error")
+                        }else if(data.success == true){
+                            swal(msg + "成功！", "管理员已"+msg, "success")
+                        }else{
+                            swal(msg + "失败！", data.msg, "error")
+                        }
+                        reload ();
+                    }
+                });
+            });
+        }
+        
+        function transferCustomer(userId) {
+
+            var url = /*[[@{/admin/transferCustomerPage}]]*/;
+
+            layer.open({
+                type: 2,
+                title: ['客户转交', 'font-size:20px;font-weight: 900'],
+                closeBtn: 2,
+                area: ['380px', '300px'],
+                fix: false, //不固定
+                content: url+"?oldUserId="+userId
+            });
+
+        }
+        
+        
+        
+
+    $(document).ready(function () {
+        $.jgrid.defaults.styleUI = "Bootstrap";
+        
+        $("#table_list").jqGrid({
+            url:/*[[@{/admin/list}]]*/'/admin/list',
+            mtype: 'POST',
+            datatype: "json",
+            jsonReader : {
+                root:"list",
+                page: "currentPage",
+                total: "totalPage",
+                records: "totalCount"
+            },
+            height: 'auto',
+            rownumbers:true,
+            autowidth: true,
+            shrinkToFit: true,
+            rowNum: 20,
+            rowList: [10, 20, 30,50],  // 分页大小
+            colNames: ["管理员账号", "管理员id", "身份名称", "真实姓名", "联系方式", "web应用系统", "状态", "操作"],
+            colModel: [
+                {name: "email", index: "email", width: 80,align: "left",sortable:false},
+				{name: "id",index: "id",width: 60,align: "left",sortable:false},
+                {name: "role_name",index: "roleName",width: 60,align: "left",sortable:false},
+                {name: "realname", index: "realname", width: 60,align: "left",sortable:false},
+                {name: "mobile", index: "mobile", width: 80, align: "left",sortable:false},
+                {name: "web_id",index: "web_id",width: 80,align: "left",sortable:false,formatter: "select", editoptions:{value:"1:短信调度系;2:代理商平台;3:运营平台;4:OEM代理商平台;5:运营平台"}},
+                {name: "status", index: "status", width: 50, align: "left",sortable:false,formatter: "select", editoptions:{value:"2:禁用;1:正常"}},
+                {name: "total",index: "total",width: 120,align: "left",sortable:false,title:false,
+                    formatter:function(cellvalue, options, rowObject){
+                        var userId = rowObject.id;
+                        var webId = rowObject.web_id;
+                        var role_name = rowObject.role_name;
+                        switch (rowObject.status){
+                            case "2":
+                                switcher = "<button type='button' class='btn btn-link btn-xs ' onclick=\"edit('"+userId+"',this)\" title='编辑'>编辑</button>" +
+                                        "<button type='button' class='btn btn-link btn-xs' onclick=\"switchers ('"+userId+"',1,this)\" title='启用'>启用</button>";
+                                break;
+                            case "1":
+                                switcher = "<button type='button' class='btn btn-link btn-xs ' onclick=\"edit('"+userId+"',this)\" title='编辑'>编辑</button>" +
+                                        "<button type='button' class='btn btn-link btn-xs' onclick=\"switchers ('"+userId+"',2,this)\" title='禁用'>禁用</button>";
+                                break;
+                            default:
+                                switcher = "<button type='button' class='btn btn-link btn-xs ' onclick=\"edit('"+userId+"',this)\" title='编辑'>编辑</button>";
+                                break;
+                        }
+                        switcher +="<button type='button' class='btn btn-link btn-xs' onclick=\"del('"+userId+"',this)\" title='删除'>删除</button>";
+                        if(webId!=3){
+                            switcher = "<button type='button' class='btn btn-link btn-xs ' onclick=\"edit('"+userId+"',this)\" title='编辑'>编辑</button>";
+                        }
+                        if(role_name == '销售人员'){
+                            switcher += "<button type='button' class='btn btn-link btn-xs ' onclick=\"transferCustomer('"+userId+"')\" title='客户转交'>客户转交</button>";
+                        }
+
+
+                        if(rowObject.email == 'admin@ucpaas.com' || rowObject.roleName == '运营超级管理员'){
+                            return "<button type='button' class='btn btn-link btn-xs' disabled title='编辑'>编辑</button>" +
+                                    "<button type='button' class='btn btn-link btn-xs' disabled title='禁用'>禁用</button>" +
+                                    "<button type='button' class='btn btn-link btn-xs' disabled title='删除'>删除</button>";
+                        }
+                        return switcher;
+                    }
+                }
+            ],
+            pager: "#pager_list",
+            viewrecords: true,
+//            caption: "表格标题",
+            hidegrid: false
+        });
+      
+        $(window).bind("resize", function () {
+            var width = $(".jqGrid_wrapper").width();
+            $("#table_list").setGridWidth(width);
+        })
+    });
+    function keyUp(e) {
+        var currKey=0,e=e||event;
+        currKey=e.keyCode||e.which||e.charCode;
+        var keyName = String.fromCharCode(currKey);
+        if (currKey == 13){
+            reload();
+        }
+    }
+    document.onkeyup = keyUp;
+    /*]]>*/
+</script>
+</body>
+</html>

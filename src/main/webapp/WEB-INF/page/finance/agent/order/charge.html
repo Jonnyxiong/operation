@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:th="http://www.thymeleaf.org"
+	  lang="zh-cn">
+<head>
+	<meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+	<meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+	<title>短信云平台运营系统 - 品牌代理商订单详情</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+	<link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+	<link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+	<link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+	<link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+	<style>
+		/* Additional style to fix warning dialog position */
+		#alertmod_table_list_2 {
+			top: 900px !important;
+		}
+		.reduce{
+			position: relative;
+			display: inline-block;
+			width: 20%;
+			height: 100%;
+			text-align: center;
+			background-color: #f4f6f8;
+			border: 1px solid #d1d7da;
+			color: #ff2222;
+			cursor: pointer;
+		}
+		.add{
+			position: relative;
+			display: inline-block;
+			width: 20%;
+			height: 100%;
+			background-color: #f4f6f8;
+			text-align: center;
+			border: 1px solid #d1d7da;
+			color: #ff2222;
+			cursor: pointer;
+		}
+		.count{
+			width: 50px;
+			text-align: center;
+		}
+		.modal-content{
+			user-select:none;
+			border:none;
+		}
+		#gbox_table_list{
+			user-select:none;
+		}
+	</style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="ibox ">
+				<!-- 搜索条件 -->
+					<div class="jqGrid_wrapper">
+						<table id="table_list"></table>
+						<div id="pager_list"></div>
+					</div>
+			</div>
+            <div class="total">合计（元）：<b id="price_sum" style="color: #00821A;font-size: 16px" class="red">0 </b>&nbsp; &nbsp;<button id="submitBtn" style="background-color: #00821A;color: #fff;" data-toggle="modal" data-target="#myModal" class="btn btn-green" onclick="tobe()">立即购买</button></div>
+            <input type="hidden" id="cliId" th:value="${clientId}">
+		</div>
+	</div>
+</div>
+
+<div class="modal fade bs-example-modal-lg" id="myModal" tabindex="-1" role="dialog">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">确认订单信息</h4>
+			</div>
+			<div class="modal-body">
+				<table class="table table-bordered">
+					<thead>
+						<tr>
+							<th>产品代码</th>
+							<th>产品名称</th>
+							<th>数量</th>
+							<th>产品销售价</th>
+							<th>充值数量</th>
+							<th>金额（元）</th>
+						</tr>
+					</thead>
+					<tbody id="tbo">
+						
+					</tbody>
+				</table>
+			</div>
+			<p>&nbsp; &nbsp; 需消耗账户余额：<span id="sumTotal" style="color: #00821A;"></span>元，是否确认购买？</p>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-primary" onclick="sureSubmit()">确定</button>
+				<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+			</div>
+		</div><!-- /.modal-content -->
+	</div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/auth.js?v=1.0}"></script>
+<script th:inline="javascript">
+    var Obj = {};
+    var detArr = [];
+    Obj.purchaseList = [];
+    var clientId = $("#cliId").val();
+    Obj.clientId = clientId;
+    $(document).ready(function () {
+        $.jgrid.defaults.styleUI = "Bootstrap";
+        var clientId = $("#cliId").val();
+
+        $("#table_list").jqGrid({
+            url:/*[[@{/finance/order/charge}]]*/,
+            mtype: 'POST',
+            datatype: "json",
+            postData: {
+                clientId:clientId
+            },
+            jsonReader : {
+                root:"data",
+                page: "pageNo",
+                total: "totalPage",
+                records: "totalRecord"
+            },
+            height: 'auto',
+            autowidth: true,
+            shrinkToFit: true,
+            autoScroll: true,
+            rowNum: 5,
+            rowList: [5,10, 20, 30,50],
+            colNames: ["","产品代码","产品id（隐藏）","产品名称", "产品类型", "运营商", "区域","数量","产品销售价","有效期", "创建时间","充值数量","金额（元）"],
+            colModel: [
+                {name: "&nbsp;&nbsp;",align: "left",sortable:false,width:40,
+                    formatter: function (cellvalue, options, rowObject) {
+                        var product_id = rowObject.productId;
+                        var productName = rowObject.productName;
+                        var productType = rowObject.productType;
+                        var product_Code = rowObject.productCode;
+                        var quantity = rowObject.quantity;
+                        var productPrice = rowObject.productPrice;
+                        return "<input type='checkbox'   id='"+product_id+"' data-typ='"+productType+"' data-qat='"+quantity+"' data-pn='"+productName+"' data-prc='"+productPrice+"' data-pcd='"+product_Code+"' data-pcn='' onclick='checkOne(this)'  data-pid='"+product_id+"'/>";
+                    }
+                },
+                {name: "productCode",align: "left",sortable:false},
+                {name: "productId",align: "left",sortable:false,hidden:true},
+                {name: "productName",align: "left",sortable:false},
+                {name: "productType", align: "left",sortable:false,
+                    formatter: function (cellvalue, options, rowObject) {
+                        var productType = rowObject.productType;
+                        if(productType==0)
+                            return '行业';
+                        if(productType==1)
+                            return '营销';
+                        if(productType==2)
+                            return '国际';
+                        if(productType==3)
+                            return '验证码';
+                        if(productType==4)
+                            return '通知';
+                        if(productType==7)
+                            return 'USSD';
+                        if(productType==8)
+                            return '闪信';
+                        if(productType==9)
+                            return '挂机短信';
+                    }
+                },
+                {name: "operatorCode", align: "left",sortable:false,
+                    formatter: function (cellvalue, options, rowObject) {
+                        var operatorCode = rowObject.operatorCode;
+                        if(operatorCode==0)
+                            return '全网';
+                        if(operatorCode==1)
+                            return '移动';
+                        if(operatorCode==2)
+                            return '联通';
+                        if(operatorCode==3)
+                            return '电信';
+                        if(operatorCode==4)
+                            return '国际';
+                    }
+                },
+                {name: "areaCode", align: "left",sortable:false,
+                    formatter: function (cellvalue, options, rowObject) {
+                        var areaCode = rowObject.areaCode;
+                        if(areaCode==0)
+                            return '全国';
+                        if(areaCode==1)
+                            return '国际';
+
+                    }
+                },
+                {name: "quantity", align: "left",sortable:false,
+                    formatter: function (cellvalue, options, rowObject) {
+                        var areaCode = rowObject.areaCode;
+                        var quantity = rowObject.quantity;
+                        if(areaCode==0)
+                            return quantity+'条';
+                        if(areaCode==1)
+                            return quantity+'元';
+
+                    }
+                },
+                {name: "productPrice", align: "left",sortable:false,
+                    formatter: function (cellvalue, options, rowObject) {
+                        var areaCode = rowObject.areaCode;
+                        var productPrice = rowObject.productPrice;
+                        if(areaCode==0)
+                            return productPrice+'元';
+                        if(areaCode==1)
+                            return productPrice;
+
+                    }
+                },
+                {name: "activePeriod", align: "left",sortable:false,
+                    formatter: function (cellvalue, options, rowObject) {
+                        var activePeriod = rowObject.activePeriod;
+                        if(activePeriod ==0)
+                            return '无限期';
+                        if(activePeriod !=0)
+                            return activePeriod+'天';
+
+                    }
+                },
+                {name: "createTime", align: "left",sortable:false},
+                {name: "purchaseNum", align: "middle",sortable:false,
+                    formatter: function (cellvalue, options, rowObject) {
+                        var product_id = rowObject.productId;
+                        var product_Code = rowObject.productCode;
+                        var productPrice = rowObject.productPrice;
+                        var areaCode = rowObject.areaCode;
+                        var quantity = rowObject.quantity;
+                        var switcher = '';
+                    switcher+= '<div class="count-change clearfix">';
+                    switcher+= '<span class="reduce" data-arc="'+areaCode+'" data-pid="'+product_id+'" data-qat="'+quantity+'" data-pcd="'+product_Code+'" data-prc="'+productPrice+'">-</span>';
+                    switcher+= '<input class="count" data-arc="'+areaCode+'" type="text" data-qat="'+quantity+'" data-prc="'+productPrice+'" data-pid="'+product_id+'" data-pcd="'+product_Code+'" name="count" value="1" />';
+                    switcher+= '<span class="add" data-arc="'+areaCode+'" data-pid="'+product_id+'" data-qat="'+quantity+'" data-pcd="'+product_Code+'" data-prc="'+productPrice+'">+</span>';
+                    switcher+= '</div>';
+                    return switcher;
+                    }
+                },
+                {name: "productPrice",index: "total",align: "left",sortable:false,
+                    formatter: function (cellvalue, options, rowObject) {
+                        var switcher = '';
+                        var areaCode = rowObject.areaCode;
+                        var productPrice = (rowObject.productPrice *1).toFixed(4);
+                        var product_id = rowObject.productId;
+                        var quantity = rowObject.quantity;
+                        var gjproductPrice = (productPrice * 1000000) * quantity / 1000000;
+                        if(areaCode==0) {
+                            switcher = '<span class="'+product_id+'" >' + productPrice + '</span>';
+                            return switcher;
+                        }else {
+                            switcher = '<span class="'+product_id+'" >' + gjproductPrice + '</span>';
+                            return switcher;
+                        }
+                    }
+                }
+            ],
+            pager: "#pager_list",
+            viewrecords: true,
+            hidegrid: false,
+            gridComplete:function(){
+                $("td").attr("title",'');
+                $(".reduce").click(function () {
+
+                    var count = $(this).siblings('.count').val();
+                    var product_id = $(this).data("pid");
+                    var areaCode = $(this).data("arc");
+                    var productPrice = $(this).data("prc") * 1000000;
+                    var quantity = $(this).data("qat") * 1000000;
+                    $('#'+product_id).prop("checked", true);
+                    count = Number(count);
+                    if(count==1 || count==0){
+                        return;
+                    }else {
+                        count-=1;
+                        $(this).siblings('.count').val(count);
+                        $('#'+product_id).attr('data-pcn',count);
+                    }
+                    if(areaCode==0){
+                        $('.'+product_id).text((count*productPrice)/1000000)
+                    }else {
+                        $('.'+product_id).text((count*productPrice*quantity)/(1000000*1000000))
+                    }
+                    totalSum();
+                    $("#submitBtn").attr('disabled',false);
+
+                });
+                $(".add").click(function () {
+                    var count = $(this).siblings('.count').val();
+                    var product_id = $(this).data("pid");
+                    var areaCode = $(this).data("arc");
+                    var productPrice = $(this).data("prc") * 1000000;
+                    var quantity = $(this).data("qat") * 1000000;
+                    $('#'+product_id).prop("checked", true);
+                    count = Number(count);
+                    if(count <100000000){
+                        count+=1;
+                        $(this).siblings('.count').val(count);
+                        $('#'+product_id).attr('data-pcn',count);
+                    }else {
+                        return;
+                    }
+                    if(areaCode==0){
+                        $('.'+product_id).text((count*productPrice)/1000000)
+                    }else {
+                        $('.'+product_id).text((count*productPrice*quantity)/(1000000*1000000))
+                    }
+                    totalSum();
+                    $("#submitBtn").attr('disabled',false);
+
+                });
+                $(".count").keyup(function(){
+                    var product_id = $(this).data("pid");
+                    var count = $(this).val();
+                    var areaCode = $(this).data("arc");
+                    var productPrice = $(this).data("prc") * 1000000;
+                    var quantity = $(this).data("qat") * 1000000;
+                    count = Number(count);
+                    $('#'+product_id).prop("checked", true);
+                    $('#'+product_id).attr('data-pcn',count);
+                    if(areaCode==0){
+                        $('.'+product_id).text((count*productPrice)/1000000)
+                    }else {
+                        $('.'+product_id).text((count*productPrice*quantity)/(1000000*1000000))
+                    }
+                    limited(count,this,productPrice,product_id,areaCode,quantity)
+                    totalSum();
+                    $("#submitBtn").attr('disabled',false);
+
+                });
+                $(".count").change(function(){
+                    var product_id = $(this).data("pid");
+                    var count = $(this).val();
+                    var areaCode = $(this).data("arc");
+                    var productPrice = $(this).data("prc") * 1000000;
+                    var quantity = $(this).data("qat") * 1000000;
+                    count = Number(count);
+                    $('#'+product_id).prop("checked", true);
+                    $('#'+product_id).attr('data-pcn',count);
+                    if(areaCode==0){
+                        $('.'+product_id).text((count*productPrice)/1000000)
+                    }else {
+                        $('.'+product_id).text((count*productPrice*quantity)/(1000000*1000000))
+                    }
+                    limited(count,this,productPrice,product_id,areaCode,quantity)
+                    totalSum();
+                });
+                $("table input[type='checkbox']").bind("change",function () {
+                    totalSum();
+                })
+            }
+        });
+
+
+        $(document).keypress(function(e) {
+            // 回车键事件
+            if(e.which == 13) {
+                search();
+            }
+        });
+
+
+
+
+    });
+
+    function checkOne(checker){
+        var status = $(checker).prop("checked");
+        var pcn =  $(checker).closest('tr').find('input[type=text]').val();
+        if(!status){
+            var product_id = $(checker).data("pid");
+            for(var i=0;i<Obj.purchaseList.length;i++){
+                var existProduct = Obj.purchaseList[i];
+                if(existProduct.productId==product_id){
+                    Obj.purchaseList.splice(i,1);
+                    break;
+                }
+            }
+        }else {
+            $(checker).attr('data-pcn',pcn);
+        }
+    }
+
+    function limited(count,countval,productPrice,product_id,areaCode,quantity) {
+        if(count>100000000){
+            layer.msg('充值金额需小于等于1亿',{icon:2,time:1500});
+            $("#submitBtn").attr('disabled','disabled');
+            return;
+        }
+        if(count<1){
+            layer.msg('充值金额需大于0',{icon:2,time:1500});
+            $("#submitBtn").attr('disabled','disabled');
+            return;
+        }
+        if(!_Auth.isNum(count)){
+            $(countval).val(1);
+            if(areaCode==0){
+                $('.'+product_id).text((1*productPrice)/1000000);
+                $('#'+product_id).prop("checked", false);
+            }else {
+                $('.'+product_id).text((1*productPrice*quantity)/(1000000*1000000));
+                $('#'+product_id).prop("checked", false);
+            }
+        }
+        $("#submitBtn").attr('disabled',false);
+    }
+
+    function sureSubmit() {
+        var objJson = JSON.stringify(Obj);
+        $.ajax({
+            url:/*[[@{/finance/order/createOrder}]]*/,
+            type:"POST",
+            data: objJson,
+			contentType:"application/json",
+            success:function(data){
+                layer.msg(data.msg, {time: 1500},function () {
+                    parent.layer.closeAll();
+                });
+            }
+		});
+    }
+    function tobe() {
+        detArr = [];
+        submitSum();
+        var htmlstr ="";
+        for(var i =0;i<detArr.length;i++){
+            htmlstr+="<tr>";
+            for(var k in detArr[i]){
+                htmlstr+="<td >" + detArr[i][k] +"</td>";
+            }
+            htmlstr+="</tr>";
+        }
+        console.log(htmlstr);
+		$("#tbo").html(htmlstr)
+    }
+
+    function totalSum() {
+
+        var checkArr =  $("input[type=checkbox]:checked");
+        var total =0;
+        $("input[type=checkbox]:checked").each(function (i) {
+            var obj = {};
+            if($(checkArr[i]).attr("data-typ")==2){
+                total += ($(checkArr[i]).attr("data-pcn") * 1000000) * ($(checkArr[i]).attr("data-qat") *1000000) *($(checkArr[i]).data("prc") *1000000);
+            }else {
+                total += ($(checkArr[i]).attr("data-pcn") * 1000000) * ($(checkArr[i]).data("prc") *1000000 * 1000000);
+            }
+            obj.productId = $(checkArr[i]).data("pid");
+            obj.productCode = $(checkArr[i]).data("pcd");
+            obj.purchaseNum =$(checkArr[i]).attr("data-pcn");
+        });
+        $("#price_sum").text((total/(1000000 * 1000000 * 1000000)).toFixed(4));
+
+    }
+    function submitSum() {
+        Obj.purchaseList = [];
+        var checkArr =  $("input[type=checkbox]:checked");
+        var total =0;
+
+        $("input[type=checkbox]:checked").each(function (i) {
+            var obj = {};
+            var detail = {};
+            if($(checkArr[i]).attr("data-typ")==2){
+                total += ($(checkArr[i]).attr("data-pcn") * 1000000) * ($(checkArr[i]).attr("data-qat") *1000000) *($(checkArr[i]).data("prc") *1000000);
+            }else {
+                total += ($(checkArr[i]).attr("data-pcn") * 1000000) * ($(checkArr[i]).data("prc") *1000000 * 1000000);
+            }
+
+            obj.productId = $(checkArr[i]).data("pid");
+            obj.productCode = $(checkArr[i]).data("pcd");
+            obj.purchaseNum =$(checkArr[i]).attr("data-pcn");
+
+            //订单详情
+
+            detail.productCode = $(checkArr[i]).data("pcd");
+            detail.productName = $(checkArr[i]).data("pn");
+            if($(checkArr[i]).attr("data-typ")==2){
+                detail.purchaseNum = $(checkArr[i]).attr("data-qat") + '元';
+                detail.productPrice = '折扣率：' + $(checkArr[i]).data("prc");
+                detail.count = $(checkArr[i]).attr("data-pcn") ;
+                detail.total = $(checkArr[i]).attr("data-pcn") * $(checkArr[i]).data("qat") * $(checkArr[i]).data("prc") ;
+            }else {
+                detail.purchaseNum = $(checkArr[i]).attr("data-qat") + '条';
+                detail.productPrice = $(checkArr[i]).data("prc");
+                detail.productPrice = (detail.productPrice*1).toFixed(4);
+                detail.count = $(checkArr[i]).attr("data-pcn") ;
+                detail.total = $(checkArr[i]).attr("data-pcn") * $(checkArr[i]).data("prc") ;
+                detail.total = (detail.total*1).toFixed(4);
+            }
+            detArr.push(detail);
+            Obj.purchaseList.push(obj);
+        });
+        $("#sumTotal").text((total/(1000000 * 1000000 * 1000000)).toFixed(4));
+    }
+
+</script>
+
+</body>
+</html>

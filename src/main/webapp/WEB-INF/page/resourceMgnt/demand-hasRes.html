@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org" lang="zh-cn">
+<head>
+<meta content="云之讯,云通讯,云通讯平台" name="keywords" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport"
+	content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1" />
+<title>短信云平台运营系统 - 管理员中心</title>
+<meta charset="utf-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}"
+	rel="stylesheet">
+<link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}"
+	rel="stylesheet">
+<!-- jqgrid-->
+<link
+	th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}"
+	rel="stylesheet">
+<link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+<link th:href="@{/resources/css/style.min862f.css?v=4.1.0}"
+	rel="stylesheet">
+
+<style>
+    /* Additional style to fix warning dialog position */
+    #alertmod_table_list_2 {
+        top: 900px !important;
+    }
+
+    .submit-title h2{
+        line-height: 50px;
+        border-bottom: 1px solid #DDD;
+        margin-top: 0px;
+        padding:0  15px;
+    }
+
+    .submit-title2 h3{
+        line-height: 40px;
+/*         border-bottom: 1px solid #DDD; */
+/*         margin-bottom: 10px; */
+        margin:0px;
+        padding:0 15px;
+    }
+
+    .submit-ctx {
+        background-color: #FFF;
+        padding-bottom: 50px;
+    }
+    
+    .marginTop30 {
+    	margin-top: 30px;
+    }
+
+</style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+	<div class="wrapper wrapper-content  animated fadeInRight" >
+	
+		<div class="ibox submit-ctx container-fluid">
+				<div class="row">
+					<div class="col-sm-12 submit-title">
+						<h2>资源需求列表</h2>
+					</div>
+				</div>
+				<form class="form-horizontal">
+					<!-- 左边 -->
+					<div class="row">
+						<div class="">
+							
+								<div class="form-group col-lg-7">
+									<label class="col-sm-2 control-label">需求编号：</label>
+									<div class="col-xs-5">
+										<p class="form-control-static" th:text="${demandItem.demandId}"></p>
+									</div>
+								</div>
+							
+							
+								<div class="form-group  col-lg-7">
+									<label class="col-sm-2 control-label">所属行业：</label>
+									<div class="col-xs-5">
+										<p class="form-control-static" th:text="${demandItem.industryType}"></p>
+									</div>
+								</div>
+							
+								<div class="form-group  col-lg-7">
+									<label class="col-sm-2 control-label">发送类型：</label>
+									<div class="col-xs-5">
+										<p class="form-control-static" th:text="${demandItem.smsType}"></p>
+									</div>
+								</div>
+							
+								<div class="form-group  col-lg-7">
+									<label class="col-sm-2 control-label">预计量(条/月)：</label>
+									<div class="col-xs-5">
+										<p class="form-control-static" th:text="${demandItem.expectNumber}"></p>
+									</div>
+								</div>
+							
+								<div class="form-group  col-lg-7">
+									<label class="col-sm-2 control-label">是否保底：</label>
+									<div class="col-xs-5">
+										<p class="form-control-static" th:if="${demandItem.minimumGuarantee} gt 0" th:text="${demandItem.minimumGuarantee} + '万条/月'"></p>
+										<p class="form-control-static" th:if="${demandItem.minimumGuarantee} eq 0">不承诺保底</p>
+									</div>
+								</div>
+							
+								<div class="form-group  col-lg-7">
+									<label class="col-sm-2 control-label">通道类型：</label>
+									<div class="col-xs-5">
+										<p class="form-control-static" th:text="${demandItem.channelType}"></p>
+									</div>
+								</div>
+							
+								<div class="form-group  col-lg-7">
+									<label class="col-xs-2 control-label">是否直连：</label>
+									<div class="col-xs-9" th:switch="${demandItem.directConnect}">
+										<p class="form-control-static" th:case="0">直连</p>
+										<p class="form-control-static" th:case="1">第三方</p>
+									</div>
+								</div>
+							
+								<div class="form-group  col-lg-7">
+									<label class="col-xs-2 control-label">扩展位：</label>
+									<div class="col-xs-9">
+										<p class="form-control-static" th:if="${demandItem.extendSize} eq 0">无特殊需求</p>
+										<p class="form-control-static" th:if="${demandItem.extendSize} gt 0" th:text="${demandItem.extendSize} + ' 位'"></p>
+									</div>
+								</div>
+							
+						</div>
+						<!-- 右边 -->
+						<div class="">
+							
+								<div class="form-group  col-lg-7">
+									<label class="col-xs-2 control-label">速率：</label>
+									<div class="col-xs-9">
+										<p class="form-control-static" th:text="${demandItem.rate eq null ? '-' : demandItem.rate + ' TPS'}"></p>
+									</div>
+								</div>
+								<div class="form-group  col-lg-7">
+									<label class="col-xs-2 control-label">签名：</label>
+									<div class="col-xs-9">
+										<p class="form-control-static" th:text="${demandItem.signType}"></p>
+									</div>
+								</div>
+								<div class="form-group  col-lg-7">
+									<label class="col-xs-2 control-label">发送内容模板：</label>
+									<div class="col-xs-9">
+										<p class="form-control-static" th:text="${demandItem.contentTemplate}"></p>
+									</div>
+								</div>
+								<div class="form-group  col-lg-7">
+									<label class="col-xs-2 control-label">销售价格(元/条):</label>
+									<div class="col-xs-9">
+										<p class="form-control-static" th:text="${demandItem.salePrice}"></p>
+									</div>
+								</div>
+								<div class="form-group  col-lg-7">
+									<label class="col-xs-2 control-label">要求上线时间：</label>
+									<div class="col-xs-9">
+										<p class="form-control-static" th:if="${demandItem.onlineDate} ne null" th:text="${#dates.format(demandItem.onlineDate,'yyyy-MM-dd')}"></p>
+									</div>
+								</div>
+								<div class="form-group  col-lg-7">
+									<label class="col-xs-2 control-label">需求发起时间：</label>
+									<div class="col-xs-9">
+										<p class="form-control-static" th:if="${demandItem.createTime} ne null" th:text="${#dates.format(demandItem.createTime,'yyyy-MM-dd')}"></p>
+									</div>
+								</div>
+								<div class="form-group  col-lg-7">
+									<label class="col-xs-2 control-label">状态：</label>
+									<div class="col-xs-9" th:switch="${demandItem.state}">
+										<p class="form-control-static" th:case="0">寻资源</p>
+										<p class="form-control-static" th:case="1">已供应</p>
+										<p class="form-control-static" th:case="2">无资源</p>
+										<p class="form-control-static" th:case="3">撤单</p>
+									</div>
+								</div>
+								<div class="form-group col-lg-7" th:if="${demandItem.remark}">
+									<label class="col-xs-2 control-label">备注:</label>
+									<div class="col-xs-9">
+										<p class="form-control-static" th:text="${demandItem.remark}"></p>
+									</div>
+								</div>
+								<!-- <div class="form-group  col-lg-7">
+									<label class="col-xs-2 control-label">处理时间：</label>
+									<div class="col-xs-9"> 
+										<p class="form-control-static" th:if="${demandItem.updateTime} ne null" th:text="${#dates.format(demandItem.updateTime,'yyyy-MM-dd')}"></p>
+									</div>
+								</div> -->
+						</div>
+						<!-- 右边 end -->
+				</div>
+				<div class="row">
+	                <div class="col-sm-12">
+	                    <div class="col-sm-offset-1">
+	                        <span><button type="button" class="btn btn-primary" onclick="selectRes()">选择资源</button></span>
+	                    </div>
+	                </div>
+	            </div>
+	            
+	            <div class="row marginTop30">
+                  <div class="col-sm-12 submit-title2">
+                      <h3>已选择资源</h3>
+                  </div>
+               </div>
+	               
+				<div class="ibox-content">
+					<div class="jqGrid_wrapper">
+						<table id="table_list"></table>
+						<div id="pager_list"></div>
+					</div>
+				</div>
+				
+				<div class="row">
+					<div class="col-sm-12">
+						<div class="col-sm-offset-1">
+							<button type="button" class="btn btn-primary" onclick="save(this)">确定</button>
+							<button type="button" class="btn btn-default" style="margin-left:30px" onclick="cancel()">取消</button>
+						</div>
+					</div>
+				</div>
+					
+				</form>
+			</div>
+	</div>
+
+		
+		
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+
+<script th:inline="javascript">
+/*<![CDATA[*/
+    
+    var demandId = [[${demandItem.demandId}]];
+    
+    // 已选择的资源（用于接收"选择资源"弹出框中选中的资源）
+    var selectedRes = [];
+    
+	$(document).ready(function() {
+		$.jgrid.defaults.styleUI = "Bootstrap";
+
+		$('#myTabs a').click(function(e) {
+			e.preventDefault()
+			$(this).tab('show')
+		});
+		
+		$("#table_list").jqGrid({
+			datatype: "local",
+			data: selectedRes,
+			height: 'auto',
+		          rownumbers:true,
+		          autowidth: true,
+		          shrinkToFit: false,
+		          autoScroll: true,
+		          rowNum: 20,
+		          rowList: [10, 20, 30,50],
+		          colModel: [
+						{ label: "资源编号",name: "resourceId",align: "left",sortable:false, width:110, key: true},
+						{ label:"通道号",name: "channelId",align: "left",sortable:false, width:70,
+							formatter:function(cellvalue){
+		                        if(cellvalue != null && cellvalue != ''){
+		                        	return cellvalue;
+		                        }else{
+		                            return cellvalue = '-';
+		                        }
+		                    }
+						},
+						{ label:"通道类型",name: "channelType",align: "left",sortable:false, width:100},
+						{ label:"发送类型",name: "smsType",align: "left",sortable:false,width:100,
+							formatter:function(cellvalue){
+								var reg = new RegExp("\\$\\#","g"); 
+		                        return cellvalue.replace(reg, "，");
+		                    }
+						},
+						{ label:"发送内容属性",name: "contentProp",align: "left",sortable:false,width:100},
+						{ label:"是否直连",name: "directConnect",align: "left",sortable:false,width:80,formatter:"select",editoptions:{value:"0:直连;1:第三方"}},
+						{ label:"是否保底",name: "minimumGuarantee",align: "left",sortable:false,width:80},
+						{ label:"是否授信",name: "isCredit",align: "left",sortable:false,width:80},
+						{ label:"扩展位",name: "extendSize",align: "left",sortable:false,width:60},
+						{ label:"速率",name: "rate",align: "left",sortable:false,width:80},
+						{ label:"签名",name: "signType",align: "left",sortable:false,width:80},
+						{ label:"待接入时间",name: "onlineDate",align: "left",sortable:false,width:100,
+							formatter:function(cellvalue){
+		                        if(cellvalue != null && cellvalue != ''){
+		                        	return cellvalue;
+		                        }else{
+		                            return cellvalue = '-';
+		                        }
+		                    }
+						},
+						{ label:"采购价格（元/条）",name: "purchasePrice",align: "left",width:120,sortable:false},
+						{ label:"状态",name: "state",align: "left",sortable:false,width:'65',formatter:"select",editoptions:{value:"0:待接入;1:已接入"}}
+		          ],
+		          pager: "#pager_list",
+		          viewrecords: true,
+		          hidegrid: false
+		  	});
+		
+	});
+	
+	
+	// 打开“选择资源”弹出框
+	function selectRes(){
+		var selectBoxURL = /*[[@{/order/resource/demand/selectRes}]]*/;
+		layer.open({
+		    type: 2,
+		    title: ['选择资源', 'font-size:18px;'],
+		    closeBtn: 2,
+		    fix: false, //不固定
+		    area: ['1200px', '600px'],
+		    content: selectBoxURL
+		});
+	}
+	
+	// 刷新jqGrid表单数据
+	function reloadGridData(data){
+		var grid = $("#table_list");
+		grid.jqGrid('clearGridData');  //清空表格
+		grid.jqGrid('setGridParam',{  // 重新加载数据
+		      datatype:'local',
+		      data : data,
+		      page:1
+		}).trigger("reloadGrid");
+	}
+	
+	function save(obj){
+		if($(obj).hasClass("disabled")){
+			return;
+		}
+		
+		if(selectedRes.length == 0){
+			layer.msg("请选择资源");
+			return;
+		}
+		
+		$(obj).addClass("disabled");
+		
+		var postData = {};
+		postData.demandId = demandId;
+		var resourceIds = [];
+		$(selectedRes).each(function(index, obj){
+			resourceIds.push(obj.resourceId);
+		});
+		postData.resourceIds = resourceIds;
+		
+		$.ajax({
+            url: /*[[@{/order/resource/demand/hasres/save}]]*/,
+            type: "POST",
+            contentType:"application/json",
+            data: JSON.stringify(postData),
+            success:function(data){
+                if(data == null){
+                    layer.msg('系统错误，请稍后再试', {icon: 2,time: 1500}, function(){
+                    	$(obj).removeClass("disabled");
+                    });
+                }else if(data.code == 0){
+                    layer.msg(data.msg, {icon: 1,time: 1500}, function(){
+                        window.location.href = /*[[@{/order/resource/view?fromPage=demand-hasRes}]]*/;
+                    });
+                }else{
+                    layer.msg(data.msg, {icon: 2,time: 1500}, function(){
+                    	$(obj).removeClass("disabled");
+                    });
+                }
+            }
+        });
+	}
+	
+	function cancel(){
+		window.location.href = /*[[@{/order/resource/view?fromPage=demand-hasRes}]]*/;
+	}
+	
+/*]]>*/
+</script>
+</body>
+</html>

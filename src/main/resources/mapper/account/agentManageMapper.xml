@@ -1,0 +1,427 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 代理商信息 -->
+<mapper namespace="agentManage">
+
+	<!-- part 1 标准功能 -->
+	<!-- 查询条件 -->
+	<sql id="queryCondition">
+		<if test="condition != null and condition!=''">
+			and (
+					g.agent_id like '%${condition}%' 
+					or g.agent_name like '%${condition}%'
+					or g.mobile like '%${condition}%'
+					or u.realname like '%${condition}%'
+					or u1.email like '%${condition}%'
+				)
+		</if>
+		<if test="agent_type != null and agent_type!=''">
+			and g.agent_type = #{agent_type}
+		</if>
+		<if test="start_time_day != null and start_time_day!=''">
+			and g.create_time >= STR_TO_DATE(#{start_time_day},'%Y-%m-%d')
+		</if>
+		<if test="end_time_day != null and end_time_day!=''">
+			and g.create_time <![CDATA[<= STR_TO_DATE(#{end_time_day},'%Y-%m-%d %T') ]]>
+		</if>
+		<if test="minAmount != null and minAmount!=''">
+			and b.balance >=#{minAmount}
+		</if>
+		<if test="maxAmount != null and maxAmount!=''">
+			and <![CDATA[b.balance <=#{maxAmount} ]]>
+		</if>
+		<if test="dataAuthorityCondition != null">
+			<choose>
+				<when test="dataAuthorityCondition.needQuerySaleIsNullData">
+					AND(
+					g.belong_sale in
+					<foreach collection="dataAuthorityCondition.ids" index="index" item="item" open="(" close=")" separator=",">
+						#{item}
+					</foreach>
+					OR
+					ISNULL(g.belong_sale)
+					)
+				</when>
+				<otherwise>
+					AND g.belong_sale in
+					<foreach collection="dataAuthorityCondition.ids" index="index" item="item" open="(" close=")" separator=",">
+						#{item}
+					</foreach>
+				</otherwise>
+			</choose>
+		</if>
+	</sql>
+
+	<!-- 查询代理商信息 -->
+	<select id="queryAgentInfo" resultType="map">
+		SELECT
+		g.agent_id,
+		g.agent_name,
+		g.mobile,
+		(select count(0) from t_sms_oauth_pic tp where tp.agent_id = g.agent_id ) as flag,
+      	u1.email,
+		u.realname as userRealName,
+		case g.agent_type
+		when 1 then '销售代理商'
+		when 2 then '品牌代理商'
+		when 3 then '资源合作商'
+		when 4 then '代理商和资源合作'
+		when 5 then 'OEM代理商'
+		end agent_type_name,
+		agent_type,
+		g.status,
+		CASE g.status
+			WHEN '0' then '注册未激活'
+			WHEN '1' then '已启用'
+			WHEN '5' then '已冻结'
+			WHEN '6' then '已注销'
+			END statusName,
+		CASE g.oauth_status
+			WHEN '2' THEN '待认证'
+			WHEN '3' THEN '已认证'
+			WHEN '4' THEN '认证不通过'
+			END AS oauthStatus,
+		TRUNCATE(IFNULL(b.balance, 0), 4) AS balance,
+		DATE_FORMAT(g.create_time,'%Y-%m-%d %T') AS create_time,
+		TRUNCATE(IFNULL(b.current_credit, 0), 4) AS credit_balance
+		FROM
+		t_sms_agent_info g
+		INNER JOIN
+		t_sms_agent_account b
+		ON
+		g.agent_id =b.agent_id
+		LEFT JOIN t_sms_user u ON g.belong_sale = u.id
+		JOIN t_sms_user u1 on u1.id = g.admin_id
+		WHERE
+		 1 = 1
+<!-- 		g.status &lt;&gt; 6 -->
+		<include refid="queryCondition" />
+		order by g.create_time desc
+		${limit}
+	</select>
+
+	<select id="queryAgentInfoCount" resultType="map">
+		SELECT count(0) as
+		totalCount
+		FROM
+		t_sms_agent_info g
+		INNER JOIN
+		t_sms_agent_account b
+		ON
+		g.agent_id = b.agent_id
+		LEFT JOIN t_sms_user u ON g.belong_sale = u.id
+		JOIN t_sms_user u1 on u1.id = g.admin_id
+		WHERE
+		 1 = 1
+<!-- 		g.status &lt;&gt; 6 -->
+		<include refid="queryCondition" />
+	</select>
+	
+	<!-- 查询所有代理商信息 -->
+	<select id="queryAllAgentInfo" resultType="map">
+	SELECT
+		g.agent_id,
+		g.agent_name,
+		g.mobile,
+		u1.email,
+		u.realname as userRealName,
+		case g.agent_type 
+		when 1 then '销售代理商'
+		when 2 then '品牌代理商'
+		when 3 then '资源合作商'
+		when 4 then '代理商和资源合作'
+		when 5 then 'OEM代理商'
+		end agent_type_name,
+		agent_type,
+		CASE g.status
+			WHEN '0' then '注册未激活'
+			WHEN '1' then '已启用'
+			WHEN '5' then '已冻结'
+			WHEN '6' then '已注销'
+			END status,
+		CASE g.oauth_status
+			WHEN '2' THEN '待认证'
+			WHEN '3' THEN '已认证'
+			WHEN '4' THEN '认证不通过'
+			END AS oauthStatus,
+		CAST(b.balance AS DECIMAL(15,2)) AS balance,
+		DATE_FORMAT(g.create_time,'%Y-%m-%d %T') AS create_time
+		FROM
+		t_sms_agent_info g
+		INNER JOIN
+		t_sms_agent_account b
+		ON
+		g.agent_id =b.agent_id
+		LEFT JOIN t_sms_user u ON g.belong_sale = u.id
+		JOIN t_sms_user u1 on u1.id = g.admin_id
+		WHERE
+		 1 = 1
+		<include refid="queryCondition" />
+		order by g.create_time desc
+	</select>
+
+	<select id="queryAgentDetailInfo" resultType="map">
+		SELECT
+		g.agent_id,
+		g.admin_id,
+		g.agent_name,
+		g.shorter_name,
+		g.agent_type,
+		g.mobile,
+		u1.email,
+		g.belong_sale,
+		case g.agent_type 
+		when 1 then '销售代理商'
+		when 2 then '品牌代理商'
+		when 3 then '资源合作商'
+		when 4 then '代理商和资源合作'
+		when 5 then 'OEM代理商'
+		end agent_type_name,
+		case g. STATUS when 0 then '注册未激活'
+		when 1 then '已启用'
+		when 5 then '已冻结'
+		when 6 then '已注销'
+		end status_name,
+		case g.oauth_status when 2 then '待认证'
+		when 3 then '已认证'
+		when 4 then '认证不通过'
+		end oauth_status_name,
+		DATE_FORMAT(g.oauth_date,'%Y-%m-%d %T') AS oauth_date,
+		g.address,
+		CASE p.id_type
+			WHEN 1 THEN '身份证'
+			WHEN 11 THEN '身份证正面'
+			WHEN 10 THEN '身份证背面'
+			WHEN 2 THEN '护照'
+			WHEN 3 THEN '组织机构证'
+			WHEN 4 THEN '税务登记证'
+			WHEN 5 THEN '营业执照'
+			WHEN 6 THEN '三证合一'
+			WHEN 7 THEN '四证合一'
+			WHEN 8 THEN '等级证书号'
+				END AS id_type,
+		p.id_nbr,
+		p.id_nbr2,
+		g.company_nbr,
+		CAST(a.balance AS DECIMAL(15,2)) AS balance,
+		CAST(a.credit_balance AS DECIMAL(15,2)) AS credit_balance,
+		CAST(a.accumulated_income AS DECIMAL(15,2)) AS accumulated_income,
+		CAST(a.commission_income AS DECIMAL(15,2)) AS commission_income,
+		DATE_FORMAT(g.create_time,'%Y-%m-%d %T') AS create_time,
+		DATE_FORMAT(p.update_date,'%Y-%m-%d %T') AS update_date,
+		g.remark
+		FROM
+		t_sms_agent_info g
+		LEFT JOIN t_sms_oauth_pic p ON p.agent_id = g.agent_id
+		INNER JOIN t_sms_agent_account a ON a.agent_id = g.agent_id
+		JOIN t_sms_user u1 on u1.id = g.admin_id
+		WHERE
+		g.agent_id = #{agentId}
+		limit 1
+	</select>
+	
+	<!-- 获取当前代理商下的客户数量 -->
+	<select id="getClientNumByAgentId" resultType="int">
+		SELECT
+			COUNT(0)
+		FROM
+			t_sms_account a
+		WHERE
+			a.agent_id = #{agentId}
+	</select>
+	
+	
+	<!-- 修改代理商状态 -->
+	<update id="updateStatus">
+		UPDATE t_sms_agent_info
+		SET status = #{status}
+		WHERE
+			agent_id = #{agentId}
+	</update>
+	
+	<!-- 修改代理商的类型 -->
+	<update id="updateAgentType">
+		UPDATE 
+			t_sms_agent_info
+		SET 
+			agent_type = #{agentType}
+		WHERE
+			agent_id = #{agentId}
+	</update>
+	
+	<update id="updateAgentWebId">
+		UPDATE t_sms_user
+		SET web_id = #{webId}
+		WHERE
+			id = (
+				SELECT
+					i.admin_id
+				FROM
+					t_sms_agent_info i
+				WHERE
+					i.agent_id = #{agentId}
+			)
+	</update>
+	<!-- 获取OEM代理角色ID -->
+	<select id="getOEMRoleId" resultType="string">
+		SELECT
+			r.id
+		FROM
+			`t_sms_role` r
+		WHERE
+			r.web_id = 4
+		LIMIT 1
+	</select>
+	<!-- 更新OEM代理商角色 -->
+	<update id="updateAgentRole">
+		UPDATE t_sms_user_role 
+		SET 
+			role_id = #{roleId}
+		WHERE
+			user_id = (SELECT i.admin_id FROM t_sms_agent_info i WHERE i.agent_id = #{agentId})
+				
+	
+	</update>
+	
+	
+	<!-- part 2 OEM功能 -->
+	<!-- 判断代理商是否上传OEM配置资料 -->
+	<select id="checkDataExist" resultType="int">
+		SELECT
+			COUNT(0) AS totalCount
+		FROM
+			t_sms_oem_data_config c
+		INNER JOIN 
+			t_sms_agent_info i
+		ON i.agent_id = c.agent_id
+		WHERE i.agent_id = #{agentId}
+	</select>
+	<!-- 获取OEM代理商配置资料 -->
+	<select id="getOEMDataConfig" resultType="map">
+		SELECT
+			c.agent_id,
+			c.domain_name,
+			c.copyright_text,
+			c.tab_logo_url,
+			c.logo_url,
+			c.company_logo_url,
+			c.api_document_url,
+			c.FAQ_document_url,
+			c.navigation_backcolor,
+			c.navigation_text_color,
+			c.hy_sms_discount,
+			c.yx_sms_discount,
+			c.gj_sms_discount,
+			c.test_product_id,
+			c.test_sms_number
+		FROM
+			t_sms_oem_data_config c
+		INNER JOIN 
+			t_sms_agent_info i
+		ON i.agent_id = c.agent_id
+		WHERE i.agent_id = #{agentId}
+	</select>
+	
+	<!-- 获取OEM代理商配置资料 -->
+	<select id="getOEMDataConfigByDomain" resultType="map">
+		SELECT
+			c.agent_id,
+			c.domain_name,
+			c.copyright_text,
+			c.tab_logo_url,
+			c.logo_url,
+			c.company_logo_url,
+			c.api_document_url,
+			c.FAQ_document_url,
+			c.navigation_backcolor,
+			c.navigation_text_color,
+			c.hy_sms_discount,
+			c.yx_sms_discount,
+			c.gj_sms_discount,
+			c.test_product_id,
+			c.test_sms_number
+		FROM
+			t_sms_oem_data_config c 
+		WHERE c.domain_name = #{domain}
+	</select>
+	
+	<!-- 修改OEM资料 -->
+	<update id="updateAgentConfig">
+		UPDATE `t_sms_oem_data_config`
+		<set>
+			<if test="domain != '' and domain != null">
+				 `domain_name` = #{domain},
+			</if>
+			<if test="domain != '' and domain != null">
+				 `copyright_text` = #{copyright},
+			</if>		
+			<if test="h_tab_logo != '' and h_tab_logo != null">
+				 `tab_logo_url` = #{h_tab_logo},
+			</if>
+			<if test="h_logo != '' and h_logo != null">
+				 `logo_url` = #{h_logo},
+			</if>
+			<if test="h_company_logo != '' and h_company_logo != null">
+				 `company_logo_url` = #{h_company_logo},
+			</if>
+			<if test="h_api_document != '' and h_api_document != null">
+		 		`api_document_url` = #{h_api_document},
+			</if>
+			<if test="h_FAQ_document != '' and h_FAQ_document != null">
+		 		`FAQ_document_url` = #{h_FAQ_document},
+			</if>
+			<if test="nav_backcolor != '' and nav_backcolor != null">
+		 		`navigation_backcolor` = #{nav_backcolor},
+			</if>
+			<if test="nav_text_color != '' and nav_text_color != null">
+		 		`navigation_text_color` = #{nav_text_color},
+			</if>
+			<if test="hy_discount != '' and hy_discount != null">
+		 		`hy_sms_discount` = #{hy_discount},
+			</if>
+			<if test="yx_discount != '' and yx_discount != null">
+		 		`yx_sms_discount` = #{yx_discount},
+			</if>
+			<if test="gj_discount != '' and gj_discount != null">
+		 		`gj_sms_discount` = #{gj_discount},
+			</if>
+			`test_product_id` = #{productId},
+			`test_sms_number` = #{productNum}
+		</set>
+		WHERE
+			`agent_id` = #{agent_id}
+	</update>
+	
+	<!-- 添加OEM资料 -->
+	<insert id="insertAgentConfig">
+	INSERT INTO `t_sms_oem_data_config`(
+		`agent_id`, `domain_name`, `copyright_text`, `tab_logo_url`, `logo_url`, `company_logo_url`, `api_document_url`,
+		 `FAQ_document_url`, `navigation_backcolor`, `navigation_text_color`, `hy_sms_discount`, `yx_sms_discount`,
+		 `gj_sms_discount`,test_product_id,test_sms_number
+		 ) 
+	VALUES (
+		#{agent_id}, #{domain}, #{copyright}, #{h_tab_logo}, #{h_logo}, #{h_company_logo}, #{h_api_document},
+		 #{h_FAQ_document}, #{nav_backcolor}, #{nav_text_color},#{hy_discount}, #{yx_discount}, #{gj_discount},
+		 #{productId},#{productNum}
+		 )
+	
+	</insert>
+
+	<update id="updateBelongSaleForAgent">
+		UPDATE
+			t_sms_agent_info
+		SET
+			belong_sale = #{belong_sale}
+		WHERE
+			agent_id = #{agent_id}
+			<if test="oldBelongSale != null and oldBelongSale != ''">
+				AND belong_sale = #{oldBelongSale}
+			</if>
+	</update>
+
+
+
+	
+</mapper> 

@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信云平台运营系统 </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+    <link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+    <link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+    <style>
+        /* Additional style to fix warning dialog position */
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+        .modal-body input{
+        	width:150px;
+        }
+    </style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="tabs-container">
+				<ul class="nav nav-tabs">
+					<li class="active" th:if="${menus.tskhsz}" onclick="doResize(1)"><a data-toggle="tab" href="#tab-1" aria-expanded="true">特殊客户设置</a>
+					</li>
+					<li class="" th:if="${menus.tskhszjl}" onclick="doResize(2)">    <a data-toggle="tab" id="tab_2"  href="#tab-2" aria-expanded="false">特殊客户设置记录</a>
+					</li>
+				</ul>
+
+				<div class="tab-content">
+					<div id="tab-1" class="tab-pane active" th:if="${menus.tskhsz}">
+						<div class="panel-body">
+							<div class="ibox ">
+								<!-- 搜索条件 -->
+								<div class="ibox-content">
+									<form role="form" class="form-inline">
+										<div class="form-group">
+											<label for="condition" class="sr-only">特殊客户: </label>
+											<input type="text" placeholder="客户ID/邮箱/手机号" id="condition" name="condition" class="form-control">
+										</div>
+
+										<div class="form-group">
+											<input style='display:none' />
+											<span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-danger" onclick="search()">搜索</button></span>
+										</div>
+									</form>
+								</div>
+
+								<div class="ibox-content">
+
+									<div class="table-responsive">
+										<table class="table">
+											<tr class="active">
+												<th>客户id</th>
+												<th>客户名称</th>
+												<th>手机号码</th>
+												<th>客户状态</th>
+												<th>认证状态</th>
+												<th>所属代理商id</th>
+												<th>所属代理商名称</th>
+												<th>创建时间</th>
+											</tr>
+											<tr>
+												<td id="clientid" class="client"></td>
+												<td id="name" class="client"></td>
+												<td id="mobile" class="client"></td>
+												<td id="status" class="client"></td>
+												<td id="oauth_status" class="client"></td>
+												<td id="agent_id" class="client"></td>
+												<td id="agent_name" class="client"></td>
+												<td id="createtime" class="client"></td>
+												<input id="clientid" type="hidden"  class="client"/>
+												<input id="agent_id" type="hidden"  class="client"/>
+											</tr>
+										</table>
+									</div>
+									<div class="jqGrid_wrapper">
+										<table id="table_list"></table>
+										<div id="pager_list"></div>
+									</div>
+									<p>&nbsp;</p>
+									<form role="form" class="form-inline">
+										<div class="form-group">
+											<span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-danger" onclick="commit()">提交</button></span>
+											<span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-error" onclick="goback()">返回</button></span>
+										</div>
+									</form>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div id="tab-2" class="tab-pane" th:if="${menus.tskhszjl}">
+						<div class="panel-body">
+							<div class="ibox-content">
+								<form role="form" class="form-inline">
+									<div class="form-group">
+										<!-- <label for="example1" class="sr-only">用户名</label> -->
+										<input type="text" placeholder="客户ID/客户名称/产品代码/产品名称" id="condition2" class="form-control">
+									</div>
+									<!-- 时间选择 -->
+									<div class="form-group" id="sandbox-container">
+										<div class="form-group pull-right">设置时间:
+											<input placeholder="起始时间" class="form-control layer-date" id="start_time_day" />至
+											<input placeholder="截止时间" class="form-control layer-date" id="end_time_day" />
+										</div>
+									</div>
+									<div class="form-group">
+										<span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-danger" onclick="search2()">搜索</button></span>
+									</div>
+								</form>
+							</div>
+
+							<div class="ibox-content">
+								<div class="jqGrid_wrapper2">
+									<table id="table_list2"></table>
+									<div id="pager_list2"></div>
+								</div>
+								<p>&nbsp;</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+</div>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/js/plugins/validate/jquery.validate.min.js}"></script>
+<script th:src="@{/resources/js/jquery.form.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/auth.js?v=1.0.0}"></script>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var menus = [[${menus}]];
+    if (menus.tskhsz) {
+
+    } else if (menus.tskhszjl) {
+        $("#tab_2")[0].click();
+    }
+    var data4Discount;
+	var productInfoPoList=[];
+	var msgTime = 1500;
+	var tag = 'tag-1';
+
+    function search(){
+		var clientUrl =/*[[@{/product/speCusSeting/clientinfo}]]*/;     
+		var clientId = $("#condition").val();
+		var agentId ='';
+		if(clientId==undefined || clientId==null||clientId==''){
+			return;
+		}
+    	$.ajax({
+    		type: "POST",
+    		dataType: "json",
+    		async: false,
+    		url: clientUrl,
+    		data:{
+    			customerInfo:clientId
+    		},
+    		success: function(result){
+    			if(result.success){
+    				var data = result.data;
+    				if(data){
+	    				$(".client").each(function(){
+	    					var id = $(this).attr("id");
+	    					$(this).html(data[id]);
+	    				});
+	    				$("#clientid").val(data['clientid']);
+	    				$("#agent_id").val(data['agent_id']);
+	    				agentId =  data['agent_id'];
+    				}else{
+        				$(".client").each(function(){
+        					var id = $(this).attr("id");
+        					$(this).html("");
+        				});
+        				$("#clientid").val("");
+        				$("#agent_id").val("");
+        				agentId =  "";
+    				}
+    			}else{
+    				$(".client").each(function(){
+    					var id = $(this).attr("id");
+    					$(this).html("");
+    				});
+    				$("#clientid").val("");
+    				$("#agent_id").val("");
+    				agentId =  "";
+    			}
+    		}
+    	});
+    	
+    	productInfoPoList=[];
+    	
+    	
+        $("#table_list").jqGrid('setGridParam',{
+            datatype:'json',
+            postData: {
+            	clientId: $("#clientid").val(),
+            	agentId:agentId
+            }, //发送数据
+        }).trigger("reloadGrid"); //重新载入
+    }
+
+    function goback(){
+        var mainUrl =  [[@{/product/speCusSeting}]];
+        window.location.href = mainUrl;
+    }
+    
+    $(document).ready(function () {
+        $.jgrid.defaults.styleUI = "Bootstrap";
+        $("#table_list").jqGrid({
+            url:/*[[@{/product/speCusSeting/list}]]*/,
+            mtype: 'POST',
+            datatype: "json",
+            postData: {
+            	clientId: $("#condition").val()
+            },
+            jsonReader : {
+                root:"list",
+                page: "currentPage",
+                total: "totalPage",
+                records: "totalCount"
+            },
+            height: 'auto',
+            autowidth: true,
+            shrinkToFit: true,
+            autoScroll: true,
+            rowNum: 20,
+            rowList: [10, 20, 30,50],
+            colNames: ["","产品ID(隐藏)", "产品代码", "产品名称","产品类型", "运营商","区域", "有效期", "产品销售价", "数量", "创建时间","数量(隐藏)","折扣率(隐藏)", "折后单价"],
+            colModel: [
+            	{name: "&nbsp;&nbsp;",align: "left",sortable:false,width:5,
+	                formatter: function (cellvalue, options, rowObject) {
+	                	var product_id = rowObject.product_id;
+	                	return "<input type='checkbox'   id='"+product_id+"'  onclick='checkOne(this)' data-pid='"+product_id+"'/>"; 
+	                }
+            	},
+                {name: "product_id",align: "left",sortable:false,width:20,hidden:true},
+                {name: "product_code",align: "left",sortable:false,width:20},
+                {name: "product_name",align: "left",sortable:false,width:20},
+                {name: "product_type_name", align: "left",sortable:false,width:20},
+                {name: "operator_code", align: "left",sortable:false,width:10},
+                {name: "area_code", align: "left",sortable:false,width:10},
+                {name: "active_period", align: "left",sortable:false,width:10},
+                {name: "product_price_str", align: "left",sortable:false,width:20},
+                {name: "quantity_name", align: "left",sortable:false,width:20},
+                {name: "create_time", align: "left",sortable:false,width:25},
+                {name: "quantity", align: "left",sortable:false,width:25,hidden:true},
+                {name: "price_discount", align: "left",sortable:false,hidden:true},
+                {
+                    name: "total", index: "total", align: "left", width: 30, sortable: false,
+                    formatter: function (cellvalue, options, rowObject) {
+                        var switcher;
+                        //var price_discount = rowObject.price_discount ? rowObject.price_discount.toFixed(2) : "";			//国际短信取这个字段
+                        //var price_normal = rowObject.gn_discount_price ? rowObject.gn_discount_price.toFixed(2) : "";			//普通短信取这个字段
+						var price_discount;     //国际短信取这个字段
+						var price_normal;		//普通短信取这个字段
+                        var product_id = rowObject.product_id;
+                        var product_type = rowObject.product_type;
+                        var product_price = rowObject.product_price;
+                        var quantity = rowObject.quantity;
+                        var product_type_name = rowObject.product_type_name;
+                        var product_name = rowObject.product_name;
+
+                        if(product_type != 2){
+                            if(rowObject.gn_discount_price === null || rowObject.gn_discount_price === ""){
+                                price_normal = rowObject.price_discount.toFixed(4);
+							} else {
+                                price_normal = (rowObject.gn_discount_price / quantity).toFixed(4);
+							}
+
+						} else {
+                            price_discount = rowObject.price_discount ? rowObject.price_discount.toFixed(2) : 1.0000;
+						}
+
+                        product_name = $('<div/>').text(product_name).html();
+                        if (product_type != 2) {
+                            switcher = '<input class="discount" style="width: 55px;text-align:center;" type="text" value="' + price_normal + '" data-key="gn_discount_price" data-pid="' + product_id + '" data-ptype="'+product_type+'"  data-pname="' + product_name + '"  data-ptname="' + product_type_name + '" data-pprice="'+ product_price +'" data-pquantity="'+ quantity +'"/>';
+                            switcher += '<span>元<font size="2" color="">&nbsp;&nbsp;[0~1]的四位小数</font></span>';
+                            switcher += '<div data-pid="'+product_id+'" class="low" style="display: none;color: #FF9600;">亲，您设置的价格有点低哦</div>';
+                            switcher += '<div data-pid="'+product_id+'" class="high" style="display: none;color: #FF9600;">亲，您设置的价格有点高哦</div>';
+                            switcher += '<div data-pid="'+product_id+'" class="more" style="display: none;color: red;font-size: 11px;">请输入0-1之间的值</div>';
+                        } else {
+                            switcher = '<span>折扣率&nbsp;</span>';
+                            switcher += '<input class="discount" style="width: 55px;text-align:center;" type="text" value="' + price_discount + '" data-key="product_price_dis" data-pid="' + product_id + '" data-ptype="'+product_type+'"  data-pname="' + product_name + '"  data-ptname="' + product_type_name + '"  data-pprice="'+ product_price +'" data-pquantity="'+ quantity +'"/>';
+                        }
+
+                        return switcher;
+                    },
+                }
+			],
+            pager: "#pager_list",
+            viewrecords: true,
+            hidegrid: false,
+            gridComplete:function(){
+                $("td").attr("title",'');
+                $(".discount").keyup(function(){
+					var product_id = $(this).data("pid");            		
+					var product_type_name = $(this).data("ptname");            		
+					var product_name = $(this).data("pname");
+                    var product_type = $(this).data("ptype");
+                    var product_price = $(this).data("pprice");
+                    var quantity = $(this).data("pquantity");
+                    var key = $(this).data("key");
+        			$('#'+product_id).prop("checked", true);
+        			var value = $(this).val();
+                    if(value<=0.01){
+                        $(this).siblings(".low").show();
+                        $(this).siblings(".high").hide();
+                        $(this).siblings(".more").hide();
+                    }else if(value>=0.05&&value<=1){
+                        $(this).siblings(".high").show();
+                        $(this).siblings(".low").hide();
+                        $(this).siblings(".more").hide();
+                    }else if(value>1){
+                        $(this).siblings(".high").hide();
+                        $(this).siblings(".low").hide();
+                        $(this).siblings(".more").show();
+                    }else {
+                        $(this).siblings(".high").hide();
+                        $(this).siblings(".low").hide();
+                        $(this).siblings(".more").hide();
+                    }
+        			var product = {};
+    				product.product_id = product_id;
+    				product[key] = value;
+    				product.product_type_name = product_type_name;
+    				product.product_name = product_name;
+    				product.product_type = product_type;
+    				product.product_price = product_price;
+    				product.quantity = quantity;
+    				var existP = false;
+    				for(var i=0;i<productInfoPoList.length;i++){
+    					var existProduct = productInfoPoList[i];
+    					if(existProduct.product_id==product_id){
+    						existProduct[key] = value;
+                            existProduct['product_type'] = product_type;
+                            existP = true;
+    						break;
+    					}
+    				}
+    				if(!existP){
+	    				productInfoPoList.push(product);
+    				}
+        		});
+            }
+        });
+         
+
+       
+        $(document).keypress(function(e) {  
+            // 回车键事件  
+               if(e.which == 13) {  
+            	   search();  
+               }  
+           }); 
+    }); 
+    
+    function resizeJqgrid1(){
+    	if(tag=='tag-1')
+    		return;
+        var width = $(".jqGrid_wrapper2").width();
+        $("#table_list").setGridWidth(width);
+        $(window).bind("resize", function () {
+            var width = $(".jqGrid_wrapper2").width();
+            $("#table_list").setGridWidth(width);
+        })
+        tag='tag-1';
+    }
+    
+    function checkOne(checker){
+ 		 var status = $(checker).prop("checked"); 
+ 		 if(!status){
+			var product_id = $(checker).data("pid");     
+			for(var i=0;i<productInfoPoList.length;i++){
+				var existProduct = productInfoPoList[i];
+				if(existProduct.product_id==product_id){ 
+					productInfoPoList.splice(i,1);
+					break;
+				}
+			}
+ 		 }
+    } 
+    
+    function commit(){
+    	for(var i=0;i<productInfoPoList.length;i++){
+			var existProduct = productInfoPoList[i];
+			console.dir(existProduct);
+
+            if(existProduct.product_type!=2) {
+                if (isNaN(existProduct.gn_discount_price)) {
+                    layer.msg("折扣率只能是数字，请检查后再提交", {icon: 2, time: msgTime});
+                    return;
+                }
+                if (!_Auth.isFourdecimal(existProduct.gn_discount_price)) {
+                    layer.msg("折后价/折扣率只能是0-1之间的小数，最多保留四位", {icon: 2, time: msgTime});
+                    return;
+                }
+            }else if(existProduct.product_type ==2){
+                if (isNaN(existProduct.product_price_dis)) {
+                    layer.msg("折扣率只能是数字，请检查后再提交", {icon: 2, time: msgTime});
+                    return;
+                }
+                if (!_Auth.isFourdecimal(existProduct.product_price_dis)) {
+                    layer.msg("折后价/折扣率只能是0-1之间的小数，最多保留四位", {icon: 2, time: msgTime});
+                    return;
+                }
+			}
+		}
+    	
+    	
+		var content = {};
+		content.clientid = $('#clientid').val();
+		content.agentId = $('#agent_id').val();
+		content.productInfoPoList = productInfoPoList;
+		
+		if(content.productInfoPoList==undefined||content.productInfoPoList.length==0){
+			return;
+		}
+    	layer.confirm("确定修改折扣率？", function(index){
+			 
+			confirmSubmitData(content);
+			
+			layer.close(index);
+		}); 
+     }
+    
+
+	function confirmSubmitData(content){
+		for(var i=0;i<content.productInfoPoList.length;i++){
+			var existProduct = productInfoPoList[i];
+            if(existProduct.product_type!=2) {
+                if (existProduct.gn_discount_price == '' || isNaN(existProduct.gn_discount_price)) {
+                    product_type_name = existProduct.product_type_name;
+                    product_name = existProduct.product_name;
+                    var msgCheck = product_type_name + "[" + product_name + "]的折扣率小于0，请重新填写！";
+                    layer.alert(msgCheck, function (index) {
+                        layer.close(index);
+                    });
+                    return;
+                }
+            }else if(existProduct.product_type==2){
+                if (existProduct.product_price_dis == '' || isNaN(existProduct.product_price_dis)) {
+                    product_type_name = existProduct.product_type_name;
+                    product_name = existProduct.product_name;
+                    var msgCheck = product_type_name + "[" + product_name + "]的折扣率小于0，请重新填写！";
+                    layer.alert(msgCheck, function (index) {
+                        layer.close(index);
+                    });
+                    return;
+                }
+			}
+		}
+		
+		
+		
+		var jsonText = JSON.stringify(content);
+		
+		$.ajax({
+			type: "POST",
+			url:/*[[@{/product/speCusSeting/updateDiscountInfoBatch}]]*/,
+			data: {placeOrderParamJsonStr:jsonText}, 
+			success: function(data){ 
+				
+				if(data.success){
+					layer.msg(data.msg, {icon: 1,time: msgTime});  
+					search();
+				}else{
+					var product_id=data.data;
+					var product_type_name;
+					var product_name;
+					var msg = data.msg;
+					for(var i=0;i<productInfoPoList.length;i++){
+    					var existProduct = productInfoPoList[i];
+    					if(existProduct.product_id==product_id){
+    	    				product_type_name = existProduct.product_type_name;
+    	    				product_name = existProduct.product_name;
+    	    				msg = product_type_name+"["+product_name+"]的"+msg;
+    	    				break;
+    					}
+    				}
+					layer.alert(msg, function(index){
+						layer.close(index);
+					});
+				}
+          	}
+			
+		});
+		
+	}
+	
+
+    var start = {
+        elem: "#start_time_day",
+        format: "YYYY-MM-DD",
+    	min: halfYearAgo("yyyy-MM-dd"),
+        max: laydate.now(),  
+        istoday: true,
+        choose: function (datas) {
+            end.min = datas;
+        }
+    };
+    var end = {
+        elem: "#end_time_day",
+        format: "YYYY-MM-DD",
+    	min: halfYearAgo("yyyy-MM-dd"),
+        max: laydate.now(),  
+        istoday: true,
+        choose: function (datas) {
+            start.max = datas;
+        }
+    };
+    laydate(start);
+    laydate(end);
+	
+	function search2(){
+
+        $("#table_list2").jqGrid('setGridParam',{
+            datatype:'json',
+            postData: {
+            	condition: $("#condition2").val(),
+            	start_time_day: $("#start_time_day").val(),
+            	end_time_day: $("#end_time_day").val()
+            }, //发送数据
+//            page:1
+        }).trigger("reloadGrid"); //重新载入
+    }
+	 
+    $(document).ready(function () {
+        $.jgrid.defaults.styleUI = "Bootstrap";
+        $("#table_list2").jqGrid({
+            url:/*[[@{/product/speCusSeting/clientProduct/list}]]*/,
+            mtype: 'POST',
+            datatype: "json",
+            jsonReader : {
+                root:"list",
+                page: "currentPage",
+                total: "totalPage",
+                records: "totalCount"
+            },
+            height: 'auto',
+            rownumbers:true,
+            autowidth: true,
+            shrinkToFit: false,
+            autoScroll: true,
+            rowNum: 20,
+            rowList: [10, 20, 30,50],
+            colNames: ["客户ID", "客户名称", "产品名称", "产品类型","运营商","区域","产品代码", "所属代理商", "数量", "有效期", "产品定价", "产品成本价", "折扣价",  "设置者", "设置时间"],
+            colModel: [
+                {name: "client_id",align: "left",sortable:false},
+                {name: "name",align: "left",sortable:false},
+                {name: "product_name", align: "left",sortable:false}, 
+                {name: "product_type_name", align: "left",sortable:false},
+                {name: "operator_code", align: "left",sortable:false},
+                {name: "area_code", align: "left",sortable:false},
+                {name: "product_code", align: "left",sortable:false},
+                {name: "agent_id", align: "left",sortable:false},
+                {name: "quantity", align: "left",sortable:false},
+                {name: "active_period", align: "left",sortable:false},
+                {name: "product_price",align: "left",sortable:false},
+                {name: "product_cost",align: "left",sortable:false},
+                {name: "gn_discount_price",align: "left",sortable:false},
+                {name: "updator",align: "left",sortable:false},
+                {name: "update_time",align: "left",sortable:false},
+            ],
+            pager: "#pager_list2",
+            viewrecords: true,
+            hidegrid: false
+        });
+        
+         
+        
+    }); 
+    
+    function resizeJqgrid2(){
+    	if(tag=='tag-2')
+    		return;
+        var width = $(".jqGrid_wrapper").width();
+        $("#table_list2").setGridWidth(width);
+        $(window).bind("resize", function () {
+            var width = $(".jqGrid_wrapper").width();
+            $("#table_list2").setGridWidth(width);
+        })
+
+        tag='tag-2';
+    }
+     
+    /*]]>*/
+</script>
+</body>
+</html>

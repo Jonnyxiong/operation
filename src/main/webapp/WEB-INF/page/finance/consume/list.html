@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:th="http://www.thymeleaf.org"
+	  lang="zh-cn">
+<head>
+	<meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+	<meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+	<title>短信云平台运营系统 - 账单信息</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+	<link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+	<link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+	<link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+	<link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+	<style>
+		/* Additional style to fix warning dialog position */
+		#alertmod_table_list_2 {
+			top: 900px !important;
+		}
+	</style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="tabs-container">
+				<ul class="nav nav-tabs">
+					<li class="active" th:if="${menus.ppxfjl}" onclick="doResize(1)"><a data-toggle="tab" href="#tab-1" aria-expanded="true">品牌消费记录</a>
+					</li>
+					<li class="" th:if="${menus.zzhxf}" onclick="doResize(2)"><a id="tab_2" data-toggle="tab" href="#tab-2" aria-expanded="false">子账户消费</a>
+					</li>
+					<!--<li class="active" onclick="doResize(1)" th:if="${menus.yezd}"><a data-toggle="tab" href="#tab-1" aria-expanded="true">品牌消费记录</a>
+					</li>
+					<li class="" onclick="doResize(2)" th:if="${menus.yjzd}"><a data-toggle="tab" href="#tab-2" aria-expanded="false">OEM消费记录</a>
+					</li>-->
+				</ul>
+				<div class="tab-content">
+					<!-- 品牌消费记录 -->
+					<!--<div id="tab-1" class="tab-pane active" th:if="${menus.yezd}">-->
+					<div id="tab-1" class="tab-pane active" th:if="${menus.ppxfjl}">
+						<div class="panel-body">
+							<div class="ibox ">
+								<!-- 搜索条件 -->
+								<div class="row">
+									<div class="col-sm-12">
+										<form class="form-inline" method="post" id="mainForm_1" >
+											<div class="form-group">
+												<!--<label for="financialType_1">客户ID</label>-->
+												<input type="text" placeholder="客户ID" name="clientId" id="clientId" class="form-control" style="width:210px;">
+											</div>
+											<div class="form-group">
+												<!--<label for="financialType_1">客户名称</label>-->
+												<input type="text" placeholder="客户名称" name="clientName" id="clientName" class="form-control" style="width:210px;">
+											</div>
+											<div class="form-group">
+												<label for="operateType">操作类型:</label>
+												<select id="operateType" name="operateType" class="form-control js-selecthandle" data-type="1">
+													<option value="0">短信失败返还</option>
+													<option value="">全部</option>
+												</select>
+											</div>
+
+											<div class="form-group">
+												<label for="productType_1">产品类型:</label>
+												<select id="productType_1" name="productType" class="form-control">
+													<option value="">全部</option>
+													<option value="3">验证码</option>
+													<option value="4">通知</option>
+													<option value="0">行业</option>
+													<option value="1">营销</option>
+													<option value="2">国际</option>
+												</select>
+											</div>
+
+											<div class="form-group">
+												<label for="operatorCode_1">运营商类型:</label>
+												<select id="operatorCode_1" name="operatorCode" class="form-control">
+													<option value="">全部</option>
+													<option value="1">移动</option>
+													<option value="2">联通</option>
+													<option value="3">电信</option>
+													<option value="0">全网</option>
+													<option value="4">国际</option>
+												</select>
+											</div>
+
+											<!-- 时间选择 -->
+											<div class="form-group" style="margin-left:2.5%">
+												<div class="form-group pull-right">操作日期:
+													<input placeholder="开始时间" class="form-control layer-date" name="startTimeDay" id="start_time_day_1" style="width:100px"/>至
+													<input placeholder="结束时间" class="form-control layer-date" name="endTimeDay" id="end_time_day_1" style="width:100px" />
+												</div>
+											</div>
+											<div class="form-group">
+												<span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-danger" onclick="search(1)">搜索</button></span>
+												<span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-primary" onclick="exportExcel(1)">导出Excel</button></span>
+											</div>
+										</form>
+									</div>
+								</div>
+							</div>
+
+							<div class="ibox-content">
+								<div class="jqGrid_wrapper">
+									<table id="table_list_1"></table>
+									<div id="pager_list_1"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<!-- OEM消费记录 -->
+					<!--<div id="tab-2" class="tab-pane" th:if="${menus.yjzd}">-->
+					<div id="tab-2" class="tab-pane" th:if="${menus.zzhxf}">
+						<div class="panel-body">
+							<div class="ibox ">
+								<!-- 搜索条件 -->
+								<div class="row">
+									<div class="col-sm-12">
+										<form class="form-inline" method="post" id="mainForm_2" >
+											<div class="form-group">
+												<!--<label for="financialType_1">客户ID</label>-->
+												<input type="text" placeholder="子账户ID" name="clientId" id="clientId_2" class="form-control" style="width:210px;">
+											</div>
+											<div class="form-group">
+												<!--<label for="financialType_1">客户名称</label>-->
+												<input type="text" placeholder="子账户名称" name="clientName" id="clientName_2" class="form-control" style="width:210px;">
+											</div>
+											<div class="form-group">
+												<label for="orderType">操作类型:</label>
+												<select id="orderType" name="orderType" class="form-control js-selecthandle" data-type="2">
+													<option value="3">短信失败返还</option>
+													<option value="">全部</option>
+												</select>
+											</div>
+											<div class="form-group">
+												<label for="productType_2">产品类型:</label>
+												<select id="productType_2" name="productType" class="form-control">
+													<option value="">全部</option>
+													<option value="3">验证码</option>
+													<option value="4">通知</option>
+													<option value="0">行业</option>
+													<option value="1">营销</option>
+													<option value="2">国际</option>
+												</select>
+											</div>
+
+											<div class="form-group">
+												<label for="operatorCode_2">运营商类型:</label>
+												<select id="operatorCode_2" name="operatorCode" class="form-control">
+													<option value="">全部</option>
+													<option value="1">移动</option>
+													<option value="2">联通</option>
+													<option value="3">电信</option>
+													<option value="0">全网</option>
+													<option value="4">国际</option>
+												</select>
+											</div>
+
+											<!-- 时间选择 -->
+											<div class="form-group" style="margin-left:2.5%">
+												<div class="form-group pull-right">操作日期:
+													<input placeholder="开始时间" class="form-control layer-date" name="beginCreateTime" id="start_time_day_2" style="width:100px"/>至
+													<input placeholder="结束时间" class="form-control layer-date" name="endCreateTime" id="end_time_day_2" style="width:100px"/>
+												</div>
+											</div>
+											<div class="form-group">
+												<span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-danger" onclick="search(2)">搜索</button></span>
+												<span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-primary" onclick="exportExcel(2)">导出Excel</button></span>
+											</div>
+										</form>
+									</div>
+								</div>
+							</div>
+
+							<div class="ibox-content">
+								<div class="jqGrid_wrapper">
+									<table id="table_list_2"></table>
+									<div id="pager_list_2"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/jquery.form.js}"></script>
+
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+
+<script th:inline="javascript">
+    var max_export_num = [[${max_export_num}]];
+
+    var grid_width = 1200; // 默认宽度
+
+	var initTab1 = 1;
+	var initTab2 = 1;
+    var menus = [[${menus}]];
+    if (menus.ppxfjl) {
+
+    } else if (menus.zzhxf) {
+        $.jgrid.defaults.styleUI = "Bootstrap";
+        $("#tab_2")[0].click();
+    }
+    var start_1 = {
+        elem: "#start_time_day_1",
+        format: "YYYY-MM-DD",
+        min: halfYearAgo("yyyy-MM-dd"),
+        max: laydate.now(),
+        istoday: true,
+        choose: function (datas) {
+            end_1.min = datas;
+        }
+    };
+
+    var end_1 = {
+        elem: "#end_time_day_1",
+        format: "YYYY-MM-DD",
+        min: halfYearAgo("yyyy-MM-dd"),
+        max: laydate.now(),
+        istoday: true,
+        choose: function (datas) {
+            start_1.max = datas;
+        }
+    };
+
+    var start_2 = {
+        elem: "#start_time_day_2",
+        format: "YYYY-MM-DD",
+        min: halfYearAgo("yyyy-MM-dd"),
+        max: laydate.now(),
+        istoday: true,
+        choose: function (datas) {
+            end_2.min = datas;
+        }
+    };
+
+    var end_2 = {
+        elem: "#end_time_day_2",
+        format: "YYYY-MM-DD",
+        min: halfYearAgo("yyyy-MM-dd"),
+        max: laydate.now(),
+        istoday: true,
+        choose: function (datas) {
+            start_2.max = datas;
+        }
+    };
+
+	try {
+        laydate(start_1);
+	} catch (err){
+
+	}
+    try {
+        laydate(start_2);
+    } catch (err){
+
+    }
+    try {
+        laydate(end_1);
+    } catch (err){
+
+    }
+    try {
+        laydate(end_2);
+    } catch (err){
+
+    }
+
+    function doSearch(){
+        if ($("#tab-1").hasClass("active")){
+            $("#table_list_1" ).jqGrid('setGridParam',{
+                datatype:'json',
+                postData: {
+                    clientid: $("#clientId").val(),
+                    name:$("#clientName").val(),
+                    operateType:$("#operateType").val(),
+                    productType:$("#productType_1").val(),
+                    startTimeDay: $("#start_time_day_1").val(),
+                    endTimeDay: $("#end_time_day_1").val(),
+                    operatorCode: $("#operatorCode_1").val()
+                }, //发送数据
+            }).trigger("reloadGrid"); //重新载入
+        } else if ($("#tab-2").hasClass("active")){
+//            search(2);
+            $("#table_list_2" ).jqGrid('setGridParam',{
+                datatype:'json',
+                postData: {
+                    clientid: $("#clientId_2").val(),
+                    name:$("#clientName_2").val(),
+                    orderType:$("#orderType").val(),
+                    productType:$("#productType_2").val(),
+                    beginCreateTime: $("#start_time_day_2").val(),
+                    endCreateTime: $("#end_time_day_2").val(),
+                    operatorCode: $("#operatorCode_2").val()
+                }, //发送数据
+            }).trigger("reloadGrid"); //重新载入
+        }
+    }
+    function search(type){
+        doSearch();
+		/*$("#table_list_" + type).jqGrid('setGridParam',{
+			datatype:'json',
+			postData: {
+                clientid: $("#clientid"+type).val(),
+                name:$("#name"+type).val(),
+                operateType:$("#operateType"+type).val(),
+                productType:$("#productType_"+type).val(),
+				startTimeDay: $("#start_time_day_"+type).val(),
+				endTimeDay: $("#end_time_day_"+type).val(),
+			}, //发送数据
+		}).trigger("reloadGrid"); //重新载入*/
+    }
+
+    // 导出Excel文件
+    function exportExcel(type) {
+        var totalCount = $("#table_list_"+type).jqGrid('getGridParam','records');
+        if (totalCount == 0) {
+            layer.alert("共0条记录，导出Excel文件失败");
+            return;
+        }
+        if(totalCount > max_export_num){
+            layer.msg("导出Excel文件条数大于"+max_export_num+"条", {icon: 2});
+            return;
+        }
+        var mainForm = $("#mainForm_"+type);
+//        var action = mainForm.attr("action");
+
+        var exporUrl = "";
+        var operateType = "";
+        switch (type){
+            case 1:
+                exporUrl = /*[[@{/finance/consumer/brand/list/export}]]*/'';
+                operateType = $("#operateType").find("option:selected").text();
+                break;
+            case 2:
+                exporUrl = /*[[@{/finance/consumer/oem/list/export}]]*/'';
+                operateType = $("#orderType").find("option:selected").text();
+                break;
+        }
+
+        var msg = "正在生成报表，请稍后...";
+        layer.msg('<div style="color:#506470;font-family: "microsoft yahei","Arial Narrow",HELVETICA;">'+msg+'</div>', {icon: 16,shade: [0.5, '#f5f5f5'],scrollbar: false,offset: 'auto',time: 600000}) ;
+        var options = {
+            url:exporUrl,
+            data:{
+                _operateType:operateType,
+                _productType:$("#productType_"+type).find("option:selected").text(),
+                _operatorCode:$("#operatorCode_"+type).find("option:selected").text()
+            },
+            success : function(result) {
+                layer.closeAll(); //疯狂模式，关闭所有层
+                if(result == null){
+                    layer.msg("导出错误，请稍后重试...", {icon:2});
+                }else if(result.success == true){
+                    var exportFileName = result.data;
+                    var turnForm = document.createElement("form");
+                    document.body.appendChild(turnForm);
+                    turnForm.method = 'post';
+                    turnForm.action = /*[[@{/statistic/downloadExcel}]]*/"";
+                    //创建表单
+                    var newElement = document.createElement("input");
+                    newElement.setAttribute("name","exportFileName");
+                    newElement.setAttribute("type","hidden");
+                    newElement.setAttribute("value",exportFileName);
+                    turnForm.appendChild(newElement);
+                    turnForm.submit();
+                }else{
+                    layer.msg(result.msg, {icon:2});
+
+                }
+            },
+            complete : function(XMLHttpRequest,status){
+            },
+            type : "post",
+            async: true,
+            timeout:30000
+        };
+//        $("#mainForm").ajaxSubmit(options);
+        mainForm.ajaxSubmit(options);
+
+//        mainForm.attr("action", exporUrl).submit();
+//        mainForm.attr("action", action);
+    }
+
+    function doResize(type){
+        var width = $(".jqGrid_wrapper").width();
+        if(width > 0){
+            grid_width = width;
+        }
+        $("#table_list_"+ type).setGridWidth(grid_width);
+
+        if(type == 2){
+            $("#table_list_2").jqGrid({
+                url:/*[[@{/finance/consumer/oem/list}]]*/'',
+                mtype: 'POST',
+                datatype: "json",
+                jsonReader : {
+                    root:"data",
+                    page: "page",
+                    total: "totalPage",
+                    records: "totalRecord"
+                },
+                postData: {
+                    clientid: $("#clientId_2").val(),
+                    name:$("#clientName_2").val(),
+                    orderType:$("#orderType").val(),
+                    productType:$("#productType_2").val(),
+                    beginCreateTime: $("#start_time_day_2").val(),
+                    endCreateTime: $("#end_time_day_2").val(),
+                    operatorCode: $("#operatorCode_2").val(),
+                },
+                height: 'auto',
+                rownumbers:true,
+                autowidth: true,
+                shrinkToFit: true,
+                autoScroll: true,
+                rowNum: 20,
+                rowList: [10, 20, 30,50],
+                colModel: [
+                    {label:"子账户ID",name: "clientId",align: "left",sortable:false, width:80},
+                    {label:"子账户名称",name: "clientName",align: "left",sortable:false, width:100},
+                    {label:"操作类型",name: "orderTypeStr",align: "left",sortable:false, width:100},
+                    {label:"订单编号",name: "orderId",align: "left",sortable:false, width:150},
+                    {label:"产品类型",name: "productTypeStr",align: "left",sortable:false, width:60},
+                    {label:"运营商类型",name: "operatorCodeStr",align: "left",sortable:false,width:80},
+                    {label:"区域",name: "areaCodeStr",align: "left",sortable:false,width:60},
+                    {label:"单价(元)",name: "unitPriceStr",align: "left",sortable:false,width:100},
+                    {label:"到期时间",name: "dueTimeStr",align: "left",sortable:false,width:100},
+                    {label:"短信数量",name: "orderNumberStr",align: "left",sortable:false,width:100},
+                    {label:"消费日期",name: "consumerDateStr",align: "left",sortable:false, width:80},
+                    {label:"操作者",name: "operatorStr",align: "left",sortable:false,width:60},
+                    {label:"操作日期",name: "createTimeStr",align: "left",sortable:false,width:120}
+                ],
+                pager: "#pager_list_2",
+                viewrecords: true,
+                hidegrid: false,
+                footerrow:true,
+                gridComplete:function(){
+                    var orderNumberSum;
+                    $.ajax({
+                        type : "post",
+                        url : /*[[@{/finance/consumer/oem/total}]]*/'',
+                        data : {
+                            clientid: $("#clientId_2").val(),
+                            name:$("#clientName_2").val(),
+                            operateType:$("#orderType").val(),
+                            productType:$("#productType_2").val(),
+                            startTimeDay: $("#start_time_day_2").val(),
+                            endTimeDay: $("#end_time_day_2").val(),
+                            operatorCode: $("#operatorCode_2").val()
+                        },
+                        async:false,
+                        success : function(result) {
+                            if(result.code == 0){
+                                orderNumberSum = result.data;
+                            }else{
+                                orderNumberSum = '';
+                            }
+
+                        }
+                    });
+
+                    $("#table_list_2").footerData('set', {
+                        "clientId": '',
+                        "clientName": '',
+                        "orderTypeStr": '',
+                        "orderId": '',
+                        "productTypeStr": '',
+                        "operatorCodeStr": '',
+                        "areaCodeStr": '',
+                        "unitPriceStr": '',
+                        "dueTimeStr": '总计',
+                        "orderNumberStr": orderNumberSum,
+                        "consumerDateStr": '',
+                        "operatorStr": '',
+                        "createTimeStr": ''} );
+                }
+            });
+		}
+
+		if (type == 1)
+		{
+            doSearch();
+		}
+		else {
+            if (initTab2 != 1)
+            {
+                doSearch();
+            }
+		}
+    }
+
+    $(document).ready(function () {
+        $.jgrid.defaults.styleUI = "Bootstrap";
+        $("#table_list_1").jqGrid({
+            url:/*[[@{/finance/consumer/brand/list}]]*/'',
+            mtype: 'POST',
+            datatype: "json",
+            jsonReader : {
+                root:"data",
+                page: "page",
+                total: "totalPage",
+                records: "totalRecord"
+            },
+            postData: {
+                clientid: $("#clientId").val(),
+                name:$("#clientName").val(),
+                operateType:$("#operateType").val(),
+                productType:$("#productType_1").val(),
+                startTimeDay: $("#start_time_day_1").val(),
+                endTimeDay: $("#end_time_day_1").val(),
+                operatorCode: $("#operatorCode_1").val()
+            },
+            height: 'auto',
+            rownumbers:true,
+            autowidth: true,
+            shrinkToFit: true,
+            autoScroll: true,
+            rowNum: 20,
+            rowList: [10, 20, 30,50],
+            colModel: [
+                {label:"客户ID",name: "clientid",align: "left",sortable:false, width:80},
+                {label:"客户名称",name: "clientName",align: "left",sortable:false, width:100},
+                {label:"操作类型",name: "operateTypeStr",align: "left",sortable:false, width:100},
+                {label:"订单编号",name: "orderId",align: "left",sortable:false, width:150},
+                {label:"产品类型",name: "productTypeStr",align: "left",sortable:false, width:100},
+                {label:"运营商类型",name: "operatorCodeStr",align: "left",sortable:false,width:100},
+                {label:"区域",name: "areaCodeStr",align: "left",sortable:false,width:100},
+                {label:"单价(元)",name: "unitPriceStr",align: "left",sortable:false,width:100},
+                {label:"到期时间",name: "dueTimeStr",align: "left",sortable:false,width:100},
+                {label:"短信数量",name: "smsNumberStr",align: "left",sortable:false,width:100},
+                {label:"消费日期",name: "consumerDateStr",align: "left",sortable:false, width:80},
+                {label:"操作者",name: "operatorStr",align: "left",sortable:false},
+                {label:"操作日期",name: "operateTimeStr",align: "left",sortable:false}
+            ],
+            pager: "#pager_list_1",
+            viewrecords: true,
+            hidegrid: false,
+			/*统计功能 */
+            footerrow:true,
+            gridComplete:function(){
+                var smsNumberSum;
+                $.ajax({
+                    type : "post",
+                    url : /*[[@{/finance/consumer/brand/total}]]*/'',
+                    data : {
+                        clientid: $("#clientId").val(),
+                        name:$("#clientName").val(),
+                        operateType:$("#operateType").val(),
+                        productType:$("#productType_1").val(),
+                        startTimeDay: $("#start_time_day_1").val(),
+                        endTimeDay: $("#end_time_day_1").val(),
+                        operatorCode: $("#operatorCode_1").val(),
+                    },
+                    async:false,
+                    success : function(result) {
+                        if(result.code == 0){
+                            smsNumberSum = result.data;
+                        }else{
+                            smsNumberSum = '';
+                        }
+
+                    }
+                });
+                $("#table_list_1").footerData('set', {
+                    "clientid": '',
+                    "clientName": '',
+                    "operateTypeStr": '',
+                    "orderId": '',
+                    "productTypeStr": '',
+                    "operatorCodeStr": '',
+                    "areaCodeStr": '',
+                    "unitPriceStr": '',
+                    "dueTimeStr": '总计',
+                    "smsNumberStr": smsNumberSum,
+                    "consumerDateStr": '',
+                    "operatorStr": '',
+                    "operateTimeStr": ''} );
+            }
+        });
+
+		//切换操作类型
+		$(".js-selecthandle").change(function(){
+		    var value = $(this).val(), table = $(this).data("type");
+		    if(value == ''){
+		        $("#table_list_" + table).closest(".ui-jqgrid-view").find(".ui-jqgrid-sdiv").hide();
+			} else {
+                $("#table_list_" + table).closest(".ui-jqgrid-view").find(".ui-jqgrid-sdiv").show();
+			}
+		})
+
+        $(window).bind("resize", function () {
+            var width = $(".jqGrid_wrapper").width();
+
+            $("#table_list_1").setGridWidth(width);
+        })
+
+        function keyUp(e) {
+            var currKey=0,e=e||event;
+            currKey=e.keyCode||e.which||e.charCode;
+            var keyName = String.fromCharCode(currKey);
+            if (currKey == 13){
+                doSearch();
+            }
+        }
+        document.onkeyup = keyUp;
+    });
+</script>
+
+</body>
+</html>

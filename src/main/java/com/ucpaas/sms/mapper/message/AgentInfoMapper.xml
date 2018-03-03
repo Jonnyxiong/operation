@@ -1,0 +1,517 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ucpaas.sms.mapper.message.AgentInfoMapper">
+     
+        
+    <resultMap id="rowMapper" type="AgentInfo">
+        <result property="agentId" jdbcType="INTEGER" column="agent_id"/>
+        <result property="adminId" jdbcType="BIGINT" column="admin_id"/>
+        <result property="agentName" jdbcType="VARCHAR" column="agent_name"/>
+        <result property="shorterName" jdbcType="VARCHAR" column="shorter_name"/>
+        <result property="agentType" jdbcType="INTEGER" column="agent_type"/>
+        <result property="status" jdbcType="VARCHAR" column="status"/>
+        <result property="oauthStatus" jdbcType="INTEGER" column="oauth_status"/>
+        <result property="oauthDate" jdbcType="TIMESTAMP" column="oauth_date"/>
+        <result property="address" jdbcType="VARCHAR" column="address"/>
+        <result property="company" jdbcType="VARCHAR" column="company"/>
+        <result property="companyNbr" jdbcType="VARCHAR" column="company_nbr"/>
+        <result property="mobile" jdbcType="VARCHAR" column="mobile"/>
+        <result property="belongSale" jdbcType="BIGINT" column="belong_sale"/>
+        <result property="createTime" jdbcType="TIMESTAMP" column="create_time"/>
+        <result property="updateTime" jdbcType="TIMESTAMP" column="update_time"/>
+        <result property="remark" jdbcType="VARCHAR" column="remark"/>
+        <result property="rebateUseRadio" jdbcType="DECIMAL" column="rebate_use_radio"/>
+    </resultMap> 
+     
+    <sql id="BASE_COLUMN_LIST">
+        agent_id,
+        admin_id,
+        agent_name,
+        shorter_name,
+        agent_type,
+        status,
+        oauth_status,
+        oauth_date,
+        address,
+        company,
+        company_nbr,
+        mobile,
+        belong_sale,
+        create_time,
+        update_time,
+        remark,
+        rebate_use_radio
+    </sql>
+
+    <insert id="insert" parameterType="AgentInfo" >
+        INSERT INTO t_sms_agent_info 
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="agentId != null" >
+                agent_id,
+            </if>
+            <if test="adminId != null" >
+                admin_id,
+            </if>
+            <if test="agentName != null" >
+                agent_name,
+            </if>
+            <if test="shorterName != null" >
+                shorter_name,
+            </if>
+            <if test="agentType != null" >
+                agent_type,
+            </if>
+            <if test="status != null" >
+                status,
+            </if>
+            <if test="oauthStatus != null" >
+                oauth_status,
+            </if>
+            <if test="oauthDate != null" >
+                oauth_date,
+            </if>
+            <if test="address != null" >
+                address,
+            </if>
+            <if test="company != null" >
+                company,
+            </if>
+            <if test="companyNbr != null" >
+                company_nbr,
+            </if>
+            <if test="mobile != null" >
+                mobile,
+            </if>
+            <if test="belongSale != null" >
+                belong_sale,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+            <if test="updateTime != null" >
+                update_time,
+            </if>
+            <if test="remark != null" >
+                remark,
+            </if>
+            <if test="rebateUseRadio != null" >
+                rebate_use_radio
+            </if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides="," >
+            <if test="agentId != null" >
+                #{agentId},
+            </if>
+            <if test="adminId != null" >
+                #{adminId},
+            </if>
+            <if test="agentName != null" >
+                #{agentName},
+            </if>
+            <if test="shorterName != null" >
+                #{shorterName},
+            </if>
+            <if test="agentType != null" >
+                #{agentType},
+            </if>
+            <if test="status != null" >
+                #{status},
+            </if>
+            <if test="oauthStatus != null" >
+                #{oauthStatus},
+            </if>
+            <if test="oauthDate != null" >
+                #{oauthDate},
+            </if>
+            <if test="address != null" >
+                #{address},
+            </if>
+            <if test="company != null" >
+                #{company},
+            </if>
+            <if test="companyNbr != null" >
+                #{companyNbr},
+            </if>
+            <if test="mobile != null" >
+                #{mobile},
+            </if>
+            <if test="belongSale != null" >
+                #{belongSale},
+            </if>
+            <if test="createTime != null" >
+                now(),
+            </if>
+            <if test="updateTime != null" >
+                now(),
+            </if>
+            <if test="remark != null" >
+                #{remark},
+            </if>
+            <if test="rebateUseRadio != null" >
+                #{rebateUseRadio}
+            </if>
+        </trim>
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List" >
+        INSERT INTO t_sms_agent_info (
+            agent_id,
+            admin_id,
+            agent_name,
+            shorter_name,
+            agent_type,
+            status,
+            oauth_status,
+            oauth_date,
+            address,
+            company,
+            company_nbr,
+            mobile,
+            belong_sale,
+            create_time,
+            update_time,
+            remark,
+            rebate_use_radio
+        )VALUES
+        <foreach collection="list" item="item" index="index" separator="," >  
+            (
+                #{item.agentId},
+                #{item.adminId},
+                #{item.agentName},
+                #{item.shorterName},
+                #{item.agentType},
+                #{item.status},
+                #{item.oauthStatus},
+                #{item.oauthDate},
+                #{item.address},
+                #{item.company},
+                #{item.companyNbr},
+                #{item.mobile},
+                #{item.belongSale},
+                now(),
+                now(),
+                #{item.remark},
+                #{item.rebateUseRadio}
+            )
+        </foreach>
+    </insert>
+    
+      
+    <update id="update" parameterType="AgentInfo">
+        UPDATE t_sms_agent_info SET 
+            admin_id=#{adminId},
+            agent_name=#{agentName},
+            shorter_name=#{shorterName},
+            agent_type=#{agentType},
+            status=#{status},
+            oauth_status=#{oauthStatus},
+            oauth_date=#{oauthDate},
+            address=#{address},
+            company=#{company},
+            company_nbr=#{companyNbr},
+            mobile=#{mobile},
+            belong_sale=#{belongSale},
+            create_time=#{createTime},
+            update_time=#{updateTime},
+            remark=#{remark},
+            rebate_use_radio=#{rebateUseRadio}
+        WHERE 
+            agent_id = #{agentId} 
+    </update>
+    
+ 
+    
+    <update id="updateSelective" parameterType="AgentInfo">
+        UPDATE t_sms_agent_info 
+            <set>
+                <if test="adminId != null and adminId != ''">
+                    admin_id = #{adminId},
+                </if>
+                <if test="agentName != null and agentName != ''">
+                    agent_name = #{agentName},
+                </if>
+                <if test="shorterName != null and shorterName != ''">
+                    shorter_name = #{shorterName},
+                </if>
+                <if test="agentType != null and agentType != ''">
+                    agent_type = #{agentType},
+                </if>
+                <if test="status != null and status != ''">
+                    status = #{status},
+                </if>
+                <if test="oauthStatus != null and oauthStatus != ''">
+                    oauth_status = #{oauthStatus},
+                </if>
+                <if test="oauthDate != null and oauthDate != ''">
+                    oauth_date = #{oauthDate},
+                </if>
+                <if test="address != null and address != ''">
+                    address = #{address},
+                </if>
+                <if test="company != null and company != ''">
+                    company = #{company},
+                </if>
+                <if test="companyNbr != null and companyNbr != ''">
+                    company_nbr = #{companyNbr},
+                </if>
+                <if test="mobile != null and mobile != ''">
+                    mobile = #{mobile},
+                </if>
+                <if test="belongSale != null and belongSale != ''">
+                    belong_sale = #{belongSale},
+                </if>
+                <if test="createTime != null and createTime != ''">
+                    create_time = #{createTime},
+                </if>
+                <if test="updateTime != null and updateTime != ''">
+                    update_time = #{updateTime},
+                </if>
+                <if test="remark != null and remark != ''">
+                    remark = #{remark},
+                </if>
+                <if test="rebateUseRadio != null and rebateUseRadio != ''">
+                    rebate_use_radio = #{rebateUseRadio}
+                </if>
+            </set>
+        WHERE 
+            agent_id = #{agentId} 
+    </update>
+
+    <select id="getByAgentId" resultMap="rowMapper">
+        SELECT 
+            <include refid="BASE_COLUMN_LIST" />
+        FROM t_sms_agent_info
+        WHERE 
+            agent_id = #{agentId}
+    </select>
+
+    <select id="queryList" parameterType="AgentInfo" resultMap="rowMapper">
+        SELECT 
+            <include refid="BASE_COLUMN_LIST" /> 
+        FROM t_sms_agent_info 
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            <if test="params.agentId != null and params.agentId != ''">
+                and agent_id = #{params.agentId}
+            </if>
+            <if test="params.adminId != null and params.adminId != ''">
+                and admin_id = #{params.adminId}
+            </if>
+            <if test="params.agentName != null and params.agentName != ''">
+                and agent_name = #{params.agentName}
+            </if>
+            <if test="params.shorterName != null and params.shorterName != ''">
+                and shorter_name = #{params.shorterName}
+            </if>
+            <if test="params.agentType != null and params.agentType != ''">
+                and agent_type = #{params.agentType}
+            </if>
+            <if test="params.status != null and params.status != ''">
+                and status = #{params.status}
+            </if>
+            <if test="params.oauthStatus != null and params.oauthStatus != ''">
+                and oauth_status = #{params.oauthStatus}
+            </if>
+            <if test="params.oauthDate != null and params.oauthDate != ''">
+                and oauth_date = #{params.oauthDate}
+            </if>
+            <if test="params.address != null and params.address != ''">
+                and address = #{params.address}
+            </if>
+            <if test="params.company != null and params.company != ''">
+                and company = #{params.company}
+            </if>
+            <if test="params.companyNbr != null and params.companyNbr != ''">
+                and company_nbr = #{params.companyNbr}
+            </if>
+            <if test="params.mobile != null and params.mobile != ''">
+                and mobile = #{params.mobile}
+            </if>
+            <if test="params.belongSale != null and params.belongSale != ''">
+                and belong_sale = #{params.belongSale}
+            </if>
+            <if test="params.createTime != null and params.createTime != ''">
+                and create_time = #{params.createTime}
+            </if>
+            <if test="params.updateTime != null and params.updateTime != ''">
+                and update_time = #{params.updateTime}
+            </if>
+            <if test="params.remark != null and params.remark != ''">
+                and remark = #{params.remark}
+            </if>
+            <if test="params.rebateUseRadio != null and params.rebateUseRadio != ''">
+                and rebate_use_radio = #{params.rebateUseRadio}
+            </if>
+	     </trim>
+    </select>
+
+    <select id="count" parameterType="AgentInfo" resultType="int">
+        SELECT COUNT(0) 
+        FROM t_sms_agent_info 
+        WHERE 
+            1 = 1
+            <if test="agentId != null and agentId != ''">
+                and agent_id = #{agentId}
+            </if>
+            <if test="adminId != null and adminId != ''">
+                and admin_id = #{adminId}
+            </if>
+            <if test="agentName != null and agentName != ''">
+                and agent_name = #{agentName}
+            </if>
+            <if test="shorterName != null and shorterName != ''">
+                and shorter_name = #{shorterName}
+            </if>
+            <if test="agentType != null and agentType != ''">
+                and agent_type = #{agentType}
+            </if>
+            <if test="status != null and status != ''">
+                and status = #{status}
+            </if>
+            <if test="oauthStatus != null and oauthStatus != ''">
+                and oauth_status = #{oauthStatus}
+            </if>
+            <if test="oauthDate != null and oauthDate != ''">
+                and oauth_date = #{oauthDate}
+            </if>
+            <if test="address != null and address != ''">
+                and address = #{address}
+            </if>
+            <if test="company != null and company != ''">
+                and company = #{company}
+            </if>
+            <if test="companyNbr != null and companyNbr != ''">
+                and company_nbr = #{companyNbr}
+            </if>
+            <if test="mobile != null and mobile != ''">
+                and mobile = #{mobile}
+            </if>
+            <if test="belongSale != null and belongSale != ''">
+                and belong_sale = #{belongSale}
+            </if>
+            <if test="createTime != null and createTime != ''">
+                and create_time = #{createTime}
+            </if>
+            <if test="remark != null and remark != ''">
+                and remark = #{remark}
+            </if>
+            <if test="rebateUseRadio != null and rebateUseRadio != ''">
+                and rebate_use_radio = #{rebateUseRadio}
+            </if>
+    </select>
+	 
+
+    <sql id="agentInfoColumns">
+        a.`agent_id` as "agentId",
+        a.`admin_id` as "adminId",
+        a.`agent_name` as "agentName",
+        a.`shorter_name` as "shorterName",
+        a.`agent_type` as "agentType",
+        a.`status`,
+        a.`oauth_status` as "oauthStatus",
+        a.`oauth_date` as "oauthDate",
+        a.`address`,
+        a.`company`,
+        a.`company_nbr` as "companyNbr",
+        a.`mobile`,
+        a.`belong_sale` as "belongSale",
+        a.`create_time` as "createTime",
+        a.`update_time` as "updateTime",
+        a.`remark`,
+        a.`rebate_use_radio` as "rebateUseRadio"
+    </sql>
+
+    <sql id="agentInfoJoins">
+    </sql>
+
+    <sql id="agentInfoCondition">
+    </sql>
+
+
+    <!-- Mod by lpjLiu 20171009 v2.2.2
+     join t_sms_user b on b.id = a.admin_id
+     WHERE a.agent_type= #{agentType} and a.status = 1 and a.oauth_status =3 and b.`status`=1 -->
+    <select id="findAgentInfoList" resultType="AgentInfo">
+        SELECT
+          <include refid="agentInfoColumns"/>
+        FROM
+          t_sms_agent_info a
+        WHERE a.agent_type= #{agentType}
+        <![CDATA[
+          and a.status <> 6
+        ]]>
+    </select> <select id="findAgentInfoList2" resultType="AgentInfo">
+        SELECT
+          <include refid="agentInfoColumns"/>
+        FROM
+          t_sms_agent_info a
+        WHERE a.agent_type= #{agentType} AND a.oauth_status=3
+        <![CDATA[
+          and a.status <> 6 AND a.oauth_status=3
+        ]]>
+    </select>
+
+    <select id="getByAdminId" resultType="AgentInfo">
+        SELECT
+        <include refid="agentInfoColumns"/>
+        FROM
+        t_sms_agent_info a
+        WHERE
+        a.admin_id = #{adminId}
+    </select>
+    <!--按权限获取获取代理商总数和本月新增代理个数(needQuerySaleIsNullData)-->
+    <select id="getAgentNum" resultType="int">
+    SELECT COUNT(0)AS agent_num_total FROM t_sms_agent_info
+        WHERE (belong_sale IN
+            <foreach collection="ids" index="index" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+            <if test="needQuerySaleIsNullData">
+                OR belong_sale IS NULL
+            </if>
+            )
+        <if test="startTime !=null">
+            AND create_time >=#{startTime}
+            AND create_time &lt; #{endTime}
+        </if>
+    </select>
+
+    <!-- 根据权限获取所属销售下或所属销售为空的的代理商 -->
+    <select id="findAllListByBelongSales" resultMap="rowMapper" parameterType="com.ucpaas.sms.entity.po.DataAuthorityCondition">
+        SELECT
+        <include refid="BASE_COLUMN_LIST" />
+        FROM t_sms_agent_info
+        WHERE 1 = 1
+        <choose>
+            <when test="needQuerySaleIsNullData">
+                AND(
+                belong_sale in
+                <foreach collection="ids" index="index" item="item" open="(" close=")" separator=",">
+                    #{item}
+                </foreach>
+                OR
+                ISNULL(belong_sale)
+                )
+            </when>
+            <otherwise>
+                AND belong_sale in
+                <foreach collection="ids" index="index" item="item" open="(" close=")" separator=",">
+                    #{item}
+                </foreach>
+            </otherwise>
+        </choose>
+    </select>
+
+    <!-- 模糊查询agent_id或者agent_name的代理商 -->
+    <select id="findListByAgentIdAndAgentName" resultMap="rowMapper">
+        SELECT
+        <include refid="BASE_COLUMN_LIST"/>
+        FROM t_sms_agent_info
+        WHERE
+        agent_id like CONCAT('%',#{condition},'%' )
+        or agent_name like CONCAT('%',#{condition},'%' )
+    </select>
+
+</mapper>
+

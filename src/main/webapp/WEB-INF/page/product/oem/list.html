@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:th="http://www.thymeleaf.org"
+	  lang="zh-cn">
+<head>
+	<meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+	<meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+	<title>短信云平台运营系统 - OEM产品管理</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+	<link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+	<link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+	<link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+	<link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+	<style>
+		/* Additional style to fix warning dialog position */
+		#alertmod_table_list_2 {
+			top: 900px !important;
+		}
+		.error-span{font-size: 14px;color: red;}
+		.beside-close {float: right;padding-top:5px;margin-right:30px;font-size: 16px;font-weight: bold;}
+	</style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="tabs-container">
+				<ul class="nav nav-tabs">
+					<li class="active" th:if="${menus.OEMcpbgl}"><a data-toggle="tab" href="#tab-1" aria-expanded="true"> OEM产品包管理</a>
+					</li>
+					<li class="" th:if="${menus.OEMdlsxpz}"><a data-toggle="tab" href="#tab-2" aria-expanded="false" id="rebateConfigPage">OEM代理属性配置</a>
+					</li>
+				</ul>
+				<div class="tab-content">
+					<div id="tab-1" class="tab-pane active" th:if="${menus.OEMcpbgl}">
+						<div class="panel-body">
+							<div class="ibox ">
+								<!-- 搜索条件 -->
+								<div class="ibox-content">
+									<div class="row">
+									<div class="col-sm-12">
+										<form class="form-inline" method="post" id="mainForm" >
+											<div class="form-group">
+												<input type="text" placeholder="产品代码/名称" name="condition" id="condition" class="form-control">
+											</div>
+
+											<div class="form-group">
+												<label for="status">状态: </label>
+												<select id="status" name="status" class="form-control">
+													<option value="">全部</option>
+													<option value="0">待上架</option>
+													<option value="1">已上架</option>
+													<option value="2">已下架</option>
+												</select>
+											</div>
+
+											<!-- 时间选择 -->
+											<!--<div class="form-group" style="margin-left:2.5%">-->
+												<!--<div class="form-group pull-right">到期时间:-->
+													<!--<input placeholder="开始时间" class="form-control layer-date" name="start_time_day" id="start_time_day" />至-->
+													<!--<input placeholder="结束时间" class="form-control layer-date" name="end_time_day" id="end_time_day" />-->
+												<!--</div>-->
+											<!--</div>-->
+											<div class="form-group">
+												<span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-danger" onclick="search()">搜索</button></span>
+												<span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-primary" onclick="add()">添加产品包</button></span>
+											</div>
+										</form>
+									</div>
+								</div>
+								</div>
+
+								<div class="ibox-content">
+									<div class="jqGrid_wrapper">
+										<table id="table_list"></table>
+										<div id="pager_list"></div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div id="tab-2" class="tab-pane" th:if="${menus.OEMdlsxpz}">
+						<div class="panel-body">
+							<div class="ibox ">
+								<div class="ibox-content">
+									<div class="row">
+										<div class="col-sm-6 b-r">
+											<h4><span>1. OEM订单中返点抵充比例：</span></h4>
+
+											<br>
+											<table class="table  table-striped table-bordered table-hover">
+												<thead>
+												<tr class="tr-rebate">
+													<th colspan="3" style="text-align: center;">季度消耗条数S
+														<img alt="" id="oem_rebate_q" th:src="@{/resources/img/question.png}" style="" />
+													</th>
+													<th style="text-align: center;">激励返点比例</th>
+												</tr>
+												</thead>
+												<tbody>
+													<tr class="tr-rebate" th:each="item : ${dataList}">
+														<td class="td-start" style="text-align: right;border-right: 0px;">
+															<span  th:text="${item.start_line}"></span> &nbsp;&le;
+														</td>
+														<td style="text-align: center;border-left:0;border-right: 0px;width:10px;">
+															S<input type="hidden" class="rebate_id" th:value="${item.id}"/>
+														</td>
+														<td class="td-end" style="text-align: left;border-left: 0px;">
+															&lt;&nbsp;<span   th:text="${item.end_line }"></span>
+														</td>
+														<td><span class="td-rebateNum" th:text="${item.rebate_proportion}"></span>%</td>
+													</tr>
+
+												</tbody>
+											</table>
+										</div>
+										<div class="col-sm-6">
+											<div class="table-down-div">
+												<h4><span>2.OEM返点结算单价(元)：</span></h4><br>
+
+												<form role="form" class="form-inline">
+													<div class="form-group">
+														<input type="number" id="rebate_price" class="form-control"  style="text-align:center" disabled="disabled"/>
+													</div>
+													<button type="button" class="btn btn-info" id="edit-rebate" onclick="editRebate(this)"> &#43;</button>
+													<button type="button" class="btn btn-success help-rebate" id="save-rebate" style="display:none;" onclick="saveRebate(this)">&radic;</button>
+													<button type="button" class="btn btn-default help-rebate" style="display:none;" onclick="cancel(this)">&times;</button>
+													<br><span class="error-span" id="rebate-err"></span>
+												</form>
+											</div>
+
+											<div class="select-div">
+												<h4><span>3.OEM产品到期时间列表：</span></h4><br>
+												<dl>
+													<dt>
+														<form role="form" class="form-inline">
+															<div class="form-group">
+																<input id="due_time" placeholder="新增到期时间" class="form-control layer-date">
+															</div>
+															<button type="button" class="btn btn-success" onclick="addTime()"> &#43;</button>
+														</form>
+													</dt>
+													<dd></dd>
+												</dl>
+												<dl>
+													<dt>
+													</dt>
+													<dd>
+														<form role="form" class="form-inline">
+															<div class="form-group">
+																<select id="product_duetime" class="form-control" multiple="multiple" style="min-width: 200px;"></select>
+															</div>
+															<img alt="" id="due_time_q" th:src="@{/resources/img/question.png}" style="position:relative;top:-42px;" />
+														</form>
+													</dd>
+												</dl>
+											</div>
+											<div  class="select-down-div">
+												<h4><span>4.OEM国际短信优惠比：</span></h4><br>
+												<form role="form" class="form-inline">
+													<div class="form-group">
+														<input type="number" id="gj_sms_discount" class="form-control" style="text-align:center" disabled="disabled"/>
+													</div>
+													<button type="button" class="btn btn-info" id="edit-discount" onclick="editDiscount(this)"> &#43;</button>
+													<button type="button" class="btn btn-success help-discount" id="save-discount" style="display:none;" onclick="saveDiscount(this)">&radic;</button>
+													<button type="button" class="btn btn-default help-discount" style="display:none;" onclick="cancel(this)">&times;</button>
+													<br><span class="error-span" id="discount-err"></span>
+												</form>
+											</div>
+										</div>
+									</div>
+								</div>
+								<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal" id="modal-btn" style="display: none;"></button>
+								<!-- 模态框（Modal） -->
+								<div class="modal inmodal" id="myModal" tabindex="-1" role="dialog" aria-hidden="true">
+									<div class="modal-dialog modal-lg">
+										<div class="modal-content">
+											<form class="form-horizontal m-t" method="post" action="#" id="edit_rebate_form">
+												<div class="modal-header">
+													<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+														&times;
+													</button>
+													<button type="reset" id="add-btn" class="btn btn-link beside-close" >添加</button>
+													<h4 class="modal-title" id="myModalLabel">修改返点抵充比例</h4>
+												</div>
+												<div class="modal-body">
+
+													<div class="form-group">
+														<label class="col-sm-3 control-label">季度消耗最小数量 (包含):</label>
+														<div class="col-sm-8">
+															<input type="text" class="form-control" id="start_line" name="start_line" max="99999999999" step="1"/>
+														</div>
+														<label class="control-label">条</label>
+													</div>
+													<div class="form-group">
+														<label class="col-sm-3 control-label">季度消耗最大数量（不包含）:</label>
+														<div class="col-sm-8">
+															<input type="text" class="form-control" id="end_line" name="end_line" max="99999999999" step="1"/>
+														</div>
+														<label class="control-label">条</label>
+													</div>
+													<div class="form-group">
+														<label class="col-sm-3 control-label">激励返点比例:</label>
+														<div class="col-sm-8">
+															<input type="text" class="form-control" id="rebate_proportion" name="rebate_proportion" step="0.01"/>
+															<input type="hidden" id="edit_action" name="edit_action" value="update"/>
+															<input type="hidden" id="rebateId" name="rebateId" value=""/>
+														</div>
+														<label class="control-label">%</label>
+													</div>
+
+												</div>
+												<div class="modal-footer">
+													<button type="button" id="del-btn" class="btn btn-danger">删除</button>
+													<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+													<button type="button" class="btn btn-success" onclick="save(this)">保存</button>
+												</div>
+											</form>
+										</div><!-- /.modal-content -->
+									</div><!-- /.modal -->
+
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/plugins/validate/jquery.validate.min.js}"></script>
+<script th:src="@{/resources/js/jquery.form.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+
+<script th:inline="javascript">
+
+    var menus = [[${menus}]];
+    if (menus.OEMcpbgl) {
+
+    } else if (menus.OEMdlsxpz) {
+        $("#rebateConfigPage")[0].click();
+    }
+
+    var due_time = {
+        elem: "#due_time",
+        format: "YYYY-MM-DD",
+        min: laydate.now(1),
+        isclear: true, //是否显示清空
+        istoday: false,
+        issure: true, //是否显示确认
+        event:"focus"
+    };
+
+    laydate(due_time);
+
+    function search(){
+        $("#table_list").jqGrid('setGridParam',{
+            datatype:'json',
+            postData: {
+                condition: $("#condition").val(),
+                status:$("#status").val(),
+                start_time_day: $("#start_time_day").val(),
+                end_time_day: $("#end_time_day").val(),
+            }, //发送数据
+        }).trigger("reloadGrid"); //重新载入
+    }
+
+    function add(){
+        var url = [[@{/product/oem/add}]];
+        window.location.href = url;
+    }
+
+    function getDetails(id){
+        var url = [[@{/product/oem/view}]];
+        window.location.href = url+"?id="+id;
+    }
+
+    function edit(id){
+        var url = [[@{/product/oem/edit}]];
+        window.location.href = url+"?id="+id;
+    }
+
+    // msg消失时间
+    var msgTime = 1500;
+    var validate;
+
+    // 修改状态 上架 下架
+    function updateStatus(a, id, state) {
+        layer.confirm("确定要" + $(a).text() + "吗？", function(index){
+            confirmUpdateStatus(id, state);
+            layer.close(index);
+        });
+    }
+
+    function confirmUpdateStatus(id, state){
+        var sucessInfo ;
+        var failInfo ;
+        if(state == 1){
+            sucessInfo = "上架成功";
+            failInfo = "上架失败";
+        }else{
+            sucessInfo = "下架成功";
+            failInfo = "下架失败";
+        }
+        $.ajax({
+            url:[[@{/product/oem/updateStatus}]],
+			type:"POST",
+			data:{
+            	id : id,
+                state : state
+			},
+			success:function(data){
+                if(data == null){
+                    layer.msg('系统错误，请稍后再试', {icon: 2,time: msgTime});
+                }else if(data.success){
+                    layer.msg(sucessInfo, {icon: 1,time: msgTime});
+                }else{
+                    layer.msg(failInfo, {icon: 2,time: msgTime});
+                }
+                search();
+			}
+		});
+    }
+
+    $(document).ready(function () {
+        $.jgrid.defaults.styleUI = "Bootstrap";
+        $("#table_list").jqGrid({
+            url:[[@{/product/oem/list}]],
+			mtype: 'POST',
+			datatype: "json",
+			jsonReader : {
+			root:"list",
+				page: "currentPage",
+				total: "totalPage",
+				records: "totalCount"
+			},
+			height: 'auto',
+			rownumbers:true,
+			autowidth: true,
+			shrinkToFit: false,
+			autoScroll: true,
+			rowNum: 20,
+			rowList: [10, 20, 30,50],
+			colNames: ["产品名称","产品代码","产品类型","运营商","区域","短信单价（元）","状态","创建者","创建时间","到期时间","是否在代理商平台显示","操作"],
+			colModel: [
+				{name: "product_name",align: "left",sortable:false,  width: 200},
+				{name: "product_code",align: "left",sortable:false, width: 200},
+				{name: "product_type_name",align: "left",sortable:false,width: 150},
+				{name: "operator_code",align: "left",sortable:false,width: 150},
+				{name: "area_code",align: "left",sortable:false,width: 150},
+				{name: "unit_price",align: "left",sortable:false, width: 150},
+				{name: "status_name",align: "left",sortable:false, width: 150},
+				{name: "creator",align: "left",sortable:false, width: 100},
+				{name: "create_time",align: "left",sortable:false, width: 110},
+				{name: "due_time",align: "left",sortable:false, width: 117},
+				{name: "is_show_name",align: "left",sortable:false, width: 160},
+				{name: "operation",index: "operation",align: "left",sortable:false, width: 100,title:false,
+					formatter:function(cellvalue, options, rowObject){
+						var _status = rowObject.status;
+						var _product_id = rowObject.product_id;
+						var switcher = "";
+						if (_status == 0){
+							switcher += "<button type='button' class='btn btn-link btn-xs ' onclick=\"edit('"+_product_id+"')\" title='编辑'>编辑</button>";
+                            switcher += "<button type='button' class='btn btn-link btn-xs ' onclick=\"updateStatus(this,'"+_product_id+"',1)\" title='上架'>上架</button>";
+						} else if (_status == 1) {
+                            switcher += "<button type='button' class='btn btn-link btn-xs ' onclick=\"getDetails('"+_product_id+"')\" title='详情'>详情</button>";
+                            switcher += "<button type='button' class='btn btn-link btn-xs ' onclick=\"updateStatus(this,'"+_product_id+"',2)\" title='下架'>下架</button>";
+						} else if (_status == 2){
+                            switcher += "<button type='button' class='btn btn-link btn-xs ' onclick=\"edit('"+_product_id+"')\" title='编辑'>编辑</button>";
+                            switcher += "<button type='button' class='btn btn-link btn-xs ' onclick=\"updateStatus(this,'"+_product_id+"',1)\" title='上架'>上架</button>";
+						}
+						return switcher;
+					}
+				}
+			],
+            pager: "#pager_list",
+            viewrecords: true,
+            hidegrid: false
+    	});
+
+        $(window).bind("resize", function () {
+            var width = $(".jqGrid_wrapper").width();
+            $("#table_list").setGridWidth(width);
+        })
+
+        function keyUp(e) {
+            var currKey=0,e=e||event;
+            currKey=e.keyCode||e.which||e.charCode;
+            var keyName = String.fromCharCode(currKey);
+            if (currKey == 13){
+                if ($("#tab-1").hasClass("active")){
+                    search();
+                }
+            }
+        }
+        document.onkeyup = keyUp;
+
+        $.validator.defaults.ignore = "";
+        //表单验证规则
+        validate = $("#edit_rebate_form").validate({
+            rules: {
+                start_line:{
+                    digits:true,
+                    min:0,
+                    max:999999999
+                },
+                end_line:{
+                    digits:true,
+                    min:0,
+                    max:999999999
+                },
+            },
+            messages: {
+                start_line: {
+                    digits:"请输入整数",
+                    max:"消耗数量输入范围（0-999,999,999）",
+                    min:"消耗数量输入范围（0-999,999,999）"
+                },
+                end_line: {
+                    digits:"请输入整数",
+                    max:"消耗数量输入范围（0-999,999,999）",
+                    min:"消耗数量输入范围（0-999,999,999）"
+                },
+            }
+        });
+
+        getAgentParams();
+
+        $("#gj_sms_discount").bind({
+            input:function(){checkDiscount(this.value);},
+            propertychange:function(){checkDiscount(this.value);},
+        });
+
+        $("#rebate_price").bind({
+            input:function(){checkRebate(this.value);},
+            propertychange:function(){checkRebate(this.value);},
+        });
+
+        $("#due_time_q").hover(function(){
+            layer.tips('双击日期可删除', this, {tips: [2, '#78BA32']});
+        },function(){
+            layer.closeAll();
+        });
+
+        $("#oem_rebate_q").hover(function(){
+            layer.tips('双击可添加或编辑', this,{tips: [2, '#78BA32']});
+        },function(){
+            layer.closeAll();
+        });
+
+        $("#product_duetime").bind({
+            dblclick:function(){
+                var d = this.value;
+                layer.confirm("确定删除"+d+"？", function(index){
+                    submitByAjax("due_time",d,2);
+                    layer.close(index);
+                });
+            }
+        });
+
+        $(".tr-rebate").bind({
+			dblclick:function(){
+                $("#modal-btn").click();
+                $("#myModalLabel").text("修改返点抵充比例");
+                $("#del-btn").css({display:"inline-block"});
+                $("#edit_action").val("update");
+                var row = $(this);
+                var startLine = row.find(".td-start span").text();
+                var endLine = row.find(".td-end span").text();
+                var rebate = row.find(".td-rebateNum").text();
+                var rebate_id = row.find(".rebate_id").val();
+                $("#add-btn").css({display:"inline-block"});
+                if(rebate_id == null || rebate_id == ''){
+                    $("#add-btn").click();
+                    return;
+                }
+                $("#rebateId").val(rebate_id);
+                $("#start_line").val(startLine);
+                $("#end_line").val(endLine);
+                $("#rebate_proportion").val(rebate);
+            }
+        });
+        $("#add-btn").bind({
+            click:function(){
+                $("#myModalLabel").text("添加返点抵充比例");
+                $("#del-btn").css({display:"none"});
+                $("#add-btn").css({display:"none"});
+                $("#edit_action").val("add");
+                $("#rebate_id").val("");
+            }
+        });
+        var _url = [[@{/product/oem/addRebate}]];
+        $("#del-btn").bind({
+            click:function(){
+                layer.confirm("<b>确认删除?</b>", function(index){
+                    $.ajax({
+                        url: _url,
+                        data:{edit_action:'delete',rebateId:$("#rebateId").val()},
+                        success: function(data){
+                            if (data == "" || data == null) {
+                                return; //session超时
+                            }
+                            if (data.success) {
+                                layer.msg(data.msg, {icon: 1,time: msgTime});
+                                window.setTimeout(function(){
+                                    var mainUrl = [[@{/product/oem/product}]];
+        	                        mainUrl = mainUrl + '?page=toRebatePage';
+        	                        window.location.href = mainUrl;
+                                }, msgTime);
+                            } else {
+                                layer.msg(data.msg, {
+                                    icon: 2
+                                });
+                            }
+                        }});
+                    layer.close(index);
+                });
+            }
+        });
+        
+
+        var page =  /*[[${page}]]*/;
+        if(page=="toRebatePage"){
+        	$("#rebateConfigPage").click();
+        }
+    });
+
+    function checkRebate(value){
+        var msgSpan = $("#rebate-err");
+        msgSpan.html("");
+        if(value == null || value.trim() == ""){
+            msgSpan.html("请输入数值");
+            return false;
+        }
+        value = Number(value);
+		// [0.025，0.05]
+        if(value > 0.05 || value < 0.025){
+            $("#rebate-err").html("取值范围：[0.025 , 0.05]");
+            return false;
+        }
+        var reg = /^[0-1]{1}\.[0-9]{0,4}$/;
+        if(!reg.test(value)){
+            $("#rebate-err").html("小数点后限制4位");
+            return false;
+        }
+        return true;
+    }
+
+    function checkDiscount(value){
+        var msgSpan = $("#discount-err");
+        msgSpan.html("");
+        if(value == null || value.trim() == ""){
+            msgSpan.html("请输入数值");
+            return false;
+        }
+        value = Number(value);
+        if(value > 1 || value < 0.6){
+            $("#discount-err").html("取值范围：[0.6 , 1.0]");
+            return false;
+        }
+        var reg = /^[0-1]{1}\.[0-9]{0,4}$/;
+        if(!reg.test(value)&& value!=1){
+            $("#discount-err").html("小数点后限制4位");
+            return false;
+        }
+        return true;
+    }
+
+    function editRebate(btn){
+        $(btn).attr("disabled", true);
+        $("#rebate_price").attr("disabled",false);
+        $(".help-rebate").css({display:"inline-block"});
+    }
+
+    function saveRebate(btn){
+        var value = $("#rebate_price").val().trim();
+        // [0.025，0.05]
+        if(!checkRebate(value)){
+            return;
+        }
+        submitByAjax("rebate_price",value,1);
+        $("#edit-rebate").attr("disabled", false);
+        $("#rebate_price").attr("disabled",true);
+        $(".help-rebate").css({display:"none"});
+    }
+
+    function addTime(btn){
+        var due_time = $("#due_time").val().trim();
+        if(due_time == null || due_time == ''){
+            layer.msg('请选择日期', {icon: 0,time: msgTime});
+            return;
+        }
+        submitByAjax("due_time",due_time,1);
+    }
+
+    function editDiscount(btn){
+        $(btn).attr("disabled", true);
+        $("#gj_sms_discount").attr("disabled",false);
+        $(".help-discount").css({display:"inline-block"});
+    }
+
+    function saveDiscount(btn){
+        var value = $("#gj_sms_discount").val().trim();
+        // [0.6，1]
+        if(!checkDiscount(value)){
+            return;
+        }
+        submitByAjax("gj_sms_discount",value,1);
+        $("#edit-discount").attr("disabled", false);
+        $("#gj_sms_discount").attr("disabled",true);
+        $(".help-discount").css({display:"none"});
+    }
+
+    function cancel(btn){
+        var cls = $(btn).attr("class");
+        $(btn).css({display:"none"});
+        if(cls.indexOf("help-rebate") != -1){
+            $("#edit-rebate").attr("disabled", false);
+            $("#rebate_price").attr("disabled",true);
+            $(".help-rebate").css({display:"none"});
+        }else{
+            $("#edit-discount").attr("disabled", false);
+            $("#gj_sms_discount").attr("disabled",true);
+            $(".help-discount").css({display:"none"});
+        }
+        getAgentParams();
+    }
+
+    function save(btn) {
+        if(!validate.form()){
+            return;
+        }
+        var options = {
+            beforeSubmit : function() {
+                $(btn).attr("disabled", true);
+            },
+            success : function(data) {
+                $(btn).attr("disabled", false);
+
+                if (data == "" || data == null) {
+                    return; //session超时
+                }
+                if (data.success) {
+                    layer.msg(data.msg, {icon: 1,time: msgTime});
+                    window.setTimeout(function(){
+                        var mainUrl = [[@{/product/oem/product}]];
+                        mainUrl = mainUrl + '?page=toRebatePage';
+                        window.location.href = mainUrl;
+                    }, msgTime);
+                } else {
+                    layer.msg(data.msg, {
+                        icon: 2
+                    });
+                }
+            },
+            url : [[@{/product/oem/addRebate}]],
+            type : "post",
+            timeout:3000
+        };
+        $("#edit_rebate_form").ajaxSubmit(options);
+	}
+
+    function getAgentParams(){
+        var url = [[@{/product/oem/agentParams}]]
+        $.post(
+            url,
+            'json',
+            function(data){
+                var opt = "";
+                for(var i in data){
+                    if(data[i].param_key == "OEM_GJ_SMS_DISCOUNT"){
+                        $("#gj_sms_discount").val(data[i].param_value);
+                    }
+                    if(data[i].param_key == "OEM_PRODUCT_DUETIME"){
+                        opt += "<option value="+data[i].param_value+">"+data[i].param_value+"</option>"
+                    }
+                    if(data[i].param_key == "OEM_AGENT_REBATE_PRICE"){
+                        $("#rebate_price").val(data[i].param_value);
+                    }
+                }
+                $("#product_duetime").html(opt);
+            }
+        )
+    }
+
+    function submitByAjax(key,value,action){
+        $.ajax({
+            url: [[@{/product/oem/addAgentParams}]],
+            async: false,
+            data: {param_value:value,param_key : key,action:action},
+            success: function(data){
+                if (data == "" || data == null) {
+                    return; //session超时
+                }
+                if (data.success) {
+                    $("#due_time").val("");
+                    getAgentParams();
+                    layer.msg(data.msg, {icon: 1,time: msgTime});
+                } else {
+                    layer.msg(data.msg, {
+                        icon: 2
+                    });
+                }
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

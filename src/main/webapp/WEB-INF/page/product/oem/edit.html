@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:th="http://www.thymeleaf.org"
+	  lang="zh-cn">
+<head>
+	<meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+	<meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+	<title>短信云平台运营系统 - OEM产品包修改</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+	<link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+	<link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+	<link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+	<link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/plugins/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css}" rel="stylesheet">
+
+	<style>
+		/* Additional style to fix warning dialog position */
+		#alertmod_table_list_2 {
+			top: 900px !important;
+		}
+	</style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="ibox ">
+				<div class="ibox-title">
+					<h5>OEM产品包修改</h5>
+				</div>
+				<!-- 搜索条件 -->
+				<div class="ibox-content">
+					<div class="row">
+						<div class="col-sm-12">
+							<form class="form-horizontal m-t" id="mainForm">
+								<!--<div class="form-group">-->
+									<!--<label class="col-sm-3 control-label">产品ID:</label>-->
+									<!--<div class="col-sm-8">-->
+										<!--<p class="form-control-static" th:text="${data.product_id}"></p>-->
+										<!---->
+									<!--</div>-->
+								<!--</div>-->
+								<input type="hidden" name="product_id" th:value="${data.product_id}"/>
+								<div class="form-group">
+									<label class="col-sm-3 control-label">产品代码:</label>
+									<div class="col-sm-8">
+										<input type="text" class="form-control" id="product_code" th:disabled="${data.status} eq 2" name="product_code" th:value="${data.product_code}" placeholder="请输入长度为0~50的字符"/>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-3 control-label">产品名称:</label>
+									<div class="col-sm-8">
+										<input type="text" class="form-control" id="product_name" th:disabled="${data.status} eq 2" name="product_name" th:value="${data.product_name}" placeholder="请输入长度为0~50的字符"/>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-3 control-label">产品描述:</label>
+									<div class="col-sm-8">
+										<input type="text" class="form-control" id="product_desc" th:disabled="${data.status} eq 2" name="product_desc" th:value="${data.product_desc}" placeholder="请输入长度为0~50的字符"/>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-3 control-label">对应运营商:</label>
+									<div class="col-sm-8">
+										<select id="operator_code" name="operator_code" class="form-control" th:disabled="${data.status} eq 2">
+											<option value="0">全网</option>
+											<option value="1">移动</option>
+											<option value="2">联通</option>
+											<option value="3">电信</option>
+											<option value="4">国际</option>
+										</select>
+										<!--<input name="operator_code" type="hidden" value="0" />-->
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-3 control-label">产品类型:</label>
+									<div class="col-sm-8">
+										<select id="product_type" name="product_type" class="form-control" th:disabled="${data.status} eq 2">
+											<option value="3">验证码</option>
+											<option value="4">通知</option>
+											<option value="1">会员营销</option>
+											<option value="0">行业</option>
+											<option value="2">国际短信</option>
+										</select>
+										<label id="product_type-error" class="" for="" style="color: #f00;display: inline;padding-left: 10px;font-size: 12px;"></label>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-3 control-label">适用区域:</label>
+									<div class="col-sm-8">
+										<select id="area_code" name="area_code" class="form-control" th:disabled="${data.status} eq 2">
+											<option value="0">全国</option>
+											<option value="1">国际</option>
+										</select>
+										<!--<input name="area_code" type="hidden" value="0" />-->
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-3 control-label">到期时间:</label>
+									<div class="col-sm-8">
+										<select id="due_time" name="due_time" class="form-control" >
+											<option  th:each="item : ${dataList}" th:value="${item.param_value}" th:text="${item.param_value}" th:if="${item.param_key == 'OEM_PRODUCT_DUETIME'}"></option>
+										</select>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-3 control-label">短信单价（元）:</label>
+									<div class="col-sm-8">
+										<input type="number" class="form-control" id="unit_price" name="unit_price" placeholder="" th:value="${data.unit_price}" step="0.0001"/>
+										<label id="unit_price-error" class="" for="" style="color: #f00;display: inline;padding-left: 10px;font-size: 12px;"></label>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-3 control-label">状态:</label>
+									<div class="col-sm-8">
+										<select id="status_name" name="status_name" class="form-control" disabled>
+											<option value="已下架" th:selected="(${data.status_name} eq '已下架')">已下架</option>
+											<option value="已上架" th:selected="(${data.status_name} eq '已上架')">已上架</option>
+											<option value="待上架" th:selected="(${data.status_name} eq '待上架')">待上架</option>
+										</select>
+										<input name="status" type="hidden" value="0" />
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-sm-3 control-label">是否在代理平台显示:</label>
+									<div class="col-sm-8">
+										<div class="radio radio-info radio-inline">
+											<input type="radio" id="inlineRadio1" value="1" name="isShow" checked="">
+											<label for="inlineRadio1"> 是 </label>
+										</div>
+										<div class="radio radio-info radio-inline">
+											<input type="radio" id="inlineRadio2" value="0" name="isShow">
+											<label for="inlineRadio2"> 否 </label>
+										</div>
+									</div>
+
+									<input type="hidden" id="oldIsShow" th:value="${data.is_show}">
+								</div>
+								<div class="form-group">
+									<label class="col-sm-3 control-label">备注:</label>
+									<div class="col-sm-8">
+										<input type="text" class="form-control" id="remark" name="remark" th:value="${data.remark}" placeholder=""/>
+									</div>
+								</div>
+
+								<div class="form-group" id="inter_discount_div" style="display:none;">
+									<label class="col-sm-3 control-label">国际短信优惠比:</label>
+									<div class="col-sm-8" th:each="item : ${dataList}">
+										<input type="text" class="form-control" readOnly  th:value="${item.param_value}" th:if="${item.param_key == 'OEM_GJ_SMS_DISCOUNT'}"/>
+									</div>
+								</div>
+
+								<div class="form-group">
+									<div class="col-sm-12 col-sm-offset-3">
+										<button type="button" class="btn btn-sm btn-success" onclick="edit(this)">提交</button>
+										<button type="button" class="btn btn-sm btn-error" onclick="goBack()">返回</button>
+									</div>
+								</div>
+							</form>
+							<input type="hidden" id="ajaxurl">
+							<input type="hidden" id="backurl">
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/validate/jquery.validate.min.js}"></script>
+<script th:src="@{/resources/js/jquery.form.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/oemProduct.js?v=1.1.0}"></script>
+
+<script th:inline="javascript">
+    function goBack(){
+//        var mainUrl =  [[@{/product/oem/product}]];
+//        window.location.href = mainUrl;
+		history.go(-1);
+    }
+    var due_time = [[${data.due_time}]]
+
+    $("#due_time").val(due_time);
+	$("#backurl").val([[@{/product/oem/product}]]);
+    $("#ajaxurl").val([[@{/product/oem/edit/save}]]);
+    $(function () {
+        //设置是否在代理商在代理商平台的值
+        var oldIsShow = $('#oldIsShow').val();
+
+
+        if (oldIsShow == 0) {
+            $("input:radio[value=0]").attr('checked', 'true');
+        }
+
+
+        var dueTime = [[${data.due_time}]];
+        var operator_code = [[${data.operator_code}]];
+        var product_type = [[${data.product_type}]];
+        var area_code = [[${data.area_code}]];
+        $("#due_time option[value=" + dueTime + "]").attr("selected", true);
+        $("#product_type").change();
+        $("#operator_code option[value=" + operator_code + "]").attr("selected", true);
+        $("#product_type option[value=" + product_type + "]").attr("selected", true);
+        $("#area_code option[value=" + area_code + "]").attr("selected", true);
+        if (product_type == 2) {
+            $('#unit_price').attr("readonly", "readonly");
+            $('#inter_discount_div').show();
+        }
+
+    })
+
+
+</script>
+
+</body>
+</html>

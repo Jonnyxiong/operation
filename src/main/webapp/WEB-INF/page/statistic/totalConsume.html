@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:th="http://www.thymeleaf.org"
+	  lang="zh-cn">
+<head>
+	<meta charset="UTF-8"/>
+	<meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+	<title>运营平台 — 融合通讯开放平台让通讯更简单</title>
+	<meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+	<!--[if lt IE 9]>
+	<meta http-equiv="refresh" content="0;ie.html" />
+	<![endif]-->
+
+
+
+	<link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet"/>
+	<link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"/>
+	<link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/animate.min.css}" rel="stylesheet"/>
+	<link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet"/>
+	<link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+
+	<style type="text/css">
+
+		#inlineRadio1,#inlineRadio2,#inlineRadio3,#inlineRadio4{
+			margin-top: 2px;
+		}
+		.chart{
+			display: none;
+		}
+		.chart.active{
+			display: block;
+			z-index: 5;
+		}
+		.ui-jqgrid-labels>th{
+			width:80px;
+		}
+		#total_send_send{
+			position: absolute;
+			top: 420px;
+			left: 260px;
+		}
+		#total_send_cost{
+			position: absolute;
+			top:420px;
+			left: 760px;
+		}
+        .jqgrow.ui-row-ltr{
+            font-size: 4px;
+        }
+		.laydate_table {
+			display: none;
+		}
+		input[type='radio']{
+			margin-left:30px;
+		}
+		#inlineRadio1{
+			margin-left: 0;
+		}
+		label:hover{
+			cursor: pointer;
+			color: #75DBCC;
+		}
+	</style>
+</head>
+
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content animated fadeInRight">
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="ibox ">
+				<div class="ibox-title">
+					<h5>短信总消耗报表</h5>
+				</div>
+				<div class="ibox-content">
+					<form id="select_form">
+						<label for="inlineRadio1">
+							<input type="radio" name="inlineRadioOptions" id="inlineRadio1" value="option1" checked="checked"> 近三月消耗对比图
+
+						</label>
+						<label for="inlineRadio2">
+							<input type="radio" name="inlineRadioOptions" id="inlineRadio2" value="option2"> 消耗趋势图
+
+						</label>
+						<label for="inlineRadio3">
+							<input type="radio" name="inlineRadioOptions" id="inlineRadio3" value="option3"> 各BU消耗占比图
+
+						</label>
+						<label for="inlineRadio4">
+							<input type="radio" name="inlineRadioOptions" id="inlineRadio4" value="option4"> 回款金额
+						</label>
+					</form>
+					<br/>
+					<div>
+						<div class="widget-content nopadding">
+							<form class="form-inline" id="time_select">
+								<div class="form-group">
+									<label for="start_time">  时间段：</label>
+									<input placeholder="起始时间" class="form-control layer-date" id="start_time" readonly="readonly" disabled="disabled" name="startTime" style="width: 100px">
+								</div>
+								<div class="form-group" id="time_end">
+									<label for="end_time">至</label>
+									<input placeholder="截止时间" class="form-control layer-date" id="end_time" readonly="readonly" disabled="disabled" name="endTime" style="width: 100px">
+								</div>
+								<!--<button type="button" class="btn btn-success btn-sm" onclick="getTendency()">确定</button>-->
+							</form>
+
+
+							<form class="form-inline" id="time_select_two">
+								<div class="form-group">
+									<label for="start_time_two">  时间段：</label>
+									<input placeholder="起始时间" class="form-control layer-date" id="start_time_two" readonly="readonly" name="startTime" style="width: 100px">
+								</div>
+								<button type="button" class="btn btn-success btn-sm" onclick="getTendency()">确定</button>
+							</form>
+							<form class="form-inline" id="time_select_three">
+								<div class="form-group">
+									<label for="start_time_three">  时间段：</label>
+									<input placeholder="起始时间" class="form-control layer-date" id="start_time_three" readonly="readonly" name="startTime" style="width: 100px">
+								</div>
+								<button type="button" class="btn btn-success btn-sm" onclick="getTendency3()">确定</button>
+							</form>
+							<form class="form-inline" id="time_select_four">
+								<div class="form-group">
+									<label for="start_time_four">  时间段：</label>
+									<input placeholder="起始时间" class="form-control layer-date" id="start_time_four" readonly="readonly" name="startTime" style="width: 100px">
+								</div>
+								<button type="button" class="btn btn-success btn-sm" onclick="getTendency4()">确定</button>
+							</form>
+
+
+							<!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+							<div class="ibox-content">
+								<div id="myChart1" style="width: 1120px;height:600px;" class="active chart"></div>
+								<div id="myChart2" style="width: 1000px;height:600px;" class="chart"></div>
+								<div id="myChart3" style="width: 1000px;height:600px;" class="chart"></div>
+								<div id="myChart4" style="width: 1000px;height:600px;" class="chart"></div>
+							</div>
+
+							<div class="ibox-content" title="（当前月）">
+								<div class="jqGrid_wrapper">
+									<p>TOP10客户发送量（<span class="presentMonth"></span>月份）：</p>
+									<table id="table_list"></table>
+									<div id="pager_list"></div>
+								</div>
+								<p>&nbsp;</p>
+							</div>
+							<div class="ibox-content" title="（当前月）">
+								<div class="jqGrid_wrapper">
+									<p>TOP10通道消耗量（<span class="presentMonth"></span>月份）：</p>
+									<table id="table_list_total"></table>
+									<div id="pager_list_total"></div>
+								</div>
+								<p>&nbsp;</p>
+							</div>
+						</div>
+					</div><!-- end 第一row -->
+				</div>
+			</div>
+		</div>
+	</div>
+
+</div>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<!--<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>-->
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/plugins/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/echarts/echarts.common.min.js}"></script>
+<script th:src="@{/resources/js/jquery.form.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+
+<script th:inline="javascript">
+	/*<![CDATA[*/
+
+    var date=new Date;
+    var year=date.getFullYear();
+    var day = date.getDate();
+//    var day = 1;
+    var month=date.getMonth()+1;
+    var mymonth=date.getMonth()+1;
+    month =month<10 ? "0"+month:month;
+    var mydate = (year.toString()+month.toString());
+    var presentDate = (year.toString()+month.toString());
+	if(day == 1){
+	    var prevMonth = date.getMonth(),
+			prevMonth_ = prevMonth >= 10 ? prevMonth : "0" + prevMonth;
+	    if(prevMonth == 0){
+            presentDate = (year-1) + "-12";
+		} else {
+            presentDate = year + "-" + prevMonth_;
+		}
+        $(".presentMonth").text(prevMonth_);
+
+	} else {
+        presentDate = year + "-" + month;
+        $(".presentMonth").text(month);
+
+    }
+
+    if(mymonth<10){
+
+        mydate = (year.toString()+"-0"+mymonth.toString())
+    }else {
+
+        mydate = (year.toString()+"-"+mymonth.toString())
+    }
+
+
+
+
+
+//    var start = {
+//        elem: "#start_time",
+//        format: "yyyy-MM",
+//        // min: laydate.now(),
+//        max: laydate.now(-1),
+//        istime: false,
+//        start:laydate.now(-62,'yyyy-MM'),
+//        istoday: true,
+//        choose: function (datas) {
+//            end.min = datas;
+//            end.start = datas
+//        }
+//    };
+//    var end = {
+//        elem: "#end_time",
+//        format: "yyyy-MM",
+////            min: "#start",
+//        max: laydate.now(-1),
+//        start:laydate.now(-31,'yyyy-MM'),
+//        istime: false,
+//        istoday: false,
+//        choose: function (datas) {
+//            start.max = datas
+//        }
+//    };
+
+
+//    var startTwo = {
+//        elem: "#start_time_two",
+//		isdate:true,
+//        format: "YYYY-MM",
+//        start:laydate.now(-1)
+//
+//    };
+//    var startThree = {
+//        elem: "#start_time_three",
+//        format: "YYYY-MM",
+//        start:laydate.now(-1)
+//
+//    };
+//    var startFour = {
+//        elem: "#start_time_four",
+//        format: "YYYY-MM",
+//        start:laydate.now(-1)
+//
+//    };
+    laydate.render({
+        elem: '#start_time_two'
+        ,type: 'month'
+    });
+    laydate.render({
+        elem: '#start_time_three'
+        ,type: 'month'
+    });
+    laydate.render({
+        elem: '#test3'
+        ,type: 'month'
+    });
+    laydate.render({
+        elem: '#start_time_four'
+        ,type: 'month'
+    });
+
+
+
+
+//    laydate(start);
+//    laydate(startTwo);
+//    laydate(startThree);
+//    laydate(startFour);
+//    laydate(end);
+
+
+    $("#start_time").val(monthsAgo("yyyy-MM",2));
+    $("#end_time").val(monthsAgo("yyyy-MM",0));
+    $("#start_time_two").val(mydate);
+    $("#start_time_three").val(mydate);
+    $("#start_time_four").val(mydate);
+
+
+
+
+    var iboxWidth = $('.ibox-content').width();
+    $('.ibox-content').width(iboxWidth);
+
+var myChart1 = echarts.init(document.getElementById('myChart1'));
+var myChart2 = echarts.init(document.getElementById('myChart2'));
+var myChart3 = echarts.init(document.getElementById('myChart3'));
+var myChart4 = echarts.init(document.getElementById('myChart4'));
+var increaseArr = new Array();
+var url = /*[[@{/statistic/consumePerMonth}]]*/;
+var unit = "";
+
+
+var xData = new Array();
+   	option1 = {
+        backgroundColor: '#f7f8fa',
+        tooltip: {
+            axisPointer: {
+                type: 'cross',
+                crossStyle: {
+                    color: '#999'
+                }
+            }
+        },
+        toolbox: {
+            feature: {
+                saveAsImage: {show: true}
+            }
+        },
+		color:['#ffa3ac','#ffcb8e'],
+        legend: {
+            data:['总消耗量','总消耗金额'],
+            selectedMode:false,
+            y:'bottom'
+        },
+        xAxis: [
+            {
+                type: 'category',
+                data: []
+            }
+        ],
+        yAxis: [
+            {
+                type: 'value',
+                name: '总消耗量(条)',
+				positon:'left',
+                axisLabel: {
+                    formatter: function (value) {
+                        return (value/10000).toFixed(0) + 'w';
+                    }
+                },
+                splitLine:{
+                    show:false
+                }
+
+            },
+            {
+                type: 'value',
+                name: '总消耗金额(元)',
+                positon:'right',
+                axisLabel: {
+                    formatter: function (value) {
+                        return (value/10000).toFixed(0) + 'w';
+                    }
+                },
+                splitLine:{
+                    show:false
+                }
+            }
+        ],
+        series: [
+            {
+                name:'总消耗量',
+                type:'bar',
+                data:[]
+            },
+            {
+                name:'总消耗金额',
+                type:'bar',
+                yAxisIndex: 1,
+                data:[]
+            }
+        ]
+    };
+    option2 = {
+        tooltip: {
+//            trigger: 'axis',
+            axisPointer: {
+                type: 'cross',
+                crossStyle: {
+                    color: '#999'
+                }
+            }
+        },
+        toolbox: {
+            feature: {
+                saveAsImage: {show: true}
+            }
+        },
+		color:['#ffa3ac','#75dbcc'],
+        legend: {
+            data:['总消耗量','总消耗金额'],
+            y:'96.9%',
+            selectedMode:false,
+            textStyle:{
+                fontSize:6
+			},
+        },
+        xAxis: [
+            {
+                type: 'category',
+                min: 0,
+                max: 31,
+                axisLabel: {
+                    "interval": 0,
+                    "rotate": 46,
+					margin:3,
+					textStyle:{
+                        fontSize:8
+					}
+                },
+                data: [],
+                nameTextStyle:{
+                    fontSize:1,
+					color:"#ff0058"
+				}
+            }
+
+        ],
+        yAxis: [
+            {
+                type: 'value',
+                name: '总消耗量(条)',
+				position:'left',
+                axisLabel: {
+                    formatter: function (value) {
+                        return (value/10000).toFixed(0) + 'w';
+                    }
+                },
+                splitLine:{
+                    show:false
+                }
+            },
+            {
+                type: 'value',
+                name: '总消耗金额(元)',
+				position:'right',
+                axisLabel: {
+                    formatter: function (value) {
+						return (value/10000).toFixed(0) + 'w';
+                    }
+                },
+                splitLine:{
+                    show:false
+                }
+            }
+        ],
+        series: [
+            {
+                name:'总消耗量',
+                type:'line',
+                data:[]
+            },
+            {
+                name:'总消耗金额',
+                yAxisIndex: 1,
+                type:'line',
+                data:[]
+            }
+        ]
+    };
+    option3 = {
+        title: [{
+            text: '总发送量',
+            subtext: '',
+            textAlign: 'left',
+            x: '21.5%',
+            y: 'center',
+            textStyle: {
+                fontWeight: 'normal',
+                fontSize: 14
+            },
+            subtextStyle:{
+                fontSize:6,
+                color:"#000"
+
+            }
+        },
+            {
+                text: '总消耗金额',
+                subtext: '',
+                textAlign: 'left',
+                x: '71%',
+                y: 'center',
+                textStyle: {
+                    fontWeight: 'normal',
+                    fontSize: 14,
+                },
+				subtextStyle:{
+                fontSize:6,
+                    color:"#000"
+                }
+            },
+    ],
+        tooltip : {
+            show:false,
+            trigger: 'item',
+            formatter: "{a} <br/>{b} : {c} ({d}%)"
+        },
+		color:['#75dbcc','#d1e47d','#67d6f8','#CC99FF','#FF9900','#99CC00','#CC99CC','#FF66CC'],
+        legend: {
+            x : 'center',
+            y : 'bottom',
+            selectedMode:false,
+            data:[]
+        },
+        toolbox: {
+            show : true,
+            feature : {
+                saveAsImage : {show: true}
+            }
+        },
+        series : [
+            {
+                type:'pie',
+                radius : [60, 110],
+                center : ['25%', '50%'],
+                label: {
+                    normal: {
+                        show: true,
+                        formatter: '{c} 条',
+                    	textStyle:{
+                        color:'#000'
+                    	}
+                    },
+                    emphasis: {
+                        show: true
+                    }
+                },
+                data:[
+
+                ]
+            },
+            {
+                type:'pie',
+                radius : [60, 110],
+                center : ['75%', '50%'],
+                label: {
+                    normal: {
+                        show: true,
+                        formatter: '{c} 元',
+                        textStyle:{
+                            color:'#000'
+                        }
+                    },
+                    emphasis: {
+                        show: true
+                    }
+                },
+                data:[
+
+                ]
+            }
+        ]
+    };
+    option4 = {
+        title: {
+            text: '回款金额',
+            subtext: '',
+            x: 'center',
+            y: 'center'
+        },
+        tooltip: {
+            show:false,
+            trigger: 'item',
+            formatter: "{a} <br/>{b}: {c} ({d}%)"
+        },
+        toolbox: {
+            feature: {
+                dataView: {show: false, readOnly: true},
+                magicType: {show: false, type: ['line', 'bar']},
+                restore: {show: false},
+                saveAsImage: {show: true}
+            }
+        },
+        legend: {
+            orient: 'horizontal',
+            x: 'center',
+            y:'bottom',
+            selectedMode:false,
+            data:['预付充值','直客消耗']
+        },
+		color:['#67d6f8','#75dbcc'],
+        series: [
+            {
+                name:'访问来源',
+                type:'pie',
+				label:{
+                    normal:{
+                        formatter: '{c} 元',
+                        textStyle:{
+                            color:'#000'
+                        }
+					}
+				},
+                radius: ['40%', '70%'],
+                data:[
+                ]
+            }
+        ]
+    };
+// 为echarts对象加载数据
+myChart1.setOption(option1);
+myChart2.setOption(option2);
+myChart3.setOption(option3);
+myChart4.setOption(option4);
+var myChart = myChart1;
+
+    //解决合计精度问题
+    Math.add = function(v1, v2)
+    {
+        var r1, r2, m;
+        try
+        {
+            r1 = v1.toString().split(".")[1].length;
+        }
+        catch (e)
+        {
+            r1 = 0;
+        }
+        try
+        {
+            r2 = v2.toString().split(".")[1].length;
+        }
+        catch (e)
+        {
+            r2 = 0;
+        }
+        m = Math.pow(10, Math.max(r1, r2));
+
+        return (v1 * m + v2 * m) / m;
+    };
+
+
+
+    function queryTendency1(url,title,unit,mychart){
+        $("#start_time").val(monthsAgo("yyyy-MM",2));
+        var startTime = $("#start_time").val();
+        var endTime = $("#end_time").val();
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: {
+                startTime:startTime,
+                endTime:endTime
+            },
+            success: function(data){
+                    var xData = [];
+                    var chargeTotalArr = [];
+                    var salefeeStr = [];
+                    for(var i=0; i<data.data.length;i++){
+						xData.push(data.data[i].date);
+                        chargeTotalArr.push(data.data[i].chargeTotal)
+                        salefeeStr.push(data.data[i].salefeeStr)
+//                        var maxN = eval("Math.max(" + chargeTotalArr.toString() + ")");
+//                        var maxM = eval("Math.max(" + costfeeArr.toString() + ")");
+//                        var minN = eval("Math.min(" + chargeTotalArr.toString() + ")");
+//                        var minM = eval("Math.min(" + costfeeArr.toString() + ")");
+
+					}
+                for(var i=0; i<chargeTotalArr.length;i++){
+                    chargeTotalArr[i] =  Number(chargeTotalArr[i]);
+                }
+                for(var i=0; i<salefeeStr.length;i++){
+                    salefeeStr[i] =  Number(salefeeStr[i]);
+                }
+
+                myChart.setOption({
+                        xAxis:{data:xData},
+                        series:[{
+                            data: chargeTotalArr
+                        },
+							{
+							    data:salefeeStr
+							}]
+                    });
+                }
+        });
+    }
+    function queryTendency2(url,title,unit){
+        var startTime = $("#start_time_two").val();
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: {
+                date:startTime
+            },
+            success: function(data){
+                var xDataTrend = [];
+                var chargeTotalTrendArr = [];
+                var chargeTotalTrend = [];
+                var salefeeTrendArr = [];
+                var salefeeTrend = [];
+                for(var i=0; i<data.data.length;i++){
+                    var dateTrend = data.data[i].date + '';
+					dateTrend.substring(3,7);
+                    xDataTrend.push(dateTrend);
+                    chargeTotalTrendArr.push(data.data[i].chargeTotal);
+                    salefeeTrendArr.push(data.data[i].salefeeStr);
+//                    var maxN = eval("Math.max(" + chargeTotalTrendArr.toString() + ")");
+//                    var maxM = eval("Math.max(" + costfeeTrendArr.toString() + ")");
+//                    var minN = eval("Math.min(" + chargeTotalTrendArr.toString() + ")");
+//                    var minM = eval("Math.min(" + costfeeTrendArr.toString() + ")");
+                }
+                for(var i=0; i<chargeTotalTrendArr.length;i++){
+                    chargeTotalTrendArr[i] =  Number(chargeTotalTrendArr[i]);
+
+
+                }
+                for(var i=0; i<salefeeTrendArr.length;i++){
+                    salefeeTrendArr[i] =  Number(salefeeTrendArr[i]);
+
+
+                }
+                myChart2.setOption({
+                    xAxis:{data:xDataTrend},
+                    series:[{
+                        data: chargeTotalTrendArr
+                    },
+                        {
+                            data:salefeeTrendArr
+                        }]
+                });
+            }
+        });
+    }
+    function queryTendency3(url,title,unit){
+        var startTime = $("#start_time_three").val();
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: {
+                date:startTime
+            },
+            success: function(data){
+                var dpArr = [];
+                var cgArr = [];
+                var slArr = [];
+                var cgObj = {};
+                var slObj = {};
+                for(var i = 0; i<data.data.length;i++){
+                    cgObj = {};
+                    slObj = {};
+                    if(data.data[i]["departmentStr"]){
+                        dpArr.push(data.data[i]["departmentStr"]);
+                        cgObj.value=data.data[i]["chargeTotal"];
+                        cgObj.name=data.data[i]["departmentStr"];
+                        slObj.value=data.data[i]["salefeeStr"];
+                        slObj.name=data.data[i]["departmentStr"];
+                        cgArr.push(cgObj);
+                        slArr.push(slObj);
+                    }
+                }
+                var sum1 = 0;
+                var sum2 = 0;
+                for (var i = 0; i < cgArr.length; i++){
+                    sum1 += cgArr[i]['value'];
+
+                };
+
+                for (var j = 0; j < slArr.length; j++){
+                    sum2 += slArr[j]["value"]-0;
+
+                };
+                sum2 = Number(sum2).toFixed(2);
+                $("#text_sum1").text(sum1+"条");
+                $("#text_sum2").text(sum2+"元");
+
+                myChart3.setOption({
+                    title:[
+                        {
+                            subtext:sum1+"条"
+                        },{
+                            subtext:sum2+"元"
+						}
+					],
+                    legend:{
+                        data: dpArr
+                    },
+                    series:[{
+                        data: cgArr
+                    },
+						{
+						    data:slArr
+						}]
+                });
+            }
+        });
+    }
+    function queryTendency4(url,title,unit){
+        var startTime = $("#start_time_four").val();
+
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: {
+                date:startTime
+            },
+            success: function(data){
+                var byBayArr = [];
+                var prepayRecharge = {};
+                var directConsume = {};
+                var returnTotal = data.data["prepayRecharge"] + data.data["directConsume"];
+                prepayRecharge.value= Number(data.data["prepayRecharge"]).toFixed(2);
+                prepayRecharge.name="预付充值";
+                directConsume.value= Number(data.data["directConsume"]).toFixed(2);
+                directConsume.name="直客消耗";
+                byBayArr.push(prepayRecharge);
+                byBayArr.push(directConsume);
+                returnTotal =  Number(returnTotal).toFixed(2);
+
+                myChart4.setOption({
+                    title:{
+                        subtext:returnTotal +"元"
+                    },
+                    series:[{
+                        data: byBayArr
+                    }]
+                });
+            }
+        });
+    }
+
+
+
+
+
+
+    //根据时间查询
+
+
+    function getTendency() {
+//        var startTime = $("#start_time_two").val();
+//        console.log(startTime);
+        queryTendency2(/*[[@{/statistic/consumeTrend}]]*/,"消耗趋势图",unit,myChart2);
+    };
+    function getTendency3() {
+        queryTendency3(/*[[@{/statistic/consumeVsByBU}]]*/,"各BU消耗占比图",unit,myChart3);
+    };
+    function getTendency4() {
+        queryTendency4(/*[[@{/statistic/consumeVsByPay}]]*/,"回款金额",unit,myChart4);
+    };
+
+
+
+    queryTendency1(/*[[@{/statistic/consumePerMonth}]]*/,"近三月消耗对比图",unit,myChart1);
+    $("#time_select_two").css('display',"none");
+    $("#time_select_three").css('display',"none");
+    $("#time_select_four").css('display',"none");
+
+
+	//点击单选按钮切换图表
+    $(":radio").click(function(){
+        var v = $(this).val();
+        switch (v){
+			case "option1":
+                $("#time_select").css('display',"block");
+                $("#time_select_two").css('display',"none");
+                $("#time_select_three").css('display',"none");
+                $("#time_select_four").css('display',"none");
+                $("#total_send").css('display',"none");
+                $("#start_time").attr("disabled",true);
+                $('#myChart1').addClass('active').siblings().removeClass('active');
+                url =  /*[[@{/statistic/consumePerMonth}]]*/;
+				break;
+			case "option2":
+                $('#myChart2').addClass('active').siblings().removeClass('active');
+                $("#time_select_two").css('display',"block");
+                $("#time_select_three").css('display',"none");
+                $("#time_select_four").css('display',"none");
+                $("#total_send").css('display',"none");
+                $("#time_select").css('display',"none");
+                url =  /*[[@{/statistic/consumeTrend}]]*/;
+                queryTendency2(/*[[@{/statistic/consumeTrend}]]*/,"消耗趋势图",unit,myChart2);
+                break;
+			case "option3":
+                $('#myChart3').addClass('active').siblings().removeClass('active');
+                $("#time_select_three").css('display',"block");
+                $("#time_select_two").css('display',"none");
+                $("#time_select_four").css('display',"none");
+                $("#total_send").css('display',"block");
+                $("#time_select").css('display',"none");
+                url =  /*[[@{/statistic/consumeVsByBU}]]*/;
+                queryTendency3(/*[[@{/statistic/consumeVsByBU}]]*/,"各BU消耗占比图",unit,myChart3);
+                break;
+			case "option4":
+                $('#myChart4').addClass('active').siblings().removeClass('active');
+                $("#time_select_two").css('display',"none");
+                $("#time_select_three").css('display',"none");
+                $("#time_select_four").css('display',"block");
+                $("#total_send").css('display',"none");
+                $("#time_select").css('display',"none");
+                url =  /*[[@{/statistic/consumeVsByPay}]]*/;
+                queryTendency4(/*[[@{/statistic/consumeVsByPay}]]*/,"回款金额",unit,myChart4);
+                break;
+			default:
+                $('#myChart1').addClass('active').siblings().removeClass('active');
+                $("#start_time").val(monthsAgo("yyyy-MM",2));
+                $("#start_time").attr("disabled",true);
+                $("#time_select").css('display',"block");
+                $("#total_send").css('display',"none");
+                $("#time_select_two").css('display',"none");
+                url =  /*[[@{/statistic/consumePerMonth}]]*/;
+                queryTendency1(/*[[@{/statistic/consumePerMonth}]]*/,"近三月消耗对比图",unit,myChart1);
+        }
+//        queryTendency(url,v,unit,myChart);
+    });
+
+
+
+
+
+
+    //表格数据
+    function search(table_id){
+
+        $("#"+table_id+"").jqGrid('setGridParam',{
+            datatype:'json',
+            postData: {
+                date: presentDate
+            } //发送数据
+//            page:1
+        }).trigger("reloadGrid"); //重新载入
+    }
+
+
+    var isHover = false	;
+    var isHoverTotal = false;
+
+
+    $(document).ready(function () {
+        $.jgrid.defaults.styleUI = "Bootstrap";
+        $("#table_list").jqGrid({
+            url:/*[[@{/statistic/topClients}]]*/,
+            mtype: 'POST',
+            datatype: "json",
+            jsonReader : {
+                root: "data",
+                page: "pageNo",
+                total: "totalPage",
+                records: "totalRecord"
+            },
+            postData: {
+                date: presentDate
+            },
+            height: 'auto',
+            rownumbers:true,
+            autowidth: true,
+            shrinkToFit: true,
+            autoScroll: false,
+            footerrow:true,
+            rowNum: 20,
+//            rowList: [10, 20, 30,50],
+            colModel: [
+                {label:"所属部门",name: "departmentStr",align: "left",sortable:false,width:"60"},
+                {label:"客户名称",name: "accountGname", align: "left",sortable:false,width:"60"},
+                {label:"归属销售",name: "belongSaleStr", align: "left",sortable:false,width:"90"},
+                {label:"提交条数(条)",name: "submitTotal", align: "left",sortable:false,width:"70"},
+                {label:"计费条数(条)",name:"chargeTotal", align: "left",sortable:false,width:"60"},
+//                {label:"成功率(%)",name: "successRate", align: "left",sortable:false,width:"60"},
+                {label:"成功率(%)",name: "successRate2Dot3", align: "left",sortable:false,width:"60"},
+                {label:"消费金额(元)",name: "salefeeStr", align: "left",sortable:false,width:"60"},
+                {label:"通道成本(元)",name: "costfeeStr", align: "left",sortable:false,width:"60"},
+                {label:"毛利(元)",name: "profit", align: "left",sortable:false,width:"60"},
+                {label:"毛利率(%)",name: "profitRate", align: "left",sortable:false,width:"60"}
+            ],
+            gridComplete: completeMethod,
+            pager: "#pager_list",
+            viewrecords: false,
+            hidegrid: false
+        });
+        $("#table_list_total").jqGrid({
+            url:/*[[@{/statistic/topChannels}]]*/,
+            mtype: 'POST',
+            datatype: "json",
+            jsonReader : {
+                root: "data",
+                page: "pageNo",
+                total: "totalPage",
+                records: "totalRecord"
+            },
+            postData: {
+                date:presentDate
+            },
+            height: 'auto',
+			width:'1100',
+            rownumbers:true,
+            font:'8',
+            autowidth: true,
+            shrinkToFit: true,
+            autoScroll: false,
+			fontSize:'6',
+            footerrow:true,
+            rowNum: 20,
+            colModel: [
+                {label:"所属部门",name: "departmentStr",align: "left",sortable:false,width:"110"},
+                {label:"运营商类型",name: "operatorstypeStr", align: "left",sortable:false},
+                {label:"通道号",name: "channelid", align: "left",sortable:false,width:"110"},
+                {label:"归属商务",name: "belongBusinessStr", align: "left",sortable:false,width:"110"},
+                {label:"通道备注",name:"remark", align: "left",sortable:false,width:"180"},
+                {label:"总发送量(条)",name: "sendTotal", align: "left",sortable:false},
+                {label:"通道计费数(条)",name: "chargeTotal", align: "left",sortable:false,width:'180'},
+                {label:"成功率(%)",name: "successRate", align: "left",sortable:false},
+                {label:"销售收入(元)",name: "saletotalStr", align: "left",sortable:false},
+                {label:"通道单价(元)",name: "costpriceStr", align: "left",sortable:false,
+                    formatter: function (cellvalue, options, rowObject) {
+                        if(cellvalue)
+                            return  Number(cellvalue/1000).toFixed(4);
+                        return cellvalue;
+                    }
+				},
+                {label:"通道成本(元)",name: "costtotalStr", align: "left",sortable:false},
+                {label:"毛利(元)",name: "profit", align: "left",sortable:false},
+                {label:"毛利率(%)",name: "profitRate", align: "left",sortable:false}
+            ],
+            gridComplete: completeMethodTwo,
+            pager: "#pager_list_total",
+            viewrecords: false,
+            hidegrid: false
+        });
+
+
+
+        //第一top10表格统计功能
+        function completeMethod(){
+            var jq_tables = $("#table_list").jqGrid("getRowData");
+            var sum_submitTotal = 0;
+            var sum_chargeTotal = 0;
+            var sum_salefeeStr = 0;
+            var sum_costfeeStr = 0;
+            var sum_profit = 0;
+            for(var i=0;i<jq_tables.length;i++){
+                //jq_tables[i].字段名 获取每一行的指定字段的值
+                sum_submitTotal = Math.add(sum_submitTotal,parseFloat(jq_tables[i]['submitTotal'])==null?0:jq_tables[i]['submitTotal']);
+                sum_chargeTotal = Math.add(sum_chargeTotal,parseFloat(jq_tables[i]['chargeTotal'])==null?0:jq_tables[i]['chargeTotal']);
+                sum_salefeeStr = Math.add(sum_salefeeStr,parseFloat(jq_tables[i]['salefeeStr'])==null?0:jq_tables[i]['salefeeStr']);
+                sum_costfeeStr = Math.add(sum_costfeeStr,parseFloat(jq_tables[i]['costfeeStr'])==null?0:jq_tables[i]['costfeeStr']);
+                sum_profit = Math.add(sum_profit,parseFloat(jq_tables[i]['profit'])==null?0:jq_tables[i]['profit']);
+            }
+            sum_salefeeStr = Number(sum_salefeeStr).toFixed(2);
+            sum_costfeeStr = Number(sum_costfeeStr).toFixed(2);
+            sum_profit = Number(sum_profit).toFixed(2);
+
+            $(this).footerData("set",{"belongSaleStr":"合计",
+                'submitTotal': sum_submitTotal,
+                'chargeTotal': sum_chargeTotal,
+                'successRate': "-",
+                'salefeeStr': sum_salefeeStr,
+                'costfeeStr': sum_costfeeStr,
+                'profit': sum_profit,
+                'profitRate': '-'
+            });
+        }
+        //第二个top10表格统计功能
+        function completeMethodTwo(){
+            var jq_tables = $("#table_list_total").jqGrid("getRowData");
+            var sum_sendTotal = 0;
+            var sum_chargeTotal = 0;
+            var sum_successRate = 0;
+            var sum_saletotalStr = 0;
+            var sum_costpriceStr = 0;
+            var sum_costtotalStr = 0;
+            var sum_profit = 0;
+            var sum_profitRate = 0;
+            for(var j=0;j<jq_tables.length;j++){
+                //jq_tables[i].字段名 获取每一行的指定字段的值
+                sum_sendTotal = Math.add(sum_sendTotal,parseFloat(jq_tables[j]['sendTotal'])==null?0:jq_tables[j]['sendTotal']);
+                sum_chargeTotal = Math.add(sum_chargeTotal,parseFloat(jq_tables[j]['chargeTotal'])==null?0:jq_tables[j]['chargeTotal']);
+                sum_saletotalStr = Math.add(sum_saletotalStr,parseFloat(jq_tables[j]['saletotalStr'])==null?0:jq_tables[j]['saletotalStr']);
+                sum_costpriceStr = Math.add(sum_costpriceStr,parseFloat(jq_tables[j]['costpriceStr'])==null?0:jq_tables[j]['costpriceStr']);
+                sum_costtotalStr = Math.add(sum_costtotalStr,parseFloat(jq_tables[j]['costtotalStr'])==null?0:jq_tables[j]['costtotalStr']);
+                sum_profit = Math.add(sum_profit,parseFloat(jq_tables[j]['profit'])==null?0:jq_tables[j]['profit']);
+            }
+
+            sum_saletotalStr = Number(sum_saletotalStr).toFixed(2);
+            sum_costtotalStr = Number(sum_costtotalStr).toFixed(2);
+            sum_profit = Number(sum_profit).toFixed(2);
+
+            $(this).footerData("set",{"remark":"合计",
+                'sendTotal': sum_sendTotal,
+                'chargeTotal': sum_chargeTotal,
+                'successRate': '-',
+                'saletotalStr': sum_saletotalStr,
+                'costpriceStr': '-',
+                'costtotalStr': sum_costtotalStr,
+                'profit': sum_profit,
+                'profitRate': '-'
+            });
+        }
+
+        $(window).bind("resize", function () {
+            var width = $(".jqGrid_wrapper").width();
+            $("#table_list").setGridWidth(width-20);
+            $("#table_list_total").setGridWidth(width-20);
+        })
+
+
+        function keyUp(e) {
+            var currKey=0,e=e||event;
+            currKey=e.keyCode||e.which||e.charCode;
+            var keyName = String.fromCharCode(currKey);
+            if (currKey == 13 && isHover === true){
+                search("table_list");
+            }else if(currKey == 13 && isHoverTotal === true){
+                search("table_list_total");
+            }else{
+                return ;
+			}
+        }
+        document.onkeyup = keyUp;
+
+
+        //冒泡提示 页面加载完成后手动抓取元素，修改title值，达到冒泡提示效果
+
+        $("#table_list_submitTotal").attr("title","(0+1+3+4+5+6+7+8+9+10)");
+        $("#table_list_chargeTotal").attr("title","按计费规则取值");
+        $("#table_list_successRate").attr("title","(3/0+1+3+4+5+6+7+8+9+10)");
+        $("#table_list_successRate2Dot3").attr("title","(3/0+1+3+4+5+6+7+8+9+10)");
+        $("#table_list_costfeeStr").attr("title","（通道侧）");
+        $("#table_list_total_sendTotal").attr("title","（1+2+3+5+6）");
+        $("#table_list_total_chargeTotal").attr("title","按计费规则取值");
+        $("#table_list_total_successRate").attr("title","(3/1+2+3+5+6)");
+        $("#table_list_total_saletotalStr").attr("title","（客户侧的消费金额）");
+
+
+
+
+        //移除日期控件选择日的功能
+        $("#laydate_table").remove();
+
+
+
+
+        //鼠标悬停表单，按enter刷新对应表单
+
+
+        $('#gbox_table_list').mouseover(function () {
+            isHover =true;
+        });
+        $("#gbox_table_list").mouseout(function () {
+            isHover =false;
+        });
+
+
+        $('#gbox_table_list_total').mouseover(function () {
+            isHoverTotal =true;
+        });
+        $("#gbox_table_list_total").mouseout(function () {
+            isHoverTotal =false;
+        });
+
+    });
+
+
+	/*]]>*/
+
+</script>
+</body>
+
+</html>

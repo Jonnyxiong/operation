@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信云平台运营系统 - 管理员中心</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+    <link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+    <link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+    <style>
+        /* Additional style to fix warning dialog position */
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+    </style>
+</head>
+<body class="gray-bg">
+<div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="tabs-container">
+                <ul class="nav nav-tabs">
+                    <li class="" id="agentTab" th:if="${menus.dlsgl}">
+                        <a href="/accountInfo/agent/query" id="tab-1">客户管理</a>
+                    </li>
+                    <li class="active" th:if="${menus.dlssq}">
+                        <a data-toggle="tab" href="#tab-2" aria-expanded="true">客户申请</a>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane active" id="tab-2" th:if="${menus.dlssq}">
+                        <!-- 搜索条件 -->
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="ibox ">
+                                        <div class="ibox-content">
+                                            <form role="form" class="form-inline">
+                                                <div class="form-group">
+                                                    <!-- <label for="example1" class="sr-only">用户名</label> -->
+                                                    <input type="text" placeholder="邮箱/手机号码" id="condition"
+                                                           class="form-control">
+                                                </div>
+                                                <!-- 时间选择 -->
+                                                <div class="form-group" id="sandbox-container">
+                                                    <div class="form-group pull-right"><span
+                                                            style="font-weight:700">提交申请时间:</span>
+                                                        <input placeholder="起始时间" class="form-control layer-date"
+                                                               id="start_time_day"/>至
+                                                        <input placeholder="截止时间" class="form-control layer-date"
+                                                               id="end_time_day"/>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="applyStatus">申请状态:</label>
+                                                    <select id="applyStatus" class="form-control">
+                                                        <option value="0" selected="selected">待受理</option>
+                                                        <option value="1">受理不通过</option>
+                                                        <option value="2">已受理</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                            <span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-danger"
+                                                      onclick="search()">搜索</button></span>
+                                                </div>
+                                            </form>
+                                        </div>
+                                        <div class="ibox-content">
+                                            <div class="jqGrid_wrapper">
+                                                <table id="table_list"></table>
+                                                <div id="pager_list"></div>
+                                            </div>
+                                            <p>&nbsp;</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal inmodal" id="rejectModal" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content animated flipInY">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"><span
+                                aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        <h3 class="modal-title">不受理账户</h3>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-sm-2">
+                                <label class="control-label pull-right">原因：</label>
+                            </div>
+                            <div class="col-sm-8">
+                            <textarea id="reason" name="reason" placeholder="给我一个理由吧" class="form-control" required=""
+                                      aria-required="true"></textarea>
+                                <span id="error-remark" style="color:red"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+                        <button type="button" class="btn btn-primary" onclick="save()">不受理</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+    <script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+    <script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+    <script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+    <script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+    <script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+    <script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+    <script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+    <script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+    <script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        var start = {
+            elem: "#start_time_day",
+            format: "YYYY-MM-DD",
+            min: halfYearAgo("yyyy-MM-dd"),
+            max: laydate.now(),
+            istoday: true,
+            choose: function (datas) {
+                end.min = datas;
+            }
+        };
+        var end = {
+            elem: "#end_time_day",
+            format: "YYYY-MM-DD",
+            min: halfYearAgo("yyyy-MM-dd"),
+            max: laydate.now(),
+            istoday: true,
+            choose: function (datas) {
+                start.max = datas;
+            }
+        };
+        laydate(start);
+        laydate(end);
+
+        function search() {
+
+            $("#table_list").jqGrid('setGridParam', {
+                datatype: 'json',
+                postData: {
+                    condition: $("#condition").val(),
+                    applyStatus: $("#applyStatus").val(),
+                    start_time_day: $("#start_time_day").val(),
+                    end_time_day: $("#end_time_day").val()
+                }, //发送数据
+//            page:1
+            }).trigger("reloadGrid"); //重新载入
+        }
+
+
+        $(document).ready(function () {
+            $.jgrid.defaults.styleUI = "Bootstrap";
+            $("#table_list").jqGrid({
+                url:/*[[@{/accountInfo/applyRecord/list}]]*/,
+                mtype: 'POST',
+                datatype: "json",
+                jsonReader: {
+                    root: "list",
+                    page: "currentPage",
+                    total: "totalPage",
+                    records: "totalCount"
+                },
+                height: 'auto',
+                rownumbers: true,
+                autowidth: true,
+                shrinkToFit: false,
+                autoScroll: true,
+                rowNum: 20,
+                rowList: [10, 20, 30, 50],
+                colNames: ["企业名称/个人名称", "联系地址", "联系人", "邮箱", "手机号码", "所在城市", "归属销售", "备注", "申请状态", /*"申请状态(隐藏)",*/ "原因", "提交时间", "操作"],
+                colModel: [
+                    {name: "company", align: "left", sortable: false},
+                    {name: "address", align: "left", sortable: false},
+                    {name: "realname", align: "left", sortable: false},
+                    {name: "email", align: "left", sortable: false},
+                    {name: "mobile", align: "left", sortable: false},
+                    {name: "city", align: "left", sortable: false},
+                    {name: "userRealName", align: "left", sortable: false},
+                    {name: "remark", align: "left", sortable: false},
+                    {name: "statusName", align: "left", sortable: false},
+                    /*{name: "status", align: "left",sortable:false},*/
+                    {name: "reason", align: "left", sortable: false},
+                    {name: "create_time", align: "left", sortable: false},
+                    {
+                        name: "total", index: "total", align: "left", sortable: false, width: 200, title: false,
+                        formatter: function (cellvalue, options, rowObject) {
+
+                            var status = rowObject.status;
+                            var company = rowObject.company;
+                            var email = rowObject.email;
+                            var id = rowObject.id;
+                            var mobile = rowObject.mobile;
+                            var switcher = '';
+                            /*if(status==0){
+                                switcher = "<button type='button' class='btn btn-link btn-xs ' onclick=\"editStatusBox('"+company+"','"+email+"','2')\">受理</button>";
+                                switcher += "<button type='button' class='btn btn-link btn-xs'  data-toggle=\"modal\" data-target=\"#rejectModal\" onclick=\"selectRow('"+company+"','"+email+"','1')\">不受理</button>";
+                            }*/
+
+                            if (status == 0) {
+                                switcher = "<button type='button' class='btn btn-link btn-xs ' onclick=\"jumpToAcceptPage('品牌','" + id + "','" + mobile + "')\" title='品牌受理'>品牌受理</button>";
+                                switcher += "<button type='button' class='btn btn-link btn-xs' onclick=\"jumpToAcceptPage('oem','" + id + "','" + mobile + "')\" title='OEM受理'>OEM受理</button>";
+                                switcher += "<button type='button' class='btn btn-link btn-xs'  data-toggle=\"modal\" data-target=\"#rejectModal\" onclick=\"selectRow('" + company + "','" + email + "','1','" + id + "')\" title='不受理'>不受理</button>";
+                            }
+
+                            return switcher;
+                        }
+                    }
+                ],
+                pager: "#pager_list",
+                viewrecords: true,
+                hidegrid: false
+            });
+
+            $(window).bind("resize", function () {
+                var width = $(".jqGrid_wrapper").width();
+                $("#table_list").setGridWidth(width);
+            })
+
+
+            function keyUp(e) {
+                var currKey = 0, e = e || event;
+                currKey = e.keyCode || e.which || e.charCode;
+                var keyName = String.fromCharCode(currKey);
+                if (currKey == 13) {
+                    search();
+                }
+            }
+
+            document.onkeyup = keyUp;
+
+        });
+
+
+        var save_flag = false;
+
+        function editStatusBox(company, email, status) {
+            if (status = 2) {//受理
+                swal({
+                    title: "您确定要受理代理商【" + company + "】",
+                    text: "",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "受理",
+                    cancelButtonText: "让我再考虑一下…",
+                    closeOnConfirm: false
+                }, function () {
+                    if (save_flag) {
+                        return
+                    } else {
+                        save_flag = true;
+                    }
+                    $.ajax({
+                        url:/*[[@{/accountInfo/applyRecord/acceptOrNot}]]*/,
+                        type: "POST",
+                        data: {
+                            email: email,
+                            status: status
+                        },
+                        success: function (data) {
+                            save_flag = false;
+                            if (data == null) {
+                                swal("失败！", "系统错误，请稍后再试！", "error")
+                            } else if (data.success == true) {
+                                swal("成功！", data.msg, "success")
+                            } else {
+                                swal("失败！", data.msg, "error")
+                            }
+                            search();
+                        },
+                        complete: function (XMLHttpRequest, textStatus) {
+                            save_flag = false;
+                        }
+                    });
+                });
+            } else {//不受理
+
+            }
+        }
+
+        //点击品牌代理或者OEM代理
+        function jumpToAcceptPage(flag, applyId, mobile) {
+            //alert(flag)
+            var fla = null;
+            var viewUrl;
+            if (flag == 'oem') {
+                fla = 'oem';
+            } else {
+                fla = 'brand';
+            }
+
+            $.ajax({
+                type: "Get", //方法
+                url: "/accountInfo/applyRecord/queryByFlagAndmobile", //url
+                contentType: "application/json; charset=utf-8", //数据格式
+                data: {
+                    flag: fla,
+                    mobile: mobile
+                },
+                dataType: "json", //数据格式
+                success: function (data) {
+                    if (data == "fail") {
+                        return swal("失败！", "手机号码已经存在！", "error");
+                    }
+                    if (flag == '品牌') {
+                        viewUrl = /*[[@{/accountInfo/applyRecord/jumpToBrandAcceptPage}]]*/;
+                    } else {
+                        viewUrl = /*[[@{/accountInfo/applyRecord/jumpToOemAcceptPage}]]*/;
+                    }
+                    window.location.href = viewUrl + "?applyId=" + applyId;
+                }
+
+            })
+        }
+
+
+        var selectEmail, selectStatus, selectapplyId;
+
+        function selectRow(company, email, status, applyId) {
+            selectEmail = email;
+            selectStatus = status;
+            selectapplyId = applyId;
+
+        }
+
+        function save() {
+            if (save_flag) {
+                return
+            } else {
+                save_flag = true;
+            }
+            if (selectEmail === undefined || selectStatus === undefined) {
+                swal("失败！", "受理处理失败，未选择记录", "error")
+                save_flag = false;
+                return;
+            }
+
+            $.ajax({
+                url:/*[[@{/accountInfo/applyRecord/acceptOrNot}]]*/,
+                type: "POST",
+                data: {
+                    email: selectEmail,
+                    status: selectStatus,
+                    applyId: selectapplyId,
+                    reason: $('#reason').val()
+                },
+                success: function (data) {
+                    save_flag = false;
+                    if (data == null) {
+                        swal("失败！", "系统错误，请稍后再试！", "error")
+                    } else if (data.success == true) {
+                        $("#rejectModal").modal('hide');
+                        swal("成功！", data.msg, "success")
+                    } else {
+                        swal("失败！", data.msg, "error")
+                    }
+                    search();
+                },
+                complete: function (XMLHttpRequest, textStatus) {
+                    save_flag = false;
+                }
+            });
+        }
+
+        /*]]>*/
+    </script>
+</body>
+</html>

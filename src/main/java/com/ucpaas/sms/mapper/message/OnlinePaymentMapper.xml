@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ucpaas.sms.mapper.message.OnlinePaymentMapper">
+     
+        
+    <resultMap id="rowMapper" type="com.ucpaas.sms.entity.po.JsmsOnlinePaymentPo">
+        <result property="paymentId" jdbcType="VARCHAR" column="payment_id"/>
+        <result property="agentId" jdbcType="INTEGER" column="agent_id"/>
+        <result property="flowId" jdbcType="VARCHAR" column="flow_id"/>
+        <result property="paymentAmount" jdbcType="DECIMAL" column="payment_amount"/>
+        <result property="paymentMode" jdbcType="INTEGER" column="payment_mode"/>
+        <result property="paymentState" jdbcType="INTEGER" column="payment_state"/>
+        <result property="createTime" jdbcType="TIMESTAMP" column="create_time"/>
+        <result property="submitTime" jdbcType="TIMESTAMP" column="submit_time"/>
+        <result property="submitDeadline" jdbcType="TIMESTAMP" column="submit_deadline"/>
+        <result property="remark" jdbcType="VARCHAR" column="remark"/>
+        <result property="description" jdbcType="VARCHAR" column="description"/>
+        <result property="adminId" jdbcType="BIGINT" column="admin_id"/>
+        <result property="updateTime" jdbcType="TIMESTAMP" column="update_time"/>
+        <result property="payTime" jdbcType="TIMESTAMP" column="pay_time"/>
+        <result property="agentName" jdbcType="VARCHAR" column="agent_name"/>
+        <result property="saler" jdbcType="VARCHAR" column="realname"/>
+    </resultMap> 
+     
+    <sql id="BASE_COLUMN_LIST">
+        payment_id,
+        agent_id,
+        flow_id,
+        payment_amount,
+        payment_mode,
+        payment_state,
+        create_time,
+        submit_time,
+        submit_deadline,
+        remark,
+        description,
+        admin_id,
+        update_time,
+        pay_time
+    </sql>
+
+
+
+    <select id="queryListPo" resultMap="rowMapper">
+        SELECT
+        payment_id,
+        t1.agent_id,
+        flow_id,
+        payment_amount,
+        payment_mode,
+        payment_state,
+        t1.create_time,
+        submit_time,
+        submit_deadline,
+        t1.remark,
+        description,
+        t1.admin_id,
+        t1.update_time,
+        pay_time,
+        u.realname AS saler,
+        agent.agent_name AS agent_name,
+        u2.realname as operation
+        FROM
+        t_sms_online_payment t1
+        LEFT JOIN t_sms_agent_info agent ON t1.agent_id = agent.agent_id
+        LEFT JOIN t_sms_user u ON agent.belong_sale = u.id
+        LEFT JOIN t_sms_user u2 ON t1.admin_id = u2.id
+        WHERE 1=1
+        <if test="params.idOrAmount != null and params.idOrAmount != ''">
+            and  ( payment_id like  CONCAT('%',#{params.idOrAmount},'%')  OR payment_amount like CONCAT('%',#{params.idOrAmount},'%') )
+        </if>
+
+        <if test="params.idOrNameOrSaler != null and params.idOrNameOrSaler != ''">
+        AND ( t1.agent_id like CONCAT('%',#{params.idOrNameOrSaler},'%')  OR agent.agent_name like CONCAT('%',#{params.idOrNameOrSaler},'%') OR u.username like CONCAT('%',#{params.idOrNameOrSaler},'%') )
+        </if>
+        <if test="params.paymentMode != null and params.paymentMode != ''">
+        AND payment_mode = #{params.paymentMode}
+        </if>
+        <if test="params.paymentState != null and params.paymentState != ''">
+        AND payment_state = #{params.paymentState}
+        </if>
+        <if test="params.paymentStates != null and params.paymentStates != ''">
+            AND payment_state in (${params.paymentStates})
+        </if>
+        <if test="params.payTimeStart != null">
+       <![CDATA[ AND pay_time > #{params.payTimeStart}]]>
+        </if>
+        <if test="params.payTimeEnd!= null ">
+       <![CDATA[ AND pay_time<#{params.payTimeEnd}]]>
+        </if>
+    </select>
+
+
+    <select id="queryList" resultMap="rowMapper">
+        SELECT 
+            <include refid="BASE_COLUMN_LIST" /> 
+        FROM t_sms_online_payment 
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            <if test="params.paymentId != null and params.paymentId != ''">
+                and payment_id = #{params.paymentId}
+            </if>
+            <if test="params.agentId != null and params.agentId != ''">
+                and agent_id = #{params.agentId}
+            </if>
+            <if test="params.flowId != null and params.flowId != ''">
+                and flow_id = #{params.flowId}
+            </if>
+            <if test="params.paymentAmount != null and params.paymentAmount != ''">
+                and payment_amount = #{params.paymentAmount}
+            </if>
+            <if test="params.paymentMode != null and params.paymentMode != ''">
+                and payment_mode = #{params.paymentMode}
+            </if>
+            <if test="params.paymentState != null and params.paymentState != ''">
+                and payment_state = #{params.paymentState}
+            </if>
+            <if test="params.createTime != null and params.createTime != ''">
+                and create_time = #{params.createTime}
+            </if>
+            <if test="params.submitTime != null and params.submitTime != ''">
+                and submit_time = #{params.submitTime}
+            </if>
+            <if test="params.submitDeadline != null and params.submitDeadline != ''">
+                and submit_deadline = #{params.submitDeadline}
+            </if>
+            <if test="params.remark != null and params.remark != ''">
+                and remark = #{params.remark}
+            </if>
+            <if test="params.description != null and params.description != ''">
+                and description = #{params.description}
+            </if>
+            <if test="params.adminId != null and params.adminId != ''">
+                and admin_id = #{params.adminId}
+            </if>
+            <if test="params.updateTime != null and params.updateTime != ''">
+                and update_time = #{params.updateTime}
+            </if>
+            <if test="params.payTime != null and params.payTime != ''">
+                and pay_time = #{params.payTime}
+            </if>
+	     </trim>
+    </select>
+
+    <select id="count" resultType="int">
+        SELECT COUNT(0) 
+        FROM t_sms_online_payment 
+        WHERE 
+            1 = 1
+            <if test="paymentId != null and paymentId != ''">
+                and payment_id = #{paymentId}
+            </if>
+            <if test="agentId != null and agentId != ''">
+                and agent_id = #{agentId}
+            </if>
+            <if test="flowId != null and flowId != ''">
+                and flow_id = #{flowId}
+            </if>
+            <if test="paymentAmount != null and paymentAmount != ''">
+                and payment_amount = #{paymentAmount}
+            </if>
+            <if test="paymentMode != null and paymentMode != ''">
+                and payment_mode = #{paymentMode}
+            </if>
+            <if test="paymentState != null and paymentState != ''">
+                and payment_state = #{paymentState}
+            </if>
+            <if test="createTime != null and createTime != ''">
+                and create_time = #{createTime}
+            </if>
+            <if test="submitTime != null and submitTime != ''">
+                and submit_time = #{submitTime}
+            </if>
+            <if test="submitDeadline != null and submitDeadline != ''">
+                and submit_deadline = #{submitDeadline}
+            </if>
+            <if test="remark != null and remark != ''">
+                and remark = #{remark}
+            </if>
+            <if test="description != null and description != ''">
+                and description = #{description}
+            </if>
+            <if test="adminId != null and adminId != ''">
+                and admin_id = #{adminId}
+            </if>
+            <if test="updateTime != null and updateTime != ''">
+                and update_time = #{updateTime}
+            </if>
+            <if test="payTime != null and payTime != ''">
+                and pay_time = #{payTime}
+            </if>
+    </select>
+	 
+</mapper>
+

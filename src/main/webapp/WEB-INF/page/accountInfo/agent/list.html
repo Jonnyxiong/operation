@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信云平台运营系统 - 管理员中心</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+    <link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+    <link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+    <style>
+        /* Additional style to fix warning dialog position */
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+
+        .close {
+            opacity: 1;
+        }
+
+        .modal-content {
+            opacity: 1 !important;
+            border: none;
+        }
+
+    </style>
+</head>
+<body class="gray-bg">
+<div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="tabs-container">
+                <ul class="nav nav-tabs">
+                    <li class="active" id="agentTab" th:if="${menus.dlsgl}">
+                        <a data-toggle="tab" href="#tab-1" aria-expanded="true">客户管理</a>
+                    </li>
+                    <li class="" th:if="${menus.dlssq}">
+                        <a href="/accountInfo/applyRecord/query" id="tab-2">客户申请</a>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane active" id="tab-1" th:if="${menus.dlsgl}">
+                        <div class="panel-body">
+                            <!-- 搜索条件 -->
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="ibox ">
+                                        <div class="ibox-content">
+                                            <form role="form" class="form-inline" id="mainForm" method="post">
+                                                <input type="hidden" th:value="${jsmsMenu.menuId}" id="menuId">
+                                                <div class="form-group">
+                                                    <!-- <label for="example1" class="sr-only">用户名</label> -->
+                                                    <input type="text" placeholder="客户ID/客户名称/手机号码/销售名字/邮箱"
+                                                           id="condition"
+                                                           name="condition" class="form-control" style="width:310px">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="agent_type">客户类型:</label>
+                                                    <select id="agent_type" class="form-control" name="agent_type">
+                                                        <option value="">所有</option>
+                                                        <option value="1">销售代理商</option>
+                                                        <option value="2">品牌代理商</option>
+                                                        <option value="5">OEM代理商</option>
+                                                    </select>
+                                                </div>
+                                                <!-- 时间选择 -->
+                                                <div class="form-group sandbox-container">
+                                                    <div class="form-group pull-right"><span
+                                                            style="font-weight:700">注册时间:</span>
+                                                        <input placeholder="起始时间" class="form-control layer-date"
+                                                               id="start_time_day" name="start_time_day"/>至
+                                                        <input placeholder="截止时间" class="form-control layer-date"
+                                                               id="end_time_day"
+                                                               name="end_time_day"/>
+                                                    </div>
+                                                </div>
+
+
+                                                <div class="form-group sandbox-container">
+                                                    <div>
+                                                        <span style="font-weight:700">余额范围:</span>
+                                                        <input type="number" id="minAmount" class="form-control"
+                                                               name="minAmount">至
+                                                        <input type="number" id="maxAmount" class="form-control"
+                                                               name="maxAmount">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                        <span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-danger"
+                                                                  onclick="search()">搜索</button></span>
+                                                    <span>&nbsp;&nbsp;<button type="button"
+                                                                              class="btn btn-sm btn-primary  hide"
+                                                                              data-menuId="6036"
+                                                                              onclick="exportExcel()">导出Excel</button></span>
+                                                    <span>&nbsp;&nbsp;<button type="button"
+                                                                              class="btn btn-sm btn-primary hide"
+                                                                              data-menuId="6035"
+                                                                              onclick="add()">新增客户</button></span>
+                                                </div>
+                                            </form>
+                                        </div>
+
+                                        <div class="ibox-content">
+                                            <div class="jqGrid_wrapper">
+                                                <table id="table_list"></table>
+                                                <div id="pager_list"></div>
+                                            </div>
+                                            <p>&nbsp;</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal inmodal" id="rejectModal" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content animated flipInY">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal"><span
+                                    aria-hidden="true">&times;</span><span
+                                    class="sr-only">Close</span></button>
+                            <h3 class="modal-title">不受理账户</h3>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-sm-2">
+                                    <label class="control-label pull-right">原因：</label>
+                                </div>
+                                <div class="col-sm-8">
+                                <textarea id="reason" name="reason" placeholder="给我一个理由吧" class="form-control"
+                                          required="" aria-required="true"></textarea>
+                                    <span id="error-remark" style="color:red"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+                            <button type="button" class="btn btn-primary" onclick="save()">不受理</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Modal -->
+            <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog" role="document" style="opacity: 1">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                    aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="myModalLabel">可用额度提醒设置</h4>
+                        </div>
+                        <div class="modal-body">
+                            <form class="form-horizontal">
+                                <div class="form-group">
+                                    <label for="alarmPhone" class="col-sm-4 control-label">手机号码</label>
+                                    <div class="col-sm-6">
+                                        <input type="" class="form-control" id="alarmPhone">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="alarmAmount" class="col-sm-4 control-label">当账户可用额度低于</label>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control" id="alarmAmount"
+                                               placeholder="0<=可用额度<=100W">
+                                        <input type="hidden" id="agentId">
+                                    </div>
+                                    <label class="col-sm-2 control-label">开始提醒</label>
+                                </div>
+                                <div class="form-group">
+                                    <label class="text-center"><h5>
+                                        *可用额度=余额+授信额度，例如：余额为￥100，授信额度为￥1000，则可用额度为￥1100。当可用额度提醒设置为0元时，则默认不进行提醒。</h5>
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-offset-4 col-sm-10">
+                                        <a class="btn btn-primary" id="alarm">确定</a>
+                                        <button type="button" class="btn btn-default col-sm-offset-4"
+                                                data-dismiss="modal">
+                                            取消
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+    <script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+    <script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+    <script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+    <script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+    <script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+    <script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+    <script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+    <script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+    <script th:src="@{/resources/js/common.js?v=1.0.1}"></script>
+    <script th:src="@{/resources/js/auth.js}"></script>
+    <script th:src="@{/resources/js/layer/layer.js}"></script>
+
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        var menus = [[${menus}]];
+        if (menus.dlsgl) {
+
+        } else if (menus.dlssq) {
+            $("#tab-2")[0].click();
+//        document.getElementById("zzhkh").click();
+        }
+        var start = {
+            elem: "#start_time_day",
+            format: "YYYY-MM-DD",
+            min: halfYearAgo("yyyy-MM-dd"),
+            max: laydate.now(),
+            istoday: true,
+            choose: function (datas) {
+                end.min = datas;
+            }
+        };
+        var end = {
+            elem: "#end_time_day",
+            format: "YYYY-MM-DD",
+            min: halfYearAgo("yyyy-MM-dd"),
+            max: laydate.now(),
+            istoday: true,
+            choose: function (datas) {
+                start.max = datas;
+            }
+        };
+        laydate(start);
+        laydate(end);
+
+        function search() {
+
+            $("#table_list").jqGrid('setGridParam', {
+                datatype: 'json',
+                postData: {
+                    condition: $("#condition").val(),
+                    start_time_day: $("#start_time_day").val(),
+                    end_time_day: $("#end_time_day").val(),
+                    minAmount: $("#minAmount").val(),
+                    maxAmount: $("#maxAmount").val(),
+                    agent_type: $("#agent_type").val()
+                }, //发送数据
+//            page:1
+            }).trigger("reloadGrid"); //重新载入
+        }
+
+        function reload() {
+            event.preventDefault();
+            $("#table_list").jqGrid('setGridParam', {
+                datatype: 'json',
+                postData: {
+                    condition: $("#condition").val(),
+                    agentType: $("#agentType").val(),
+                    create_time: $("#create_time").val()
+                }, //发送数据
+            }).trigger("reloadGrid"); //重新载入
+        }
+
+
+        $(document).ready(function () {
+            $.jgrid.defaults.styleUI = "Bootstrap";
+            $("#table_list").jqGrid({
+                url:/*[[@{/accountInfo/agent/list}]]*/,
+                mtype: 'POST',
+                datatype: "json",
+                jsonReader: {
+                    root: "list",
+                    page: "currentPage",
+                    total: "totalPage",
+                    records: "totalCount"
+                },
+                height: 'auto',
+                rownumbers: true,
+                autowidth: true,
+                shrinkToFit: false,
+                autoScroll: true,
+                rowNum: 20,
+                rowList: [10, 20, 30, 50],
+                colNames: ["客户ID", "客户名称", "手机号码", "邮箱", "客户状态", "代理商状态(隐藏)", "认证标注(隐藏)", "认证状态", "客户类型", "余额(元)", "授信余额（元）", "可用额度（元）", "归属销售", "注册时间", "操作"],
+                colModel: [
+                    {name: "agent_id", align: "left", sortable: false},
+                    {name: "agent_name", align: "left", sortable: false},
+                    {name: "mobile", align: "left", sortable: false},
+                    {name: "email", align: "left", sortable: false},
+                    {name: "statusName", align: "left", sortable: false},
+                    {name: "status", align: "left", sortable: false, hidden: true},
+                    {name: "flag", align: "left", sortable: false, hidden: true},
+                    {name: "oauthStatus", align: "left", sortable: false},
+                    {name: "agent_type_name", align: "left", sortable: false},
+                    {name: "balance", align: "left", sortable: false},
+                    {name: "credit_balance", align: "left", sortable: false},
+                    {name: "useable_balance", align: "left", sortable: false},
+                    {name: "userRealName", align: "left", sortable: false},
+                    {name: "create_time", align: "left", sortable: false, hidden: true},
+                    {
+                        name: "total", index: "total", align: "left", sortable: false, title: false, width: '280',
+                        formatter: function (cellvalue, options, rowObject) {
+                            var agentId = rowObject.agent_id;
+                            var agentName = rowObject.agent_name;
+                            var status = rowObject.status;
+                            var agent_type_name = rowObject.agent_type_name;
+                            var oauth_status = rowObject.oauthStatus;
+                            var flag = rowObject.flag
+                            var switcher = '';
+                            //5:冻结 ; 1:解冻; 6:注销
+                            switcher = "<button type='button' class='btn btn-link btn-xs hide' onclick=\"view('" + agentId + "')\" title='查看'  data-menuId='6028'>查看</button>";
+                            if (status != 5 && status != 6)
+                                switcher += "<button type='button' class='btn btn-link btn-xs hide'  onclick=\"updateStatus('" + agentName + "','" + agentId + "','5')\" title='冻结'  data-menuId='6029'>冻结</button>";
+                            if (status == 5 && status != 6)
+                                switcher += "<button type='button' class='btn btn-link btn-xs hide'  onclick=\"updateStatus('" + agentName + "','" + agentId + "','1')\" title='解冻'  data-menuId='6030'>解冻</button>";
+                            if (status != 6)
+                                switcher += "<button type='button' class='btn btn-link btn-xs hide'  onclick=\"updateStatus('" + agentName + "','" + agentId + "','6')\" title='注销'  data-menuId='6031'>注销</button>";
+                            if (status != 6 && status != 5)
+                                switcher += "<button type='button' class='btn btn-link btn-xs hide' data-toggle='modal' data-target='#myModal'  onclick=\"usable('" + agentName + "','" + agentId + "','6')\" title='可用额度提醒'  data-menuId='6032'>可用额度提醒</button>";
+                            if (agent_type_name == 'OEM代理商')
+                                switcher += "<button type='button' class='btn btn-link btn-xs hide' onclick=\"discount('" + agentName + "','" + agentId + "','6')\" title='折扣设置'  data-menuId='6033'>折扣设置</button>";
+                            if (oauth_status == '待认证' && flag > 0) {
+                                switcher += "<button type='button' class='btn btn-link btn-xs hide' onclick=\"Auditing('" + agentId + "')\" title='审核资质'  data-menuId='6038'>审核资质</button>";
+                            }
+                            if (oauth_status == '待认证' && flag == 0 || oauth_status == '认证不通过') {
+                                switcher += "<button type='button' class='btn btn-link btn-xs hide' onclick=\"uploadAptitude('" + agentId + "')\" title='上传资质'  data-menuId='6037'>上传资质</button>";
+                            }
+                            if (rowObject.status == 1 && rowObject.oauthStatus == '已认证' && rowObject.agent_type == 5) {
+                                switcher += "<button type='button' class='btn btn-link btn-xs hide' onclick=\"buyProducts('" + agentId + "','" + agentName + "')\" title='短信购买'  data-menuId='6034'>短信购买</button>";
+                            }
+                            return switcher;
+                        }
+                    }
+                ],
+                pager: "#pager_list",
+                viewrecords: true,
+                hidegrid: false,
+                gridComplete: function () {
+                    var menuId = $("#menuId").val();
+                    checkMenu(menuId);
+                }
+            });
+
+            $(window).bind("resize", function () {
+                var width = $(".jqGrid_wrapper").width();
+                $("#table_list").setGridWidth(width);
+            })
+
+
+            function keyUp(e) {
+                var currKey = 0, e = e || event;
+                currKey = e.keyCode || e.which || e.charCode;
+                var keyName = String.fromCharCode(currKey);
+                if (currKey == 13) {
+                    search();
+                }
+            }
+
+            document.onkeyup = keyUp;
+
+        });
+
+
+        function view(agentId) {
+            var viewUrl = /*[[@{/accountInfo/agent/view}]]*/;
+            window.location.href = viewUrl + "?agentId=" + agentId;
+        }
+
+        //代理商购买短信
+        function buyProducts(agentId, name) {
+            var viewUrl = "/accountInfo/oem/productsView?agentId=" + agentId;
+            layer.open({
+                type: 2,
+                title: '<span>为</span><span style="color: #003399;font-weight: 900">' + agentId + '</span><span>-</span><span style="color: #003399;font-weight: 900">' + name + '</span><span> 短信购买</span>',
+                shadeClose: true,
+                shade: 0.8,
+                area: ['1300px', '95%'],
+                content: viewUrl //iframe的url
+            });
+        }
+
+        function updateStatus(agentName, agentId, status) {
+            var statuName = "冻结";
+            switch (status) {
+                case "5":
+                    statuName = "冻结";
+                    break;
+                case "1":
+                    statuName = "解冻";
+                    break;
+                case "6":
+                    statuName = "注销";
+                    break;
+            }
+            swal({
+                title: "您确定要" + statuName + "代理商【" + agentName + "】",
+                text: "",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: statuName,
+                cancelButtonText: "让我再考虑一下…",
+                closeOnConfirm: false
+            }, function () {
+                $.ajax({
+                    url:/*[[@{/accountInfo/agent/updateStatus}]]*/,
+                    type: "POST",
+                    data: {
+                        agentId: agentId,
+                        status: status
+                    },
+                    success: function (data) {
+                        if (data == null) {
+                            swal("失败！", "系统错误，请稍后再试！", "error")
+                        } else if (data.success == true) {
+                            swal("成功！", data.msg, "success")
+                        } else {
+                            swal("失败！", data.msg, "error")
+                        }
+                        search();
+                    }
+                });
+            });
+        }
+
+
+        // 可用额度提醒
+
+        function usable(agentName, agentId, status) {
+            $("#agentId").val(agentId);
+            $.ajax({
+                type: 'GET',
+                url: '/accountInfo/agentBalanceAlarm/get/' + agentId,
+                cache: false,
+                dataType: 'json',
+                success: function (data) {
+                    $("#alarmPhone").val(data["data"]['alarmPhone']);
+                    $("#alarmAmount").val(data["data"]['alarmAmount']);
+                    $("#agentId").val(data["data"]['agentId']);
+                }
+            });
+
+        }
+
+        //折扣设置
+        function discount(agentName, agentId, status) {
+            var viewUrl = /*[[@{/accountInfo/agent/discount}]]*/'';
+            window.location.href = viewUrl + "?agentId=" + agentId + '&agentName=' + agentName;
+        }
+
+        $("#alarm").on('click', function () {
+            var agentId = $("#agentId").val();
+            var alarmPhone = $("#alarmPhone").val();
+            var alarmAmount = $("#alarmAmount").val();
+            var phoneArr = [];
+            phoneArr = alarmPhone.split(',');
+            /*if(phoneArr.length > 2){
+                layer.msg('最多只能设置两个手机号');
+                return false;
+            }*/
+            if (isRepeat(phoneArr)) {
+                layer.msg("手机号码重复");
+                return false;
+            }
+            for (var i = 0; i < phoneArr.length; i++) {
+                if (!_Auth.isMobile(phoneArr[i])) {
+                    layer.msg('请输入正确手机号');
+                    return false;
+                }
+            }
+
+            if (!_Auth.isNum(alarmAmount)) {
+                layer.msg('请输入正整数');
+                return false;
+            }
+            if (alarmAmount > 1000000) {
+                layer.msg('请输入小于等于100W的金额');
+                return false;
+            }
+            if (alarmAmount < 0) {
+                layer.msg('请输入不小于0的金额');
+                return false;
+            }
+            $.ajax({
+                type: 'POST',
+                url: '/accountInfo/agentBalanceAlarm/post',
+                data: {
+                    agentId: agentId,
+                    alarmPhone: alarmPhone,
+                    alarmAmount: alarmAmount
+                },
+                cache: false,
+                dataType: 'json',
+                success: function (data) {
+                    $("#myModal").modal('hide');
+                    layer.msg(data.msg);
+                    reload();
+                }
+            });
+
+            return false;
+        });
+
+        var max_export_num = /*[[${max_export_num}]]*/;
+
+        //导出Excel文件
+        function exportExcel() {
+            var totalCount = $("#table_list").jqGrid('getGridParam', 'records');
+            if (totalCount == 0) {
+                layer.msg("共0条记录，将不导出Excel文件", {icon: 2});
+                return;
+            }
+            if (totalCount > max_export_num) {
+                layer.msg("导出Excel文件条数大于" + max_export_num + "条", {icon: 2});
+                return;
+            }
+            var mainForm = $("#mainForm");
+            var action = mainForm.attr("action");
+            var exporUrl = /*[[@{/accountInfo/agent/exportExcel}]]*/;
+            mainForm.attr("action", exporUrl).submit();
+            mainForm.attr("action", action);
+        }
+
+
+        //点击新增代理商
+        function add() {
+            var addUrl = /*[[@{/agentInfo/add}]]*/;
+            window.location.href = addUrl;
+        }
+
+        function Auditing(agentId) {
+            var viewUrl = /*[[@{/opsAudit/agent/view}]]*/;
+            window.location.href = viewUrl + "?agentId=" + agentId + "&type=" + 11;
+        }
+
+        function uploadAptitude(agentId) {
+            var url = /*[[@{/accountInfo/qualification/save}]]*/;
+            window.location.href = url + "?agentId=" + agentId;
+        }
+
+        function isRepeat(arr) {
+
+            var hash = {};
+            for (var i in arr) {
+                if (hash[arr[i]])
+                    return true;
+                hash[arr[i]] = true;
+
+            }
+            return false;
+        }
+
+        /*]]>*/
+    </script>
+</body>
+</html>

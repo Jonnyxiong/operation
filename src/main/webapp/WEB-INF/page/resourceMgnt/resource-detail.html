@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org" lang="zh-cn">
+<head>
+<meta content="云之讯,云通讯,云通讯平台" name="keywords" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport"
+	content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1" />
+<title>短信云平台运营系统 - 管理员中心</title>
+<meta charset="utf-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}"
+	rel="stylesheet">
+<link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}"
+	rel="stylesheet">
+<!-- jqgrid-->
+<link
+	th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}"
+	rel="stylesheet">
+<link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+<link th:href="@{/resources/css/style.min862f.css?v=4.1.0}"
+	rel="stylesheet">
+
+<style>
+/* Additional style to fix warning dialog position */
+#alertmod_table_list_2 {
+	top: 900px !important;
+}
+
+.grid-detail {
+	background-color: #FFF;
+}
+
+.grid-icon {
+	font-size: 30px;
+	line-height: 80px;
+}
+
+.grid-icon span:before {
+	color: green;
+}
+.form-title{
+	padding-top:7px;
+}
+.form-control-static{
+	word-break:break-all;
+}
+</style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+	<div class="wrapper wrapper-content  animated fadeInRight"
+		style="width: 600px;">
+
+		<div class="container-fluid grid-detail">
+			<div class="row">
+				<div class="col-xs-12" >
+					<!-- Tab panes -->
+					<div class="tab-content">
+						<div role="tabpanel" class="tab-pane active" id="home">
+							<div class="form-horizontal">
+								<div class="form-group">
+									<label class="col-xs-3 control-label text-right form-title">资源编号：</label>
+									<div class="col-xs-8">
+										<p class="form-control-static" th:text="${model.resourceId}"></p>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-xs-3 control-label text-right form-title">通道号：</label>
+									<div class="col-xs-9">
+										<p class="form-control-static" th:text="${model.channelId}"></p>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-xs-3 control-label text-right form-title">通道类型：</label>
+									<div class="col-xs-9">
+										<p class="form-control-static" th:text="${model.channelType}"></p>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-xs-3 control-label text-right form-title">发送类型：</label>
+									<div class="col-xs-9">
+										<p class="form-control-static" th:text="${#strings.replace(model.smsType,'$#','，')}"></p>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-xs-3 control-label text-right form-title" >发送内容属性：</label>
+									<div class="col-xs-9">
+										<p class="form-control-static" th:text="${model.contentProp}"></p>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-xs-3 control-label text-right form-title">归属商务：</label>
+									<div class="col-xs-9">
+										<p class="form-control-static" th:text="${model.belongBusinessName}"></p>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-xs-3 control-label text-right form-title">是否直连：</label>
+									<div class="col-xs-9" th:switch="${model.directConnect}">
+										<p class="form-control-static" th:case="0">直连</p>
+										<p class="form-control-static" th:case="1">第三方</p>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-xs-3 control-label text-right form-title">扩展位：</label>
+									<div class="col-xs-9">
+										<p class="form-control-static" th:if="${model.extendSize} eq 0">无特殊需求</p>
+										<p class="form-control-static" th:if="${model.extendSize} gt 0" th:text="${model.extendSize} + ' 位'"></p>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-xs-3 control-label text-right form-title">签名：</label>
+									<div class="col-xs-9">
+										<p class="form-control-static" th:text="${model.signType}"></p>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-xs-3 control-label text-right form-title">采购价格(元/条):</label>
+									<div class="col-xs-9">
+										<p class="form-control-static" th:text="${model.purchasePrice}"></p>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-xs-3 control-label text-right form-title">速率：</label>
+									<div class="col-xs-9">
+										<p class="form-control-static" th:text="${model.rate eq null ? '-' : model.rate} + ' TPS'"></p>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-xs-3 control-label text-right form-title">是否保底：</label>
+									<div class="col-xs-9">
+										<p class="form-control-static" th:if="${model.minimumGuarantee} gt 0" th:text="${model.minimumGuarantee} + '万条/月'"></p>
+										<p class="form-control-static" th:if="${model.minimumGuarantee} eq 0">不承诺保底</p>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-xs-3 control-label text-right form-title">是否授信：</label>
+									<div class="col-xs-9">
+										<p class="form-control-static" th:if="${model.isCredit} gt 0" th:text="${model.isCredit} + '万条/月'"></p>
+										<p class="form-control-static" th:if="${model.isCredit} eq 0">不授信</p>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-xs-3 control-label text-right form-title">结算方式：</label>
+									<div class="col-xs-9">
+										<p class="form-control-static" th:text="${model.payType}"></p>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-xs-3 control-label text-right form-title">发票 :</label>
+									<div class="col-xs-9" th:switch="${model.invoiceType}">
+										<!--0：不要票，1：专票，2：普票-->
+										<p class="form-control-static" th:case="0">不要票</p>
+										<p class="form-control-static" th:case="1">专票</p>
+										<p class="form-control-static" th:case="2">普票</p>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-xs-3 control-label text-right form-title">是否已接入:</label>
+									<div class="col-xs-9">
+										<p class="form-control-static" th:if="${model.onlineDate} ne null" th:text="'待接入，' + ${#dates.format(model.onlineDate,'yyyy-MM-dd')}"></p>
+										<p class="form-control-static" th:if="${model.onlineDate} eq null">已接入</p>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-xs-3 control-label text-right form-title">接入IP：</label>
+									<div class="col-xs-9">
+										<p class="form-control-static" th:text="${model.mtIp}"></p>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-xs-3 control-label text-right form-title">接入协议：</label>
+									<div class="col-xs-9" th:switch="${model.protocolType}">
+										<p class="form-control-static" th:case="0">HTTP</p>
+										<p class="form-control-static" th:case="1">CMPP</p>
+										<p class="form-control-static" th:case="2">SMGP</p>
+										<p class="form-control-static" th:case="3">SMIP</p>
+										<p class="form-control-static" th:case="4">SMPP</p>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-xs-3 control-label text-right form-title">供应商：</label>
+									<div class="col-xs-9">
+										<p class="form-control-static" th:text="${model.supplier}"></p>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-xs-3 control-label text-right form-title">联系人：</label>
+									<div class="col-xs-9">
+										<p class="form-control-static" th:text="${model.contact}"></p>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-xs-3 control-label text-right form-title">手机号码：</label>
+									<div class="col-xs-9">
+										<p class="form-control-static" th:text="${model.mobile}"></p>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-xs-3 control-label text-right form-title">备注：</label>
+									<div class="col-xs-9">
+										<p class="form-control-static" th:text="${model.remark}"></p>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-xs-3 control-label text-right form-title">状态：</label>
+									<div class="col-xs-9" th:switch="${model.state}">
+										<p class="form-control-static" th:case="0">待接入</p>
+										<p class="form-control-static" th:case="1">已接入</p>
+										<p class="form-control-static" th:case="2">待审批</p>
+										<p class="form-control-static" th:case="3">撤销</p>
+									</div>
+								</div>
+								<div class="form-group">
+									<label class="col-xs-3 control-label text-right form-title">提交时间：</label>
+									<div class="col-xs-9">
+										<p class="form-control-static" th:if="${model.createTime} ne null" th:text="${#dates.format(model.createTime,'yyyy-MM-dd')}"></p>
+									</div>
+								</div>
+							</div>
+						</div>
+
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+	<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+	<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+	<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+	<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+	<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+	<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+	<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+	<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+	<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+	<script th:src="@{/resources/js/layer/layer.js}"></script>
+
+	<script th:inline="javascript">
+		/*<![CDATA[*/
+		$(document).ready(function() {
+			$.jgrid.defaults.styleUI = "Bootstrap";
+
+			$('#myTabs a').click(function(e) {
+				e.preventDefault()
+				$(this).tab('show')
+			})
+		});
+		/*]]>*/
+	</script>
+</body>
+</html>

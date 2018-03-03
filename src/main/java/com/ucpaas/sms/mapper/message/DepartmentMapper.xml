@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ucpaas.sms.mapper.message.DepartmentMapper">
+
+    <sql id="BASE_COLUMN_LIST">
+        department_id as "departmentId",
+        department_name as "departmentName",
+        department_desc as "departmentDesc",
+        parent_id as "parentId",
+        level,
+        state,
+        create_id as "createId",
+        create_time as "createTime",
+        update_time as "updateTime"
+    </sql>
+
+    <insert id="insert" parameterType="Department" useGeneratedKeys="true" keyProperty="departmentId">
+        INSERT INTO t_sms_department 
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="departmentName != null" >
+                department_name,
+            </if>
+            <if test="departmentDesc != null" >
+                department_desc,
+            </if>
+            <if test="parentId != null" >
+                parent_id,
+            </if>
+            <if test="level != null" >
+                level,
+            </if>
+            <if test="state != null" >
+                state,
+            </if>
+            <if test="createId != null" >
+                create_id,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+            <if test="updateTime != null" >
+                update_time
+            </if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides="," >
+            <if test="departmentName != null and departmentName != ''">
+                #{departmentName},
+            </if>
+            <if test="departmentDesc != null and departmentDesc != ''">
+                #{departmentDesc},
+            </if>
+            <if test="parentId != null" >
+                #{parentId},
+            </if>
+            <if test="level != null" >
+                #{level},
+            </if>
+            <if test="state != null" >
+                #{state},
+            </if>
+            <if test="createId != null" >
+                #{createId},
+            </if>
+            <if test="createTime != null" >
+                #{createTime},
+            </if>
+            <if test="updateTime != null" >
+                #{updateTime}
+            </if>
+        </trim>
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List" >
+        INSERT INTO t_sms_department (
+            department_name,
+            department_desc,
+            parent_id,
+            level,
+            state,
+            create_id,
+            create_time,
+            update_time
+        )VALUES
+        <foreach collection="list" item="item" index="index" separator="," >  
+        (
+            #{item.departmentName},
+            #{item.departmentDesc},
+            #{item.parentId},
+            #{item.level},
+            #{item.state},
+            #{item.createId},
+            #{item.createTime},
+            #{item.updateTime}
+        )
+        </foreach>
+    </insert>
+
+    <update id="delete">
+        UPDATE t_sms_department SET
+        state = 0
+        WHERE department_id = #{departmentId}
+    </update>
+
+    <update id="update" parameterType="Department">
+        UPDATE t_sms_department SET 
+            department_name=#{departmentName},
+            department_desc=#{departmentDesc},
+            parent_id=#{parentId},
+            level=#{level},
+            state=#{state},
+            update_time=#{updateTime}
+        WHERE 
+            department_id = #{departmentId} 
+    </update>
+
+    <update id="updateSelective" parameterType="Department">
+        UPDATE t_sms_department 
+            <set>
+                <if test="departmentName != null and departmentName != ''">
+                    department_name = #{departmentName},
+                </if>
+                <if test="departmentDesc != null and departmentDesc != ''">
+                    department_desc = #{departmentDesc},
+                </if>
+                <if test="parentId != null">
+                    parent_id = #{parentId},
+                </if>
+                <if test="level != null">
+                    level = #{level},
+                </if>
+                <if test="state != null">
+                    state = #{state},
+                </if>
+                <if test="updateTime != null">
+                    update_time = #{updateTime}
+                </if>
+            </set>
+        WHERE 
+            department_id = #{departmentId} 
+    </update>
+
+    <select id="getByDepartmentId" resultType="Department">
+        SELECT 
+            <include refid="BASE_COLUMN_LIST" />
+        FROM t_sms_department
+        WHERE 
+            department_id = #{departmentId}
+    </select>
+
+    <select id="queryList" resultType="Department">
+        SELECT 
+            <include refid="BASE_COLUMN_LIST" /> 
+        FROM t_sms_department 
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            <if test="params.departmentId != null">
+                and department_id = #{params.departmentId}
+            </if>
+            <if test="params.departmentName != null and params.departmentName != ''">
+                and department_name = #{params.departmentName}
+            </if>
+            <if test="params.departmentDesc != null and params.departmentDesc != ''">
+                and department_desc = #{params.departmentDesc}
+            </if>
+            <if test="params.parentId != null">
+                and parent_id = #{params.parentId}
+            </if>
+            <if test="params.level != null">
+                and level = #{params.level}
+            </if>
+            <if test="params.state != null">
+                and state = #{params.state}
+            </if>
+            <if test="params.createId != null">
+                and create_id = #{params.createId}
+            </if>
+            <if test="params.createTime != null">
+                and create_time = #{params.createTime}
+            </if>
+            <if test="params.updateTime != null">
+                and update_time = #{params.updateTime}
+            </if>
+	     </trim>
+    </select>
+
+    <select id="count" resultType="int">
+        SELECT COUNT(0) 
+        FROM t_sms_department 
+        WHERE 
+            1 = 1
+            <if test="departmentId != null">
+                and department_id = #{departmentId}
+            </if>
+            <if test="departmentName != null and departmentName != ''">
+                and department_name = #{departmentName}
+            </if>
+            <if test="departmentDesc != null and departmentDesc != ''">
+                and department_desc = #{departmentDesc}
+            </if>
+            <if test="parentId != null">
+                and parent_id = #{parentId}
+            </if>
+            <if test="level != null">
+                and level = #{level}
+            </if>
+            <if test="state != null">
+                and state = #{state}
+            </if>
+            <if test="createId != null">
+                and create_id = #{createId}
+            </if>
+            <if test="createTime != null">
+                and create_time = #{createTime}
+            </if>
+    </select>
+
+    <select id="getLevelByDepartmentId" resultType="int">
+        SELECT
+            `level`
+        FROM t_sms_department
+        WHERE
+          department_id = #{departmentId}
+    </select>
+
+    <select id="getUserCountByDepartmentId" resultType="int">
+        SELECT
+            count(0) as "count"
+        FROM t_sms_user
+        WHERE
+          `status` = 1 and department_id = #{departmentId}
+    </select>
+
+    <select id="getDeptCountByDepartmentId" resultType="int">
+        SELECT
+        count(0) as "count"
+        FROM t_sms_department
+        WHERE
+        `state` = 1 and parent_id = #{departmentId}
+    </select>
+
+    <select id="findRoleIdsByDeptId" resultType="integer">
+        SELECT role_id as "roleId" FROM t_sms_department_role WHERE department_id = #{departmentId}
+    </select>
+
+    <select id="isExistName" resultType="int">
+        SELECT COUNT(0)
+        FROM t_sms_department
+        WHERE
+            state = 1 and parent_id = #{parentId}
+        <if test="departmentId != null">
+            <![CDATA[
+                and department_id != #{departmentId}
+            ]]>
+        </if>
+        <if test="departmentName != null and departmentName != ''">
+            and department_name = #{departmentName}
+        </if>
+    </select>
+
+    <!-- 添加角色和部门的关联表数据 -->
+    <insert id="insertRoleAssociationDepartment">
+        INSERT INTO t_sms_department_role(department_id, role_id)
+        <foreach collection="roles" item="role" separator=" union all ">
+            SELECT #{departmentId}, #{role.id} FROM DUAL
+        </foreach>
+    </insert>
+
+    <!-- 删除角色和部门的关联表数据 -->
+    <delete id="deleteRoleAssociationDepartment">
+        DELETE FROM t_sms_department_role WHERE department_id = #{departmentId}
+        <if test="roles != null and roles.size != 0">
+            and role_id in
+            <foreach collection="roles" item="item" open="(" close=")" separator=",">
+                #{item.id}
+            </foreach>
+        </if>
+    </delete>
+
+    <select id="findOwnerRoleInfoByDepartmentId" resultType="Role">
+        SELECT
+            b.id as "id",
+            b.role_name as "roleName"
+        FROM t_sms_department_role a
+        JOIN t_sms_role b on b.id = a.role_id
+        WHERE a.department_id = #{departmentId}
+    </select>
+
+    <select id="findLowerDepartmentListByDepartmentId" resultType="Department">
+        SELECT
+          <include refid="BASE_COLUMN_LIST" />
+        FROM t_sms_department
+        WHERE
+          parent_id = #{departmentId} and state = 1
+          AND `level` = (select `level` + 1 as "level" from t_sms_department where department_id = #{departmentId})
+    </select>
+
+    <select id="findAllDept" resultType="com.ucpaas.sms.entity.po.DeptTree">
+        select
+          department_id as "deptId",
+          `level` as "level",
+          parent_id as "parentId",
+          department_name as "deptName"
+        from t_sms_department
+        where state = 1
+        ORDER BY parent_id, `level`;
+    </select>
+
+</mapper>
+

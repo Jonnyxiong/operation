@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 运营平台财务管理 -->
+<mapper namespace="OrderInfo">
+	
+	<sql id="queryOrderInfoConditon">
+		<where>
+			1 = 1
+			<if test="operatorCode != null and operatorCode != '' ">
+				AND co.operator_code = #{operatorCode}
+			</if>
+			<if test="orderInfo != null and orderInfo!=''">
+				AND (
+						co.order_id like CONCAT('%',#{orderInfo},'%' ) 
+						or pi.product_code like CONCAT('%',#{orderInfo},'%' )
+						or co.client_id like CONCAT('%',#{orderInfo},'%' )
+						or co.agent_id like CONCAT('%',#{orderInfo},'%' )
+					)
+			</if>
+			<if test="status != null and status != '' ">
+				AND co.status = #{status}
+			</if>
+			<if test="start_time_day != null and start_time_day!=''">
+				AND co.create_time >= STR_TO_DATE(#{start_time_day},'%Y-%m-%d %H:%i:%S')
+			</if>
+			<if test="end_time_day != null and end_time_day!=''">
+				AND co.create_time <![CDATA[<= STR_TO_DATE(CONCAT(#{end_time_day},' 23:59:59'),'%Y-%m-%d %H:%i:%S') ]]>
+			</if>
+			order by co.create_time desc
+		</where>
+	</sql>
+	
+	<select id="queryOrderInfo" resultType="map">
+		SELECT
+			CAST(co.sub_id AS CHAR(20)) as sub_id,
+			co.order_id,
+			CASE co.order_type
+				WHEN 0 THEN '客户购买'
+				WHEN 1 THEN '代理商代买'
+				END AS order_type,
+			co.product_id,
+			pi.product_code,
+			co.product_type,
+<!-- 			0：行业，1：营销，2：国际，3：验证码，4：通知，7：USSD，8：闪信，9：挂机短信-->
+			CASE co.product_type
+				WHEN 0 THEN '行业'
+				WHEN 1 THEN '营销'
+				WHEN 2 THEN '国际'
+				WHEN 3 THEN '验证码'
+				WHEN 4 THEN '通知'
+				WHEN 7 THEN 'USSD'
+				WHEN 8 THEN '闪信'
+				WHEN 9 THEN '挂机短信'
+				END AS product_type_name,
+		<!-- 对应运营商，0：全网，1：移动，2：联通，3：电信，4：国际-->
+			CASE co.operator_code
+				WHEN 0 THEN '全网'
+				WHEN 1 THEN '移动'
+				WHEN 2 THEN '联通'
+				WHEN 3 THEN '电信'
+				WHEN 4 THEN '国际'
+				END AS operator_code,
+		<!-- 适用区域，0：全国，1：国际-->
+			CASE co.area_code
+				WHEN 0 THEN '全国'
+				WHEN 1 THEN '国际'
+				END AS area_code,
+			TRUNCATE(co.sale_price, 4) as "sale_price",
+			TRUNCATE(co.product_cost, 4) as "product_cost",
+			CASE
+				WHEN co.product_type = 2 THEN CONCAT(IFNULL(TRUNCATE(co.quantity, 4),0.0000),'元')
+				ELSE CONCAT( ROUND(co.quantity, 0),'条')
+			END AS quantity,
+			CASE
+				WHEN co.product_type = 2 THEN CONCAT(IFNULL(TRUNCATE(co.remain_quantity, 4),0.0000),'元')
+				ELSE CONCAT(ROUND(IFNULL(co.remain_quantity,0), 0),'条')
+			END AS remain_quantity,
+			co.client_id,
+			co.agent_id,
+			co.status,
+			CASE co.status
+				WHEN 0 THEN '待审核'
+				WHEN 1 THEN '订单生效'
+				WHEN 2 THEN '订单完成'
+				WHEN 3 THEN '订单失败'
+				WHEN 4 THEN '订单取消'
+				END AS statusName,
+			co.active_period,
+			CASE co.active_period
+				WHEN 0 THEN '无限期'
+				ELSE  CONCAT(co.active_period,'天')
+			END AS active_period_str,
+			DATE_FORMAT(co.end_time,'%Y-%m-%d %H:%i:%S') as end_time,
+			DATE_FORMAT(co.create_time,'%Y-%m-%d %H:%i:%S') as create_time,
+			DATE_FORMAT(co.effective_time,'%Y-%m-%d %H:%i:%S') as effective_time,
+			ai.agent_type
+		FROM 
+		t_sms_client_order co
+		INNER JOIN t_sms_agent_info ai ON co.agent_id = ai.agent_id
+		INNER JOIN t_sms_product_info pi ON co.product_id = pi.product_id
+		<include refid="queryOrderInfoConditon" />
+		${limit}
+	</select>
+	
+	<!-- 总计行 --> 
+	<select id="total" resultType="map">
+		SELECT a.sale_price,a.product_cost,a.quantity_t,a.quantity_y,a.remain_quantity_t,a.remain_quantity_y FROM (
+		SELECT
+			SUM(IFNULL(TRUNCATE(co.sale_price, 4),0.0000)) AS sale_price,
+			SUM(IFNULL(TRUNCATE(co.product_cost, 4),0.0000)) AS product_cost,
+			SUM(
+				CASE
+				WHEN co.product_type = 2 THEN 0
+				ELSE ROUND(IFNULL(co.quantity,0),0)END
+				) AS quantity_t,
+			SUM(
+				CASE
+				WHEN co.product_type = 2 THEN TRUNCATE(IFNULL(co.quantity,0.0000),4)
+				ELSE 0 END
+				) AS quantity_y,
+			SUM(
+				CASE
+				WHEN co.product_type = 2 THEN 0
+				ELSE ROUND(IFNULL(co.remain_quantity,0),0)END
+				) AS remain_quantity_t,
+			SUM(
+				CASE
+				WHEN co.product_type = 2 THEN TRUNCATE(IFNULL(co.remain_quantity,0.0000),4)
+				ELSE 0 END
+				) AS remain_quantity_y
+		FROM 
+		t_sms_client_order co
+		INNER JOIN t_sms_agent_info ai ON co.agent_id = ai.agent_id
+		INNER JOIN t_sms_product_info pi ON co.product_id = pi.product_id
+		<where>
+			1 = 1
+			<if test="operatorCode != null and operatorCode != '' ">
+				AND co.operator_code = #{operatorCode}
+			</if>
+			<if test="condition != null and condition !=''">
+				AND (
+				co.order_id like CONCAT('%',#{condition},'%' )
+				or pi.product_code like CONCAT('%',#{condition},'%' )
+				or co.client_id like CONCAT('%',#{condition},'%' )
+				or co.agent_id like CONCAT('%',#{condition},'%' )
+				)
+			</if>
+			<if test="status != null and status != '' ">
+				AND co.status = #{status}
+			</if>
+			<if test="startDateTime != null and startDateTime!=''">
+				AND co.create_time >= STR_TO_DATE(#{startDateTime},'%Y-%m-%d %H:%i:%S')
+			</if>
+			<if test="endDateTime != null and endDateTime!=''">
+				AND co.create_time <![CDATA[<= STR_TO_DATE(CONCAT(#{endDateTime},' 23:59:59'),'%Y-%m-%d %H:%i:%S') ]]>
+			</if>
+			<if test="clientids != null and clientids.size > 0">
+				and co.client_id IN
+				<foreach collection="clientids" item="item" separator="," open="(" close=")">
+					#{item}
+				</foreach>
+			</if>
+			order by co.create_time desc
+		</where>
+		) a
+	</select>
+	
+	<select id="queryOrderInfoCount" resultType="map">
+		select count(0) as totalCount from(
+			select 
+				0
+			FROM 
+			t_sms_client_order co
+			INNER JOIN t_sms_agent_info ai 
+			ON co.agent_id = ai.agent_id
+			<include refid="queryOrderInfoConditon" />
+		) m
+	</select>
+	
+	
+	<select id="queryOrderInfoBySubId" resultType="map">
+		SELECT 
+			co.sub_id,
+			co.order_id,
+			co.client_id,
+			co.agent_id,
+			co.product_id,
+			pi.product_code,
+		<!-- 			0：行业，1：营销，2：国际，3：验证码，4：通知，7：USSD，8：闪信，9：挂机短信-->
+			CASE co.product_type
+				WHEN 0 THEN '行业'
+				WHEN 1 THEN '营销'
+				WHEN 2 THEN '国际'
+				WHEN 3 THEN '验证码'
+				WHEN 4 THEN '通知'
+				WHEN 7 THEN 'USSD'
+				WHEN 8 THEN '闪信'
+				WHEN 9 THEN '挂机短信'
+				END AS product_type,
+			<!-- 对应运营商，0：全网，1：移动，2：联通，3：电信，4：国际-->
+			CASE co.operator_code
+				WHEN 0 THEN '全网'
+				WHEN 1 THEN '移动'
+				WHEN 2 THEN '联通'
+				WHEN 3 THEN '电信'
+				WHEN 4 THEN '国际'
+				END AS operator_code,
+			<!-- 适用区域，0：全国，1：国际-->
+			CASE co.area_code
+				WHEN 0 THEN '全国'
+				WHEN 1 THEN '国际'
+				END AS area_code,
+			co.product_name,
+			co.product_number,
+			CASE co.order_type
+				WHEN 0 THEN '客户购买'
+				WHEN 1 THEN '代理商代买'
+				END AS order_type,
+			co.status,
+			CASE co.status
+				WHEN 0 THEN '待审核'
+				WHEN 1 THEN '订单生效'
+				WHEN 2 THEN '订单完成'
+				WHEN 3 THEN '订单失败'
+				WHEN 4 THEN '订单取消'
+				END AS status_name,
+			co.active_period,
+			CASE co.active_period
+				WHEN 0 THEN '无限期'
+				ELSE CONCAT(co.active_period,'天')
+			END AS active_period_str,
+			CASE
+				WHEN co.product_type = 2 THEN CONCAT(IFNULL(TRUNCATE(co.quantity, 4),0.0000),'元')
+				ELSE CONCAT( ROUND(co.quantity, 0),'条')
+			END AS quantity,
+			CASE
+				WHEN co.product_type = 2 THEN CONCAT(IFNULL(TRUNCATE(co.remain_quantity, 4),0.0000),'元')
+				ELSE CONCAT(ROUND(IFNULL(co.remain_quantity,0), 0),'条')
+			END AS remain_quantity,
+			TRUNCATE(co.sale_price, 4) as "sale_price",
+			TRUNCATE(co.product_cost, 4) as "product_cost",
+
+			DATE_FORMAT(co.end_time,'%Y-%m-%d %H:%i:%S') as end_time,
+			DATE_FORMAT(co.create_time,'%Y-%m-%d %H:%i:%S') as create_time,
+			DATE_FORMAT(co.effective_time,'%Y-%m-%d %H:%i:%S') as effective_time,
+			DATE_FORMAT(co.update_time,'%Y-%m-%d %H:%i:%S') as update_time,
+<!-- 			audit_type, -->
+			co.auditor,
+			co.admin_id
+		FROM 
+			t_sms_client_order co
+			INNER JOIN t_sms_product_info pi ON co.product_id = pi.product_id
+		WHERE 
+			co.sub_id = #{sub_id}
+	</select>
+	
+	<!-- 导出品牌代理商订单信息 -->
+	<select id="exportOrderExcel" resultType="map">
+		SELECT
+			co.sub_id, 
+			co.order_id,
+			CASE co.order_type
+				WHEN 0 THEN '客户购买'
+				WHEN 1 THEN '代理商代买'
+				END AS order_type,
+			co.product_id,
+			pi.product_code,
+		<!-- 			0：行业，1：营销，2：国际，3：验证码，4：通知，7：USSD，8：闪信，9：挂机短信-->
+			CASE co.product_type
+				WHEN 0 THEN '行业'
+				WHEN 1 THEN '营销'
+				WHEN 2 THEN '国际'
+				WHEN 3 THEN '验证码'
+				WHEN 4 THEN '通知'
+				WHEN 7 THEN 'USSD'
+				WHEN 8 THEN '闪信'
+				WHEN 9 THEN '挂机短信'
+				END AS product_type,
+			<!-- 对应运营商，0：全网，1：移动，2：联通，3：电信，4：国际-->
+			CASE co.operator_code
+				WHEN 0 THEN '全网'
+				WHEN 1 THEN '移动'
+				WHEN 2 THEN '联通'
+				WHEN 3 THEN '电信'
+				WHEN 4 THEN '国际'
+				END AS operator_code,
+			<!-- 适用区域，0：全国，1：国际-->
+			CASE co.area_code
+				WHEN 0 THEN '全国'
+				WHEN 1 THEN '国际'
+			END AS area_code,
+			TRUNCATE(co.sale_price, 4) as "sale_price",
+			TRUNCATE(co.product_cost, 4) as "product_cost",
+			CASE
+				WHEN co.product_type = 2 THEN CONCAT(IFNULL(TRUNCATE(co.quantity, 4),0.0000),'元')
+				ELSE CONCAT( ROUND(co.quantity, 0),'条')
+			END AS quantity,
+			CASE
+				WHEN co.product_type = 2 THEN CONCAT(IFNULL(TRUNCATE(co.remain_quantity, 4),0.0000),'元')
+				ELSE CONCAT(ROUND(IFNULL(co.remain_quantity,0), 0),'条')
+			END AS remain_quantity,
+			co.client_id,
+			co.agent_id,
+			co.status,
+			CASE co.status
+				WHEN 0 THEN '待审核'
+				WHEN 1 THEN '订单生效'
+				WHEN 2 THEN '订单完成'
+				WHEN 3 THEN '订单失败'
+				WHEN 4 THEN '订单取消'
+				END AS statusName,
+			co.active_period,
+			CASE  co.active_period
+				WHEN 0 THEN '无限期'
+				ELSE CONCAT(co.active_period,'天')
+			END AS active_period_str,
+			DATE_FORMAT(co.end_time,'%Y-%m-%d %H:%i:%S') as end_time,
+			DATE_FORMAT(co.create_time,'%Y-%m-%d %H:%i:%S') as create_time,
+			DATE_FORMAT(co.effective_time,'%Y-%m-%d %H:%i:%S') as effective_time,
+			ai.agent_type
+		FROM 
+		t_sms_client_order co
+		INNER JOIN t_sms_agent_info ai ON co.agent_id = ai.agent_id
+		INNER JOIN t_sms_product_info pi ON co.product_id = pi.product_id
+		<include refid="queryOrderInfoConditon" />
+	</select>
+	
+	
+	
+</mapper> 

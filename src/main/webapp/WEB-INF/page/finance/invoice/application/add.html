@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:th="http://www.thymeleaf.org"
+	  lang="zh-cn">
+<head>
+	<meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+	<meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+	<title>短信云平台运营系统 - 发票申请</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+	<link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+	<link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet">
+	<link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+	<link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/select2.css}" rel="stylesheet">
+	<style>
+		/* Additional style to fix warning dialog position */
+		body {
+			font-size: 13px !important;
+		}
+		#alertmod_table_list_2 {
+			top: 900px !important;
+		}
+		.close{
+			opacity: 1;
+		}
+		.modal-content{
+			opacity: 1 !important;
+			border:none;
+		}
+		.radio{
+			margin-top:0 !important;
+		}
+		.invoiceWrap{
+			position: relative;
+			width:650px;
+			padding-top:5px;
+		}
+		.invoiceWrap .backgroundBar{
+			position: absolute;
+			width:100%;
+			height:10px;
+			background-color: #1d262e;
+			border-radius: 5px;
+			left:0;
+			top:0;
+			z-index:1;
+		}
+		.invoiceWrap .ctx{
+			background-color: #FFF;
+			position: relative;
+			z-index:10;
+			border:1px solid #DDD;
+			border-top-left-radius: 5px;
+			border-top-right-radius: 5px;
+			width:600px;
+			margin: 0px auto;
+			box-shadow: 2px 2px 2px 0px #DDD;
+		}
+		.invoiceWrap .ctx h3{
+			line-height: 60px;
+			border-bottom:1px dashed #DDD;
+		}
+		.select2 span{
+			display:block !important;
+			margin-top: 0px !important;
+		}
+		.select2-container {
+			width: 275px !important;
+		}
+		.select2-dropdown {
+			width: 280px !important;
+		}
+		.select2-container .select2-selection--single{
+			width:280px;
+		}
+
+		* { -ms-word-wrap: break-word; word-wrap: break-word; }
+		html { -webkit-text-size-adjust: none; text-size-adjust: none; }
+		html, body {height:100%;width:100%; }
+		html, body, h1, h2, h3, h4, h5, h6, div, ul, ol, li, dl, dt, dd, iframe, textarea, input, button, p, strong, b, i, a, span, del, pre, table, tr, th, td, form, fieldset, .pr, .pc { margin: 0; padding: 0; word-wrap: break-word; font-family: verdana,Microsoft YaHei,Tahoma,sans-serif; *font-family: Microsoft YaHei,verdana,Tahoma,sans-serif; }
+		body, ul, ol, li, dl, dd, p, h1, h2, h3, h4, h5, h6, form, fieldset, .pr, .pc, em, del { font-style: normal; font-size: 100%; }
+		ul, ol, dl { list-style: none; }
+		._citys { width: 450px; display: inline-block; border: 2px solid #eee; padding: 5px; position: relative;background-color: gainsboro  }
+		._citys span { color: #56b4f8; height: 15px; width: 15px; line-height: 15px; text-align: center; border-radius: 3px; position: absolute; right: 10px; top: 10px; border: 1px solid #56b4f8; cursor: pointer; }
+		._citys0 { width: 100%; height: 34px; display: inline-block; border-bottom: 2px solid #56b4f8; padding: 0; margin: 0; }
+		._citys0 li { display: inline-block; line-height: 34px; font-size: 15px; color: #888; width: 80px; text-align: center; cursor: pointer; }
+		.citySel { background-color: #56b4f8; color: #fff !important; }
+		._citys1 { width: 100%; display: inline-block; padding: 10px 0; }
+		._citys1 a { width: 83px; height: 35px; display: inline-block; background-color: #f5f5f5; color: #666; margin-left: 6px; margin-top: 3px; line-height: 35px; text-align: center; cursor: pointer; font-size: 13px; overflow: hidden; }
+		._citys1 a:hover { color: #fff; background-color: #56b4f8; }
+		.AreaS { background-color: #56b4f8 !important; color: #fff !important; }
+
+	</style>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content  animated fadeInRight">
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="tabs-container">
+				<ul class="nav nav-tabs">
+					<li class="active" th:if="${menus.fpsq}">
+						<a href="javascript:;" id="zkkh">发票申请</a>
+					</li>
+					<li class="" th:if="${menus.sqjl}">
+						<a href="/finance/invoice/record/list" id="sqjl">申请记录</a>
+					</li>
+					<li class="" th:if="${menus.fpxx}">
+						<a  href="/finance/invoice/info/list" id="fpxx">发票信息</a>
+					</li>
+					<li class="" th:if="${menus.fpsh}">
+						<a  href="/finance/invoice/audit/list" id="fpsh">发票审核</a>
+					</li>
+				</ul>
+
+				<div class="tab-pane active" th:if="${menus.fpsq}">
+					<div class="panel-body">
+						<div class="alert alert-success" role="alert">开票时间：每月10号，20号，30号统一处理邮寄。（为发票可顺利寄达，请确保客户的邮寄地址、联系电话无误）</div>
+						<div class="form-horizontal invoiceObject">
+							<div class="form-group">
+								<label class="col-sm-2 control-label">开票客户:</label>
+								<div class="col-sm-6">
+									<select id="agentId"  class="form-control"></select>
+									<input type="hidden" name="agentId" class="js-key js-agent" data-key="agentId">
+									<input type="hidden" name="agentName" class="js-key js-agentName" data-key="agentName">
+									<input type="hidden" name="id" class="js-key js-id" data-key="id">
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-2 control-label">可开票金额:</label>
+								<div class="col-sm-6 ">
+									<input type="text" class="form-control canamount" readonly disabled>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-2 control-label"><span class="red">*</span>发票金额:</label>
+								<div class="col-sm-6">
+									<input type="text" class="form-control invoiceAmount">
+								</div>
+								<div class="col-sm-1 control-label" style="text-align: left;">
+									<span >元</span>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-2 control-label">开票项目:</label>
+								<div class="col-sm-6 control-label" style="text-align: left;">
+									<span>信息服务费</span>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-2 control-label">备注:</label>
+								<div class="col-sm-6 ">
+									<input type="text" name="remark" class="form-control remark">
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-2 control-label"><span class="red">*</span>发票类型:</label>
+								<div class="col-sm-6 ">
+									<label class="radio-inline">
+										<input style="min-height: 20px;" type="radio" name="invoiceType" id="invoiceType1" class="invoiceType-radio radio" value="1" checked> 普通发票（电子）
+									</label>
+									<label class="radio-inline" >
+										<input style="min-height: 20px;" type="radio" name="invoiceType" id="invoiceType2" class="invoiceType-radio radio" value="2"> 增值税专用发票
+									</label>
+								</div>
+							</div>
+							<!-- 普通电子发票（电子） -->
+							<div class="form-group normalInvoice">
+								<div class="col-sm-10 col-sm-offset-2">
+									<div class="invoiceWrap">
+										<div class="backgroundBar"></div>
+										<div class="ctx">
+											<h3 class="text-center">新增普通电子发票（电子）</h3>
+											<form class="form-horizontal" id="normalInvoice">
+												<div class="form-group invoiceMsg">
+													<label class="col-sm-3 control-label">发票信息ID:</label>
+													<div class="col-sm-8 control-label" style="text-align: left;">
+														<span class="js-id"></span>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-sm-3 control-label">开票客户:</label>
+													<div class="col-sm-8 control-label" style="text-align: left;">
+														<span class="js-clientid"></span>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-sm-3 control-label"><span class="red">*</span>开票主体:</label>
+													<div class="col-sm-8 grid-add">
+														<label class="radio-inline">
+															<input style="min-height: 20px;" type="radio" name="invoiceBody" class="invoiceType-body radio radio-2" value="2" checked> 企业
+														</label>
+														<label class="radio-inline">
+															<input style="min-height: 20px;" type="radio" name="invoiceBody" class="invoiceType-body radio radio-1" value="1"> 个人
+														</label>
+													</div>
+													<div class="col-sm-8 control-label grid-info hide" style="text-align: left;">
+														<span class="js-invoiceBodyStr">个人</span>
+														<input type="hidden" value="" class="js-invoiceBody">
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-sm-3 control-label"><span class="red">*</span>发票抬头:</label>
+													<div class="col-sm-7 grid-add ">
+														<input type="text" name="invoiceHead" class="form-control invoiceHead" required>
+													</div>
+													<div class="col-sm-7 control-label grid-info hide" style="text-align: left;">
+														<span class="js-invoiceHeadStr">个人</span>
+														<input type="hidden" value="" class="js-invoiceHead">
+													</div>
+												</div>
+												<div class="form-group" id ="js-creditCode_normal">
+													<label class="col-sm-3 control-label"><span class="red">*</span>统一社会信用代码:</label>
+													<div class="col-sm-7 grid-add ">
+														<input type="text" name="creditCode" class="form-control creditCode" required>
+													</div>
+													<div class="col-sm-7 control-label grid-info hide" style="text-align: left;">
+														<span class="js-creditCodeStr">统一社会信用代码</span>
+														<input type="hidden" value="" class="js-creditCode">
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-sm-3 control-label"><span class="red">*</span>电子邮箱:</label>
+													<div class="col-sm-7 grid-add ">
+														<input type="text" class="form-control email" required>
+													</div>
+													<div class="col-sm-7 control-label grid-info hide" style="text-align: left;">
+														<span class="js-emailStr"></span>
+														<input type="hidden" value="" class="js-email">
+													</div>
+												</div>
+												<div class="form-group">
+													<div class="col-sm-offset-3 col-sm-7 grid-add ">
+														<button type="submit" class="btn btn-primary js-addNormall">确认</button>
+														<button type="button" class="btn btn-link js-cancelNormal grid-edit hide">取消</button>
+													</div>
+													<div class="col-sm-offset-3 col-sm-7 grid-info hide">
+														<button type="button" class="btn btn-primary js-editNormal">修改</button>
+													</div>
+
+												</div>
+											</form>
+										</div>
+									</div>
+								</div>
+							</div>
+							<!-- 增值税发票信息 -->
+							<div class="form-group vataInvoice hide">
+								<div class="col-sm-10 col-sm-offset-2">
+									<div class="invoiceWrap">
+										<div class="backgroundBar"></div>
+										<div class="ctx">
+											<h3 class="text-center">新增增值税发票信息</h3>
+											<form class="form-horizontal" id="vataInvoice">
+												<div class="form-group invoiceMsg">
+													<label class="col-sm-3 control-label">发票信息ID:</label>
+													<div class="col-sm-8 control-label" style="text-align: left;">
+														<span class="js-id"></span>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-sm-3 control-label">开票客户:</label>
+													<div class="col-sm-8 control-label" style="text-align: left;">
+														<span class="js-clientid">客户123</span>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-sm-3 control-label"><span class="red">*</span>发票抬头:</label>
+													<div class="col-sm-7 grid-add ">
+														<input type="text" name="invoiceHead2" class="form-control invoiceHead" required>
+													</div>
+													<div class="col-sm-7 control-label grid-info hide" style="text-align: left;">
+														<span class="js-invoiceHeadStr">个人</span>
+														<input type="hidden" value="" class="js-invoiceHead">
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-sm-3 control-label"><span class="red">*</span>统一社会信用代码:</label>
+													<div class="col-sm-7 grid-add ">
+														<input type="text" name="creditCode2" class="form-control creditCode" required>
+													</div>
+													<div class="col-sm-7 control-label grid-info hide" style="text-align: left;">
+														<span class="js-creditCodeStr">统一社会信用代码</span>
+														<input type="hidden" value="" class="js-creditCode">
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-sm-3 control-label"><span class="red">*</span>公司注册地址:</label>
+													<div class="col-sm-7 grid-add ">
+														<input type="text" name="companyRegAddr" class="form-control companyRegAddr">
+													</div>
+													<div class="col-sm-7 control-label grid-info hide" style="text-align: left;">
+														<span class="js-companyRegAddrStr"></span>
+														<input type="hidden" value="" class="js-companyRegAddr">
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-sm-3 control-label"><span class="red">*</span>开户银行:</label>
+													<div class="col-sm-7 grid-add ">
+														<input type="text" name="bank" class="form-control bank">
+													</div>
+													<div class="col-sm-7 control-label grid-info hide" style="text-align: left;">
+														<span class="js-bankStr"></span>
+														<input type="hidden" value="" class="js-bank">
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-sm-3 control-label"><span class="red">*</span>开户账号:</label>
+													<div class="col-sm-7 grid-add ">
+														<input type="text" name="bankAccount" class="form-control bankAccount">
+													</div>
+													<div class="col-sm-7 control-label grid-info hide" style="text-align: left;">
+														<span class="js-bankAccountStr"></span>
+														<input type="hidden" value="" class="js-bankAccount">
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-sm-3 control-label"><span class="red">*</span>公司固定电话:</label>
+													<div class="col-sm-7 grid-add ">
+														<input type="text" name="telphone" class="form-control telphone">
+													</div>
+													<div class="col-sm-7 control-label grid-info hide" style="text-align: left;">
+														<span class="js-telphoneStr"></span>
+														<input type="hidden" value="" class="js-telphone">
+													</div>
+												</div>
+												<hr>
+												<div class="form-group">
+													<label class="col-sm-3 control-label"><span class="red">*</span>收件人:</label>
+													<div class="col-sm-7 grid-add ">
+														<input type="text" name="toName" class="form-control toName">
+													</div>
+													<div class="col-sm-7 control-label grid-info hide" style="text-align: left;">
+														<span class="js-toNameStr"></span>
+														<input type="hidden" value="" class="js-toName">
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-sm-3 control-label"><span class="red">*</span>收件人地址:</label>
+													<div class="col-sm-7 grid-add ">
+														<input type="text" name="toAddr" class="form-control toAddr" id="city">
+													</div>
+													<div class="col-sm-7 control-label grid-info hide" style="text-align: left;">
+														<span class="js-toAddrStr"></span>
+														<input type="hidden" value="" class="js-toAddr">
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-sm-3 control-label"><span class="red">*</span>详细地址:</label>
+													<div class="col-sm-7 grid-add ">
+														<input type="text" name="toAddrDetail" class="form-control toAddrDetail">
+													</div>
+													<div class="col-sm-7 control-label grid-info hide" style="text-align: left;">
+														<span class="js-toAddrDetailStr"></span>
+														<input type="hidden" value="" class="js-toAddrDetail">
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-sm-3 control-label"><span class="red">*</span>收件人手机:</label>
+													<div class="col-sm-7 grid-add ">
+														<input type="text" name="toPhone" class="form-control toPhone">
+													</div>
+													<div class="col-sm-7 control-label grid-info hide" style="text-align: left;">
+														<span class="js-toPhoneStr"></span>
+														<input type="hidden" value="" class="js-toPhone">
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-sm-3 control-label">收件人QQ:</label>
+													<div class="col-sm-7 grid-add ">
+														<input type="text" name="toQq" class="form-control toQq">
+													</div>
+													<div class="col-sm-7 control-label grid-info hide" style="text-align: left;">
+														<span class="js-toQqStr"></span>
+														<input type="hidden" value="" class="js-toQq">
+													</div>
+												</div>
+												<hr>
+												<div style="padding-left:20px;margin-bottom:20px;">
+													<span>为避免邮寄错误，请填写正确的收件信息，发票金额大于200元包邮寄送，小于200元邮费到付</span>
+												</div>
+												<div class="form-group">
+													<div class="col-sm-offset-3 col-sm-7 grid-add">
+														<button type="submit" class="btn btn-primary js-addVata">确认</button>
+														<button type="button" class="btn btn-link js-cancelVata grid-edit hide">取消</button>
+													</div>
+													<div class="col-sm-offset-3 col-sm-7 grid-info hide">
+														<button type="button" class="btn btn-primary js-editVata">修改</button>
+													</div>
+												</div>
+
+											</form>
+										</div>
+									</div>
+								</div>
+							</div>
+							<!-- 新增增值税发票信息 end -->
+							<div class="form-group">
+								<div class="col-sm-offset-2 col-sm-10">
+									<button type="button" class="btn btn-primary js-savaInvoice">确定</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/select2.min.js}"></script>
+<script th:src="@{/resources/js/auth.js}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/jquery.validate.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/messages_zh.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/invoice.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/city/Popt.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/city/cityJson.js?v=1.1.0}"></script>
+<script th:src="@{/resources/js/city/citySet.js?v=1.0.0}"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+		var menus = [[${menus}]]
+    if (menus.fpsq) {
+		} else if (menus.sqjl) {
+			$("#sqjl")[0].click();
+		} else if (menus.fpxx) {
+			$("#fpxx")[0].click();
+		} else if (menus.fpsh) {
+            $("#fpsh")[0].click();
+        }
+    $("#city").click(function (e) {
+        SelCity(this,e);
+        console.log("inout",$(this).val(),new Date())
+    });
+
+    /*]]>*/
+</script>
+
+</body>
+</html>

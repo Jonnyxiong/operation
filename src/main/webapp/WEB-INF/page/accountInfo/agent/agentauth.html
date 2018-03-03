@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta name="baidu-site-verification" content="zNwez22Bcq"/>
+    <meta name="google-site-verification" content="6hC_46bMT6_bGxmL_Ec5V_7xnPSnQBhQBl8y3MtfoFc" />
+    <meta name="Baiduspider" content="noarchive"/>
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信平台运营系统 </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet">
+    <!-- jqgrid-->
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+
+    <link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+    <link th:href="@{/resources/js/webuploader/webuploader.css?v=4.1.0}" rel="stylesheet">
+    <style>
+        /* Additional style to fix warning dialog position */
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+        .ctx{
+            line-height: 34px;
+        }
+        .imgupload{
+            position: relative;
+            width:180px;
+            height:180px;
+            line-height: 180px;
+            text-align: center;
+            border:1px solid #DDD;
+            overflow: hidden;
+        }
+        .imgupload span{
+            font-size:30px;
+        }
+        .imgupload input{
+            position: absolute;
+            opacity: 0;
+            top:0;
+            left:0;
+            width:100%;
+            height:100%;
+        }
+        .imgupload img{
+            position: absolute;
+            top:0;
+            left:0;
+            width:100%;
+            height:100%;
+            z-index:100;
+            /*display: none;*/
+        }
+    </style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="container-fluid">
+    <!--<form method="post" class="clearfix" action="accountInfo/qualification/save" th:action="@{/accountInfo/qualification/save}" id="mainForm" novalidate="novalidate" enctype="multipart/form-data">-->
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox ">
+                <div class="ibox-content">
+                    <div class="form-horizontal">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">客户ID：</label>
+                            <div class="col-sm-4">
+                                <div class="from-control ctx" id="agentId" th:text="${agentId}"></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">客户名称：</label>
+                            <div class="col-sm-4">
+                                <div class="from-control ctx" id="nameID" th:text="${agentName}"></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">手机号码：</label>
+                            <div class="col-sm-4">
+                                <div class="from-control ctx" th:text="${mobile}"></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">公司地址：</label>
+                            <div class="col-sm-4">
+                                <div class="from-control ctx" th:text="${address}"></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">证件类型：</label>
+                            <div class="col-sm-4">
+                                <dd  th:if="${oauthType}==1">
+                                    <select class="form-control" name="idType" id="idType" th:value="${idType}">
+                                        <option th:selected="${idType eq 1}" value="1">身份证</option>
+                                        <option th:selected="${idType eq 2}" value="2">护照</option>
+                                    </select>
+                                </dd>
+                                <dd th:if="${oauthType}==2">
+                                    <select class="form-control" name="idType" id="idType" th:value="${idType}">
+                                        <option th:selected="${idType eq 3}" value="3">组织机构证</option>
+                                        <option th:selected="${idType eq 4}" value="4">税务登记证</option>
+                                        <option th:selected="${idType eq 5}" value="5">营业执照</option>
+                                        <option th:selected="${idType eq 6}" value="6">三证合一(企业)</option>
+                                        <option th:selected="${idType eq 7}" value="7">四证合一(企业)</option>
+                                        <option th:selected="${idType eq 8}" value="8">登记证书号</option>
+                                    </select>
+                                </dd>
+                                <!--<select class="form-control" name="idType" id="idType">
+                                    <option value="1">身份证</option>
+                                    <option value="2">护照</option>
+                                    <option value="3">组织机构证</option>
+                                    <option value="4">税务登记证</option>
+                                    <option value="5">营业执照</option>
+                                    <option value="6">三证合一(企业)</option>
+                                    <option value="7">四证合一(企业)</option>
+                                    <option value="8">登记证书号</option>
+                                </select>-->
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">证件号码：</label>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control number" name="idNbr" th:value="${idNbr}">
+                            </div>
+                        </div>
+                        <input type="hidden"  id="oauthTypeID"  th:value="${oauthType}" >
+                        <input type="hidden"  id="decodeImgUrl"  th:value="${decodeImgUrl}" >
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">证件图片：</label>
+                            <div class="col-sm-4">
+                                <!--<img th:src="${smsp_img_url}+'/file/scanPic.html?path='+${imgUrl}"-->
+                                     <!--width="50" height="35" style="cursor: pointer;" title="点击查看大图"-->
+                                     <!--onclick="viewFile(this)" th:if="${imgUrl}"/>-->
+
+                                <div id="uploader-demo">
+                                    <!--用来存放item-->
+                                    <div class="imgupload">
+                                        <span class="glyphicon glyphicon-plus"></span>
+                                        <img th:src="${smsp_img_url}+'/file/scanPic.html?path='+${imgUrl}" alt="" class="js-img img" id="preview" >
+                                    </div>
+                                    <div id="fileList" class="uploader-list"></div>
+                                    <div id="filePicker">选择图片</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">提交时间：</label>
+                            <div class="col-sm-4">
+                                <div class="from-control ctx" th:text="${createTime}"></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">备注：</label>
+                            <div class="col-sm-4">
+                                <div class="from-control ctx" th:text="${remark}"></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-10">
+                                <button type="submit" class="btn btn-primary js-save" id="saveID">保存</button>
+                                <button type="button" class="btn btn-default" onclick="reback()">返回</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--</form>-->
+</div>
+<script th:src="@{/resources/js/hex_ha_ha_ha_ha_ha.js}"></script>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/jquery.form.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/plugins/validate/jquery.validate.min.js}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/js/smsp.validate.js}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/auth.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/webuploader/webuploader.min.js?v=1.0.0}"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var img_url = [[${smsp_img_url}]];
+    var imgUrl = [[${imgUrl}]];
+    var urlPath;
+    $(function(){
+        var uploader = WebUploader.create({
+
+            // 选完文件后，是否自动上传。
+            auto: true,
+
+            // swf文件路径
+            swf: + '/js/webuploader/Uploader.swf',
+
+            // 文件接收服务端。
+            server: img_url +  "/upload/uploadAuto.html",
+            //设置name属性
+            fileVal: 'photoFile',
+            //允许文件多次上传
+            duplicate:true,
+            // 选择文件的按钮。可选。
+            // 内部根据当前运行是创建，可能是input元素，也可能是flash.
+            pick: '#filePicker',
+            // 只允许选择图片文件。
+            accept: {
+                title: 'Images',
+                extensions: 'gif,jpg,jpeg,bmp,png',
+                mimeTypes: 'image/*'
+            }
+        });
+
+        uploader.on('fileQueued', function (file) {
+            // 创建缩略图
+            // 如果为非图片文件，可以不用调用此方法。
+            // thumbnailWidth x thumbnailHeight 为 100 x 100
+            uploader.makeThumb(file, function (error, src) {
+                if (error) {
+                    alert("图片预览失败");
+                    return;
+                }
+                $("#preview").show();
+                $("#preview").attr("src",src);
+            });
+        });
+        // 文件上传成功，给item添加成功class, 用样式标记上传成功。
+        uploader.on('uploadSuccess', function (file, res) {
+            if (res.result == "success") {
+                urlPath = res.path;
+            }
+        });
+        $(".imgupload").click(function(){
+//            $(".js-file").trigger("click");
+        })
+
+
+        //保存资质
+        $(".js-save").click(function(){
+            document.getElementById("saveID").setAttribute("disabled", true);
+            var clientType = $("#oauthTypeID").val();
+            var idNbr = $(".number").val();
+            var imgurl = urlPath || $("#decodeImgUrl").val();
+            var realName = $("#nameID").text();
+            var idType =$("#idType").val();
+                var agentId = $("#agentId").text();
+                $.ajax({
+                    url:/*[[@{/accountInfo/qualification/save}]]*/,
+                    type:"POST",
+                    data:{
+                        idNbr: idNbr,
+                        imgurl:imgurl,
+                        realName:realName,
+                        idType: idType,
+                        clientType:clientType,
+                        agentId:agentId
+                    },
+                    success:function(data){
+                       // document.getElementById("saveID").removeAttribute("disabled");
+                        if(data == null){
+                            swal("失败！", "系统错误，请稍后再试！", "error")
+                            document.getElementById("saveID").removeAttribute("disabled");
+                        }else if(data.code == 0){
+
+                            layer.msg(data.msg,{icon:1,time:1500},function () {
+                                window.location.href = '/accountInfo/agentmanage'
+                            })
+                        }else{
+                            swal("失败！", data.msg, "error")
+                            document.getElementById("saveID").removeAttribute("disabled");
+                        }
+                    }
+                })
+        });
+
+    })
+    function reback() {
+        window.history.back();
+    }
+    /*]]>*/
+</script>
+</body>
+</html>

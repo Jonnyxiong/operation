@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信平台运营系统 </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+    <link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+    <link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+
+    <style>
+        /* Additional style to fix warning dialog position */
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+    </style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox "> 
+            	<!-- 搜索条件 -->
+                <div class="ibox-content">
+                	<form role="form" class="form-inline" id="mainForm">
+                        <div class="form-group">
+                            <!-- <label for="example1" class="sr-only">用户名</label> -->
+                                <input type="text" id="condition" class="form-control pull-right  col-md-4" placeholder="输入英文/中文/国际代码" />
+                        </div> 
+                        
+                        <div class="form-group">
+                                    <button type="button" class="btn btn-danger" onclick="reload()">搜索</button>
+                                    <button type="button" class="btn btn-primary" onclick="add()">添加</button>
+                                    <button type="button" class="btn " onclick="exportExcel()">导出</button>
+                        </div>
+                    </form>
+                </div>
+            
+                <div class="ibox-content"> 
+                    <div class="jqGrid_wrapper">
+                        <table id="table_list"></table>
+                        <div id="pager_list"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+    function reload (){
+        $("#table_list").jqGrid('setGridParam',{
+            datatype:'json',
+            postData: {
+            	condition: $("#condition").val()
+
+            }, //发送数据
+//            page:1
+        }).trigger("reloadGrid"); //重新载入
+    }
+
+    function edit(id,btn){
+        var url = /*[[@{/product/internetSmsPrice/edit}]]*/;
+        window.location.href=url + '?id=' + id;
+    }
+    
+    function add(id,btn){
+        var url = /*[[@{/product/internetSmsPrice/add}]]*/;
+        window.location.href=url;
+    }
+ 
+    function del(id, btn){
+        swal({
+            title: "您确定要删除吗？", 
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "确定",
+            cancelButtonText: "让我再考虑一下…",
+            closeOnConfirm: false
+        }, function () {
+            $.ajax({
+                url:/*[[@{/product/internetSmsPrice/delete}]]*/,
+                type:"post",
+                data:{
+                    id: id
+                },
+                success:function(data){
+                    if(data.success){
+                        swal("成功！", data.msg, "success")
+                    }else{
+                        swal("失败！", data.msg, "error")
+                    }
+                    reload ();
+                }
+            });
+        });
+    }
+
+    $(document).ready(function () {
+        $.jgrid.defaults.styleUI = "Bootstrap";
+        $("#table_list").jqGrid({
+            url:/*[[@{/product/internetSmsPrice/list}]]*/,
+            mtype: 'POST',
+            datatype: "json",
+            jsonReader : {
+                root:"list",
+                page: "currentPage",
+                total: "totalPage",
+                records: "totalCount"
+            },
+            height: 'auto',
+            rownumbers:true,
+            autowidth: true,
+            shrinkToFit: true,
+            rowNum: 20,
+            rowList: [10, 20, 30,50],
+            colNames: ["id(隐藏)","国际名称", "中文名称", "国际代码", "国际简码", "国际价格", "操作"],
+            colModel: [
+                {name: "id",index: "id",width: 60,align: "left",sortable:false,hidden:true},
+                {name: "intername",index: "intername",width: 60,align: "left",sortable:false},
+                {name: "areaname",index: "areaname",width: 60,align: "left",sortable:false},
+                {name: "prefix",index: "prefix",width: 60,align: "left",sortable:false},
+                {name: "intercode",index: "intercode",width: 60,align: "left",sortable:false},
+                {name: "fee",index: "fee",width: 60,align: "left",sortable:false},
+                {name: "total",index: "total",width: 120,align: "left",sortable:false,title:false,
+                    formatter:function(cellvalue, options, rowObject){
+
+                        var id = rowObject.id;
+                        var switcher = '';
+
+                        switcher = "<button type='button' class='btn btn-link btn-xs ' onclick=\"edit('"+id+"',this)\" title='修改'>修改</button>";
+                        switcher += "<button type='button' class='btn btn-link btn-xs ' onclick=\"del('"+id+"',this)\" title='删除'>删除</button>";
+                        return switcher;
+                    }
+                }
+            ],
+            pager: "#pager_list",
+            viewrecords: true,
+            hidegrid: false
+        });
+      
+        $(window).bind("resize", function () {
+            var width = $(".jqGrid_wrapper").width();
+            $("#table_list").setGridWidth(width);
+        })
+    });
+    function keyUp(e) {
+        var currKey=0,e=e||event;
+        currKey=e.keyCode||e.which||e.charCode;
+        var keyName = String.fromCharCode(currKey);
+        if (currKey == 13){
+            reload();
+        }
+    }
+    document.onkeyup = keyUp;
+    
+  //导出Excel文件
+	function exportExcel() {
+		var totalCount = $("#table_list").jqGrid('getGridParam','records');
+		if (totalCount == 0) {
+			layer.alert("共0条记录，导出Excel文件失败");
+			return;
+		}
+		if(totalCount>6000){
+			layer.alert("导出Excel文件条数大于6000条");
+			return;	
+		}
+		var mainForm = $("#mainForm");
+		var action = mainForm.attr("action");
+		mainForm.attr("action", /*[[@{/product/internetSmsPrice/exportExcel}]]*/).submit();
+		mainForm.attr("action", action);
+	}
+    /*]]>*/
+</script>
+</body>
+</html>

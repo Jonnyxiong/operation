@@ -1,0 +1,390 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ucpaas.sms.mapper.message.OemDataConfigMapper">
+     
+        
+    <resultMap id="rowMapper" type="OemDataConfig">
+        <result property="id" jdbcType="INTEGER" column="id"/>
+        <result property="domainName" jdbcType="VARCHAR" column="domain_name"/>
+        <result property="agentId" jdbcType="INTEGER" column="agent_id"/>
+        <result property="copyrightText" jdbcType="VARCHAR" column="copyright_text"/>
+        <result property="tabLogoUrl" jdbcType="VARCHAR" column="tab_logo_url"/>
+        <result property="logoUrl" jdbcType="VARCHAR" column="logo_url"/>
+        <result property="companyLogoUrl" jdbcType="VARCHAR" column="company_logo_url"/>
+        <result property="apiDocumentUrl" jdbcType="VARCHAR" column="api_document_url"/>
+        <result property="fAQDocumentUrl" jdbcType="VARCHAR" column="FAQ_document_url"/>
+        <result property="navigationBackcolor" jdbcType="VARCHAR" column="navigation_backcolor"/>
+        <result property="navigationTextColor" jdbcType="VARCHAR" column="navigation_text_color"/>
+        <result property="hySmsDiscount" jdbcType="DECIMAL" column="hy_sms_discount"/>
+        <result property="yxSmsDiscount" jdbcType="DECIMAL" column="yx_sms_discount"/>
+        <result property="gjSmsDiscount" jdbcType="DECIMAL" column="gj_sms_discount"/>
+        <result property="testProductId" jdbcType="INTEGER" column="test_product_id"/>
+        <result property="testSmsNumber" jdbcType="INTEGER" column="test_sms_number"/>
+    </resultMap> 
+     
+    <sql id="BASE_COLUMN_LIST">
+        id,
+        domain_name,
+        agent_id,
+        copyright_text,
+        tab_logo_url,
+        logo_url,
+        company_logo_url,
+        api_document_url,
+        FAQ_document_url,
+        navigation_backcolor,
+        navigation_text_color,
+        hy_sms_discount,
+        yx_sms_discount,
+        gj_sms_discount,
+        test_product_id,
+        test_sms_number
+    </sql>
+
+    <insert id="insert" parameterType="OemDataConfig" >
+        INSERT INTO t_sms_oem_data_config 
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                id,
+            </if>
+            <if test="domainName != null" >
+                domain_name,
+            </if>
+            <if test="agentId != null" >
+                agent_id,
+            </if>
+            <if test="copyrightText != null" >
+                copyright_text,
+            </if>
+            <if test="tabLogoUrl != null" >
+                tab_logo_url,
+            </if>
+            <if test="logoUrl != null" >
+                logo_url,
+            </if>
+            <if test="companyLogoUrl != null" >
+                company_logo_url,
+            </if>
+            <if test="apiDocumentUrl != null" >
+                api_document_url,
+            </if>
+            <if test="fAQDocumentUrl != null" >
+                FAQ_document_url,
+            </if>
+            <if test="navigationBackcolor != null" >
+                navigation_backcolor,
+            </if>
+            <if test="navigationTextColor != null" >
+                navigation_text_color,
+            </if>
+            <if test="hySmsDiscount != null" >
+                hy_sms_discount,
+            </if>
+            <if test="yxSmsDiscount != null" >
+                yx_sms_discount,
+            </if>
+            <if test="gjSmsDiscount != null" >
+                gj_sms_discount,
+            </if>
+            <if test="testProductId != null" >
+                test_product_id,
+            </if>
+            <if test="testSmsNumber != null" >
+                test_sms_number
+            </if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id},
+            </if>
+            <if test="domainName != null" >
+                #{domainName},
+            </if>
+            <if test="agentId != null" >
+                #{agentId},
+            </if>
+            <if test="copyrightText != null" >
+                #{copyrightText},
+            </if>
+            <if test="tabLogoUrl != null" >
+                #{tabLogoUrl},
+            </if>
+            <if test="logoUrl != null" >
+                #{logoUrl},
+            </if>
+            <if test="companyLogoUrl != null" >
+                #{companyLogoUrl},
+            </if>
+            <if test="apiDocumentUrl != null" >
+                #{apiDocumentUrl},
+            </if>
+            <if test="fAQDocumentUrl != null" >
+                #{fAQDocumentUrl},
+            </if>
+            <if test="navigationBackcolor != null" >
+                #{navigationBackcolor},
+            </if>
+            <if test="navigationTextColor != null" >
+                #{navigationTextColor},
+            </if>
+            <if test="hySmsDiscount != null" >
+                #{hySmsDiscount},
+            </if>
+            <if test="yxSmsDiscount != null" >
+                #{yxSmsDiscount},
+            </if>
+            <if test="gjSmsDiscount != null" >
+                #{gjSmsDiscount},
+            </if>
+            <if test="testProductId != null" >
+                #{testProductId},
+            </if>
+            <if test="testSmsNumber != null" >
+                #{testSmsNumber}
+            </if>
+        </trim>
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List" >
+        INSERT INTO t_sms_oem_data_config (
+            id,
+            domain_name,
+            agent_id,
+            copyright_text,
+            tab_logo_url,
+            logo_url,
+            company_logo_url,
+            api_document_url,
+            FAQ_document_url,
+            navigation_backcolor,
+            navigation_text_color,
+            hy_sms_discount,
+            yx_sms_discount,
+            gj_sms_discount,
+            test_product_id,
+            test_sms_number
+        )VALUES
+        <foreach collection="list" item="item" index="index" separator="," >  
+            (
+                #{item.id},
+                #{item.domainName},
+                #{item.agentId},
+                #{item.copyrightText},
+                #{item.tabLogoUrl},
+                #{item.logoUrl},
+                #{item.companyLogoUrl},
+                #{item.apiDocumentUrl},
+                #{item.fAQDocumentUrl},
+                #{item.navigationBackcolor},
+                #{item.navigationTextColor},
+                #{item.hySmsDiscount},
+                #{item.yxSmsDiscount},
+                #{item.gjSmsDiscount},
+                #{item.testProductId},
+                #{item.testSmsNumber}
+            )
+        </foreach>
+    </insert>
+    
+     
+    
+ 
+    <update id="update" parameterType="OemDataConfig">
+        UPDATE t_sms_oem_data_config SET 
+            domain_name=#{domainName},
+            agent_id=#{agentId},
+            copyright_text=#{copyrightText},
+            tab_logo_url=#{tabLogoUrl},
+            logo_url=#{logoUrl},
+            company_logo_url=#{companyLogoUrl},
+            api_document_url=#{apiDocumentUrl},
+            FAQ_document_url=#{fAQDocumentUrl},
+            navigation_backcolor=#{navigationBackcolor},
+            navigation_text_color=#{navigationTextColor},
+            hy_sms_discount=#{hySmsDiscount},
+            yx_sms_discount=#{yxSmsDiscount},
+            gj_sms_discount=#{gjSmsDiscount},
+            test_product_id=#{testProductId},
+            test_sms_number=#{testSmsNumber}
+        WHERE 
+            id = #{id} 
+    </update>
+    
+ 
+    
+    <update id="updateSelective" parameterType="OemDataConfig">
+        UPDATE t_sms_oem_data_config 
+            <set>
+                <if test="domainName != null and domainName != ''">
+                    domain_name = #{domainName},
+                </if>
+                <if test="agentId != null and agentId != ''">
+                    agent_id = #{agentId},
+                </if>
+                <if test="copyrightText != null and copyrightText != ''">
+                    copyright_text = #{copyrightText},
+                </if>
+                <if test="tabLogoUrl != null and tabLogoUrl != ''">
+                    tab_logo_url = #{tabLogoUrl},
+                </if>
+                <if test="logoUrl != null and logoUrl != ''">
+                    logo_url = #{logoUrl},
+                </if>
+                <if test="companyLogoUrl != null and companyLogoUrl != ''">
+                    company_logo_url = #{companyLogoUrl},
+                </if>
+                <if test="apiDocumentUrl != null and apiDocumentUrl != ''">
+                    api_document_url = #{apiDocumentUrl},
+                </if>
+                <if test="fAQDocumentUrl != null and fAQDocumentUrl != ''">
+                    FAQ_document_url = #{fAQDocumentUrl},
+                </if>
+                <if test="navigationBackcolor != null and navigationBackcolor != ''">
+                    navigation_backcolor = #{navigationBackcolor},
+                </if>
+                <if test="navigationTextColor != null and navigationTextColor != ''">
+                    navigation_text_color = #{navigationTextColor},
+                </if>
+                <if test="hySmsDiscount != null and hySmsDiscount != ''">
+                    hy_sms_discount = #{hySmsDiscount},
+                </if>
+                <if test="yxSmsDiscount != null and yxSmsDiscount != ''">
+                    yx_sms_discount = #{yxSmsDiscount},
+                </if>
+                <if test="gjSmsDiscount != null and gjSmsDiscount != ''">
+                    gj_sms_discount = #{gjSmsDiscount},
+                </if>
+                <if test="testProductId != null and testProductId != ''">
+                    test_product_id = #{testProductId},
+                </if>
+                <if test="testSmsNumber != null and testSmsNumber != ''">
+                    test_sms_number = #{testSmsNumber}
+                </if>
+            </set>
+        WHERE 
+            id = #{id} 
+    </update>
+
+    <select id="getById" resultMap="rowMapper">
+        SELECT 
+            <include refid="BASE_COLUMN_LIST" />
+        FROM t_sms_oem_data_config
+        WHERE 
+            id = #{id}
+    </select>
+
+    <select id="queryList" parameterType="OemDataConfig" resultMap="rowMapper">
+        SELECT 
+            <include refid="BASE_COLUMN_LIST" /> 
+        FROM t_sms_oem_data_config 
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            <if test="params.id != null and params.id != ''">
+                and id = #{params.id}
+            </if>
+            <if test="params.domainName != null and params.domainName != ''">
+                and domain_name = #{params.domainName}
+            </if>
+            <if test="params.agentId != null and params.agentId != ''">
+                and agent_id = #{params.agentId}
+            </if>
+            <if test="params.copyrightText != null and params.copyrightText != ''">
+                and copyright_text = #{params.copyrightText}
+            </if>
+            <if test="params.tabLogoUrl != null and params.tabLogoUrl != ''">
+                and tab_logo_url = #{params.tabLogoUrl}
+            </if>
+            <if test="params.logoUrl != null and params.logoUrl != ''">
+                and logo_url = #{params.logoUrl}
+            </if>
+            <if test="params.companyLogoUrl != null and params.companyLogoUrl != ''">
+                and company_logo_url = #{params.companyLogoUrl}
+            </if>
+            <if test="params.apiDocumentUrl != null and params.apiDocumentUrl != ''">
+                and api_document_url = #{params.apiDocumentUrl}
+            </if>
+            <if test="params.fAQDocumentUrl != null and params.fAQDocumentUrl != ''">
+                and FAQ_document_url = #{params.fAQDocumentUrl}
+            </if>
+            <if test="params.navigationBackcolor != null and params.navigationBackcolor != ''">
+                and navigation_backcolor = #{params.navigationBackcolor}
+            </if>
+            <if test="params.navigationTextColor != null and params.navigationTextColor != ''">
+                and navigation_text_color = #{params.navigationTextColor}
+            </if>
+            <if test="params.hySmsDiscount != null and params.hySmsDiscount != ''">
+                and hy_sms_discount = #{params.hySmsDiscount}
+            </if>
+            <if test="params.yxSmsDiscount != null and params.yxSmsDiscount != ''">
+                and yx_sms_discount = #{params.yxSmsDiscount}
+            </if>
+            <if test="params.gjSmsDiscount != null and params.gjSmsDiscount != ''">
+                and gj_sms_discount = #{params.gjSmsDiscount}
+            </if>
+            <if test="params.testProductId != null and params.testProductId != ''">
+                and test_product_id = #{params.testProductId}
+            </if>
+            <if test="params.testSmsNumber != null and params.testSmsNumber != ''">
+                and test_sms_number = #{params.testSmsNumber}
+            </if>
+	     </trim>
+    </select>
+
+    <select id="count" parameterType="OemDataConfig" resultType="int">
+        SELECT COUNT(0) 
+        FROM t_sms_oem_data_config 
+        WHERE 
+            1 = 1
+            <if test="id != null and id != ''">
+                and id = #{id}
+            </if>
+            <if test="domainName != null and domainName != ''">
+                and domain_name = #{domainName}
+            </if>
+            <if test="agentId != null and agentId != ''">
+                and agent_id = #{agentId}
+            </if>
+            <if test="copyrightText != null and copyrightText != ''">
+                and copyright_text = #{copyrightText}
+            </if>
+            <if test="tabLogoUrl != null and tabLogoUrl != ''">
+                and tab_logo_url = #{tabLogoUrl}
+            </if>
+            <if test="logoUrl != null and logoUrl != ''">
+                and logo_url = #{logoUrl}
+            </if>
+            <if test="companyLogoUrl != null and companyLogoUrl != ''">
+                and company_logo_url = #{companyLogoUrl}
+            </if>
+            <if test="apiDocumentUrl != null and apiDocumentUrl != ''">
+                and api_document_url = #{apiDocumentUrl}
+            </if>
+            <if test="fAQDocumentUrl != null and fAQDocumentUrl != ''">
+                and FAQ_document_url = #{fAQDocumentUrl}
+            </if>
+            <if test="navigationBackcolor != null and navigationBackcolor != ''">
+                and navigation_backcolor = #{navigationBackcolor}
+            </if>
+            <if test="navigationTextColor != null and navigationTextColor != ''">
+                and navigation_text_color = #{navigationTextColor}
+            </if>
+            <if test="hySmsDiscount != null and hySmsDiscount != ''">
+                and hy_sms_discount = #{hySmsDiscount}
+            </if>
+            <if test="yxSmsDiscount != null and yxSmsDiscount != ''">
+                and yx_sms_discount = #{yxSmsDiscount}
+            </if>
+            <if test="gjSmsDiscount != null and gjSmsDiscount != ''">
+                and gj_sms_discount = #{gjSmsDiscount}
+            </if>
+            <if test="testProductId != null and testProductId != ''">
+                and test_product_id = #{testProductId}
+            </if>
+            <if test="testSmsNumber != null and testSmsNumber != ''">
+                and test_sms_number = #{testSmsNumber}
+            </if>
+    </select>
+	 
+</mapper>
+

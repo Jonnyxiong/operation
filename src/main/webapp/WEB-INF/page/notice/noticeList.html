@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信平台运营系统 - 管理员中心</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    <!--<link th:href="@{/resources/css/jquery.datetimepicker.css}" rel="stylesheet">-->
+
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+    <link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/timePicker.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+    <link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+
+    <style>
+        /* Additional style to fix warning dialog position */
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+        .remind{
+            margin-top:6px;
+        }
+        .time-picker{
+            z-index: 1111111 !important;
+        }
+        .time-picker>ul>li{
+            height:25px !important;
+        }
+        .selected{
+            height:25px !important;
+        }
+        .modal-content{
+            opacity: 1 !important;
+            border:none;
+        }
+        #taskMin{
+            margin-top: 9px;
+        }
+        .tip{
+            background-color: #00a2d4;
+            color:#FFF;
+            line-height: 35px;
+        }
+        .select-width{
+            width:250px !important;
+        }
+        .ml30{
+            margin-left: 30px;
+        }
+    </style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox ">
+                <div class="ibox-title">
+                    <h5>公告管理</h5>
+                </div>
+                <div class="ibox-content">
+                    <div class="row">
+                        <form role="form" class="form-inline" id="mainForm">
+                            <div class="form-group">
+                                <input type="text" placeholder="公告标题/操作人" id="noticeNameOrRealname" name="noticeNameOrRealname" class="form-control" style="width:310px">
+
+                            </div>
+                            <div class="form-group ml30">
+                                <label for="webId">应用平台:</label>
+                                <select id="webId" class="form-control select-width" name="webId">
+                                    <option value="">全部</option>
+                                    <option value="4">用户中心</option>
+                                    <option value="3">运营平台</option>
+                                    <option value="1">调度系统</option>
+                                </select>
+                            </div>
+                            <div class="form-group ml30">
+                                <label for="">状态:</label>
+                                <select id="status" class="form-control select-width" name="status">
+                                    <option value="">全部</option>
+                                    <option value="1">已发布</option>
+                                    <option value="0">待发布</option>
+                                    <option value="2">已取消</option>
+                                </select>
+                            </div>
+                            <button type="button" class="btn btn-primary ml30 " onclick="search()">搜索</button>
+                            <button type="button" class="btn btn-primary ml30 " onclick="add()">添加公告</button>
+                        </form>
+                    </div>
+                    <hr>
+                    <div class="jqGrid_wrapper">
+                        <table id="table_list"></table>
+                        <div id="pager_list"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!--<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>-->
+<script th:src="@{/resources/js/jquery.1.7.2.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/jquery.datetimepicker.full.min.js}"></script>
+<script th:src="@{/resources/js/plugins/timePicker/jquery.timePicker.js}"></script>
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/auth.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+
+
+
+
+    $(document).ready(function () {
+
+        $("#start_time").timePicker({
+            step:1
+        });
+        $("#end_time").timePicker({
+            step:1
+        });
+
+        $.jgrid.defaults.styleUI = "Bootstrap";
+        $("#table_list").jqGrid({
+            url:/*[[@{/notice/searchNotice}]]*/,
+            mtype: 'POST',
+            datatype: "json",
+            jsonReader : {
+                root: "list",
+                page: "currentPage",
+                total: "totalPage",
+                records: "totalCount"
+            },
+            height: 'auto',
+            width:'auto',
+            rownumbers:true,
+            autowidth: true,
+            shrinkToFit: true,
+            autoScroll: true,
+            rowNum: 20,
+            rowList: [10, 20, 30,50],
+            colModel: [
+                {label:"id",name: "id",align: "left",sortable:false,hidden:true},
+                {label:"公告标题",name: "noticeName",align: "left",sortable:false,width:200},
+                {label:"应用平台",name: "webId", align: "left",sortable:false,width:215,
+                    formatter:function(cellvalue){
+                        var webId=cellvalue;
+                        if (webId==1){
+                            return "调度系统";
+                        } else if(webId==4) {
+                            return "用户中心";
+                        } else if(webId==3) {
+                            return "运营平台";
+                        }
+                    }
+                },
+                {label:"操作人",name: "realname",align: "left",sortable:false,width:200},
+                {label:"操作时间",name: "updateTimeToStr",align: "left",sortable:false,width:200},
+                {label:"状态",name: "status", align: "left",sortable:false,width:220,
+                    formatter:function(cellvalue, options, rowObject){
+                        var status=cellvalue;
+                        if (status==1){
+                            return "已发布";
+                        } else if(status==0) {
+                            return "待发布";
+                        }else {
+                            return "已取消";
+                        }
+
+                    }
+
+                },
+                {label:"发布时间",name: "releaseTimeToStr",align: "left",sortable:false,width:200},
+                {label:"操作",name: "total",index: "total",align: "left",sortable:false,width:220,
+                    formatter:function(cellvalue, options, rowObject){
+                        var id=rowObject.id;
+                        var status=rowObject.status;
+                        var switcher = "";
+                        switcher += "<button type='button' class='btn btn-link btn-xs' status='"+status+"'  onclick=\"detail('"+id+"',this)\" title='详情'>详情</button>";
+                        if(status==0 || status == 2){
+                            switcher += "<button type='button' class='btn btn-link btn-xs' status='"+status+"'  onclick=\"edit('"+id+"',this)\" title='编辑'>编辑</button>";
+                        }
+                        switcher += "<button type='button' class='btn btn-link btn-xs' onclick=\"del('"+id+"','1',this)\" title='删除'>删除</button>";
+                        if(status==0)
+                        switcher += "<button type='button' class='btn btn-link btn-xs' status='"+status+"'  onclick=\"cancel('"+id+"',this)\" title='取消'>取消</button>";
+                        return switcher;
+                    }
+                }
+            ],
+            pager: "#pager_list",
+            viewrecords: true,
+            hidegrid: false
+        });
+
+        $(window).bind("resize", function () {
+            var width = $(".jqGrid_wrapper").width();
+            $("#table_list").setGridWidth(width);
+        })
+
+    });
+
+
+
+    function changeStatus(id, status, btn) {
+        var url = '/managerCenter/taskAlarmSetting/updateStatus';
+        layer.confirm('您确定改变状态吗', {
+            btn: ['确定','取消'] //按钮
+        },function(){
+            layer.closeAll();
+            $.ajax({
+                type:'post',
+                url:url,
+                data:{
+                    id:id,
+                    status:status
+                },
+                cache:false,
+                dataType:'json',
+                success:function(data){
+                    $("#table_list").jqGrid('setGridParam',{
+                        datatype:'json',
+                        postData: {
+                            condition: $("#condition").val(),
+                            departmentId: $("#departmentId").val(),
+                            belongBusiness: $("#belongBusiness").val(),
+                            startTime: $("#start_time_day").val(),
+                            endTime: $("#end_time_day").val()
+                        } //发送数据
+//            page:1
+                    }).trigger("reloadGrid"); //重新载入
+                }
+
+            });
+        });
+
+    }
+
+    function edit(id,btn) {
+        window.location.href = '/notice/edit?id=' + id;
+    }
+
+    // 查看公告详情
+    function detail(id,btn) {
+        window.location.href = '/notice/noticeDetails?id=' + id;
+    }
+
+    //取消公告
+    function cancel(id,btn) {
+        layer.confirm('您确定取消公告吗', {
+            btn: ['确定','取消'] //按钮
+        },function(){
+            layer.closeAll();
+            $.ajax({
+                type:'post',
+                url:'/notice/updateStatus',
+                data:{
+                    id:id,
+                    status:2
+                },
+                cache:false,
+                dataType:'json',
+                success:function(data){
+                    layer.msg(data.msg)
+                    $("#table_list").jqGrid('setGridParam',{
+                        datatype:'json',
+                        postData: {
+                            condition: $("#condition").val(),
+                            departmentId: $("#departmentId").val(),
+                            belongBusiness: $("#belongBusiness").val(),
+                            startTime: $("#start_time_day").val(),
+                            endTime: $("#end_time_day").val()
+                        } //发送数据
+//            page:1
+                    }).trigger("reloadGrid"); //重新载入
+                }
+
+            });
+        });
+    }
+
+    function reload() {
+        event.preventDefault();
+        $("#table_list").jqGrid('setGridParam',{
+            datatype:'json',
+            postData: {
+                noticeNameOrRealname: $("#noticeNameOrRealname").val(),
+                webId: $("#webId").val(),
+                status:$("#status").val()
+            }, //发送数据
+        }).trigger("reloadGrid"); //重新载入
+    }
+    function search() {
+        $("#table_list").jqGrid('setGridParam',{
+            datatype:'json',
+            postData: {
+                noticeNameOrRealname: $("#noticeNameOrRealname").val(),
+                webId: $("#webId").val(),
+                status:$("#status").val()
+            }, //发送数据
+            page:1
+        }).trigger("reloadGrid"); //重新载入
+    }
+
+
+
+    //添加公告
+    function add() {
+        window.location.href = '/notice/addNotice'
+    }
+
+    //删除公告
+    function del(id, status, btn) {
+        layer.confirm('您确定删除公告吗', {
+            btn: ['确定','取消'] //按钮
+        },function(){
+            layer.closeAll();
+            $.ajax({
+                type:'post',
+                url:'/notice/deleteNotice',
+                data:{
+                    id:id
+                },
+                cache:false,
+                dataType:'json',
+                success:function(data){
+                    $("#table_list").jqGrid('setGridParam',{
+                        datatype:'json',
+                        postData: {
+                            condition: $("#condition").val(),
+                            departmentId: $("#departmentId").val(),
+                            belongBusiness: $("#belongBusiness").val(),
+                            startTime: $("#start_time_day").val(),
+                            endTime: $("#end_time_day").val()
+                        } //发送数据
+//            page:1
+                    }).trigger("reloadGrid"); //重新载入
+                }
+
+            });
+        });
+    }
+    /*]]>*/
+</script>
+</body>
+</html>

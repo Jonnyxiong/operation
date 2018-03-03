@@ -1,0 +1,391 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 运营平台财务管理 -->
+<mapper namespace="agentFinance">
+	
+	<sql id="queryAgentFinanceConditon">
+		<where>
+			1 = 1
+			<if test="agentInfo != null and agentInfo != ''">
+				and 
+				(
+					ai.agent_id like CONCAT('%',TRIM(#{agentInfo}),'%' )
+					or ai.agent_name like CONCAT('%',TRIM(#{agentInfo}),'%' )
+					or ai.mobile like CONCAT('%',TRIM(#{agentInfo}),'%' )
+				    or tu.email like CONCAT('%',TRIM(#{agentInfo}),'%' )
+				)
+			</if>
+			<if test="agentType != null and agentType != ''">
+				and
+				ai.agent_type=#{agentType}
+			</if>
+
+
+		</where>
+	</sql>
+	
+	<select id="queryAgentFinance" resultType="map">
+		SELECT
+			ai.agent_id,
+			ai.agent_name,
+			ai.agent_type,
+			tu.email,
+			ai.mobile,
+			ai.oauth_status,
+			ai.status,
+			TRUNCATE(aa.balance,2) AS balance,
+			TRUNCATE(aa.commission_income,2) AS commission_income,
+			TRUNCATE(aa.rebate_income,2) AS rebate_income,
+			TRUNCATE(aa.deposit,2) AS deposit,
+			IFNULL(TRUNCATE(rec.amount,2),0.00) AS amount
+		FROM
+			t_sms_agent_info ai 
+		INNER JOIN t_sms_agent_account aa 
+		ON ai.agent_id = aa.agent_id
+		LEFT JOIN (
+			SELECT
+				r.amount,r.agent_id 
+			FROM t_sms_agent_credit_record r 
+			INNER JOIN (
+				SELECT MAX(create_time) AS create_time,agent_id 
+				FROM t_sms_agent_credit_record GROUP BY agent_id
+			) cr
+			ON cr.agent_id = r.agent_id AND cr.create_time = r.create_time
+		) rec
+		ON rec.agent_id = ai.agent_id
+		LEFT JOIN  t_sms_user tu on tu.id=ai.admin_id
+		<include refid="queryAgentFinanceConditon" />
+		ORDER BY ai.agent_id DESC
+		${limit}
+	</select>
+
+
+	<select id="queryAgentFinanceTotal" resultType="map">
+		SELECT
+
+		SUM(IFNULL(TRUNCATE(aa.balance,2),0.00)) AS balance_total,
+		SUM(IFNULL(TRUNCATE(aa.commission_income,2),0.00)) AS commission_income_total,
+		SUM(IFNULL(TRUNCATE(aa.rebate_income,2),0.00)) AS rebate_income_total,
+		SUM(IFNULL(TRUNCATE(aa.deposit,2),0.00)) AS deposit_total,
+		SUM(IFNULL(TRUNCATE(rec.amount,2),0.00)) AS amount_total
+		FROM
+		t_sms_agent_info ai
+		INNER JOIN t_sms_agent_account aa
+		ON ai.agent_id = aa.agent_id
+		LEFT JOIN (
+		SELECT
+		r.amount,r.agent_id
+		FROM t_sms_agent_credit_record r
+		INNER JOIN (
+		SELECT MAX(create_time) AS create_time,agent_id
+		FROM t_sms_agent_credit_record GROUP BY agent_id
+		) cr
+		ON cr.agent_id = r.agent_id AND cr.create_time = r.create_time
+		) rec
+		ON rec.agent_id = ai.agent_id
+		LEFT JOIN  t_sms_user tu on tu.id=ai.admin_id
+		<include refid="queryAgentFinanceConditon" />
+
+
+	</select>
+
+
+
+	<select id="queryAgentFinanceCount" resultType="map">
+		select count(0) as totalCount from(
+			SELECT
+				0
+			FROM
+				t_sms_agent_info ai 
+			INNER JOIN t_sms_agent_account aa 
+			ON ai.agent_id = aa.agent_id
+		LEFT JOIN  t_sms_user tu on tu.id=ai.admin_id
+			<include refid="queryAgentFinanceConditon" />
+		) m
+	</select>
+	<!-- 导出Excel:查询满足条件的所有的记录 -->
+	<select id="queryALLAgentFinance" resultType="map">
+		SELECT
+
+			ai.agent_id,
+			ai.agent_name,
+			CASE ai.agent_type
+			WHEN 1 THEN '销售代理商'
+			WHEN 2 THEN '品牌代理商'
+			WHEN 3 THEN '资源合作商'
+			WHEN 4 THEN '代理商和资源合作'
+			WHEN 5 THEN 'OEM代理商'
+			END AS agentType,
+			ai.agent_type,
+			tu.email,
+			ai.mobile,
+			ai.oauth_status,
+			ai.status,
+			TRUNCATE(aa.balance,2) AS balance,
+			TRUNCATE(aa.commission_income,2) AS commission_income,
+			TRUNCATE(aa.rebate_income,2) AS rebate_income,
+			TRUNCATE(aa.deposit,2) AS deposit,
+			IFNULL(TRUNCATE(rec.amount,2),0.00) AS amount
+		FROM
+			t_sms_agent_info ai 
+		INNER JOIN t_sms_agent_account aa 
+		ON ai.agent_id = aa.agent_id
+		LEFT JOIN (
+			SELECT
+				r.amount,r.agent_id 
+			FROM t_sms_agent_credit_record r 
+			INNER JOIN (
+				SELECT MAX(create_time) AS create_time,agent_id 
+				FROM t_sms_agent_credit_record GROUP BY agent_id
+			) cr
+			ON cr.agent_id = r.agent_id AND cr.create_time = r.create_time
+		) rec
+		ON rec.agent_id = ai.agent_id
+		LEFT JOIN  t_sms_user tu on tu.id=ai.admin_id
+		<include refid="queryAgentFinanceConditon" />
+		ORDER BY ai.agent_id DESC
+	</select>
+	<select id="getAgentInfoByAgentID" resultType="map">
+		SELECT
+			ai.agent_id,
+			ai.agent_name,
+			ai.mobile,
+			ai.agent_type,
+			TRUNCATE(aa.balance, 2) AS balance,
+			TRUNCATE(aa.commission_income, 2) AS commission_income,
+			TRUNCATE(aa.rebate_income, 2) AS rebate_income,
+			TRUNCATE(aa.deposit, 2) AS deposit,
+			IFNULL(TRUNCATE(rec.amount, 2), 0.00) AS amount
+		FROM
+			t_sms_agent_info ai
+		INNER JOIN t_sms_agent_account aa ON ai.agent_id = aa.agent_id
+		LEFT JOIN (
+			SELECT
+				r.agent_id,
+				r.amount
+			FROM
+				t_sms_agent_credit_record r
+			WHERE
+				r.agent_id = #{agent_id}
+			ORDER BY
+				r.create_time DESC
+			LIMIT 1
+		) rec ON rec.agent_id = ai.agent_id
+		WHERE
+			ai.agent_id = #{agent_id}
+		LIMIT 1
+	</select>
+	
+	
+	<update id="updateAgentBalance">
+		UPDATE t_sms_agent_account
+		<set>
+			balance = balance + #{operateAmount}
+			<if test="operateType == '充值' or operateType == '赠送'">
+				,accumulated_recharge = accumulated_recharge + #{operateAmount}
+			</if>
+		</set>
+		WHERE
+			agent_id = #{agent_id}
+			<if test=" balance != null and balance != ''">
+				AND balance = #{balance}
+			</if>	
+	</update>
+	
+	<select id="getAgentAccout" resultType="map">
+		SELECT
+			aa.balance,
+			aa.deposit,
+			aa.credit_balance
+		FROM
+			t_sms_agent_account aa
+		WHERE
+<!-- 			noticeService.balance >= #{operateAmount} AND -->
+			aa.agent_id = #{agent_id}
+	</select>
+	
+	
+	<insert id="insertAgentBalanceBill">
+		INSERT INTO t_sms_agent_balance_bill (
+			agent_id,
+			amount,
+			balance,
+			payment_type,
+			financial_type,
+			create_time,
+			client_id,
+			admin_id,
+			remark
+		)
+		VALUES
+			(
+				#{agent_id},
+				ABS(#{operateAmount}),
+				(SELECT balance FROM t_sms_agent_account aa WHERE aa.agent_id = #{agent_id}),
+				#{payment_type},
+				#{financial_type},
+				NOW(),
+				#{clientId},
+				#{admin_id},
+				#{remark}
+			)
+	</insert>
+	
+	<!-- 代理商财务管理 -->
+	<!-- 1 余额操作 -->
+	<select id="getClientByCondition" resultType="map">
+		SELECT
+			a.clientid,
+			a.name,
+			a.mobile as clientmobile,
+			a.`status`,
+			CASE a.`status`
+			WHEN 1 THEN '启用'
+			WHEN 5 THEN '冻结'
+			WHEN 6 THEN '注销'
+			WHEN 7 THEN '锁定'
+			END AS status_name,
+			a.oauth_status,
+			CASE a.oauth_status
+			WHEN 2 THEN '待认证'
+			WHEN 3 THEN '认证通过'
+			WHEN 4 THEN '认证不通过'
+			END AS oauth_status_name,
+			DATE_FORMAT(a.createtime,'%Y-%m-%d %T') 
+			AS createtime
+		FROM
+			t_sms_account a
+		WHERE
+			a.agent_id = #{agent_id}
+		<if test="ClientId != null and ClientId != ''">
+			AND (
+				a.clientid like '%${ClientId}%'
+				OR
+				a.mobile like '%${clientCondition}%'
+				OR
+				a.name like '%${clientCondition}%'
+			)
+		</if>
+	</select>
+
+
+	<select id="getClientByCondition1" resultType="map">
+		SELECT
+		a.clientid,
+		a.name,
+		a.mobile as clientmobile,
+		a.`status`,
+		CASE a.`status`
+		WHEN 1 THEN '启用'
+		WHEN 5 THEN '冻结'
+		WHEN 6 THEN '注销'
+		WHEN 7 THEN '锁定'
+		END AS status_name,
+		a.oauth_status,
+		CASE a.oauth_status
+		WHEN 2 THEN '待认证'
+		WHEN 3 THEN '认证通过'
+		WHEN 4 THEN '认证不通过'
+		END AS oauth_status_name,
+		DATE_FORMAT(a.createtime,'%Y-%m-%d %T')
+		AS createtime
+		FROM
+		t_sms_account a
+		WHERE
+		a.agent_id = #{agent_id}
+		AND  a.clientid=#{ClientId}
+	</select>
+
+	<select id="getClientById" resultType="map">
+		SELECT
+			a.clientid,
+			a.name,
+			a.mobile as clientmobile,
+			a.`status`,
+			CASE a.`status`
+			WHEN 1 THEN '启用'
+			WHEN 5 THEN '冻结'
+			WHEN 6 THEN '注销'
+			WHEN 7 THEN '锁定'
+			END AS status_name,
+			a.oauth_status,
+			CASE a.oauth_status
+			WHEN 2 THEN '待认证'
+			WHEN 3 THEN '认证通过'
+			WHEN 4 THEN '认证不通过'
+			END AS oauth_status_name,
+			DATE_FORMAT(a.createtime,'%Y-%m-%d %T') 
+			AS createtime
+		FROM
+			t_sms_account a
+		WHERE
+			a.agent_id = #{agent_id}
+		AND	
+			a.clientid = #{clientId}
+	</select>
+	
+	<update id="updateAgentDeposit">
+		UPDATE t_sms_agent_account
+		SET
+			deposit = deposit + #{operateAmount}
+		WHERE
+			agent_id = #{agent_id}
+			<if test=" deposit != null and deposit != ''">
+				AND deposit = #{deposit}
+			</if>	
+	</update>
+	<insert id="insertAgentDepositBill">
+		INSERT INTO t_sms_agent_deposit_bill (
+			agent_id,
+			payment_type,
+			financial_type,
+			amount,
+			balance,
+			create_time,
+			admin_id,
+			remark
+		)
+		VALUES(
+				#{agent_id},
+				#{payment_type},
+				#{financial_type},
+				ABS(#{operateAmount}),
+				(SELECT deposit FROM t_sms_agent_account aa WHERE aa.agent_id = #{agent_id}),
+				NOW(),
+				#{admin_id},
+				#{remark}
+			)
+	</insert>
+	
+	<update id="updateAgentCredit">
+		UPDATE t_sms_agent_account
+		SET
+			credit_balance = #{operateAmount}
+		WHERE
+			agent_id = #{agent_id}
+			<if test=" balance != null and balance != ''">
+				AND balance = #{balance}
+			</if>	
+	</update>
+	<insert id="insertAgentCreditRecord">
+		INSERT INTO t_sms_agent_credit_record(
+			agent_id,
+			payment_type,
+			amount,
+			create_time,
+			admin_id,
+			remark
+		)
+		VALUES(
+			#{agent_id},
+			#{payment_type},
+			#{operateAmount},
+			NOW(),
+			#{admin_id},
+			#{remark}
+		)
+	</insert>
+	
+</mapper> 

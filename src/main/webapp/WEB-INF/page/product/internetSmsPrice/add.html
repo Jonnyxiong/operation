@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信平台运营系统 - 管理员中心</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+    <!--<link href="../../../resources/css/plugins/iCheck/skins/square/green.css" th:href="@{/resources/css/plugins/iCheck/skins/square/green.css}" rel="stylesheet">-->
+    <link th:href="@{/resources/css/plugins/iCheck/custom.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+    <style>
+        /* Additional style to fix warning dialog position */
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+    </style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox "> 
+                <div class="ibox-content">
+                    <form class="form-horizontal m-t" id="mainForm">
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">国际名称：</label>
+                            <div class="col-sm-8">
+			                   	<input type="text" name="intername" class="form-control"  placeholder="例：China" maxlength="128"/>
+			                   	<span id="msg_intername" style="display:none;color: red"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">中文名称：</label>
+                            <div class="col-sm-8">
+				                  <input type="text" name="areaname" class="form-control" placeholder="例：中国" maxlength="128"/>
+				                  <span id="msg_areaname" style="display:none;color: red"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">国际代码：</label>
+                            <div class="col-sm-8">
+			                  <input type="text" name="prefix" class="form-control" placeholder="例：86" onkeyup='this.value=this.value.replace(/\D/gi,"")' maxlength="11"/>
+			                  <span id="msg_prefix" style="display:none;color: red"></span>
+                            </div>
+                        </div> 
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">国际简码：</label>
+                            <div class="col-sm-8">
+				                  <input type="text" name="intercode" class="form-control" placeholder="例：CN" onkeyup="this.value=this.value.toUpperCase()"/>
+				                  <span id="msg_intercode" style="display:none;color: red"></span>
+                            </div>
+                        </div> 
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">国际价格（元）：</label>
+                            <div class="col-sm-8">
+					              <input type="text" name="fee" class="form-control" maxlength="12" placeholder="" onkeyup="value=value.replace(/[^\-?\d.]/g,'')"/>
+					              <span id="msg_fee" style="display:none;color: red"></span>
+					              <span class="help-block">各个字段均不能为空</span>
+                            </div>
+                        </div> 
+					     <div class="form-group">
+					        <div class="col-sm-12 col-sm-offset-3">
+					            <button type="button" class="btn btn-sm btn-success" onclick="save(this)">添加</button> 
+					            <button type="button" class="btn btn-sm btn-error" onclick="goback()">返回</button> 
+					        </div>
+					    </div> 
+                    </form>
+                </div>
+
+                    <p>&nbsp;</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/iCheck/icheck.min.js}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+
+<script th:src="@{/resources/js/jquery.form.js}"></script>
+<script th:src="@{/resources/js/plugins/validate/jquery.validate.min.js}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+	
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    
+
+var msgTime = 1500;
+var validate;
+$(function(){
+	$.validator.defaults.ignore = "";
+	
+	//表单验证规则
+	validate = $("#mainForm").validate({
+		rules: {
+			intername:{
+				required:true,
+				minlength:1,
+				maxlength:128
+			},
+			areaname:{
+				required:true,
+				minlength:1,
+				maxlength:128
+			},
+			prefix:{
+				required:true,
+				digits:true,
+				min:0,
+				max:999999999
+			},
+			intercode:{
+				required:true,
+				minlength:1,
+				maxlength:20,
+				english:true
+			},
+			fee:{
+				required:true,
+				min:0,
+				max:99.99
+			},
+		},
+		messages: {
+			intername:{
+				required:"国际名称不能为空",
+				minlength:"国际名称不能为空",
+				maxlength:"字符长度不能超过128"
+			},
+			areaname:{
+				required:"中文名称不能为空",
+				minlength:"中文名称不能为空",
+				maxlength:"字符长度不能超过128"
+			},
+			prefix:{
+				required:"国际代码不能为空",
+				digits:"国际代码只能是整数",
+				min:"国际代码不能为空",
+				max:"国际代码长度不能超过9位",
+				english:"只能输入字母"
+			},
+			intercode:{
+				required:"国际简码不能为空",
+				minlength:"国际简码不能为空",
+				maxlength:"国际简码长度不能超过20位"
+			},
+			fee:{
+				required:"国际价格不能为空",
+				min:"国际价格不能为负",
+				max:"国际价格不能超过99.99"
+			},
+		}
+	});
+
+	// 只能输入英文
+	jQuery.validator.addMethod("english", function(value, element) {
+	    var chrnum = /^([a-zA-Z]+)$/;
+	    return this.optional(element) || (chrnum.test(value));
+	}, "只能输入字母");
+	
+	// 只能输入字母数组和.
+	jQuery.validator.addMethod("intername", function(value, element) {
+		var reg = /(\w|\d|\.){1,}/;
+	    return this.optional(element) || (reg.test(value));
+	}, "只能输入字母数字和 .");
+});
+	
+function save(btn){
+	if(!validate.form()){
+		return;
+	}
+	var options = {
+			beforeSubmit : function() {
+				$(btn).attr("disabled", true);
+			},
+			success : function(data) {
+				$(btn).attr("disabled", false);
+				if(data.success){
+					layer.msg(data.msg, {icon: 1},msgTime); 
+					window.location.href=/*[[@{/product/internetSmsPrice/query}]]*/;
+				}else{
+					layer.msg(data.msg, {icon: 2}); 
+				}
+			},
+			url : /*[[@{/product/internetSmsPrice/add}]]*/,
+			type : "post",
+			timeout:30000
+		};
+	layer.confirm("确认添加？", function(index){
+		$("#mainForm").ajaxSubmit(options);
+	    layer.close(index);
+	});
+};	
+	
+function goback(){
+	window.location.href=/*[[@{/product/internetSmsPrice/query}]]*/;
+}
+
+    /*]]>*/
+</script>
+</body>
+</html>

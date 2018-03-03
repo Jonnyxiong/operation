@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:th="http://www.thymeleaf.org"
+	  lang="zh-cn">
+<head>
+	<meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+	<meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+	<title>短信云平台运营系统 - 发票申请</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+	<link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+	<link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet">
+	<link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+	<link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+	<style>
+		/* Additional style to fix warning dialog position */
+		#alertmod_table_list_2 {
+			top: 900px !important;
+		}
+		.close{
+			opacity: 1;
+		}
+		.modal-content{
+			opacity: 1 !important;
+			border:none;
+		}
+	</style>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content  animated fadeInRight">
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="tabs-container">
+				<ul class="nav nav-tabs">
+					<li class="active" th:if="${menus.fpsq}">
+						<a href="javascript:;" id="zkkh">发票申请</a>
+					</li>
+					<li class="" th:if="${menus.sqjl}">
+						<a href="/finance/invoice/record/list" id="fpsq">申请记录</a>
+					</li>
+					<li class="" th:if="${menus.fpxx}">
+						<a  href="/finance/invoice/info/list" id="fpxx">发票信息</a>
+					</li>
+					<li class="" th:if="${menus.fpsh}">
+						<a  href="/finance/invoice/audit/list" id="fpsh">发票审核</a>
+					</li>
+				</ul>
+
+				<div class="tab-pane active" th:if="${menus.fpsq}">
+					<div class="panel-body">
+
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/auth.js}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+		var menus = [[${menus}]];
+		if (menus.fpsq) {
+		} else if (menus.sqjl) {
+			$("#sqjl")[0].click();
+		} else if (menus.fpxx) {
+			$("#fpxx")[0].click();
+		} else if (menus.fpsh) {
+            $("#fpsh")[0].click();
+        }
+    /*]]>*/
+</script>
+
+</body>
+</html>

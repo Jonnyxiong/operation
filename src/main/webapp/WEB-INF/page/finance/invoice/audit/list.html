@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信云平台运营系统 - 发票管理</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+    <link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+    <link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/select2.css}" rel="stylesheet">
+    <style>
+        /* Additional style to fix warning dialog position */
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+
+        .close {
+            opacity: 1;
+        }
+
+        .modal-content {
+            opacity: 1 !important;
+            border: none;
+        }
+
+        label {
+            font-weight: normal;
+            text-align: right !important;
+        }
+
+        #normal_msg .form-group {
+            margin-top: 20px;
+        }
+
+        #increment_msg .form-group {
+            margin-top: 15px;
+        }
+        #mailing .form-group {
+            margin-top: 15px;
+        }
+
+        .closemsg {
+            width: 300px;
+            color: white;
+        }
+
+        #container-box {
+            border: 1px dashed #000;
+            height: 350px;
+            box-sizing: border-box;
+        }
+
+        #container-sand {
+            box-sizing: border-box;
+            padding: 20px;
+            padding-bottom: 0;
+        }
+
+        #Addressee {
+            border: 1px dashed #000;
+            height: 120px;
+            box-sizing: border-box;
+        }
+
+        #sjr_msg {
+            box-sizing: border-box;
+            padding: 20px;
+            padding-bottom: 0;
+        }
+
+        /*#code {*/
+            /*text-align: left !important;*/
+        /*}*/
+
+        #increment_msg #form_msg .isSend {
+            display: none;
+        }
+
+        #increment_msg #form_msg .isFail {
+            display: none;
+        }
+        .mr30 {
+            margin-right: 30px;
+        }
+        .btn-green {
+            background-color: green;
+            color: #fff;
+        }
+        .btn-green:hover {
+            background-color: green;
+            color: #fff;
+        }
+        .btn-error {
+            background-color: grey;
+        }
+        .col-sm-7 {
+            padding-left: 0;
+        }
+        .select2 span{
+            display:block !important;
+            margin-top: 0px !important;
+        }
+        .select2-container {
+            width: 100px !important;
+        }
+        .select2-dropdown {
+            width: 105px !important;
+        }
+        .select2-container .select2-selection--single{
+            width:100px;
+        }
+        .sjAddress {
+            position: absolute;
+            width:350px !important;
+        }
+    </style>
+</head>
+<body class="gray-bg">
+<div class="wrapper wrapper-content  animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="tabs-container">
+                <ul class="nav nav-tabs">
+                    <li th:if="${menus.fpsq}"><a href="/finance/invoice/app">发票申请</a>
+                    </li>
+                    <li th:if="${menus.sqjl}"><a href="/finance/invoice/record/list">申请记录</a>
+                    </li>
+                    <li th:if="${menus.fpxx}"><a href="/finance/invoice/info/list">发票信息</a>
+                    </li>
+                    <li class="active" th:if="${menus.fpsh}"><a href="/finance/invoice/audit/list">发票审核</a>
+                    </li>
+                </ul>
+                <div id="tab-1" class="tab-pane active" th:if="${menus.fpsh}">
+                    <div class="panel-body">
+                        <div class="ibox ">
+                            <div class="col-sm-12">
+                                <div class="ibox ">
+                                    <!-- 搜索条件 -->
+                                    <div class="ibox-content">
+                                        <input type="hidden" th:value="${jsmsMenu.menuId}" id="menuId">
+                                        <div class="row">
+                                            <div class="col-sm-12">
+                                                <form class="form-inline" id="mainForm">
+                                                    <div class="form-group">
+                                                        <input type="text" style="width:230px;"
+                                                               placeholder="客户ID/客户名称/发票抬头/申请ID" name="condition"
+                                                               id="condition_1" class="form-control"
+                                                               onkeydown="if(event.keyCode==13){return false;}">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="belongSale">归属销售：</label>
+                                                        <select id="belongSale" name="belongSale"  class="form-control">
+                                                        </select>
+                                                        <input type="hidden" name="belongSaleName" id="belongSaleName">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="invoiceType">发票类型：</label>
+                                                        <select id="invoiceType" name="invoiceType"
+                                                                class="form-control">
+                                                            <!--发票类型，1：普通发票（电子）2：增值税专票-->
+                                                            <option value="">全部</option>
+                                                            <option value="1">普通发票（电子）</option>
+                                                            <option value="2">增值税专票</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="status">申请状态：</label>
+                                                        <select id="status" name="status" class="form-control">
+                                                            <!--0：待审核，1：已取消，2：审核不通过，3：开票中，4：已邮寄，5：已返还-->
+                                                            <option value="0">待审核</option>
+                                                            <option value="">全部</option>
+                                                            <option value="3">开票中</option>
+                                                            <option value="4">已邮寄</option>
+                                                            <option value="2">审核不通过</option>
+                                                            <option value="1">已取消</option>
+                                                            <option value="5">已返还</option>
+                                                        </select>
+                                                    </div>
+                                                    <!-- 时间选择 -->
+                                                    <div class="form-group" id="sandbox-container">
+                                                        <div class="form-group pull-right">申请时间:
+                                                            <input placeholder="开始时间" class="form-control layer-date"
+                                                                   name="startDateTime" id="startDateTime"/>至
+                                                            <input placeholder="结束时间" class="form-control layer-date"
+                                                                   name="endDateTime" id="endDateTime"/>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                    <span>&nbsp;&nbsp;<button type="button"
+                                                                              class="btn btn-sm btn-danger"
+                                                                              onclick="search()">搜索</button></span>
+                                                        <span>&nbsp;&nbsp;<a href="javascript:;"
+                                                                             class="btn btn-sm btn-primary"
+                                                                             onclick="reset()">重置</a></span>
+                                                        <span>&nbsp;&nbsp;<button type="button"
+                                                                                  class="btn btn-sm btn-primary hide"
+                                                                                  onclick="exportExcel()" data-menuId='6325'>导出Excel</button></span>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="ibox-content">
+                                        <div class="jqGrid_wrapper">
+                                            <table id="table_list_1"></table>
+                                            <div id="pager_list"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--查看普票信息-->
+<div class="pop-grid" id="normal_msg" style="display: none;">
+    <p style="margin:20px 0 0 20px">开票信息</p>
+    <div id="container-sand">
+        <div id="container-box">
+            <form role="form" class="form-inline" id="form_msg">
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">客户ID：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key paymentId" data-key="agentId">-</div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">申请ID：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key paymentAmount" data-key="invoiceId" id="invoiceId_1">-</div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">客户名称：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key paymentMode" data-key="name">-</div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">申请人：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key payTime" data-key="applicantStr">-</div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">归属销售：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key agentId" data-key="belongSaleStr">-</div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">申请时间：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key agentName" data-key="createTime">-</div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">开票项目：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key paymentId" data-key="paymentId">信息服务费</div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">申请状态：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key paymentAmount" data-key="statusStr">-</div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">发票金额：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key paymentMode" data-key="invoiceAmountStr">-</div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">备注：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key payTime" data-key="remark">-</div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">发票类型：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key agentId" data-key="invoiceTypeStr">-</div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">更新时间：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key agentName" data-key="updateTime">-</div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">发票抬头：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key sjAddress" data-key="invoiceHead">-</div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">审核人：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key paymentAmount" data-key="auditorStr">-</div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label" id="code">统一社会信用代码：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key paymentMode" data-key="creditCode">-</div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6 isFail">
+                    <label class="col-sm-5 control-label">审核不通过原因：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key payTime" data-key="auditFailCause">-</div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">电子邮箱：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key payTime" data-key="email">-</div>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+    <form action="" id="form_check_normal">
+        <div class="form-group col-sm-12" style="text-align: center;margin-top: 50px;">
+            <a href="javascript:;" class="btn btn-lg btn-green  closemsg" onclick="closemsg()">关闭</a>
+        </div>
+    </form>
+    <form action="" id="form_normal_audit">
+        <div class="form-group col-sm-12" style="text-align: center;margin-top: 50px;">
+            <a href="javascript:;" class="btn btn-lg btn-green  closemsg" onclick="auditPassNormal()">审核通过</a>
+            <a href="javascript:;" class="btn btn-lg btn-error  closemsg" onclick="auditBack()">审核不通过</a>
+        </div>
+    </form>
+</div>
+<!--查看增票信息-->
+<div class="pop-grid" id="increment_msg" style="display: none;">
+    <p style="margin:20px 0 0 20px">开票信息</p>
+    <div id="container-sand">
+        <div id="container-box">
+            <form role="form" class="form-inline" id="form_msg">
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">客户ID：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key paymentId" data-key="agentId">-</div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">客户名称：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key paymentAmount" data-key="name">-</div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">开票项目：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key paymentMode" data-key="paymentMode">信息服务费</div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">归属销售：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key paymentMode" data-key="belongSaleStr">-</div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">发票金额：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key payTime" data-key="invoiceAmountStr">-</div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">申请ID：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key agentId" data-key="invoiceId" id="invoiceId_2">-</div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">发票类型：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key agentName" data-key="invoiceTypeStr">-</div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">申请人：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key paymentId" data-key="applicantStr">-</div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">发票抬头：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key sjAddress" data-key="invoiceHead">-</div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">申请时间：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key paymentMode" data-key="createTime">-</div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label" id="code">统一社会信用代码：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key payTime" data-key="creditCode">-</div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">申请状态：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key agentId" data-key="statusStr">-</div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">开户银行：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key agentName" data-key="bank">-</div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">备注：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key paymentId" data-key="remark">-</div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">开户账号：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key paymentAmount" data-key="bankAccount">-</div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">更新时间：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key paymentMode" data-key="updateTime">-</div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">公司固定电话：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key payTime" data-key="telphone">-</div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">审核人：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key payTime" data-key="auditorStr">-</div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">公司注册地址：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key sjAddress" data-key="companyRegAddr">-</div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6 isFail">
+                    <label class="col-sm-5 control-label">审核不通过原因：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key payTime" data-key="auditFailCause">-</div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <p style="margin:20px 0 0 20px">收件人信息</p>
+    <div id="sjr_msg">
+        <div id="Addressee">
+            <form role="form" class="form-inline" id="form_msg">
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">收件人：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key paymentId" data-key="toName">-</div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">收件人手机：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key paymentAmount" data-key="toPhone">-</div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6 ">
+                    <label class="col-sm-5 control-label">收件人地址：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key sjAddress paymentMode" data-key="toAddrDetail">-</div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label class="col-sm-5 control-label">收件人QQ：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key payTime" data-key="toQq">-</div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6 isSend">
+                    <label class="col-sm-5 control-label">快递公司：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key paymentMode" data-key="expressCompany">-</div>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6 isSend">
+                    <label class="col-sm-5 control-label">快递单号：</label>
+                    <div class="col-sm-7">
+                        <div class="from-control js-key payTime" data-key="expressOrder">-</div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <form action="" id="form_check">
+        <div class="form-group col-sm-12" style="text-align: center;margin-top: 50px;">
+            <a href="javascript:;" class="btn btn-lg btn-green  closemsg" onclick="closemsg()">关闭</a>
+        </div>
+    </form>
+    <form action="" id="form_audit">
+        <div class="form-group col-sm-12" style="text-align: center;margin-top: 50px;">
+            <a href="javascript:;" class="btn btn-lg btn-green  closemsg" onclick="auditPass()">审核通过</a>
+            <a href="javascript:;" class="btn btn-lg btn-error  closemsg" onclick="auditBack()">审核不通过</a>
+        </div>
+    </form>
+</div>
+<!--审核驳回-->
+<div id="audit_back" style="display: none">
+    <form action="">
+        <div class="form-group">
+            <label class="col-sm-4  control-label"><span class="red">*</span>审核不通过原因：</label>
+            <div class="col-sm-6" id="backAuditFailCause">
+                <input type="hidden" id="backInvoiceId" name="backInvoiceId" >
+                <input type="hidden" id="backType" name="backType" >
+                <label class="radio-inline">
+                    <input type="radio" style="margin-top: 0;" name="reason" value="0" checked class="js-yufu"
+                           data-key="paytype">发票抬头有误
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" style="margin-top: 0;" name="reason" value="1" class="js-houfu"
+                           data-key="paytype">其他
+                </label>
+            </div>
+        </div>
+        <div class="form-group" id="other" style="display: none">
+            <span style="position: absolute;top: 35%;left: 112px;">其他：</span>
+            <textarea name="" id="otherReason" cols="30" rows="5"></textarea>
+        </div>
+        <div class="form-group col-sm-12" style="text-align: center;position: absolute;bottom: 0;">
+            <a href="javascript:;" class="btn btn-md btn-green mr30" onclick="makeSure()">确定</a>
+            <a href="javascript:;" class="btn btn-md btn-danger " onclick="closemsg()">关闭</a>
+        </div>
+    </form>
+</div>
+<!--邮寄-->
+<div id="mailing" style="display: none">
+    <form role="form" class="form-inline" id="form_msg">
+        <div class="form-group col-sm-12">
+            <label class="col-sm-4 control-label">收件人：</label>
+            <div class="col-sm-7">
+                <div class="from-control js-key paymentId" data-key="toName">-</div>
+            </div>
+        </div>
+        <div class="form-group col-sm-12">
+            <label class="col-sm-4 control-label">收件人手机：</label>
+            <div class="col-sm-7">
+                <div class="from-control js-key paymentAmount" data-key="toPhone">-</div>
+            </div>
+        </div>
+        <div class="form-group col-sm-12">
+            <label class="col-sm-4 control-label">收件人地址：</label>
+            <div class="col-sm-7">
+                <div class="from-control js-key paymentMode" data-key="toAddrDetail">-</div>
+            </div>
+        </div>
+        <div class="form-group col-sm-12">
+            <label class="col-sm-4 control-label">收件人QQ：</label>
+            <div class="col-sm-7">
+                <div class="from-control js-key payTime" data-key="toQq">-</div>
+            </div>
+        </div>
+        <div class="form-group col-sm-12">
+            <label class="col-sm-4 control-label"><span style="color: red;">*</span>快递公司：</label>
+            <div class="col-sm-7">
+                <select class="from-control js-key payTime" data-key="expressCompany1" id="ismailExpressCompany">
+                    <option value="0">顺丰速运</option>
+                    <option value="1">EMS快递</option>
+                    <!--<option value="3">申通快递</option>-->
+                </select>
+            </div>
+        </div>
+        <div class="form-group col-sm-12">
+            <label class="col-sm-4 control-label"><span style="color: red;">*</span>快递单号：</label>
+            <div class="col-sm-7">
+                <input class="from-control js-key payTime" data-key="expressOrder" id="ismailExpressOrder">
+            </div>
+        </div>
+        <div class="form-group col-sm-12" style="text-align: center;">
+            <p style="color: cornflowerblue;">您确定已邮寄此发票？</p>
+            <a href="javascript:;" class="btn btn-md btn-green mr30" onclick="ismail()">确定</a>
+            <a href="javascript:;" class="btn btn-md btn-danger " onclick="closemsg()">取消</a>
+        </div>
+    </form>
+</div>
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/auth.js}"></script>
+<script th:src="@{/resources/js/invoiceAudit.js}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/select2.min.js}"></script>
+<script th:inline="javascript">
+
+
+    var grid_width = 1200; // 默认宽度
+
+
+    var max_export_num = [[${max_export_num}]];
+    var start = {
+        elem: "#startDateTime",
+        format: "YYYY-MM-DD hh:mm:ss",
+        max: laydate.now(),
+
+        istime: true,
+        istoday: true,
+        choose: function (datas) {
+            end.min = datas;
+        }
+    };
+
+    var end = {
+        elem: "#endDateTime",
+        format: "YYYY-MM-DD hh:mm:ss",
+        min: "#start_time_day",
+        max: laydate.now(),
+        start:/*[[${end_time}]]*/'',
+        istime: true,
+        istoday: true,
+        choose: function (datas) {
+            start.max = datas;
+        }
+    };
+    laydate(start);
+    laydate(end);
+
+    function reset() {
+        $("#mainForm").find("input").val("");
+        $("#mainForm").find("select").val("");
+        $("#status").val("0");
+        $("#belongSale").val(' ').trigger("change");
+    }
+
+    function search() {
+        event.preventDefault();
+        $("#table_list_1").jqGrid('setGridParam', {
+            datatype: 'json',
+            postData: {
+                condition: $("#condition_1").val(),
+                belongSale: $("#belongSale").val(),
+                invoiceType: $("#invoiceType").val(),
+                status: $("#status").val(),
+                startTime: $("#startDateTime").val(),
+                endTime: $("#endDateTime").val()
+            }, //发送数据
+        }).trigger("reloadGrid"); //重新载入
+
+
+    }
+
+    function reload() {
+        event.preventDefault();
+        $("#table_list_1").jqGrid('setGridParam', {
+            datatype: 'json',
+            postData: {
+                condition: $("#condition_1").val(),
+                belongSale: $("#belongSale").val(),
+                invoiceType: $("#invoiceType").val(),
+                status: $("#status").val(),
+                startTime: $("#startDateTime").val(),
+                endTime: $("#endDateTime").val()
+            }, //发送数据
+        }).trigger("reloadGrid"); //重新载入
+    }
+
+    //解决合计精度问题
+    Math.add = function (v1, v2) {
+        var r1, r2, m;
+        try {
+            r1 = v1.toString().split(".")[1].length;
+        }
+        catch (e) {
+            r1 = 0;
+        }
+        try {
+            r2 = v2.toString().split(".")[1].length;
+        }
+        catch (e) {
+            r2 = 0;
+        }
+        m = Math.pow(10, Math.max(r1, r2));
+
+        return (v1 * m + v2 * m) / m;
+    };
+
+    // 导出Excel文件
+    function exportExcel() {
+
+        var data1 = "";
+        var totalCount = $("#table_list_1").jqGrid('getGridParam', 'records');
+//        if (totalCount == 0) {
+//            layer.alert("共0条记录，导出Excel文件失败");
+//            return;
+//        }
+        if (totalCount > max_export_num) {
+            layer.msg("导出Excel文件条数大于" + max_export_num + "条", {icon: 2});
+            return;
+        }
+        debugger;
+        var mainForm = $("#mainForm");
+        var action = mainForm.attr("action");
+        var exporUrl = '/finance/invoice/audit/exportList';
+        mainForm.attr("method", "post");
+        mainForm.attr("action", exporUrl).submit();
+    }
+
+    function doResize(type) {
+        var width = $(".jqGrid_wrapper").width();
+        if (width > 0) {
+            grid_width = width;
+        }
+        $("#table_list_" + type).setGridWidth(grid_width);
+    }
+
+    $("#belongSale").on("select2:select", function(evt){
+        $("#belongSaleName").val(evt.params.data.text);
+    });
+
+    $(document).ready(function () {
+        var sale_list = [];
+        $.ajax({
+            url : '/finance/invoice/record/queryUserByDataAuthority',
+            type : "GET",
+            success : function (res) {
+                for(var i = 0; i < res.length; i++){
+                    sale_list[i] = {};
+                    sale_list[i].id = res[i].id +'';
+                    sale_list[i].text = res[i].realname ;
+                }
+                sale_list.unshift({id:" ",text:"全部销售"});
+                //初始化select2
+                $("#belongSale").select2({
+                    data : sale_list
+                })
+                $("#belongSale").val(sale_list[0].id);
+                layer.closeAll();
+            }
+        });
+
+        $.jgrid.defaults.styleUI = "Bootstrap";
+        $("#table_list_1").jqGrid({
+            url:/*[[@{/finance/invoice/audit/list}]]*/'',
+            mtype: 'POST',
+            datatype: "json",
+            postData: {
+                condition: $("#condition_1").val(),
+                belongSale: $("#belongSale").val(),
+                invoiceType: $("#invoiceType").val(),
+                status: $("#status").val(),
+                startTime: $("#startDateTime").val(),
+                endTime: $("#endDateTime").val()
+            }, //发送数据
+            jsonReader: {
+                root: "data.data",
+                page: "data.page",
+                total: "data.totalPage",
+                records: "data.totalRecord"
+            },
+            height: 'auto',
+            rownumbers: true,
+            autowidth: true,
+            shrinkToFit: true,
+            autoScroll: true,
+            rowNum: 20,
+            rowList: [10, 20, 30, 50],
+            colNames: ["申请ID", "客户ID", "客户名称", "归属销售", "发票金额", "发票类型", "开票主体", "发票抬头", "申请人", "申请时间", "申请状态", "操作"],
+            colModel: [
+                {name: "invoiceId", align: "left", sortable: false},
+                {name: "agentId", align: "left", sortable: false},
+                {name: "name", align: "left", sortable: false},
+                {name: "belongSaleStr", align: "left", sortable: false},
+                {name: "invoiceAmountStr", align: "left", sortable: false, width: 100},
+                {name: "invoiceTypeStr", align: "left", sortable: false, width: 100},
+                {name: "invoiceBodyStr", align: "left", sortable: false, width: 100},
+                {name: "invoiceHead", align: "left", sortable: false, width: 200,
+                    formatter:function(cellvalue, options, rowObject){
+                    if(cellvalue.length>20){
+                        var _invoiceHead=cellvalue.substr(0,20);
+                        return "<span title='"+cellvalue+"'>"+_invoiceHead+""+"..."+"</span>";
+                    }else{
+                        return "<span>"+cellvalue+"</span>";
+                    }
+                }},
+                {name: "applicantStr", align: "left", sortable: false, width: 100},
+                {name: "createTime", align: "left", sortable: false, width: 100},
+                {name: "statusStr", align: "left", sortable: false, width: 100},
+                {
+                    name: "bp", index: "bp", align: "left", sortable: false, width: 250, title: false,
+                    formatter: function (cellvalue, options, rowObject) {
+                        var _invoiceId = rowObject.invoiceId;
+                        var _invoiceType = rowObject.invoiceType;
+                        var _status = rowObject.status;
+                        var switcher = "";
+                        if (_invoiceType == 1) {
+                            switcher += "<button type='button' class='btn btn-link btn-xs hide' onclick=\"checkNormal('" + _invoiceId + "','" + _status + "',this)\"   title='查看' data-menuId='6324'>查看</button>";
+                            if (_status == 0){
+                                switcher += "<button type='button' class='btn btn-link btn-xs hide' onclick=\"auditNormal('" + _invoiceId + "',this)\"   title='审核' data-menuId='6326'>审核</button>";
+                            }
+//                            if (_status == 3) {
+//                                switcher += "<button type='button' class='btn btn-link btn-xs hide' onclick=\"auditBack('" + _invoiceId + "',this)\"   title='审核驳回' data-menuId='6327'>审核驳回</button>";
+//                            }
+                        } else if (_invoiceType == 2) {
+                            if (_status == 4 || _status == 5) {
+                                switcher += "<button type='button' class='btn btn-link btn-xs hide' onclick=\"checkSend('" + _invoiceId + "',this)\"   title='查看' data-menuId='6324'>查看</button>";
+                            } else if (_status == 2) {
+                                switcher += "<button type='button' class='btn btn-link btn-xs hide' onclick=\"checkFail('" + _invoiceId + "',this)\"   title='查看' data-menuId='6324'>查看</button>";
+                            } else {
+                                switcher += "<button type='button' class='btn btn-link btn-xs hide' onclick=\"check('" + _invoiceId + "',this)\"   title='查看' data-menuId='6324'>查看</button>";
+                            }
+                            if (_status == 3) {
+                                switcher += "<button type='button' class='btn btn-link btn-xs hide' onclick=\"mail('" + _invoiceId + "',this)\"   title='邮寄' data-menuId='6328'>邮寄</button>";
+                                switcher += "<button type='button' class='btn btn-link btn-xs hide' onclick=\"auditBack('" + _invoiceId + "',this)\"   title='审核驳回' data-menuId='6327'>审核驳回</button>";
+                            }
+                            if (_status == 0) {
+                                switcher += "<button type='button' class='btn btn-link btn-xs hide' onclick=\"audit('" + _invoiceId + "',this)\"   title='审核' data-menuId='6326'>审核</button>";
+                            }
+                        }
+                        return switcher;
+                    }
+                }
+            ],
+            gridComplete: completeMethod,
+            pager: "#pager_list",
+            viewrecords: true,
+            hidegrid: false
+        });
+
+
+        $(window).bind("resize", function () {
+            var width = $(".jqGrid_wrapper").width();
+            $("#table_list_1").setGridWidth(width);
+        })
+
+        //功能按钮权限
+        function completeMethod(){
+            var menuId = $("#menuId").val();
+            checkMenu(menuId);
+        }
+
+        function keyUp(e) {
+            var currKey = 0, e = e || event;
+            currKey = e.keyCode || e.which || e.charCode;
+            var keyName = String.fromCharCode(currKey);
+            if (currKey == 13) {
+                search();
+                e.stopPropagation()
+            }
+        }
+
+        document.onkeyup = keyUp;
+    });
+
+
+</script>
+
+</body>
+</html>

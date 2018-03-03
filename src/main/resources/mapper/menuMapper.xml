@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 菜单业务 -->
+<mapper namespace="menu">
+	
+	<!-- 查询角色的菜单 @Deprecated-->
+	<select id="getRoleMenu" resultType="com.ucpaas.sms.model.Menu">
+		SELECT
+			m.menu_id,
+			m.menu_name,
+			m.menu_url,
+			m.menu_class,
+			m.parent_id,
+			m.level,
+			m.status
+		FROM
+		t_sms_menu m
+	INNER JOIN
+		t_sms_role_menu rm ON m.menu_id = rm.menu_id
+	INNER JOIN
+		t_sms_role r ON rm.role_id = r.id
+	WHERE
+		m.menu_type = 1
+		AND m.`status` = 1
+		AND r.`status` = 1
+		AND m.web_id = 3
+		<if test="level != null">
+			<![CDATA[ AND m.`level` >= #{level} ]]>
+		</if>
+		AND r.id = #{role_id}
+		ORDER BY
+			m.level,
+			m.parent_id,
+			m.sort
+	</select>
+	
+	
+	
+    <!-- 获取所有管理员列表 -->
+    <select id="getMenuList" resultType="com.ucpaas.sms.model.Menu">
+        SELECT
+        m.menu_id,
+        m.menu_name,
+        m.menu_url,
+        m.menu_class,
+        m.parent_id,
+        m.level,
+        m.status
+        FROM
+        t_sms_menu m
+        INNER JOIN
+        t_sms_role_menu rm ON m.menu_id = rm.menu_id
+        INNER JOIN
+        t_sms_role r ON rm.role_id = r.id
+        WHERE
+        m.menu_type = 1
+        AND m.`status` = 1
+        AND r.`status` = 1
+        AND m.web_id = 3
+		<if test="roleId != null and roleId != ''">
+			AND r.id = #{roleId}
+		</if>
+		<if test="roles != null and roles.size != 0">
+			AND r.id  in
+			<foreach collection="roles" item="item" open="(" close=")" separator=",">
+				#{item.id}
+			</foreach>
+		</if>
+		GROUP BY m.menu_id
+        ORDER BY
+        m.level,
+        m.parent_id,
+        m.sort
+    </select>
+</mapper>

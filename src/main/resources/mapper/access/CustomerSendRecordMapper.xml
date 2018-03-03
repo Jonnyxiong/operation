@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- SMSP运营平台:账户信息管理 - > 代理商申请记录 -->
+<mapper namespace="customer">
+
+	<sql id="queryFieldOem">
+			t.phone AS phone,
+			t.content AS content,
+			t.state,
+			t.report,
+		   t.submit,
+			t.errorcode,
+			IF(t.submitdate IS NULL,'',DATE_FORMAT(t.submitdate,'%Y-%m-%d %H:%i:%S')) AS sendTime,
+			CASE t.state
+				WHEN 0 THEN 0
+				WHEN 1 THEN t.charge_num
+				WHEN 3 THEN t.charge_num
+				WHEN 4 THEN t.charge_num
+				WHEN 5 THEN 0
+				WHEN 6 THEN t.charge_num
+				WHEN 7 THEN 0
+				WHEN 8 THEN 0
+				WHEN 9 THEN 0
+				WHEN 10 THEN IF(t.isoverratecharge = 1,t.charge_num,0)
+			END AS charge_num
+	</sql>
+
+
+
+
+	<sql id="querySmsSendRecordCommon">
+		<where>
+			<if test="start_time != null and end_time != null">
+				date BETWEEN #{start_time} AND #{end_time}
+			</if>
+			<if test="mobile != null and mobile != ''">
+				AND phone LIKE CONCAT("%",#{mobile},"%")
+			</if>
+			<if test="content != null and content != ''">
+				AND content LIKE CONCAT("%",#{content},"%")
+			</if>
+			<if test="state != null and state !='' ">
+				AND state in(${state})
+			</if>
+			AND clientid = #{clientid}
+		</where>
+	</sql>
+
+	<!-- 查询短信发送记录 -->
+	<select id="querySmsSendRecordOem" resultType="map">
+		SELECT
+		<include refid="queryFieldOem" />
+		FROM
+		(
+		SELECT
+		r.phone,
+		r.content,
+		r.state,
+		r.report,
+		r.submit,
+		r.errorcode,
+		r.date,
+		r.submitdate,
+		r.charge_num,
+		r.isoverratecharge
+		FROM
+		${i} r
+		<include refid="querySmsSendRecordCommon" />
+		) t
+		where
+		t.date between #{start_time} and #{end_time}
+		ORDER BY t.date
+		DESC
+		${limit}
+	</select>
+	<!-- 查询短信发送记录 总数 -->
+	<select id="queryCustomerSendRecordCount" resultType="map">
+		SELECT
+		count(0) AS totalCount
+		FROM
+		${table} t
+		where
+		t.clientid = #{account_id}
+		<if test="createStartTime != null and createEndTime != null">
+			AND t.date BETWEEN #{createStartTime} AND #{createEndTime}
+		</if>
+		<if test="phone != null and phone != ''">
+			AND t.phone LIKE CONCAT("%",#{phone},"%")
+		</if>
+		<if test="content != null and content != ''">
+			AND t.content LIKE CONCAT("%",#{content},"%")
+		</if>
+		<if test="send_status != null and send_status !='' ">
+			AND t.state in(${send_status})
+		</if>
+	</select>
+
+	<select id="querySmsRecord4Excel" resultType="map">
+		SELECT
+		<include refid="queryFieldOem" />
+		FROM
+		(
+		<!-- <foreach collection="table_list" item="i" separator=" UNION ALL "> -->
+		SELECT
+		r.phone,
+		r.content,
+		r.state,
+		r.report,
+		r.submit,
+		r.errorcode,
+		r.date,
+		r.submitdate,
+		r.charge_num,
+		r.isoverratecharge
+		FROM
+		${i} r
+		<include refid="querySmsSendRecordCommon" />
+		<!-- </foreach> -->
+		) t
+		where
+		t.date between #{start_time} and #{end_time}
+		ORDER BY t.date
+		DESC
+
+	</select>
+
+
+
+
+	<!-- 查询短信发送记录总数 -->
+	<!-- <select id="querySmsSendRecordCount" resultType="map">
+		SELECT
+		COUNT(1) AS totalCount
+		FROM
+		( <foreach collection="table_list" item="i" separator=" UNION ALL
+			"> SELECT r.phone, r.content, r.state, r.date, r.submitdate FROM ${i} r <include
+			refid="querySmsSendRecordCommon"/> </foreach> ) t
+		{table}
+		where
+		t.date between #{start_time} and #{end_time}
+	</select> -->
+
+	<select id="queryAccountByBelongSale" resultType="map">
+		SELECT
+		t.clientid
+		FROM
+		t_sms_account t
+		where
+		t.belong_sale = ${belong_sale}
+
+	</select>
+
+	<select id="queryAll" resultType="map">
+		SELECT
+		content,
+		phone,
+		state,
+		date,
+		submitdate,
+		COUNT(1) AS totalCount
+		FROM
+		${table}
+		where
+		clientid = #{account_id}
+		<!-- and
+		date between #{createStartTime}
+		and #{createEndTime} -->
+		<if test="createStartTime != null and createEndTime != null">
+			AND date BETWEEN #{createStartTime} AND #{createEndTime}
+		</if>
+		<if test="mobile != null and mobile != ''">
+			AND phone LIKE CONCAT("%",#{mobile},"%")
+		</if>
+		<if test="content != null and content != ''">
+			AND content LIKE CONCAT("%",#{content},"%")
+		</if>
+		<if test="state != null and state !='' ">
+			AND state in(${state})
+		</if>
+	</select>
+
+
+	<select id="queryCustomerSendRecord" resultType="map">
+		SELECT
+		<include refid="queryFieldOem" />
+		FROM
+		${table} t
+		where
+		t.clientid = #{account_id}
+		<if test="createStartTime != null and createEndTime != null">
+			AND t.date BETWEEN #{createStartTime} AND #{createEndTime}
+		</if>
+		<if test="phone != null and phone != ''">
+			AND t.phone LIKE CONCAT("%",#{phone},"%")
+		</if>
+		<if test="content != null and content != ''">
+			AND t.content LIKE CONCAT("%",#{content},"%")
+		</if>
+		<if test="send_status != null and send_status !='' ">
+			AND t.state in(${send_status})
+		</if>
+		ORDER BY t.date
+		DESC
+		${limit}
+	</select>
+
+
+
+
+
+	<sql id="queryFieldOem1">
+		t.phone AS phone,
+		t.content AS content,
+		t.submitdate AS sendTime,
+		CASE t.state
+		WHEN 0 THEN "待审核"
+		WHEN 1 THEN "未知"
+		WHEN 3 THEN "发送成功"
+		WHEN 4 THEN "发送失败"
+		WHEN 5 THEN "拦截"
+		WHEN 6 THEN "发送失败"
+		WHEN 7 THEN "拦截"
+		WHEN 8 THEN "拦截"
+		WHEN 9 THEN "拦截"
+		WHEN 10 THEN "拦截"
+		END AS status,
+		<!-- "1" as  errorcode_name, -->
+		<!-- 	t.errorcode, -->
+		<!--
+			WHEN t.state IN (0,1,3) THEN "-"
+			WHEN t.state = 6 THEN CONCAT("其它错误",IFNULL(t.report,""))
+			WHEN t.state = 4 THEN CONCAT("其它错误",IFNULL(t.submit, ""))
+		CASE t.errorcode
+			WHEN t.errorcode = 'YX:1000' THEN "系统超频错误"
+			WHEN t.errorcode = 'YX:5009' THEN "订单余额不足"
+			WHEN t.errorcode = 'YX:7000' THEN "审核不通过"
+			WHEN t.errorcode ='YX:9001' THEN "号码格式错误"
+			WHEN t.errorcode = 'YX:9002' THEN "账号不存在"
+			WHENt.errorcode = 'YX:9004' THEN "无可用通道组"
+			WHEN t.errorcode = 'YX:9006' THEN "无可选用通道"
+			ELSE CONCAT("其它错误", IFNULL(t.errorcode,""))
+		END AS errorcode_name, -->
+
+
+
+
+
+		CASE WHEN t.state IN (0,1,3) THEN "-"
+		WHEN t.state = 6 THEN CONCAT("其它错误",IFNULL(t.report,""))
+		WHEN t.state = 4 THEN CONCAT("其它错误",IFNULL(t.submit, ""))
+		WHEN t.errorcode = 'YX:1000' THEN "系统超频错误"
+		WHEN t.errorcode = 'YX:5009' THEN "订单余额不足"
+		WHEN t.errorcode = 'YX:7000' THEN "审核不通过"
+		WHEN t.errorcode = 'YX:9001' THEN "号码格式错误"
+		WHEN t.errorcode = 'YX:9002' THEN "账号不存在"
+		WHEN t.errorcode = 'YX:9004' THEN "无可用通道组"
+		WHEN t.errorcode = 'YX:9006' THEN "无可选用通道"
+		ELSE CONCAT("其它错误", IFNULL(t.errorcode,""))
+		END AS	errorcode_name,
+		/*IF(t.date IS NULL,'',DATE_FORMAT(t.date,'%Y-%m-%d
+		%H:%i:%S')) AS subTime,*/
+		IF(t.date IS	NULL,'',DATE_FORMAT(t.date,'%Y-%m-%d	%H:%i:%S')) AS sendTime,
+		CASE t.state
+		WHEN 0 THEN 0
+		WHEN 1 THEN t.charge_num
+		WHEN 3 THEN	t.charge_num
+		WHEN 4 THEN t.charge_num
+		WHEN 5 THEN 0
+		WHEN 6 THEN	t.charge_num
+		WHEN 7 THEN 0
+		WHEN 8 THEN 0
+		WHEN 9 THEN 0
+		WHEN 10 THEN
+		IF(t.isoverratecharge = 1,t.charge_num,0)
+		END AS charge_num
+
+
+		<!-- "1" AS charge_num -->
+		<!-- CASE t.state
+		WHEN 0 THEN 0
+		WHEN 1 THEN t.charge_num
+		WHEN 3 THEN	t.charge_num
+		WHEN 4 THEN t.charge_num
+		WHEN 5 THEN 0
+		WHEN 6 THEN	t.charge_num
+		WHEN 7 THEN 0
+		WHEN 8 THEN 0
+		WHEN 9 THEN 0
+		WHEN 10 THEN
+		IF(t.isoverratecharge = 1,t.charge_num,0)
+		END AS charge_num -->
+	</sql>
+
+
+
+
+
+	<select id="querySmsRecord4Excell" resultType="map">
+		SELECT
+		<include refid="queryFieldOem1" />
+		FROM
+		(
+		SELECT
+		r.phone,
+		r.content,
+		r.state,
+		r.report,
+		r.submit,
+		r.errorcode,
+		r.date,
+		r.submitdate,
+		r.charge_num,
+		r.isoverratecharge
+		FROM
+		${table} r
+		where
+		clientid = #{account_id}
+		<if test="createStartTime != null and createEndTime != null">
+			AND date BETWEEN #{createStartTime} AND #{createEndTime}
+		</if>
+		<if test="phone != null and phone != ''">
+			AND phone LIKE CONCAT("%",#{phone},"%")
+		</if>
+		<if test="content != null and content != ''">
+			AND content LIKE CONCAT("%",#{content},"%")
+		</if>
+		<if test="send_status != null and send_status !='' ">
+			AND state in(${send_status})
+		</if>
+		) t
+		where
+		t.date between #{createStartTime} and #{createEndTime}
+		ORDER BY t.date
+		DESC
+
+	</select>
+
+</mapper> 

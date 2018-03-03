@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信平台运营系统 </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet">
+    <!-- jqgrid-->
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+
+	<link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+    <style>
+        /* Additional style to fix warning dialog position */
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+    </style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+	<div class="wrapper wrapper-content animated fadeInRight">
+	    <div class="row">
+	        <div class="col-sm-12">
+	            <div class="ibox "> 
+	                <div class="ibox-content">
+
+						<div class="pull-right tooltip-demo">
+							<!--<a class="btn btn-danger btn-sm" data-toggle="tooltip" data-placement="top" title="返回" onclick="javascript:self.location=document.referrer;"><i class="fa fa-reply"></i>&nbsp;返回</a>-->
+						</div>
+
+						<!-- 保存上一面的销售id和原因-->
+
+						<input id="smspImgUrl" type="hidden" th:value="${smspImgUrl}">
+
+	                    <div class="row">
+	                        <div class="col-sm-12 b-r">
+	                            <form class="form-horizontal m-t" id="mainForm">
+
+									<input id="saleId" name="belongSale" type="hidden" th:value="${saleId}">
+									<input id="email" name="email" type="hidden" th:value="${email}">
+									<input id="reason" name="reason" type="hidden" th:value="${reason}">
+									<input id="applyId" name="applyId" type="hidden" th:value="${applyId}">
+
+	                                <div class="form-group">
+									    <label class="col-sm-3 control-label">域名:</label>
+									    <div class="col-sm-8">
+									      <input type="text" class="form-control"  id="domain" name="domain" placeholder="例：oemclient.sms.ucpaas.com" value="oemclient.sms.ucpaas.com"/>
+									    </div> 
+	                                </div>
+	                                <div class="form-group">
+	                                	<label class="col-sm-3 control-label">版权文字:</label>
+	                                    <div class="col-sm-8">
+									      <input type="text" class="form-control" id="copyright" name="copyright"  placeholder="例：2014-2018 深圳市云之讯网络技术有限公司 粤ICP备14046848号 " value="2014-2018 深圳市云之讯网络技术有限公司 粤ICP备14046848号"/>
+	                                    </div>
+	                                </div>
+	                                <div class="form-group">
+	                                	<label class="col-sm-3 control-label">导航栏背景色:</label>
+	                                    <div class="col-sm-8">
+									      <input type="text" class="form-control" id="nav_backcolor" name="nav_backcolor" maxlength="7"  placeholder="例如棕黑色为：#506470" value="#506470"/>
+								        </div>
+	                                </div>	                                
+	                                <div class="form-group">
+	                                	<label class="col-sm-3 control-label">导航栏文字颜色:</label>
+	                                	<div class="col-sm-8">
+									      <input type="text" class="form-control" id="nav_text_color" name="nav_text_color"  maxlength="7"  placeholder="例如棕黑色为：#506470" value="#506470"/>
+	                                	</div>
+	                                </div>
+	                                <!--<div class="form-group">-->
+	                                    <!--<label class="col-sm-3 control-label">行业短信折扣率:</label>-->
+	                                    <!--<div class="col-sm-8">-->
+									      <!--<input type="number" class="form-control" id="hy_discount" name="hy_discount" value="1"/>-->
+	                                    <!--</div>-->
+	                                <!--</div> -->
+	                                <!--<div class="form-group">-->
+	                                    <!--<label class="col-sm-3 control-label">营销短信折扣率:</label>-->
+	                                    <!--<div class="col-sm-8">-->
+									      <!--<input type="number" class="form-control" id="yx_discount" name="yx_discount" value="1"/>-->
+	                                    <!--</div>-->
+	                                <!--</div> -->
+	                                <!--<div class="form-group">-->
+	                                    <!--<label class="col-sm-3 control-label">国际短信折扣率:</label>-->
+	                                    <!--<div class="col-sm-8">-->
+									      <!--<input type="number" class="form-control" id="gj_discount" name="gj_discount" value="1"/>-->
+	                                    <!--</div>-->
+	                                <!--</div>-->
+
+									<div class="form-group">
+										<label class="col-sm-3 control-label">测试短信赠送:</label>
+										<div class="col-sm-8" style="width: 180px">
+											<select class="form-control" name="productType" id="productType">
+												<option value="0">行业短信+全网+全国</option>
+											</select>
+										</div>
+										<div class="col-sm-8" style="width: 230px">
+											<select class="form-control" name="productId" id="productId">
+												<option value="">请选择产品</option>
+												<option th:each="product : ${productInfoList}" th:value="${product.product_id}" th:text="${product.product_name}">选项 4</option>
+											</select>
+										</div>
+										<div class="col-sm-8" style="width: 230px">
+											<input type="text" id="productNum" name="productNum" class="form-control" placeholder="请填写赠送的短信条数">
+										</div>
+
+										<div class="col-sm-3" style="width: 200px">
+											<label class="control-label">[0~100]</label>
+										</div>
+
+									</div>
+
+									<input type="hidden" id="h_tab_logo" name="h_tab_logo" value=""/>
+									<input type="hidden" id="h_logo" name="h_logo" value=""/>
+									<input type="hidden" id="h_company_logo" name="h_company_logo" value=""/>
+
+									<input type="hidden" id="h_api_document" name="h_api_document" value=""/>
+									<input type="hidden" id="h_FAQ_document" name="h_FAQ_document" value=""/>
+
+								</form>
+
+
+             					<form class="form-horizontal" method="post" id="tab_logo_form">
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">标签页图标:<br/> (尺寸：48px*48px)</label>
+										<div class="col-sm-8">
+											<img id="preview_tab_logo" style="width: 48px;height: 48px;cursor: pointer;" name="preview_tab_logo" class="eg-preview" th:src="@{/resources/img/tab-logo_model.png}" alt="示例：标签图标" />
+											<br><input type="file" accept="image/x-icon" id="tab_logo" name="tab_logo"/>
+										</div>
+	                                </div>
+             					</form>
+
+
+					            <form class="form-horizontal" method="post" id="logo_form">
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">LOGO图:<br/> (尺寸：41px*43px)</label>
+	                                    <div class="col-sm-8">
+											<img id="preview_logo" class="eg-preview" style="width: 41px;height: 43px;cursor: pointer;" th:src="@{/resources/img/logo_model.png}" alt="示例：logo"/>
+											<br><input type="file" accept="image/png" id="logo" name="logo"/>
+	                                    </div>
+	                                </div>
+					            </form>
+
+
+
+             					<form class="form-horizontal" method="post" id="company_logo_form">
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">LOGO + 公司名称图:<br/> (尺寸：184px*30px)</label>
+	                                    <div class="col-sm-8">
+											<img id="preview_company_logo" class="eg-preview" style="width: 184px;height: 30px;cursor: pointer;" th:src="@{/resources/img/logo-company_model.png}" alt="示例：logo+公司名"/>
+											<br><input type="file" id="company_logo" name="company_logo" accept="image/png" />
+	                                    </div>
+	                                </div>  
+             					</form>
+             					<form class="form-horizontal" method="post" id="api_document_Form">
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">接口文档<br/>(文件不大于5MB):</label>
+	                                    <div class="col-sm-8">
+											 <input type="file"  class="form-control" id="api_document" name="api_document" accept="application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+	                                    </div>
+	                                </div>  
+             					</form>
+					            <form class="form-horizontal" method="post" id="FAQ_document_Form">	  
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">FAQ文档<br/>(文件不大于5MB):</label>
+	                                    <div class="col-sm-8">
+											 <input type="file"  class="form-control" id="FAQ_document" name="FAQ_document" accept="application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+	                                    </div>
+	                                </div> 
+					            </form>
+             					
+             					<form class="form-horizontal" >
+								     <div class="form-group">
+								        <div class="col-sm-12 col-sm-offset-3">
+								            <button type="button" class="btn btn-sm btn-success" onclick="uploadData(this)">提交</button> 
+								            <button type="button" class="btn btn-sm btn-error" onclick="goback()">返回</button> 
+								        </div>
+								    </div>
+             					</form>
+	                        </div>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	</div>
+	<script th:src="@{/resources/js/hex_ha_ha_ha_ha_ha.js}"></script>
+	<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+	<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+	<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+	<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+	<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+	<script th:src="@{/resources/js/jquery.form.js?v=1.0.0}"></script>
+
+	<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+	<script th:src="@{/resources/js/plugins/validate/jquery.validate.min.js}"></script>
+	<script th:src="@{/resources/js/layer/layer.js}"></script>
+	
+	<script th:inline="javascript">
+		/*<![CDATA[*/
+		 
+  	var validate;
+  	//msg消失时间
+	var msgTime = 1500;
+  	$(function(){
+  		$.validator.defaults.ignore = "";
+  		//表单验证规则
+  		validate = $("#mainForm").validate({
+  			rules: {
+  				domain:{
+  					required:true,
+  					minlength:1,
+  					maxlength:200
+  				},
+  				copyright:{
+  					required:true,
+  					minlength:10,
+  					maxlength:200
+  				},
+  				nav_backcolor: {
+ 	 				required:true,
+ 	 				minlength:4,
+  					maxlength:7
+  				},
+  				nav_text_color: {
+ 	 				required:true,
+ 	 				minlength:4,
+  					maxlength:7
+  				},
+  				hy_discount: {
+  					required:true,
+					min:0,
+					max:1
+  				},
+  				yx_discount: {
+  					required:true,
+					min:0,
+					max:1
+  				},
+  				gj_discount: {
+  					required:true,
+					min:0,
+					max:1
+  				},
+  			},
+  			messages: {
+  				domain:{
+  					required:'请输入域名',
+  					minlength:'',
+  					maxlength:'域名长度请保持在200个字符以内'
+  				},
+  				copyright:{
+  					required:'请输入企业版权文字说明',
+  					minlength:'请保持版权文字格式正确',
+  					maxlength:'版权文字内容请保持在200个字符以内'
+  				},
+  				nav_backcolor: {
+ 	 				required:'请输入导航栏背景色,16进制颜色码',
+ 	 				minlength:'请输入正确的16进制颜色码',
+  					maxlength:'16进制颜色码,最多只需要填写7位'
+  				},
+  				nav_text_color: {
+ 	 				required:'请输入导航栏文字颜色,16进制颜色码',
+ 	 				minlength:'请输入正确的16进制颜色码',
+  					maxlength:'16进制颜色码,最多只需要填写7位'
+  				},
+  				hy_discount: {
+  					required:'请输入行业短信折扣率',
+					min:'折扣率不能为负',	
+					max:'行业短信折扣率不能超过 1.0'
+  				},
+  				yx_discount: {
+  					required:'请输入营销短信折扣率',
+					min:'折扣率不能为负',
+					max:'营销短信折扣率不能超过 1.0'
+  				},
+  				gj_discount: {
+  					required:'请输入国际短信折扣率',
+					min:'折扣率不能为负',
+					max:'国际短信折扣率不能超过 1.0'
+  				},
+  			}
+  		});
+  		
+  		// 域名校验   
+		jQuery.validator.addMethod("isDomain", function(value, element) {   
+		    var tel = /^([\w-]+\.)+[\w-]+(\/[\w- .\/?%&=]*)?/;
+		    return this.optional(element) || (tel.test(value));
+		}, "请输入的正确格式的域名");
+  		// 16进制颜色码检验
+		jQuery.validator.addMethod("isHexColor", function(value, element) {   
+		    var tel = /^#[0-9a-fA-F]{6}$/;
+		    return this.optional(element) || (tel.test(value));
+		}, "请输入正确格式的16进制颜色码");
+  		
+  		$('input[type="file"]').change(function() {
+			var $file = $(this);
+			var id = $file.attr("id");
+			var fileObj = $file[0];
+			var windowURL = window.URL || window.webkitURL;
+			var dataURL;
+			var $img = $("#preview_" + id);
+			if(fileObj && fileObj.files && fileObj.files[0]){
+				dataURL = windowURL.createObjectURL(fileObj.files[0]);
+				fileUrl = fileObj.files[0];
+				$img.attr('src',dataURL);
+			}else{
+				dataURL = $file.val();
+				fileObj.files[0] = fileUrl;
+				var imgObj = document.getElementById("preview_" + id);
+			}
+		}); 
+  		
+  		
+  	})
+  	
+  	function uploadForm(formId,url,hid){
+  		var uploadFlag = false;
+  		var options = {
+ 	 			url:url,
+ 	 			async: false,
+ 	 			success : function(data) {
+	 				if(data == "" || data == null || data.result == null) {
+	 					layer.alert("服务器错误，请联系管理员", {
+	 						icon : 2
+	 					});
+	 				}else if (data.result == "success") {
+	 					$("#"+hid).val(data.path1);
+	 					uploadFlag = true;
+	 				}
+ 	 			},
+ 	 			
+ 	 			type : "post",
+ 	 			dataType: 'json',
+ 	 			timeout : 10000
+ 	 		};
+  		$("#"+ formId).ajaxSubmit(options);
+  		return uploadFlag;
+  	}
+  	
+	var maxsize = 5*1024*1024;//2M  
+	var errMsg = "上传的附件文件不能超过5M！！！";  
+    var browserCfg = {};  
+	var fileFlag = false;
+	function checkFile(id,tipMsg){
+        var ua = window.navigator.userAgent;  
+        if (ua.indexOf("MSIE")>=1){  
+            browserCfg.ie = true;  
+        }else if(ua.indexOf("Firefox")>=1){  
+            browserCfg.firefox = true;  
+        }else if(ua.indexOf("Chrome")>=1){  
+            browserCfg.chrome = true;  
+        }  
+		fileFlag = false;
+		var file = $("#"+id);
+		  
+		if (file.val() == ''){
+			fileFlag = true;
+			return fileFlag;
+		}
+		
+        var filesize = 0;  
+        if(browserCfg.firefox || browserCfg.chrome ){  
+            filesize = file[0].files[0].size;  
+        }else if(browserCfg.ie){  
+        	 fileFlag = false;
+             var obj_file = $("#"+id);  
+             obj_file.dynsrc=file.value;  
+             filesize = obj_img.fileSize;  
+         }else{  
+			 fileFlag = true;
+             return fileFlag;  
+         }  
+     
+		if (filesize == 0) {
+			layer.msg('<p style="color:black">选择需要上传的：'+tipMsg+'</p>', {
+				icon : 2
+			});
+			return fileFlag
+		} else if (filesize > maxsize) {
+			layer.alert(errMsg, {
+				icon : 2
+			});
+			return fileFlag;
+		} else {
+			fileFlag = true;
+			return fileFlag;
+		}
+	}
+
+	function uploadData(btn) {
+		if(!validate.form()){
+			return;
+		}
+
+        //校验测试产品
+        var productId = $("#productId").val();
+        var productNum = $("#productNum").val();
+        if(productId != null && productId != ''){
+            if(productNum == null || productNum == ''){
+                layer.msg("请输入赠送数量！", {icon: 2,time: msgTime});
+                return;
+            }
+
+            var pattern = /^(0|[1-9][0-9]*)$/;//正整数
+            if(pattern.test(productNum) != true){
+                layer.msg("赠送数量只能是[0~100]的正整数！", {icon: 2,time: msgTime});
+                $("#productNum").val('');
+                return;
+            }
+
+            if(productNum < 0 || productNum >100){
+                layer.msg("赠送数量只能是[0~100]的正整数！", {icon: 2,time: msgTime});
+                $("#productNum").val('');
+                return;
+            }
+        }
+
+
+        if(productNum != null && productNum != '' && productNum != '0'){
+            if(productId == null || productId == ''){
+                layer.msg("请选择产品！", {icon: 2,time: msgTime});
+                return;
+            }
+        }
+
+		if (!checkFile("tab_logo","标签页图标")) {
+			return;
+		}
+		if (!checkFile("logo","LOGO图")) {
+			return;
+		}
+		if (!checkFile("company_logo","LOGO + 公司名称图")) {
+			return;
+		}
+		if (!checkFile("api_document","接口文档")) {
+			return;
+		}
+		if (!checkFile("FAQ_document","FAQ文档")) {
+			return;
+		}
+
+		ityzl_SHOW_LOAD_LAYER("资料上传中,请稍后...");
+		var upLoadUrl = $("#smspImgUrl").val()
+				+ "/upload/multiUpload.html";
+		if ($("#tab_logo").val() != "" && ! uploadForm("tab_logo_form", upLoadUrl, "h_tab_logo")) {
+			return;
+		};
+		if ($("#logo").val() != "" && ! uploadForm("logo_form", upLoadUrl, "h_logo")) {
+			return;
+		};
+		if ($("#company_logo").val() != "" && ! uploadForm("company_logo_form", upLoadUrl,"h_company_logo")) {
+			return;
+		};
+		if ($("#api_document").val() != "" && ! uploadForm("api_document_Form", upLoadUrl,"h_api_document")) {
+			return;
+		};
+		if ($("#FAQ_document").val() != "" && ! uploadForm("FAQ_document_Form", upLoadUrl,"h_FAQ_document")) {
+			return;
+		};
+
+		var editUrl =  /*[[@{/accountInfo/applyRecord/oemConfirmAccept}]]*/;
+		var options = {
+			beforeSubmit : function() {
+				$(btn).attr("disabled", true);
+				ityzl_SHOW_LOAD_LAYER("马上完成...");
+			},
+			url : editUrl,
+			async : false,
+			success : function(data) {
+				$(btn).attr("disabled", false);
+
+//				layer.closeAll(); //疯狂模式，关闭所有层
+//				$(btn).attr("disabled", false);
+//				if (data == "" || data == null) {
+//					return; //session超时
+//				}
+//				$(btn).attr("disabled", false);
+//				if (data.success) {
+//					layer.msg(data.msg, {icon: 1,time: msgTime},function(){
+//						window.location.href=editUrl+"?agentId="+$("#agentId").val();
+//					});
+//				}else{
+//					layer.msg(data.msg, {
+//						icon : 2
+//					});
+//				}
+
+                if(data == null){
+                    layer.msg(data.msg, {icon: 2,time: msgTime});
+                }else if(data.success == true){
+                    layer.msg(data.msg, {icon: 1,time: msgTime},function(){
+                        //刷新页面
+                        var viewUrl = /*[[@{/accountInfo/applyRecord/query}]]*/;
+                        window.location.href = viewUrl;
+                    });
+                }else{
+                    layer.msg(data.msg, {icon: 2,time: msgTime});
+                }
+
+			},
+			type : "post"
+		}
+		$("#mainForm").ajaxSubmit(options);
+	}
+	
+	function goback(){
+        var applyId = $("#applyId").val();
+
+	    var saleId = $("#saleId").val();
+	    var reason = $("#reason").val();
+		var editUrl =  /*[[@{/accountInfo/applyRecord/jumpToOemAcceptPage}]]*/;
+
+		window.location.href=editUrl+"?applyId="+applyId+"&oldSaleId="+saleId+"&oldReason="+encodeURI(encodeURI(reason));
+	}
+	
+	//loading 效果
+	function ityzl_SHOW_LOAD_LAYER(msg){  
+	    return layer.msg('<div style="color:#506470;font-family: "microsoft yahei","Arial Narrow",HELVETICA;">'+msg+'</div>', {icon: 16,shade: [0.5, '#f5f5f5'],scrollbar: false,offset: 'auto',time: 600000}) ;  
+	}
+	    /*]]>*/
+	    
+	</script>
+</body>
+</html>

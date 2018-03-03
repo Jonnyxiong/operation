@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:th="http://www.thymeleaf.org"
+	  lang="zh-cn">
+<head>
+	<meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+	<meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+	<title>短信云平台运营系统 - 品牌代理商订单详情</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+	<link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+	<link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+	<link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+	<link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+	<style>
+		/* Additional style to fix warning dialog position */
+		#alertmod_table_list_2 {
+			top: 900px !important;
+		}
+		.reduce{
+			position: relative;
+			display: inline-block;
+			width: 20%;
+			height: 100%;
+			text-align: center;
+			background-color: #f4f6f8;
+			border: 1px solid #d1d7da;
+			color: #ff2222;
+			cursor: pointer;
+		}
+		.add{
+			position: relative;
+			display: inline-block;
+			width: 20%;
+			height: 100%;
+			background-color: #f4f6f8;
+			text-align: center;
+			border: 1px solid #d1d7da;
+			color: #ff2222;
+			cursor: pointer;
+		}
+		.count{
+			width: 50px;
+			text-align: center;
+		}
+		.modal-content{
+			user-select:none;
+			border:none;
+		}
+		#gbox_table_list{
+			user-select:none;
+		}
+	</style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="ibox float-e-margins">
+				<div class="ibox-content">
+					<form method="get" class="form-horizontal">
+						<div class="form-group">
+							<label class="col-sm-3 control-label">客户手机号码：</label>
+							<div class="col-sm-9">
+								<input type="hidden" id="clientid" class="form-control" th:value="${clientId}">
+								<input type="text" id="alarmPhone" class="form-control" th:value="${model} != null ? ${model.alarmPhone} : ''">
+								<span class="help-block m-b-none">用逗号分隔备用号码，例如：138******83,138******75</span>
+							</div>
+						</div>
+						<!--<div class="hr-line-dashed"></div>-->
+						<div class="form-group">
+							<label class="col-sm-3 control-label">账户短信余额低于：</label>
+							<div class="col-sm-9">
+								<input type="text" class="form-control" id="alarmNumber" th:value="${model} != null ? ${model.alarmNumber} : 0"> <label class="control-label">后提醒</label>
+								<span class="help-block m-b-none">注：当账户短信余额（验证码、通知、行业和营销短信的总和）小于或等于设置条数时，系统将会通过短信提醒您，设置条数为0时，即默认为不提醒。设置条数范围0－100,000,000条</span>
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="col-sm-8 col-sm-offset-3">
+								<button class="btn btn-primary m-l-md m-r-md" type="button" onclick="confirm()">确定</button>
+								<button class="btn btn-white" type="button" onclick="cancel()">取消</button>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/auth.js?v=1.0}"></script>
+<script th:inline="javascript">
+/*<![CDATA[*/
+	var oldModel = /*[[${model}]]*/'';
+
+
+
+    function confirm() {
+        var params = {};
+        params.clientid = $("#clientid").val();
+        params.alarmPhone = $("#alarmPhone").val().trim();
+        params.alarmNumber = $("#alarmNumber").val();
+        /*if (params.alarmPhone === "") {
+            layer.msg("手机号码不能为空");
+            return false;
+        }*/
+
+
+        var alarmPhone = params.alarmPhone.length > 0 ? params.alarmPhone.split(',') : [];
+
+        if (isRepeat(alarmPhone)) {
+            layer.msg("客户手机号码重复");
+            return false;
+        }
+        for (var i = 0; i < alarmPhone.length; i++) {
+            if (!_Auth.isMobile(alarmPhone[i])) {
+                layer.msg("客户手机号码格式不正确");
+                return false;
+            }
+        }
+
+        if (params.alarmNumber === "") {
+            layer.msg("告警额度不能为空");
+            return false;
+        }
+        if (!_Auth.isNum(params.alarmNumber)) {
+            layer.msg("告警额度为正整数");
+            return false;
+        }
+        if (params.alarmNumber > 100000000) {
+            layer.msg("告警额度不能大于1亿");
+            return false;
+        }
+		if(oldModel){
+            /*oldModel.createTime = new Date(oldModel.createTime).Format("yyyy-MM-dd hh:mm:ss");
+            oldModel.updateTime = new Date(oldModel.updateTime).Format("yyyy-MM-dd hh:mm:ss");
+            oldModel.resetTime = new Date(oldModel.resetTime).Format("yyyy-MM-dd hh:mm:ss");*/
+            oldModel.createTime = new Date(oldModel.createTime).getTime();
+            oldModel.updateTime = new Date(oldModel.updateTime).getTime();
+            oldModel.resetTime = new Date(oldModel.resetTime).getTime();
+		}
+
+
+        var paramArr = [];
+        paramArr[0] = oldModel;
+        paramArr[1] = params;
+
+        var p = JSON.stringify(paramArr);
+
+        var url = /*[[@{/alarm/client/balanceAlarm/update}]]*/'/alarm/client/balanceAlarm/update';
+        $.ajax({
+            url: url,
+            type: 'POST',
+            contentType: "application/json",
+            data: p,
+            success: function (res) {
+                if(res == null){
+                    parent.layer.msg("请求超时");
+				}else if(res.success){
+                    parent.layer.msg(res.msg);
+                    setTimeout(function () {
+                        parent.layer.closeAll();
+                    }, 1000)
+				}else{
+                    parent.layer.msg(res.msg);
+				}
+            }
+        })
+    };
+
+ 	function cancel() {
+        parent.layer.closeAll();
+    }
+
+function isRepeat(arr){
+
+    var hash = {};
+    for(var i in arr) {
+        if(hash[arr[i]])
+            return true;
+        hash[arr[i]] = true;
+
+    }
+    return false;
+}
+
+
+/*]]>*/
+</script>
+
+</body>
+</html>

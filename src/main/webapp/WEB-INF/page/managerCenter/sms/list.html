@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信平台运营系统 - 管理员中心</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    <!--<link th:href="@{/resources/css/jquery.datetimepicker.css}" rel="stylesheet">-->
+
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+    <link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/timePicker.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+    <link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+
+    <style>
+        /* Additional style to fix warning dialog position */
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+        .remind{
+            margin-top:6px;
+        }
+        .time-picker{
+            z-index: 1111111 !important;
+        }
+        .time-picker>ul>li{
+            height:25px !important;
+        }
+        .selected{
+            height:25px !important;
+        }
+        .modal-content{
+            opacity: 1 !important;
+            border:none;
+        }
+        #taskMin{
+            margin-top: 9px;
+        }
+        .tip{
+            background-color: #00a2d4;
+            color:#FFF;
+            line-height: 35px;
+        }
+    </style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="tabs-container">
+                <ul class="nav nav-tabs">
+                    <li th:if="${menus.dxtxpz}" class="active" id="tab-1"><a>短信提醒配置</a></li>
+                    <li th:if="${menus.yjtxpz}" class=""><a id="emailconf" href="/managerCenter/taskAlarmSetting/email">邮件提醒配置</a>
+                </ul>
+
+                <div class="tab-pane active" th:if="${menus.dxtxpz}">
+                    <div class="panel-body">
+                        <div class="jqGrid_wrapper">
+                            <table id="table_list"></table>
+                            <div id="pager_list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="myModal" tabindex="2" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel1">提醒配置</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal" id="myModalOne">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">提醒名称：</label>
+                        <div class="col-sm-6">
+                            <div class="remind " id="alarm_type"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">应用系统：</label>
+                        <div class="col-sm-6">
+                            <div class="remind " id="web_id"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">提醒频次：</label>
+                        <div class="col-sm-6">
+                            <div class="remind " id="taskAlarmFrequecy"></div>
+                            <input type="hidden" id="id_hide">
+                            <input type="hidden" id="status">
+                            <input type="hidden" id="webId">
+                            <input type="hidden" id="createTime">
+                            <input type="hidden" id="updateTime">
+                            <input type="hidden" id="taskAlarmType">
+                            <input type="hidden" id="taskAlarmContent">
+                        </div>
+                    </div>
+                    <!-- 时间选择 -->
+                    <div class="form-group m-r-md" id="sandbox-container" >
+                        <label class="col-sm-4 control-label">提醒时间段:</label>
+                        <div class="col-sm-6"></span>
+                            <input type="text" placeholder="起始时间" class="form-control layer-date" id="start_time" name="startTime" style="width:102px;"/>
+                            <input type="text" placeholder="截止时间" class="form-control layer-date" id="end_time" name="endTime" style="width:102px;"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label  class="col-sm-4 control-label">检测频率：</label>
+                        <div class="col-sm-5">
+                            <input type="text" class="form-control"  placeholder="0-1440之间的值" id="scanFrequecy">
+                            <!--<select name="" id="scanFrequecy" class="form-control">-->
+                                <!--<option value="30">半小时</option>-->
+                                <!--<option value="60">一小时</option>-->
+                                <!--<option value="120">两小时</option>-->
+                                <!--<option value="180">三小时</option>-->
+                                <!--<option value="240">四小时</option>-->
+                                <!--<option value="300">五小时</option>-->
+                                <!--<option value="360">六小时</option>-->
+                                <!--<option value="420">七小时</option>-->
+                                <!--<option value="480">八小时</option>-->
+                                <!--<option value="720">十二小时</option>-->
+                                <!--<option value="1440">二十四小时</option>-->
+                            <!--</select>-->
+                        </div>
+                        <label id="taskMin">分钟</label>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">提醒手机：</label>
+                        <div class="col-sm-8">
+                            <input type="text" class="form-control"  id="taskAlarmPhone">
+                        </div>
+                    </div>
+                    <div class="form-group text-center tip">
+                        <div>提示：多个手机号码可用逗号隔开，例如：15116367275,15116243578</div>
+                    </div>
+                    <div class="js-block" style="display:none;">
+                        <div class="form-group">
+                            <label class="col-sm-4 control-label">提醒值低于：</label>
+                            <div class="col-sm-5">
+                                <input type="text" class="form-control"  id="taskAlarmAmount">
+                            </div>
+                            <label class="control-label">元，发送短信提醒</label>
+                        </div>
+                        <div class="form-group text-center tip">
+                            <div>提示：适用于未设置提醒阀值的客户，达到阀值时，给提醒手机号码及归属销售发送提醒短信</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-4 col-sm-10">
+                            <a class="btn btn-primary" id="operateOne" onclick="editRemind()">确定</a>
+                            <a class="btn btn-default col-sm-offset-4" data-dismiss="modal">取消</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>-->
+<script th:src="@{/resources/js/jquery.1.7.2.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/jquery.datetimepicker.full.min.js}"></script>
+<script th:src="@{/resources/js/plugins/timePicker/jquery.timePicker.js}"></script>
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/auth.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+    var menus = [[${menus}]];
+    if (menus.dxtxpz) {
+
+    } else if (menus.yjtxpz) {
+        $("#emailconf")[0].click();
+    }
+
+
+
+    $(document).ready(function () {
+
+        $("#start_time").timePicker({
+            step:1
+        });
+        $("#end_time").timePicker({
+            step:1
+        });
+
+        $.jgrid.defaults.styleUI = "Bootstrap";
+        $("#table_list").jqGrid({
+            url:/*[[@{/managerCenter/taskAlarmSetting/sms/list}]]*/,
+            mtype: 'POST',
+            datatype: "json",
+            jsonReader : {
+                root: "data",
+                page: "pageNo",
+                total: "totalPage",
+                records: "totalRecord"
+            },
+            height: 'auto',
+            width:'auto',
+            rownumbers:true,
+            autowidth: true,
+            shrinkToFit: true,
+            autoScroll: true,
+            rowNum: 20,
+            rowList: [10, 20, 30,50],
+            colModel: [
+                {label:"id",name: "id",align: "left",sortable:false,hidden:true},
+                {label:"名称",name: "taskAlarmType",align: "left",sortable:false,width:200,
+                    formatter:function(cellvalue, options, rowObject){
+                        var taskAlarmType=cellvalue;
+                        if (taskAlarmType==1){
+                            return "短信余额提醒";
+                        } else if(taskAlarmType==2) {
+                            return "可用额度提醒";
+                        }
+
+                    }
+                },
+                {label:"提醒频次",name: "taskAlarmFrequecy",align: "left",sortable:false,width:200},
+                {label:"提醒时间段",name: "beginTime endTime",align: "left",sortable:false,width:200,
+                    formatter:function(cellvalue, options, rowObject){
+                        var beginTime=rowObject.beginTime;
+                        var endTime=rowObject.endTime;
+                        return beginTime+'~'+ endTime;
+
+                    }
+                },
+                {label:"检测频率",name: "scanFrequecy", align: "left",sortable:false,width:200,
+                    formatter:function(cellvalue, options, rowObject){
+                        var scanFrequecy=cellvalue;
+
+                        return scanFrequecy+'分钟/次';
+
+                    }
+                },
+                {label:"应用系统",name: "webId", align: "left",sortable:false,width:215,
+                    formatter:function(cellvalue, options, rowObject){
+                        var webId=cellvalue;
+                        if (webId==5){
+                            return "品牌客户端";
+                        } else if(webId==4) {
+                            return "OEM代理商平台";
+                        } else if(webId==2) {
+                            return "品牌代理商平台";
+                        } else if(webId == 6){
+                            return "OEM客户端";
+                        };
+                    }
+                },
+                {label:"提醒号码",name: "taskAlarmPhone", align: "left",sortable:false,width:200,
+                    formatter:function(cellvalue, options, rowObject){
+                        var str = cellvalue;
+                        if(str){
+                            return str
+                        } else {
+                            return "-"
+                        }
+                    }
+                },
+                {label:"默认提醒值",name: "taskAlarmAmount", align: "left",sortable:false,width:200,
+                    formatter:function(cellvalue, options, rowObject){
+                        var taskAlarmType = rowObject.taskAlarmType;
+                        var str = cellvalue;
+                        if (taskAlarmType==1){
+                            return "-";
+                        } else if(taskAlarmType==2) {
+                            return str + "元"
+                        }
+                    }
+                },
+                {label:"状态",name: "status", align: "left",sortable:false,width:220,
+                    formatter:function(cellvalue, options, rowObject){
+                        var status=cellvalue;
+                        if (status==1){
+                            return "启用";
+                        } else if(status==0) {
+                            return "禁用";
+                        }
+
+                    }
+
+                },
+                {label:"操作",name: "total",index: "total",align: "left",sortable:false,width:220,
+                    formatter:function(cellvalue, options, rowObject){
+                        var id=rowObject.id;
+                        var status=rowObject.status;
+                        var switcher = "";
+                        switcher += "<button type='button' class='btn btn-link btn-xs' data-toggle='modal' status='"+status+"' data-target='#myModal' onclick=\"edit('"+id+"',this)\" title='编辑'>编辑</button>";
+                        if(status==0)
+                            switcher += "<button type='button' class='btn btn-link btn-xs' onclick=\"changeStatus('"+id+"','1',this)\" title='启用'>启用</button>";
+                        if(status==1)
+                            switcher += "<button type='button' class='btn btn-link btn-xs' onclick=\"changeStatus('"+id+"','0',this)\" title='禁用'>禁用</button>";
+                        return switcher;
+                    }
+                }
+            ],
+//            pager: "#pager_list",
+            viewrecords: true,
+            hidegrid: false
+        });
+
+        $(window).bind("resize", function () {
+            var width = $(".jqGrid_wrapper").width();
+            $("#table_list").setGridWidth(width);
+        })
+
+    });
+
+    //解决合计精度问题
+    Math.add = function(v1, v2)
+    {
+        var r1, r2, m;
+        try
+        {
+            r1 = v1.toString().split(".")[1].length;
+        }
+        catch (e)
+        {
+            r1 = 0;
+        }
+        try
+        {
+            r2 = v2.toString().split(".")[1].length;
+        }
+        catch (e)
+        {
+            r2 = 0;
+        }
+        m = Math.pow(10, Math.max(r1, r2));
+
+        return (v1 * m + v2 * m) / m;
+    };
+
+    Number.toFixed = function(scale)
+    {
+        var s, s1, s2, start;
+
+        s1 = this + "";
+        start = s1.indexOf(".");
+        s = s1.movePoint(scale);
+
+        if (start >= 0)
+        {
+            s2 = Number(s1.substr(start + scale + 1, 1));
+            if (s2 >= 5 && this >= 0 || s2 < 5 && this < 0)
+            {
+                s = Math.ceil(s);
+            }
+            else
+            {
+                s = Math.floor(s);
+            }
+        }
+
+        return s.toString().movePoint(-scale);
+    }
+
+    //表格统计功能
+    function completeMethod(){
+        var jq_tables = $("#table_list").jqGrid("getRowData");
+        var sum_saletotalStr = 0;
+        var sum_costtotalStr = 0;
+        var sum_profit = 0;
+        for(var j=0;j<jq_tables.length;j++){
+            //jq_tables[i].字段名 获取每一行的指定字段的值
+            sum_saletotalStr = Math.add(sum_saletotalStr,parseFloat(jq_tables[j]['saletotalStr'])==null?0:jq_tables[j]['saletotalStr']);
+            sum_costtotalStr = Math.add(sum_costtotalStr,parseFloat(jq_tables[j]['costtotalStr'])==null?0:jq_tables[j]['costtotalStr']);
+            sum_profit = Math.add(sum_profit,parseFloat(jq_tables[j]['profit'])==null?0:jq_tables[j]['profit']);
+        }
+        sum_saletotalStr = Number(sum_saletotalStr).toFixed(2);
+        sum_costtotalStr = Number(sum_costtotalStr).toFixed(2);
+        sum_profit = Number(sum_profit).toFixed(2);
+
+        var sum_sendTotal=$("#table_list").getCol('sendTotal',false,'sum');
+        var sum_submitTotal=$("#table_list").getCol('submitTotal',false,'sum');
+        var sum_chargeTotal=$("#table_list").getCol('chargeTotal',false,'sum');
+        var sum_successRate=$("#table_list").getCol('successRate',false,'sum');
+        var sum_successTotal=$("#table_list").getCol('successTotal',false,'sum');
+        var submitsuccess=$("#table_list").getCol('submitsuccess',false,'sum');
+        var sum_subretsuccess=$("#table_list").getCol('subretsuccess',false,'sum');
+        var sum_reportsuccess=$("#table_list").getCol('reportsuccess',false,'sum');
+        var sum_failTotal=$("#table_list").getCol('failTotal',false,'sum');
+        var sum_costpriceStr=$("#table_list").getCol('costpriceStr',false,'-');
+        var sum_profitRate=$("#table_list").getCol('profitRate',false,'-');
+        $("#table_list").footerData('set', { 'remark': '合计',
+            'sendTotal': sum_sendTotal,
+            'submitTotal': sum_submitTotal,
+            'chargeTotal': sum_chargeTotal,
+            'successRate': "-",
+            'successTotal': sum_successTotal,
+            'submitsuccess': submitsuccess,
+            'subretsuccess': sum_subretsuccess,
+            'reportsuccess': sum_reportsuccess,
+            'failTotal': sum_failTotal,
+            'saletotalStr': sum_saletotalStr,
+            'costpriceStr': '-',
+            'costtotalStr': sum_costtotalStr,
+            'profit': sum_profit,
+            'profitRate': '-'
+        });
+    }
+
+    function changeStatus(id, status, btn) {
+        var url = '/managerCenter/taskAlarmSetting/sms/updateStatus';
+        layer.confirm('您确定改变状态吗', {
+            btn: ['确定','取消'] //按钮
+        },function(){
+            layer.closeAll();
+            $.ajax({
+                type:'post',
+                url:url,
+                data:{
+                    id:id,
+                    status:status
+                },
+                cache:false,
+                dataType:'json',
+                success:function(data){
+                    $("#table_list").jqGrid('setGridParam',{
+                        datatype:'json',
+                        postData: {
+                            condition: $("#condition").val(),
+                            departmentId: $("#departmentId").val(),
+                            belongBusiness: $("#belongBusiness").val(),
+                            startTime: $("#start_time_day").val(),
+                            endTime: $("#end_time_day").val()
+                        } //发送数据
+//            page:1
+                    }).trigger("reloadGrid"); //重新载入
+                }
+
+            });
+        });
+
+    }
+
+    function edit(id,btn) {
+        var url = '/managerCenter/taskAlarmSetting/sms/edit/' + id;
+//        var status = $(btn).attr('status');
+//        if(status == 0){
+//            $(btn).attr("data-target","");
+//            layer.msg("当前为禁用状态，请启用后进行此操作");
+//            return false;
+//        }
+        $.ajax({
+                type:'GET',
+                url:url,
+                cache:false,
+                dataType:'json',
+                success:function(data){
+                    if(data['data']['taskAlarmType'] == '1'){
+                        $("#alarm_type").text('短信余额提醒');
+                        $(".js-block").hide();
+                    }else if(data['data']['taskAlarmType'] == '2'){
+                        $("#alarm_type").text('可用余额提醒');
+                        $(".js-block").show();
+                    }
+                    $("#id_hide").val(data['data']['id']);
+                    $("#status").val(data['data']['status']);
+                    $("#webId").val(data['data']['webId']);
+                    $("#taskAlarmType").val(data['data']['taskAlarmType']);
+                    $("#taskAlarmContent").val(data['data']['taskAlarmContent']);
+                    $("#createTime").val(data['data']['createTime']);
+                    $("#updateTime").val(data['data']['updateTime']);
+                    $("#taskAlarmContent").val(data['data']['taskAlarmContent']);
+                    $("#taskAlarmFrequecy").text(data['data']['taskAlarmFrequecy']);
+                    $("#scanFrequecy").val(data['data']['scanFrequecy']);
+                    $("#start_time").val(data['data']['beginTime']);
+                    $("#end_time").val(data['data']['endTime']);
+                    $("#taskAlarmPhone").val(data['data']['taskAlarmPhone']);
+                    $("#taskAlarmAmount").val(data['data']['taskAlarmAmount']);
+                    if (data['data']['webId']==5){
+                        $("#web_id").text('品牌客户端');
+                    } else if(data['data']['webId']==4) {
+                        $("#web_id").text('OEM代理商平台');
+                    }else if(data['data']['webId']==2) {
+                        $("#web_id").text('品牌代理商平台');
+                    }  else if(data['data']['webId']==6) {
+                        $("#web_id").text('OEM客户端');
+                    }
+                }
+            });
+
+    }
+
+    function reload() {
+        event.preventDefault();
+        $("#table_list").jqGrid('setGridParam',{
+            datatype:'json',
+            postData: {
+                condition: $("#condition").val(),
+                agentType:$("#agentType").val()
+            }, //发送数据
+        }).trigger("reloadGrid"); //重新载入
+    }
+    function  isRepeat(arr){
+        var hash = {};
+        for (var i in arr) {
+            if (hash[arr[i]])
+                return true;
+            hash[arr[i]] = true;
+        }
+    }
+    function editRemind() {
+        var url = '/managerCenter/taskAlarmSetting/sms/edit';
+         var id =  $("#id_hide").val();
+         var taskAlarmType =  $("#taskAlarmType").val();
+         var taskAlarmContent =  $("#taskAlarmContent").val();
+         var taskAlarmFrequecy =  $("#taskAlarmFrequecy").text();
+         var beginTime =  $("#start_time").val();
+         var endTime =  $("#end_time").val();
+         var scanFrequecy =  $("#scanFrequecy").val();
+         var status =  $("#status").val();
+         var webId =  $("#webId").val();
+         var createTime =  $("#createTime").val();
+         var taskAlarmAmount =  $("#taskAlarmAmount").val();
+         var taskAlarmPhone =  $("#taskAlarmPhone").val();
+         var updateTime =  $("#updateTime").val();
+         var beginTimeMills = (new Date("2017/08/10 " + beginTime)).getTime();
+         var endTimeMills = (new Date("2017/08/10 " + endTime)).getTime();
+
+
+
+         if(beginTimeMills > endTimeMills){
+             layer.msg("开始时间不能比结束时间晚",{icon:2});
+             return false;
+         }
+
+        if( scanFrequecy.trim() == '' ){
+            layer.msg("扫描频率不能为空",{icon:2});
+            return false;
+        }
+        if(!_Auth.isNum(scanFrequecy)){
+            layer.msg("请输入正整数",{icon:2});
+            return false;
+        }
+        if(Number(scanFrequecy) < 30 || Number(scanFrequecy) > 1440){
+            layer.msg("扫描频率设置范围为30-1440",{icon:2});
+            return false;
+        }
+        var phone = taskAlarmPhone.split(",");
+        for (var i = 0; i < phone.length; i++) {
+            if (!/^[1][0-9][0-9]{9}$/.test(phone[i])) {
+                layer.msg("手机号码格式不正确",{icon:2});
+                return false;
+            }
+        }
+        if(isRepeat(phone)){
+            layer.msg("手机号码重复",{icon:2});
+            return false;
+        }
+        if(!/^\d+(?:.\d{1,2})?$/.test(taskAlarmAmount) && taskAlarmType == 2){
+            layer.msg("提醒值为数字，最多保留两位小数",{icon:2});
+            return false;
+        }
+        $.ajax({
+            type:'POST',
+            url:url,
+            data:{
+                id:id,
+                taskAlarmType:taskAlarmType,
+                taskAlarmFrequecy:taskAlarmFrequecy,
+                taskAlarmContent:taskAlarmContent,
+                beginTime:beginTime,
+                endTime:endTime,
+                scanFrequecy:scanFrequecy,
+                status:status,
+                webId:webId,
+                createTime:createTime,
+                updateTime:updateTime,
+                taskAlarmAmount:taskAlarmAmount,
+                taskAlarmPhone:taskAlarmPhone
+            },
+            cache:false,
+            dataType:'json',
+            success:function(data){
+                if(data.success){
+                    layer.msg("修改成功",{icon:1});
+                    $("#myModal").modal('hide');
+                    reload();
+                }else {
+                    layer.msg("修改失败",{icon:2});
+                }
+            }
+        });
+        return false;
+    }
+
+
+    /*]]>*/
+</script>
+</body>
+</html>

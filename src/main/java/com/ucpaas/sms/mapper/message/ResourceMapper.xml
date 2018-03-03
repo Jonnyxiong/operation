@@ -1,0 +1,403 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ucpaas.sms.mapper.message.ResourceMapper">
+
+	<resultMap id="rowMapper" type="Resource">
+        <result property="resourceId" jdbcType="VARCHAR" column="resource_id"/>
+        <result property="channelId" jdbcType="INTEGER" column="channel_id"/>
+        <result property="channelType" jdbcType="VARCHAR" column="channel_type"/>
+        <result property="smsType" jdbcType="VARCHAR" column="sms_type"/>
+        <result property="contentProp" jdbcType="VARCHAR" column="content_prop"/>
+        <result property="belongBusiness" jdbcType="BIGINT" column="belong_business"/>
+        <result property="directConnect" jdbcType="INTEGER" column="direct_connect"/>
+        <result property="extendSize" jdbcType="INTEGER" column="extend_size"/>
+        <result property="signType" jdbcType="VARCHAR" column="sign_type"/>
+        <result property="purchasePrice" jdbcType="VARCHAR" column="purchase_price"/>
+        <result property="rate" jdbcType="INTEGER" column="rate"/>
+        <result property="minimumGuarantee" jdbcType="VARCHAR" column="minimum_guarantee"/>
+        <result property="isCredit" jdbcType="INTEGER" column="is_credit"/>
+        <result property="payType" jdbcType="VARCHAR" column="pay_type"/>
+        <result property="invoiceType" jdbcType="INTEGER" column="invoice_type"/>
+        <result property="mtIp" jdbcType="VARCHAR" column="mt_ip"/>
+        <result property="protocolType" jdbcType="INTEGER" column="protocol_type"/>
+        <result property="supplier" jdbcType="VARCHAR" column="supplier"/>
+        <result property="contact" jdbcType="VARCHAR" column="contact"/>
+        <result property="mobile" jdbcType="VARCHAR" column="mobile"/>
+        <result property="isAudit" jdbcType="INTEGER" column="is_audit"/>
+        <result property="onlineDate" jdbcType="DATE" column="online_date"/>
+        <result property="state" jdbcType="INTEGER" column="state"/>
+        <result property="remark" jdbcType="VARCHAR" column="remark"/>
+        <result property="auditorId" jdbcType="BIGINT" column="auditor_id"/>
+        <result property="operatorId" jdbcType="BIGINT" column="operator_id"/>
+        <result property="createTime" jdbcType="TIMESTAMP" column="create_time"/>
+        <result property="updateTime" jdbcType="TIMESTAMP" column="update_time"/>
+    </resultMap> 
+     
+    <sql id="BASE_COLUMN_LIST">
+        resource_id,
+        channel_id,
+        channel_type,
+        sms_type,
+        content_prop,
+        belong_business,
+        direct_connect,
+        extend_size,
+        sign_type,
+        purchase_price,
+        rate,
+        minimum_guarantee,
+        is_credit,
+        pay_type,
+        invoice_type,
+        mt_ip,
+        protocol_type,
+        supplier,
+        contact,
+        mobile,
+        is_audit,
+        online_date,
+        state,
+        remark,
+        auditor_id,
+        operator_id,
+        create_time,
+        update_time
+    </sql>
+
+
+    <sql id="resourceColumns">
+        a.`resource_id` as "resourceId",
+	    a.`channel_id` as "channelId",
+	    a.`channel_type` as "channelType",
+	    a.`sms_type` as "smsType",
+	    a.`content_prop` as "contentProp",
+	    a.`belong_business` as "belongBusiness",
+	    a.`direct_connect` as "directConnect",
+	    a.`extend_size` as "extendSize",
+	    a.`sign_type` as "signType",
+	    a.`purchase_price` as "purchasePrice",
+	    a.`rate`,
+	    a.`minimum_guarantee` as "minimumGuarantee",
+	    a.`is_credit` as "isCredit",
+	    a.`pay_type` as "payType",
+	    a.`invoice_type` as "invoiceType",
+	    a.`mt_ip` as "mtIp",
+	    a.`protocol_type` as "protocolType",
+	    a.`supplier`,
+	    a.`contact`,
+	    a.`mobile`,
+	    a.`is_audit` as "isAudit",
+	    a.`online_date` as "onlineDate",
+	    a.`state`,
+	    a.`remark`,
+	    a.`auditor_id` as "auditorId",
+	    a.`operator_id` as "operatorId",
+	    a.`create_time` as "createTime",
+	    a.`update_time` as "updateTime"
+    </sql>
+
+    <sql id="resourceJoins">
+    </sql>
+
+    <sql id="resourceCondition">
+		<if test="state != null and state != '' ">
+			and a.state = #{state}
+		</if>
+    </sql>
+
+	<select id="get" resultType="Resource">
+		SELECT
+		<include refid="resourceColumns"/>,
+		u.realname AS belongBusinessName
+		FROM t_sms_resource_list a
+		<include refid="resourceJoins"/>
+		LEFT JOIN t_sms_user u ON u.id = a.belong_business
+		WHERE a.resource_id = #{id}
+	</select>
+
+	<select id="findAllList" resultType="Resource">
+		SELECT
+		<include refid="resourceColumns"/>
+		FROM t_sms_resource_list a
+		<include refid="resourceJoins"/>
+		<where>
+			1=1
+			<include refid="resourceCondition" />
+		</where>
+		<choose>
+			<when test="orderBy !=null and orderBy != ''">
+				ORDER BY ${orderBy}
+			</when>
+		</choose>
+	</select>
+
+	<select id="getCount" resultType="Integer">
+		SELECT
+			count(0)
+		FROM t_sms_resource_list a
+		<include refid="resourceJoins"/>
+		<where>
+			1=1
+			<include refid="resourceCondition" />
+		</where>
+	</select>
+
+	<select id="findList" resultType="Resource">
+		SELECT
+		<include refid="resourceColumns"/>,
+		u.realname AS belongBusinessName
+		FROM t_sms_resource_list a
+		<include refid="resourceJoins"/>
+		LEFT JOIN t_sms_user u ON u.id = a.belong_business
+		<where>
+			1=1
+			<include refid="resourceCondition" />
+		</where>
+		<choose>
+			<when test="orderBy !=null and orderBy != ''">
+				ORDER BY ${orderBy}
+			</when>
+		</choose>
+		${limit}
+	</select>
+
+    <insert id="insert">
+		INSERT INTO t_sms_resource_list (
+            resource_id,
+			channel_id,
+			channel_type,
+			sms_type,
+			content_prop,
+			belong_business,
+			direct_connect,
+			extend_size,
+			sign_type,
+			purchase_price,
+			rate,
+			minimum_guarantee,
+			is_credit,
+			pay_type,
+			invoice_type,
+			mt_ip,
+			protocol_type,
+			supplier,
+			contact,
+			mobile,
+			is_audit,
+			online_date,
+			state,
+			remark,
+			auditor_id ,
+			operator_id ,
+			create_time ,
+			update_time
+		)
+		VALUE
+		(
+             #{resourceId},
+			 #{channelId},
+			 #{channelType},
+			 #{smsType},
+			 #{contentProp},
+			 #{belongBusiness},
+			 #{directConnect},
+			 #{extendSize},
+			 #{signType},
+			 #{purchasePrice},
+			 #{rate},
+			 #{minimumGuarantee},
+			 #{isCredit},
+			 #{payType},
+			 #{invoiceType},
+			 #{mtIp},
+			 #{protocolType},
+			 #{supplier},
+			 #{contact},
+			 #{mobile},
+			 #{isAudit},
+			 #{onlineDate},
+			 #{state},
+			 #{remark},
+			 #{auditorId},
+			 #{operatorId},
+			 #{createTime},
+			 #{updateTime}
+		)
+	</insert>
+
+	<update id="update">
+		UPDATE t_sms_resource_list SET
+			channel_id = #{channelId},
+			channel_type = #{channelType},
+			sms_type = #{smsType},
+			content_prop = #{contentProp},
+			belong_business = #{belongBusiness},
+			direct_connect = #{directConnect},
+			extend_size = #{extendSize},
+			sign_type = #{signType},
+			purchase_price = #{purchasePrice},
+			rate = #{rate},
+			minimum_guarantee = #{minimumGuarantee},
+			is_credit = #{isCredit},
+			pay_type = #{payType},
+			invoice_type = #{invoiceType},
+			mt_ip = #{mtIp},
+			protocol_type = #{protocolType},
+			supplier = #{supplier},
+			contact = #{contact},
+			mobile = #{mobile},
+			is_audit = #{isAudit},
+			online_date = #{onlineDate},
+			state = #{state},
+			remark = #{remark},
+			auditor_id = #{auditorId},
+			operator_id = #{operatorId},
+			update_time =#{updateTime}
+		WHERE resource_id = #{resourceId}
+	</update>
+
+    <!-- 更新状态 -->
+    <update id="updateStatus">
+		UPDATE t_sms_resource_list
+			SET state = #{state}, update_time =#{updateTime}
+		WHERE
+			resource_id = #{resourceId}
+			<if test="createTime != null">
+				AND update_time = #{createTime}
+			</if>
+	</update>
+
+	<!-- 获取当月最大的ID序列，可能为空 -->
+	<select id="getMaxIdSeq" resultType="int">
+		select
+			if(seq is null, -1, seq) as seq
+		from (
+			select
+				MAX(SUBSTRING(resource_id FROM 2 FOR 4)+0) as seq
+			from t_sms_resource_list
+			where resource_id like concat('%', date_format(now(),'%Y%m%d'), '%')
+		) e
+	</select>
+
+	<select id="getChannelCount" resultType="int">
+		select count(0) from t_sms_resource_list where channel_id = #{channelId}
+	</select>
+
+	<select id="findResourceByIds" resultType="Resource" parameterType="java.util.List">
+		SELECT
+			<include refid="resourceColumns"/>
+		FROM t_sms_resource_list a
+		WHERE a.resource_id IN
+		<foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+
+	<select id="getOpenChannelCountByChannelId" resultType="int">
+		select count(0) as count from t_sms_channel where state = 1 and cid = #{channelId}
+	</select>
+	
+	
+	<select id="queryList"  resultMap="rowMapper">
+        SELECT 
+            <include refid="BASE_COLUMN_LIST" /> 
+        FROM t_sms_resource_list 
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            <if test="params.resourceId != null and params.resourceId != ''">
+                and resource_id = #{params.resourceId}
+            </if>
+            <if test="params.channelId != null and params.channelId != ''">
+                and channel_id = #{params.channelId}
+            </if>
+            <if test="params.channelType != null and params.channelType != ''">
+                and channel_type = #{params.channelType}
+            </if>
+            <if test="params.smsType != null and params.smsType != ''">
+                and sms_type = #{params.smsType}
+            </if>
+            <if test="params.contentProp != null and params.contentProp != ''">
+                and content_prop = #{params.contentProp}
+            </if>
+            <if test="params.belongBusiness != null and params.belongBusiness != ''">
+                and belong_business = #{params.belongBusiness}
+            </if>
+            <if test="params.directConnect != null and params.directConnect != ''">
+                and direct_connect = #{params.directConnect}
+            </if>
+            <if test="params.extendSize != null and params.extendSize != ''">
+                and extend_size = #{params.extendSize}
+            </if>
+            <if test="params.signType != null and params.signType != ''">
+                and sign_type = #{params.signType}
+            </if>
+            <if test="params.purchasePrice != null and params.purchasePrice != ''">
+                and purchase_price = #{params.purchasePrice}
+            </if>
+            <if test="params.rate != null and params.rate != ''">
+                and rate = #{params.rate}
+            </if>
+            <if test="params.minimumGuarantee != null and params.minimumGuarantee != ''">
+                and minimum_guarantee = #{params.minimumGuarantee}
+            </if>
+            <if test="params.isCredit != null and params.isCredit != ''">
+                and is_credit = #{params.isCredit}
+            </if>
+            <if test="params.payType != null and params.payType != ''">
+                and pay_type = #{params.payType}
+            </if>
+            <if test="params.invoiceType != null and params.invoiceType != ''">
+                and invoice_type = #{params.invoiceType}
+            </if>
+            <if test="params.mtIp != null and params.mtIp != ''">
+                and mt_ip = #{params.mtIp}
+            </if>
+            <if test="params.protocolType != null and params.protocolType != ''">
+                and protocol_type = #{params.protocolType}
+            </if>
+            <if test="params.supplier != null and params.supplier != ''">
+                and supplier = #{params.supplier}
+            </if>
+            <if test="params.contact != null and params.contact != ''">
+                and contact = #{params.contact}
+            </if>
+            <if test="params.mobile != null and params.mobile != ''">
+                and mobile = #{params.mobile}
+            </if>
+            <if test="params.isAudit != null and params.isAudit != ''">
+                and is_audit = #{params.isAudit}
+            </if>
+            <if test="params.onlineDate != null and params.onlineDate != ''">
+                and online_date = #{params.onlineDate}
+            </if>
+            <if test="params.state != null and params.state != ''">
+                and state = #{params.state}
+            </if>
+            <if test="params.remark != null and params.remark != ''">
+                and remark = #{params.remark}
+            </if>
+            <if test="params.auditorId != null and params.auditorId != ''">
+                and auditor_id = #{params.auditorId}
+            </if>
+            <if test="params.operatorId != null and params.operatorId != ''">
+                and operator_id = #{params.operatorId}
+            </if>
+            <if test="params.createTime != null and params.createTime != ''">
+                and create_time = #{params.createTime}
+            </if>
+            <if test="params.updateTime != null and params.updateTime != ''">
+                and update_time = #{params.updateTime}
+            </if>
+            
+            <if test="params.resourceIds != null ">
+            	resource_id in
+			  <foreach item="item" index="index" collection="params.resourceIds "
+			      open="(" separator="," close=")">
+			        #{item}
+			  </foreach>
+		  	</if>
+	     </trim>
+    </select>
+</mapper>
+

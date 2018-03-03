@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ucpaas.sms.mapper.message.DemandMapper">
+    
+	<sql id="demandColumns">
+		a.demand_id AS "demandId",
+		a.industry_type AS "industryType",
+		a.sms_type AS "smsType",
+		a.expect_number AS "expectNumber",
+		a.minimum_guarantee AS "minimumGuarantee",
+		a.channel_type AS "channelType",
+		a.direct_connect AS "directConnect",
+		a.extend_size AS "extendSize",
+		a.rate AS "rate",
+		a.sign_type AS "signType",
+		a.content_template AS "contentTemplate",
+		a.sale_price AS "salePrice",
+		a.online_date AS "onlineDate",
+		a.state AS "state",
+		a.remark AS "remark",
+		a.operator_id AS "operatorId",
+		a.create_time AS "createTime",
+		a.update_time AS "updateTime"
+	</sql>
+	
+	<sql id="demandJoins">
+	</sql>
+
+	<sql id="demandCondition">
+	</sql>
+    
+	<select id="get" resultType="Demand">
+		SELECT 
+			<include refid="demandColumns"/>
+		FROM t_sms_demand_list a
+		<include refid="demandJoins"/>
+		WHERE a.demand_id = #{id}
+	</select>
+
+	<select id="findAllList" resultType="Demand">
+		SELECT
+			<include refid="demandColumns"/>
+		FROM t_sms_demand_list a
+		<include refid="demandJoins"/>
+		<where>
+			1=1
+			<include refid="demandCondition" />
+		</where>
+		<choose>
+			<when test="orderBy !=null and orderBy != ''">
+				ORDER BY ${orderBy}
+			</when>
+		</choose>
+	</select>
+
+	<select id="getCount" resultType="Integer">
+		SELECT
+			count(0)
+		FROM t_sms_demand_list a
+		<include refid="demandJoins"/>
+		<where>
+			1=1
+			<include refid="demandCondition" />
+		</where>
+	</select>
+
+	<select id="findList" resultType="Demand">
+		SELECT 
+			<include refid="demandColumns"/>
+		FROM t_sms_demand_list a
+		<include refid="demandJoins"/>
+		<where>
+			1=1
+			<include refid="demandCondition" />
+		</where>
+		<choose>
+			<when test="orderBy !=null and orderBy != ''">
+				ORDER BY ${orderBy}
+			</when>
+		</choose>
+		${limit}
+	</select>
+
+	<insert id="insert">
+		INSERT INTO t_sms_demand_list(
+			demand_id,
+			industry_type,
+			sms_type,
+			expect_number,
+			minimum_guarantee,
+			channel_type,
+			direct_connect,
+			extend_size,
+			rate,
+			sign_type,
+			content_template,
+			sale_price,
+			online_date,
+			state,
+			remark,
+			operator_id,
+			create_time,
+			update_time
+		) VALUES (
+			#{demandId},
+			#{industryType},
+			#{smsType},
+			#{expectNumber},
+			#{minimumGuarantee},
+			#{channelType},
+			#{directConnect},
+			#{extendSize},
+			#{rate},
+			#{signType},
+			#{contentTemplate},
+			#{salePrice},
+			#{onlineDate},
+			#{state},
+			#{remark},
+			#{operatorId},
+			#{createTime},
+			#{updateTime}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE t_sms_demand_list SET 	
+			demand_id = #{demandId},
+			industry_type = #{industryType},
+			sms_type = #{smsType},
+			expect_number = #{expectNumber},
+			minimum_guarantee = #{minimumGuarantee},
+			channel_type = #{channelType},
+			direct_connect = #{directConnect},
+			extend_size = #{extendSize},
+			rate = #{rate},
+			sign_type = #{signType},
+			content_template = #{contentTemplate},
+			sale_price = #{salePrice},
+			online_date = #{onlineDate},
+			state = #{state},
+			remark = #{remark},
+			operator_id = #{operatorId},
+			create_time = #{createTime},
+			update_time = #{updateTime}
+		WHERE demand_id = #{demandId}
+	</update>
+
+	<!-- 更新状态 -->
+	<update id="updateStatus">
+		UPDATE t_sms_demand_list
+			SET state = #{state},update_time = #{updateTime}
+			<if test="remark != null and remark != ''">
+				,remark = #{remark}
+			</if>
+		WHERE
+			demand_id = #{demandId}
+			<if test="lastUpdateTime != null">
+				AND update_time = #{lastUpdateTime}
+			</if>
+	</update>
+
+	<!-- 获取当月最大的ID序列，可能为空 -->
+	<select id="getMaxIdSeq" resultType="int">
+		select
+			if(seq is null, -1, seq) as seq
+		from (
+			select
+				MAX(SUBSTRING(demand_id FROM 2 FOR 4)+0) as seq
+			from t_sms_demand_list
+			where demand_id like concat('%', date_format(now(),'%Y%m%d'), '%')
+		) e
+	</select>
+
+	<select id="getOrderRefById" resultType="string">
+		select order_id as "orderId" from t_sms_order_ref_demand where demand_id =#{demandId}
+	</select>
+
+	<update id="closeOrderRefById">
+		UPDATE t_sms_order_ref_demand
+			SET state = 0,update_time=now()
+		WHERE demand_id = #{demandId}
+	</update>
+
+	<select id="findResourceById" resultType="string">
+		select resource_id as resourceId from t_sms_demand_ref_resource where demand_id  =#{demandId}
+	</select>
+
+	<insert id="batchInsertResourceRef" parameterType="java.util.Map" >
+		INSERT INTO t_sms_demand_ref_resource (
+			demand_id,
+			resource_id,
+			create_time
+		)
+		VALUES
+		<foreach collection="resourceIds" item="item" index="index" separator="," >
+			(
+			#{demandId},
+			#{item},
+			#{now}
+			)
+		</foreach>
+	</insert>
+
+	<select id="getDemandByOrderId" resultType="Demand">
+		<!--select
+		a.*
+		from t_sms_demand_list a
+		where demand_id in(select e.demand_id from (select demand_id from t_sms_order_ref_demand where order_id = 'D000020170630' ORDER BY create_time desc limit 1)e)
+		-->
+		select
+			<include refid="demandColumns"/>
+		from t_sms_demand_list a
+		join t_sms_order_ref_demand b on b.demand_id = a.demand_id
+		where b.order_id = #{orderId}
+		order by b.create_time desc
+		limit 1
+	</select>
+
+</mapper>

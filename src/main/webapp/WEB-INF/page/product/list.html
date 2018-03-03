@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信云平台运营系统 </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+    <link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+    <link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+    <style>
+        /* Additional style to fix warning dialog position */
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+        .modal-body input{
+        	width:150px;
+        }
+    </style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+   
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="tabs-container">
+				<ul class="nav nav-tabs">
+					<li class="active" id="agentTab" th:if="${menus.ppcpbgl}"><a data-toggle="tab" href="#tab-1" aria-expanded="true" >品牌产品包管理</a>
+					</li>
+					<li class=""  id="clientTab" th:if="${menus.ppdlsxpz}"><a data-toggle="tab" href="#tab-2" id="rebateConfigPage" aria-expanded="false" >品牌代理属性配置</a>
+					</li>
+				</ul>
+				<div class="tab-content">
+					<div id="tab-1" class="tab-pane active" th:if="${menus.ppcpbgl}">
+						<div class="panel-body">
+							<div class="row">
+								<div class="col-sm-12">
+									<div class="ibox ">
+										<!-- 搜索条件 -->
+										<div class="ibox-content">
+											<form role="form" class="form-inline">
+												<div class="form-group">
+													<!-- <label for="example1" class="sr-only">用户名</label> -->
+													<input type="text" placeholder="产品代码/名称" id="condition" class="form-control">
+												</div>
+												<div class="form-group">
+													<label for="status">状态:</label>
+													<select id="status" class="form-control">
+														<option value="">全部状态</option>
+														<option value="0">待上架</option>
+														<option value="1">已上架</option>
+														<option value="2">已下架</option>
+													</select>
+												</div>
+												<!-- 时间选择 -->
+												<!--<div class="form-group" id="sandbox-container">-->
+													<!--<div class="form-group pull-right"><span style="font-weight:700">创建时间:</span>-->
+														<!--<input placeholder="起始时间" class="form-control layer-date" id="start_time_day" />至-->
+														<!--<input placeholder="截止时间" class="form-control layer-date" id="end_time_day" />-->
+													<!--</div>-->
+												<!--</div>-->
+												<div class="form-group">
+													<span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-danger" onclick="search()">搜索</button></span>
+													<span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-primary" onclick="add()">添加产品包</button></span>
+												</div>
+											</form>
+										</div>
+										<div class="ibox-content">
+											<div class="jqGrid_wrapper">
+												<table id="table_list"></table>
+												<div id="pager_list"></div>
+											</div>
+											<p>&nbsp;</p>
+										</div>
+									</div>
+								</div>
+							</div>
+     
+						</div><!-- panel-body -->
+					</div><!-- tab-1 -->
+					
+					<div id="tab-2" class="tab-pane" th:if="${menus.ppdlsxpz}">
+						<div class="panel-body">
+							
+  							<div class="container-fluid">
+  							
+  							
+  							
+  							<div class="row-fluid">
+						      <div class="span12">
+						        <div class="widget-box">
+						          </div>
+						<!--           <div class="widget-content nopadding"> -->
+							<div class="content-center">
+									<div class="content-left">
+										<div class="table-div">
+										<h4><span>品牌订单中返点抵充比例：</span></h4>
+										<br>
+										<table class="table  table-striped table-bordered table-hover">
+										<thead>
+											<tr class="tr-rebate">
+												<th colspan="3">季度消耗金额T（万元）
+												<img alt="" id="oem_rebate_q" th:src="@{/resources/img/question.png}"/>
+												</th><th>激励返点比例</th>
+											</tr>
+										</thead>
+										<tbody th:each="d:${dataList}">
+											<tr class="tr-rebate">
+											
+												<td class="td-start">
+													<span  th:if="${d.start_line}  != null">
+														<span th:text="${d.start_line}"></span> &le;
+													</span> 
+												</td>
+												<td>
+													T<input type="hidden" class="rebate_id" th:value="${d.id}"/>
+												</td>
+												<td class="td-end">
+													<span  th:if="${d.end_line}!=null">
+													&lt; <span th:text="${d.end_line}"></span>
+													</span>
+												</td>
+												<td><span class="td-rebateNum" th:text="${d.rebate_proportion }"></span>%</td>
+											
+											</tr>
+										</tbody> 
+										</table>
+										</div>
+									</div>
+									</div>
+						        </div>
+						      </div>
+						    </div> <!-- row-fluid -->
+  							
+  							
+  							
+  							
+  							
+  							
+  							
+  							
+  							  <button class="btn btn-primary btn-lg" id="modal-btn" data-toggle="modal" data-target="#myModal"  style="display: none;"> </button>
+								<!-- 模态框（Modal） -->
+								<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+									<div class="modal-dialog" style="width:634px">
+										<div class="modal-content">
+											<form method="post" action="#" id="edit_rebate_form">
+											<div class="modal-header">
+												<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+													&times;
+												</button>
+												<button type="reset" id="add-btn"  class="btn btn-sm btn-primary" style="display: inline-block;float: right;margin-right: 20px;">添加</button>
+												<span class="modal-title" id="myModalLabel" style="font-size:18px;font-weight:bold;">修改返点抵充比例</span>
+											</div>
+											<div class="modal-body">
+													<table class="table table-striped table-bordered">
+													<thead>
+														<tr>
+															<th>季度消耗最小金额（包含）</th><th>季度消耗最大金额（不包含）</th><th>激励返点比例</th>
+														</tr>
+													</thead>
+													<tbody>
+													<tr>
+														<td><input type="number" id="start_line" name="start_line" max="99999999999" step="0.01"/>万元</td>
+														<td><input type="number" id="end_line" name="end_line" max="99999999999" step="0.01"/>万元</td>
+														<td>
+															<input type="number" id="rebate_proportion" name="rebate_proportion" step="0.01"/>%
+															<input type="hidden" id="edit_action" name="edit_action" value="update"/>
+															<input type="hidden" id="rebateId" name="rebateId" value=""/>
+														</td>
+													</tr>
+													</tbody>
+													</table>
+											</div>
+											<div class="modal-footer">
+												<button type="button" id="del-btn" class="btn btn-danger">删除</button>
+												<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+												<button type="button" class="btn btn-success" onclick="save(this)">保存</button>
+											</div>
+											</form>
+										</div><!-- /.modal-content -->
+									</div>
+								</div><!-- /.modal -->
+  							
+  							
+  							
+  							</div>
+						
+						
+						</div><!-- panel-body -->
+					</div><!-- tab-2 -->     
+				</div><!-- tab-content -->
+			</div><!-- tabs-container-->
+		</div><!-- col-sm-12 -->
+	</div><!-- row -->
+</div>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/js/plugins/validate/jquery.validate.min.js}"></script>
+	<script th:src="@{/resources/js/jquery.form.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+//    var start = {
+//        elem: "#start_time_day",
+//        format: "YYYY-MM-DD",
+//    	min: halfYearAgo("yyyy-MM-dd"),
+//        max: laydate.now(),
+//        istoday: true,
+//        choose: function (datas) {
+//            end.min = datas;
+//        }
+//    };
+//    var end = {
+//        elem: "#end_time_day",
+//        format: "YYYY-MM-DD",
+//    	min: halfYearAgo("yyyy-MM-dd"),
+//        max: laydate.now(),
+//        istoday: true,
+//        choose: function (datas) {
+//            start.max = datas;
+//        }
+//    };
+//    laydate(start);
+//    laydate(end);
+    var menus = [[${menus}]];
+    if (menus.ppcpbgl) {
+
+    } else if (menus.ppdlsxpz) {
+        $("#rebateConfigPage")[0].click();
+    }
+
+    function search(){
+
+        $("#table_list").jqGrid('setGridParam',{
+            datatype:'json',
+            postData: {
+            	condition: $("#condition").val(),
+            	status: $("#status").val(),
+            	start_time_day: $("#start_time_day").val(),
+            	end_time_day: $("#end_time_day").val()
+            }, //发送数据
+//            page:1
+        }).trigger("reloadGrid"); //重新载入
+    }
+    
+    
+    
+    $(document).ready(function () {
+        $.jgrid.defaults.styleUI = "Bootstrap";
+        $("#table_list").jqGrid({
+            url:/*[[@{/product/list}]]*/,
+            mtype: 'POST',
+            datatype: "json",
+            jsonReader : {
+                root:"list",
+                page: "currentPage",
+                total: "totalPage",
+                records: "totalCount"
+            },
+            height: 'auto',
+            rownumbers:true,
+            autowidth: true,
+            shrinkToFit: false,
+            autoScroll: true,
+            rowNum: 20,
+            rowList: [10, 20, 30,50],
+            colNames: ["产品名称", "产品代码", "产品类型","运营商","区域", "数量", "有效期（天）", "产品定价", "成本价", "状态(隐藏)", "状态", "创建者", "创建时间", "操作"],
+            colModel: [
+                {name: "product_name",align: "left",sortable:false},
+                {name: "product_code", align: "left",sortable:false},
+                {name: "product_type_name", align: "left",sortable:false}, 
+                {name: "operator_code", align: "left",sortable:false},
+                {name: "area_code", align: "left",sortable:false},
+                {name: "quantity_name", align: "left",sortable:false},
+                {name: "active_period_name", align: "left",sortable:false},
+                {name: "price", align: "left",sortable:false,
+                    formatter:function(cellvalue, options, rowObject){
+
+                        return rowObject.product_type == 2 ? rowObject.product_price : rowObject.product_price_str;
+                    }
+				},
+                {name: "cost", align: "left",sortable:false,
+					formatter:function(cellvalue, options, rowObject){
+						return rowObject.product_type == 2 ? rowObject.product_cost : rowObject.product_cost_str;
+					}
+				},
+                {name: "status",align: "left",sortable:false,hidden:true},
+                {name: "status_name",align: "left",sortable:false},
+                {name: "creator",align: "left",sortable:false},
+                {name: "createTime",align: "left",sortable:false},
+                {name: "total",index: "total",align: "left",sortable:false,title:false,
+                    formatter:function(cellvalue, options, rowObject){
+
+                        var status = rowObject.status;
+                        var productId = rowObject.product_id;
+                        var switcher = '';
+                        if(status == 0){ //待上架
+                        	switcher = "<button type='button' class='btn btn-link btn-xs ' onclick=\"edit('"+productId+"')\" title='编辑'>编辑</button>";
+                        	switcher += "<button type='button' class='btn btn-link btn-xs ' onclick=\"updateStatus(this,'"+productId+"',1)\" title='上架'>上架</button>";
+                        }else if(status == 1){//已上架
+                        	switcher = "<button type='button' class='btn btn-link btn-xs ' onclick=\"getDetails('"+productId+"')\" title='详情'>详情</button>";
+                        	switcher += "<button type='button' class='btn btn-link btn-xs ' onclick=\"updateStatus(this,'"+productId+"',2)\" title='下架'>下架</button>";
+                        }else{
+                        	//switcher = "<button type='button' class='btn btn-link btn-xs ' onclick=\"getDetails('"+productId+"')\" title='详情'>详情</button>";
+                            switcher = "<button type='button' class='btn btn-link btn-xs ' onclick=\"edit('"+productId+"')\" title='编辑'>编辑</button>";
+                            switcher += "<button type='button' class='btn btn-link btn-xs ' onclick=\"updateStatus(this,'"+productId+"',1)\" title='上架'>上架</button>";
+                        }
+                        return switcher;
+                    }
+                }
+            ],
+            pager: "#pager_list",
+            viewrecords: true,
+            hidegrid: false
+        });
+        
+        $(window).bind("resize", function () {
+            var width = $(".jqGrid_wrapper").width();
+            $("#table_list").setGridWidth(width);
+        })
+        
+       
+        function keyUp(e) {
+            var currKey=0,e=e||event;
+            currKey=e.keyCode||e.which||e.charCode;
+            var keyName = String.fromCharCode(currKey);
+            if (currKey == 13){
+                search();
+            }
+        }
+        document.onkeyup = keyUp;
+        
+        
+        var page =  /*[[${page}]]*/;
+        if(page=="toRebatePage"){
+        	$("#rebateConfigPage").click();
+        }
+    }); 
+    
+    
+
+	//添加
+	function add() {
+		location.href = /*[[@{/product/add}]]*/;
+	}
+	
+	function getDetails(id){
+		var detailUrl = /*[[@{/product/view?id=}]]*/;
+		location.href = detailUrl + id;
+	}
+
+	//编辑
+	function edit(id) {
+		var editUrl = /*[[@{/product/edit?id=}]]*/;
+		location.href = editUrl + id;
+	}
+
+	//msg消失时间
+	var msgTime = 1500;
+	
+	//修改状态：恢复、删除
+	function updateStatus(a, id, state) {
+		
+		layer.confirm("确定要" + $(a).text() + "吗？", function(index){
+			  //do something
+			 confirmUpdateStatus(id, state);
+			  layer.close(index);
+			});
+	}
+	
+	function confirmUpdateStatus(id, state){
+		
+		var sucessInfo ;
+		var failInfo ;
+		if(state == 1){
+			sucessInfo = "上架成功";
+			failInfo = "上架失败";
+		}else{
+			sucessInfo = "下架成功";
+			failInfo = "下架失败";
+		}
+			
+		$.ajax({
+			type : "post",
+			url : /*[[@{/product/updateStatus}]]*/,
+			data : {
+				id : id,
+				state : state
+			},
+			success : function(data) {
+				if(data.success){
+					
+					layer.msg(sucessInfo, {icon: 1,time: msgTime}); 
+					 search();
+				}else{
+					layer.msg(failInfo, {icon: 2,time: msgTime}); 
+				}
+				
+			}
+		});
+	}
+   
+	
+	/**属性配置区**/
+	 //msg消失时间
+	var msgTime = 1500;
+
+	var validateModel;
+  	function save(btn){
+  		if(!validateModel.form()){
+			return;
+		}
+		var options = {
+			beforeSubmit : function() {
+				$(btn).attr("disabled", true);
+			},
+			success : function(data) {
+				$(btn).attr("disabled", false);  
+				if(data.success){
+					layer.msg(data.msg, {icon: 1,time: msgTime}); 
+					window.setTimeout(function(){
+                        var mainUrl = [[@{/product/query}]];
+	                        mainUrl = mainUrl + '?page=toRebatePage';
+	                        window.location.href = mainUrl;
+					}, msgTime);
+				}else{
+					layer.msg(data.msg, {icon: 2,time: msgTime}); 
+				}
+			},
+			url : /*[[@{/product/addRebate}]]*/,
+			type : "post",
+			timeout:3000
+		};
+		$("#edit_rebate_form").ajaxSubmit(options);
+  	}
+  	$(function(){
+  		$.validator.defaults.ignore = "";
+		//表单验证规则
+		validateModel = $("#edit_rebate_form").validate({
+			rules: {
+				start_line:{
+					min:0,
+					max:9999999999
+				},
+				end_line:{
+					min:0,
+					max:9999999999
+				},
+			},
+			messages: {
+				start_line: {
+					max:"消耗数量输入范围（0-9,999,999,999）",
+					min:"消耗数量输入范围（0-9,999,999,999）"
+				},
+				end_line: {
+					max:"消耗数量输入范围（0-9,999,999,999）",
+					min:"消耗数量输入范围（0-9,999,999,999）"
+				},
+			}
+		});
+  		
+  		$("#oem_rebate_q").hover(function(){
+  				layer.tips('双击编辑', this,{tips: [2, '#78BA32']});
+	  		},function(){
+					layer.closeAll();
+			});
+		
+  		$(".tr-rebate").bind({
+  			dblclick:function(){
+  				$("#modal-btn").click();
+  					$("#myModalLabel").text("修改返点抵充比例");
+  					$("#del-btn").css({display:"inline-block"});
+  					$("#edit_action").val("update");
+  					var row = $(this);
+  					var startLine = row.find(".td-start span span").text();
+  					var endLine = row.find(".td-end span span").text();
+  					var rebate = row.find(".td-rebateNum").text();
+  					var rebate_id = row.find(".rebate_id").val();
+  					$("#add-btn").css({display:"inline-block"});
+					if(rebate_id == null || rebate_id == ''){
+						$("#add-btn").click();
+						return;
+					}
+  					$("#rebateId").val(rebate_id);
+  					$("#start_line").val(startLine);
+  					$("#end_line").val(endLine);
+  					$("#rebate_proportion").val(rebate);
+  			}
+  		});
+  		$("#add-btn").bind({
+  			click:function(){
+  				$("#myModalLabel").text("添加返点抵充比例");
+  				$("#del-btn").css({display:"none"});
+  				$("#add-btn").css({display:"none"});
+  				$("#edit_action").val("add");
+  				$("#rebate_id").val("");
+  			}
+  		});
+  		$("#del-btn").bind({
+  			click:function(){
+  				layer.confirm("<b>确认删除?</b>", function(index){
+  					$.ajax({
+  						url:  /*[[@{/product/addRebate}]]*/,
+  						data:{edit_action:'delete',rebateId:$("#rebateId").val()},
+  						success: function(data){ 
+  							if(data.success){
+  								layer.msg(data.msg, {icon: 1,time: msgTime}); 
+  								window.setTimeout(function(){
+  			                        var mainUrl = [[@{/product/query}]];
+  			                        mainUrl = mainUrl + '?page=toRebatePage';
+  			                        window.location.href = mainUrl;
+  								}, msgTime);
+  							}else{
+  								layer.msg(data.msg, {icon: 2,time: msgTime}); 
+  							}
+  					}});
+  					layer.close(index);
+  				}); 
+  			}
+  		});
+  		
+  	})
+    /*]]>*/
+</script>
+</body>
+</html>

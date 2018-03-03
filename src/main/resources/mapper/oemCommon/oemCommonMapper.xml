@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 公用mapper -->
+<mapper namespace="oemCommon">
+	
+	<!-- 获取单一的参数 -->
+	<select id="getOneAgentParam" resultType="map">
+		SELECT
+			p.param_key,
+			p.param_value
+		FROM
+			`t_sms_agent_client_param` p
+		WHERE
+			p.param_status = 1
+		AND
+			p.param_key = #{param_key}
+	</select>
+	<!-- 获取多个参数 -->
+	<select id="getAgentParams" resultType="map">
+		SELECT
+			p.param_key,
+			p.param_value
+		FROM
+			`t_sms_agent_client_param` p
+		WHERE
+			p.param_status = 1
+		AND
+			p.param_key IN 
+		<foreach collection="list" item="param"  open="(" close=")" separator=",">
+			#{param}
+		</foreach>
+		ORDER BY p.param_value
+	</select>
+	
+	<select id="checkAgentParamsNum" resultType="int">
+		SELECT
+			COUNT(0) AS totalCount
+		FROM
+			`t_sms_agent_client_param` p
+		WHERE
+			p.param_key = #{param_key}
+			<if test="checkFlag != null and checkFlag == 'true'">
+				AND p.param_value = #{param_value}
+			</if>
+			AND p.param_status = 1
+	</select>
+	
+	<insert id="addAgentParams">
+		INSERT INTO `t_sms_agent_client_param` (
+			`param_key`,
+			`param_value`,
+			`description`,
+			`create_date`,
+			`update_date`,
+			`param_status`
+		)
+		VALUES
+			(
+				#{param_key},
+				#{param_value},
+				(SELECT p.`description` FROM `t_sms_agent_client_param` p WHERE p.`param_key` = #{param_key} LIMIT 1),
+				NOW(),
+				NOW(),
+				'1'
+			)
+	
+	</insert>
+
+	<update id="updateAgentParams">
+		UPDATE `t_sms_agent_client_param`
+		<set>
+			`param_value` = #{param_value},
+			<if test="action == 2">
+				`param_status` = #{action} ,
+			</if>
+			`update_date` = NOW()
+		</set>
+		WHERE
+		 `param_key` = #{param_key}
+		 <if test="action == 2">
+			AND `param_value` = #{param_value}
+		 </if>
+	</update>
+
+</mapper> 

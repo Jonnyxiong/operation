@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信平台运营系统 - 管理员中心</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    <!--<link th:href="@{/resources/css/jquery.datetimepicker.css}" rel="stylesheet">-->
+
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+    <link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/timePicker.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+    <link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+
+    <style>
+        /* Additional style to fix warning dialog position */
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+        .page-title{
+            padding: 20px 0;
+            position: relative;
+            z-index:10;
+        }
+        .page-title .line{
+            position: absolute;
+            width:100%;
+            height:1px;
+            background-color: #DDD;
+            left:0;
+            top:50%;
+        }
+        .page-title .title{
+            padding-left:5px;
+            padding-right:5px;
+            border-left:10px solid #0a8000;
+            position: relative;
+            z-index:11;
+            display: inline-block;
+            background-color: #FFF;
+        }
+    </style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="tabs-container">
+                <ul class="nav nav-tabs">
+                    <li th:if="${menus.dxtxpz}"><a href="/managerCenter/taskAlarmSetting/sms">短信提醒配置</a></li>
+                    <li th:if="${menus.yjtxpz}" class="active" id="tab-1"><a>邮件提醒配置</a></li>
+                </ul>
+
+                <div class="tab-pane active" th:if="${menus.yjtxpz}">
+                    <div class="panel-body">
+                        <div class="page-title">
+                            <span class="title">发送邮件服务器管理</span>
+                            <span class="line"></span>
+                        </div>
+                        <div class="text-right"><a href="javascript:;" class="btn btn-primary js-addServer">添加发送邮件服务器</a></div>
+                        <div class="jqGrid_wrapper" style="margin-top:20px;">
+                            <table id="table_list1"></table>
+                            <div id="pager_list1"></div>
+                        </div>
+                        <div class="page-title">
+                            <span class="title">邮件提醒设置</span>
+                            <span class="line"></span>
+                        </div>
+                        <div class="text-right"><a href="javascript:;" class="btn btn-primary js-addAlarm">添加邮件提醒</a></div>
+                        <div class="jqGrid_wrapper" style="margin-top:20px;">
+                            <table id="table_list2"></table>
+                            <div id="pager_list2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>-->
+<script th:src="@{/resources/js/jquery.1.7.2.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/jquery.datetimepicker.full.min.js}"></script>
+<script th:src="@{/resources/js/plugins/timePicker/jquery.timePicker.js}"></script>
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/auth.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+    $(document).ready(function () {
+        $.jgrid.defaults.styleUI = "Bootstrap";
+        $("#table_list1").jqGrid({
+            url:/*[[@{/managerCenter/taskAlarmSetting/email/server/list}]]*/,
+            mtype: 'POST',
+            datatype: "json",
+            jsonReader : {
+                root: "data",
+                page: "pageNo",
+                total: "totalPage",
+                records: "totalRecord"
+            },
+            height: 'auto',
+            width:'auto',
+            rownumbers:true,
+            autowidth: true,
+            shrinkToFit: true,
+            autoScroll: true,
+            colModel: [
+                {label:"id",name: "id",align: "left",sortable:false,hidden:true},
+                {label:"用途",name: "alarmName",align: "left",sortable:false,width:200},
+                {label:"发送邮箱",name: "emailAddress",align: "left",sortable:false,width:200},
+                {label:"账户类型",name: "mailboxType",align: "left",sortable:false,width:200,
+                    formatter:function(cellvalue, options, rowObject){
+                        var html = "";
+                        if(cellvalue == 0){
+                            return "<span>POP3</span>"
+                        } else if (cellvalue == 1){
+                            return "<span>IMAP</span>"
+                        }
+                    }
+                },
+                {label:"接受邮件服务器",name: "incomingMailServer", align: "left",sortable:false,width:200},
+                {label:"发送邮件服务器",name: "outgoingMailServer", align: "left",sortable:false,width:215},
+                {label:"应用系统",name: "webId", align: "left",sortable:false,width:200,
+                    formatter:function(cellvalue, options, rowObject){
+                        var html = "";
+
+                        if(cellvalue == 1){
+                            return "<span>短信调度系统</span>"
+                        } else if (cellvalue == 2){
+                            return "<span>代理商平台</span>"
+                        } else if (cellvalue == 3){
+                            return "<span>运营平台</span>"
+                        } else if (cellvalue == 4){
+                            return "<span>用户中心</span>"
+                        } else if (cellvalue == 5){
+                            return "<span>OEM客户端</span>"
+                        } else if (cellvalue == 6){
+                            return "<span>品牌客户端平台</span>"
+                        }
+
+                    }
+                },
+                {label:"状态",name: "status", align: "left",sortable:false,width:200,
+                    formatter:function(cellvalue, options, rowObject){
+                        var html = "";
+                        if(cellvalue == 0){
+                            return "<span>禁用</span>"
+                        } else if (cellvalue == 1){
+                            return "<span>启用</span>"
+                        }
+                    }
+                },
+                {label:"操作",name: "total",index: "total",align: "left",sortable:false,width:220,
+                    formatter: function (cellvalue, options, rowObject) {
+                        var id = rowObject.id;
+                        var status = rowObject.status;
+                        var name = rowObject.alarmName;
+                        var switcher = "";
+                        switcher += "<button type='button' class='btn btn-link btn-xs'  onclick=\"editServer('" + id + "')\" title='编辑'>编辑</button>";
+                        if (status == 0) {
+                            switcher += "<button type='button' class='btn btn-link btn-xs'  onclick=\"startServer('" + id + "','"+ name +"')\" title='启用'>启用</button>";
+                        }
+                        if (status == 1) {
+                            switcher += "<button type='button' class='btn btn-link btn-xs'  onclick=\"stopServer('" + id + "', '"+ name +"')\" title='禁用'>禁用</button>";
+                        }
+                        return switcher;
+                    }
+                }
+            ],
+            viewrecords: true,
+            hidegrid: false
+        });
+        $("#table_list2").jqGrid({
+            url:/*[[@{/managerCenter/taskAlarmSetting/email/alarm/list}]]*/,
+            mtype: 'POST',
+            datatype: "json",
+            jsonReader : {
+                root: "data",
+                page: "pageNo",
+                total: "totalPage",
+                records: "totalRecord"
+            },
+            height: 'auto',
+            width:'auto',
+            rownumbers:true,
+            autowidth: true,
+            shrinkToFit: true,
+            autoScroll: true,
+            colModel: [
+                {label:"id",name: "id",align: "left",sortable:false,hidden:true},
+                {label:"用途",name: "alarmName",align: "left",sortable:false,width:200},
+                {label:"提醒邮箱",name: "alarmEmail",align: "left",sortable:false,width:200},
+                {label:"应用系统",name: "webId",align: "left",sortable:false,width:200,
+                    formatter:function(cellvalue, options, rowObject){
+                        var html = "";
+
+                        if(cellvalue == 1){
+                            return "<span>短信调度系统</span>"
+                        } else if (cellvalue == 2){
+                            return "<span>代理商平台</span>"
+                        } else if (cellvalue == 3){
+                            return "<span>运营平台</span>"
+                        } else if (cellvalue == 4){
+                            return "<span>用户中心</span>"
+                        } else if (cellvalue == 5){
+                            return "<span>OEM客户端</span>"
+                        } else if (cellvalue == 6){
+                            return "<span>品牌客户端平台</span>"
+                        }
+
+                    }
+                },
+                {label:"状态",name: "status", align: "left",sortable:false,width:200,
+                    formatter:function(cellvalue, options, rowObject){
+                        var html = "";
+                        if(cellvalue == 0){
+                            return "<span>禁用</span>"
+                        } else if (cellvalue == 1){
+                            return "<span>启用</span>"
+                        }
+                    }
+                },
+                {
+                    label: "操作", name: "total", index: "total", align: "left", sortable: false, width: 220,
+                    formatter: function (cellvalue, options, rowObject) {
+                        var id = rowObject.id;
+                        var status = rowObject.status;
+                        var name = rowObject.alarmName;
+                        var switcher = "";
+                        switcher += "<button type='button' class='btn btn-link btn-xs'  onclick=\"editAlarm('" + id + "')\" title='编辑'>编辑</button>";
+                        if (status == 0) {
+                            switcher += "<button type='button' class='btn btn-link btn-xs'  onclick=\"startAlarm('" + id + "','"+ name +"')\" title='启用'>启用</button>";
+                        }
+                        if (status == 1) {
+                            switcher += "<button type='button' class='btn btn-link btn-xs'  onclick=\"stopAlarm('" + id + "','"+ name +"')\" title='禁用'>禁用</button>";
+                        }
+                        return switcher;
+                    }
+                }
+            ],
+            viewrecords: true,
+            hidegrid: false
+        });
+
+
+        //弹出框事件
+        $(".js-addServer").click(function(){
+            layer.open({
+                type: 2,
+                shadeClose: true,
+                title:'添加发送邮箱',
+                content: "/managerCenter/taskAlarmSetting/email/server/add",
+                area:['769px','730px']
+            });
+        })
+        $(".js-addAlarm").click(function(){
+            layer.open({
+                type: 2,
+                shadeClose: true,
+                title:'添加发送邮箱',
+                content: "/managerCenter/taskAlarmSetting/email/alarm/add",
+                area:['769px','350px']
+            });
+        })
+    });
+    function reloadServer(){
+        $("#table_list1").jqGrid('setGridParam',{
+            datatype:'json',
+            }).trigger("reloadGrid"); //重新载入
+    }
+    function reloadAlarm(){
+        $("#table_list2").jqGrid('setGridParam',{
+            datatype:'json',
+        }).trigger("reloadGrid"); //重新载入
+    }
+    function stopServer(id, name){
+        swal({
+            title: "您确定要禁用用来"+name+"的邮件服务器吗？",
+            text: "",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "禁用",
+            cancelButtonText: "让我再考虑一下…",
+            closeOnConfirm: false
+        }, function () {
+            $.ajax({
+                url:"/managerCenter/taskAlarmSetting/email/server/disable/" + id,
+                type:"POST",
+                success:function(res){
+                    if(res.code !== 0){
+                        swal("失败！", res.msg, "error")
+                        return;
+                    }
+                    swal("成功！", res.msg, "success")
+                    reloadServer();
+                }
+            });
+        });
+    }
+    function startServer(id, name){
+        swal({
+            title: "您确定要启用用来"+name+"的邮件服务器吗？",
+            text: "",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "启用",
+            cancelButtonText: "让我再考虑一下…",
+            closeOnConfirm: false
+        }, function () {
+            $.ajax({
+                url:"/managerCenter/taskAlarmSetting/email/server/enable/" + id,
+                type:"POST",
+                success:function(res){
+                    if(res.code !== 0){
+                        swal("失败！", res.msg, "error")
+                        return;
+                    }
+                    swal("成功！", res.msg, "success")
+                    reloadServer();
+                }
+            });
+        });
+    }
+    function stopAlarm(id, name){
+        swal({
+            title: "您确定要禁用用来"+name+"的邮件提醒吗？",
+            text: "",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "禁用",
+            cancelButtonText: "让我再考虑一下…",
+            closeOnConfirm: false
+        }, function () {
+            $.ajax({
+                url:"/managerCenter/taskAlarmSetting/email/alarm/disable/" + id,
+                type:"POST",
+                success:function(res){
+                    if(res.code !== 0){
+                        swal("失败！", res.msg, "error")
+                        return;
+                    }
+                    swal("成功！", res.msg, "success")
+                    reloadAlarm();
+                }
+            });
+        });
+    }
+    function startAlarm(id, name){
+        swal({
+            title: "您确定要启用用来"+name+"的邮件提醒吗？",
+            text: "",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "启用",
+            cancelButtonText: "让我再考虑一下…",
+            closeOnConfirm: false
+        }, function () {
+            $.ajax({
+                url:"/managerCenter/taskAlarmSetting/email/alarm/enable/" + id,
+                type:"POST",
+                success:function(res){
+                    if(res.code !== 0){
+                        swal("失败！", res.msg, "error")
+                        return;
+                    }
+                    swal("成功！", res.msg, "success")
+                    reloadAlarm();
+                }
+            });
+        });
+    }
+    function editServer(id){
+        layer.open({
+            type: 2,
+            shadeClose: true,
+            title:'添加发送邮箱',
+            content: "/managerCenter/taskAlarmSetting/email/server/edit?id=" + id,
+            area:['769px','730px']
+        });
+    }
+    function editAlarm(id){
+        layer.open({
+            type: 2,
+            shadeClose: true,
+            title:'添加发送邮箱',
+            content: "/managerCenter/taskAlarmSetting/email/alarm/edit?id=" + id,
+            area:['769px','350px']
+        });
+    }
+    /*]]>*/
+</script>
+</body>
+</html>

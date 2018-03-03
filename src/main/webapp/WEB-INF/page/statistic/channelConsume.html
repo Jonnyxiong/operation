@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:th="http://www.thymeleaf.org"
+	  lang="zh-cn">
+<head>
+	<meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+	<meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+	<title>短信云平台运营系统 </title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+	<link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+	<link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+	<link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+	<link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+	<style>
+		/* Additional style to fix warning dialog position */
+		#alertmod_table_list_2 {
+			top: 900px !important;
+		}
+	</style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="ibox ">
+				<div class="ibox-title">
+					<h5>通道短信消耗报表</h5>
+				</div>
+
+				<!-- 搜索条件 -->
+				<div class="ibox-content">
+					<form role="form" class="form-inline" id="mainForm">
+						<div class="form-group m-l-md m-r-md">
+							<label for="departmentId">部门:</label>
+							<select id="departmentId" class="form-control" name="departmentId">
+								<option value="">全部</option>
+							</select>
+						</div>
+						<div class="form-group m-r-md">
+							<label for="belongBusiness">所属商务:</label>
+							<select id="belongBusiness" class="form-control" name="belongBusiness">
+								<option value="">所有</option>
+							</select>
+						</div>
+						<div class="form-group m-r-md">
+							<label for="operatorstype">运营商类型:</label>
+							<select id="operatorstype" name="operatorstype" class="form-control">
+								<option value="">全部</option>
+								<option value="0">全网</option>
+								<option value="1">移动</option>
+								<option value="2">联通</option>
+								<option value="3">电信</option>
+								<option value="4">国际</option>
+							</select>
+						</div>
+						<div class="form-group m-r-md">
+							<label for="smstype">短信类型:</label>
+							<select id="smstype" name="smstype" class="form-control">
+								<option value="">全部状态</option>
+								<option value="4">验证码</option>
+								<option value="0">通知</option>
+								<option value="5">营销</option>
+								<option value="8">闪信</option>
+								<option value="7">USSD</option>
+								<option value="6">告警</option>
+							</select>
+						</div>
+						<!-- 时间选择 -->
+						<div class="form-group m-r-md" id="sandbox-container" >
+							<div class="form-group pull-right"><span style="font-weight:700">创建时间:</span>
+								<input placeholder="起始时间" class="form-control layer-date" id="start_time_day" name="startTime" style="width:102px;"/>至
+								<input placeholder="截止时间" class="form-control layer-date" id="end_time_day" name="endTime" style="width:102px;"/>
+							</div>
+						</div>
+						<div class="form-group" >
+							<input placeholder="通道号" style="width:230px" class="form-control" id="condition" name="condition"/>
+						</div>
+						<div class="form-group pull-right m-r-md">
+							<button type="button" class="btn btn-sm btn-danger m-r-md" onclick="search()">搜索</button>
+							<button type="button" class="btn btn-sm btn-primary" onclick="exportExcel()">导出Excel</button>
+						</div>
+
+					</form>
+				</div>
+
+				<div class="ibox-content">
+					<div class="jqGrid_wrapper">
+						<table id="table_list"></table>
+						<div id="pager_list"></div>
+					</div>
+					<p>&nbsp;</p>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+</div>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/jquery.form.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+
+<script th:inline="javascript">
+	/*<![CDATA[*/
+    var max_export_num = [[${max_export_num}]];
+
+    var start = {
+        elem: "#start_time_day",
+        format: "YYYY-MM-DD",
+        min: halfYearAgo("yyyy-MM-dd"),
+        max: laydate.now(),
+        istoday: true,
+        choose: function (datas) {
+            end.min = datas;
+        }
+    };
+    var end = {
+        elem: "#end_time_day",
+        format: "YYYY-MM-DD",
+        min: halfYearAgo("yyyy-MM-dd"),
+        max: laydate.now(),
+        istoday: true,
+        choose: function (datas) {
+            start.max = datas;
+        }
+    };
+    laydate(start);
+    laydate(end);
+    $("#start_time_day").val(laydate.now(-31));
+    $("#end_time_day").val(laydate.now(-1));
+
+    function search(){
+
+        $("#table_list").jqGrid('setGridParam',{
+            datatype:'json',
+            postData: {
+                condition: $("#condition").val(),
+                departmentId: $("#departmentId").val(),
+                smstype: $("#smstype").val(),
+                operatorstype: $("#operatorstype").val(),
+                belongBusiness: $("#belongBusiness").val(),
+                startTime: $("#start_time_day").val(),
+                endTime: $("#end_time_day").val()
+            } //发送数据
+//            page:1
+        }).trigger("reloadGrid"); //重新载入
+    }
+
+    $(document).ready(function () {
+        $.jgrid.defaults.styleUI = "Bootstrap";
+        $("#table_list").jqGrid({
+            url:/*[[@{/statistic/channelConsume}]]*/'',
+            mtype: 'POST',
+            datatype: "json",
+            jsonReader : {
+                root: "data",
+                page: "pageNo",
+                total: "totalPage",
+                records: "totalRecord"
+            },
+            postData: {
+                condition: $("#condition").val(),
+                departmentId: $("#departmentId").val(),
+                belongBusiness: $("#belongBusiness").val(),
+                smstype: $("#smstype").val(),
+                operatorstype: $("#operatorstype").val(),
+                startTime: $("#start_time_day").val(),
+                endTime: $("#end_time_day").val()
+            },
+            height: 'auto',
+            rownumbers:true,
+            autowidth: true,
+            shrinkToFit: false,
+            footerrow:true,
+            autoScroll: true,
+            rowNum: 20,
+            rowList: [10, 20, 30,50],
+            colModel: [
+                {label:"部门",name: "departmentStr",align: "left",sortable:false,width:'100'},
+                {label:"运营商类型",name: "operatorstypeStr",align: "left",sortable:false,width:'80'},
+                {label:"通道号",name: "channelid",align: "left",sortable:false,width:'60'},
+                {label:"归属商务",name: "belongBusinessStr", align: "left",sortable:false,width:'80'},
+                {label:"通道备注",name: "remark", align: "left",sortable:false,width:'300'},
+                {label:"短信类型",name: "smstypeStr", align: "left",sortable:false,width:'80'},
+                {label:"总发送量（条）",name: "sendTotal", align: "left",sortable:false,width:'100'},
+                {label:"通道计费数（条）",name: "chargeTotal", align: "left",sortable:false,width:'100'},
+                {label:"通道单价（元）",name: "costpriceStr", align: "left",sortable:false,width:'100'}, /*todo 多个单价, 无法展示,先隐藏*/
+                {label:"成功率（%）",name: "successRate", align: "left",sortable:false,width:'100'},
+                {label:"成功量（条）",name: "successTotal", align: "left",sortable:false,width:'100'},
+                {label:"提交成功（条）",name: "submitsuccess", align: "left",sortable:false,width:'100'},
+                {label:"发送成功（条）",name: "subretsuccess", align: "left",sortable:false,width:'100'},
+                {label:"明确成功（条）",name: "reportsuccess", align: "left",sortable:false,width:'100'},
+                {label:"失败条数（条）",name: "failTotal", align: "left",sortable:false,width:'100'},
+                {label:"销售收入(元)",name: "saletotalStr", align: "left",sortable:false,width:'100'},
+                {label:"通道成本",name: "costtotalStr", align: "left",sortable:false,width:'100'},
+                {label:"毛利（元）",name: "profit", align: "left",sortable:false,width:'100'},
+                {label:"毛利率（%）",name: "profitRate", align: "left",sortable:false,width:'100'}
+            ],
+            gridComplete: completeMethod,
+            pager: "#pager_list",
+            viewrecords: true,
+            hidegrid: false
+        });
+
+        $(window).bind("resize", function () {
+            var width = $(".jqGrid_wrapper").width();
+            $("#table_list").setGridWidth(width);
+        })
+
+
+        function keyUp(e) {
+            var currKey=0,e=e||event;
+            currKey=e.keyCode||e.which||e.charCode;
+            var keyName = String.fromCharCode(currKey);
+            if (currKey == 13){
+                search();
+            }
+        }
+        document.onkeyup = keyUp;
+
+
+
+        //冒泡提示
+        $("#table_list_total_sendTotal").attr("title","（1+2+3+5+6）");
+        $("#table_list_sendTotal").attr("title","（1+2+3+5+6）");
+        $("#table_list_total_chargeTotal").attr("title","（1+2+3）");
+        $("#table_list_successRate").attr("title","(3/1+2+3+5+6)");
+        $("#table_list_successTotal").attr("title","(2+3)");
+        $("#table_list_submitsuccess").attr("title","(1)");
+        $("#table_list_subretsuccess").attr("title","（2）");
+        $("#table_list_chargeTotal").attr("title","（1+2+3）");
+        $("#table_list_reportsuccess").attr("title","(3)");
+        $("#table_list_failTotal").attr("title","(5+6)");
+        $("#table_list_saletotalStr").attr("title","（客户侧的消耗金额）");
+
+
+    });
+
+    //解决合计精度问题
+    Math.add = function(v1, v2)
+    {
+        var r1, r2, m;
+        try
+        {
+            r1 = v1.toString().split(".")[1].length;
+        }
+        catch (e)
+        {
+            r1 = 0;
+        }
+        try
+        {
+            r2 = v2.toString().split(".")[1].length;
+        }
+        catch (e)
+        {
+            r2 = 0;
+        }
+        m = Math.pow(10, Math.max(r1, r2));
+
+        return (v1 * m + v2 * m) / m;
+    };
+
+    Number.toFixed = function(scale)
+    {
+        var s, s1, s2, start;
+
+        s1 = this + "";
+        start = s1.indexOf(".");
+        s = s1.movePoint(scale);
+
+        if (start >= 0)
+        {
+            s2 = Number(s1.substr(start + scale + 1, 1));
+            if (s2 >= 5 && this >= 0 || s2 < 5 && this < 0)
+            {
+                s = Math.ceil(s);
+            }
+            else
+            {
+                s = Math.floor(s);
+            }
+        }
+
+        return s.toString().movePoint(-scale);
+    }
+
+    //表格统计功能
+    function completeMethod(){
+//        var jq_tables = $("#table_list").jqGrid("getRowData");
+//        var sum_saletotalStr = 0;
+//        var sum_costtotalStr = 0;
+//        var sum_profit = 0;
+//        for(var j=0;j<jq_tables.length;j++){
+//            //jq_tables[i].字段名 获取每一行的指定字段的值
+//            sum_saletotalStr = Math.add(sum_saletotalStr,parseFloat(jq_tables[j]['saletotalStr'])==null?0:jq_tables[j]['saletotalStr']);
+//            sum_costtotalStr = Math.add(sum_costtotalStr,parseFloat(jq_tables[j]['costtotalStr'])==null?0:jq_tables[j]['costtotalStr']);
+//            sum_profit = Math.add(sum_profit,parseFloat(jq_tables[j]['profit'])==null?0:jq_tables[j]['profit']);
+//        }
+//        sum_saletotalStr = Number(sum_saletotalStr).toFixed(2);
+//        sum_costtotalStr = Number(sum_costtotalStr).toFixed(2);
+//        sum_profit = Number(sum_profit).toFixed(2);
+//
+//        var sum_sendTotal=$("#table_list").getCol('sendTotal',false,'sum');
+//        var sum_submitTotal=$("#table_list").getCol('submitTotal',false,'sum');
+//        var sum_chargeTotal=$("#table_list").getCol('chargeTotal',false,'sum');
+//        var sum_successRate=$("#table_list").getCol('successRate',false,'sum');
+//        var sum_successTotal=$("#table_list").getCol('successTotal',false,'sum');
+//        var submitsuccess=$("#table_list").getCol('submitsuccess',false,'sum');
+//        var sum_subretsuccess=$("#table_list").getCol('subretsuccess',false,'sum');
+//        var sum_reportsuccess=$("#table_list").getCol('reportsuccess',false,'sum');
+//        var sum_failTotal=$("#table_list").getCol('failTotal',false,'sum');
+//        var sum_costpriceStr=$("#table_list").getCol('costpriceStr',false,'-');
+//        var sum_profitRate=$("#table_list").getCol('profitRate',false,'-');
+        var sum_sendTotal=0.0;
+        var sum_submitTotal=0.0;
+        var sum_chargeTotal=0.0;
+        var sum_successRate=0.0;
+        var sum_successTotal=0.0;
+        var submitsuccess=0.0;
+        var sum_subretsuccess=0.0;
+        var sum_reportsuccess=0.0;
+        var sum_failTotal=0.0;
+        var sum_costpriceStr=0.0;
+        var sum_profitRate=0.0;
+        var sum_saletotalStr=0.0;
+        var sum_costtotalStr=0.0;
+        var sum_profit=0.0;
+        var costpriceTotal=0.0;
+
+
+        $.ajax({
+            type : "post",
+            url : /*[[@{/statistic/channelConsumeTotal}]]*/,
+            data : {
+                condition: $("#condition").val(),
+                departmentId: $("#departmentId").val(),
+                smstype: $("#smstype").val(),
+                operatorstype: $("#operatorstype").val(),
+                belongBusiness: $("#belongBusiness").val(),
+                startTime: $("#start_time_day").val(),
+                endTime: $("#end_time_day").val()
+            },
+            success : function(data) {
+
+                sum_sendTotal=data.totalOtherData.totalLine.sendTotal;
+                sum_submitTotal=data.totalOtherData.totalLine.submitTotal;
+                sum_chargeTotal=data.totalOtherData.totalLine.chargeTotal;
+                sum_successRate=data.totalOtherData.totalLine.successRate;
+                sum_successTotal=data.totalOtherData.totalLine.successTotal;
+                submitsuccess=data.totalOtherData.totalLine.submitsuccess;
+                sum_subretsuccess=data.totalOtherData.totalLine.subretsuccess;
+                sum_failTotal=data.totalOtherData.totalLine.failTotal;
+                sum_reportsuccess=data.totalOtherData.totalLine.reportsuccess;
+                sum_saletotalStr=data.totalOtherData.totalLine.saletotalStr;
+                sum_costtotalStr=data.totalOtherData.totalLine.costtotalStr;
+                sum_costfeeStr=data.totalOtherData.totalLine.costfeeStr;
+                sum_profit=data.totalOtherData.totalLine.profit;
+                sum_profitRate=data.totalOtherData.totalLine.profitRate;
+                costpriceTotal=data.totalOtherData.totalLine.costpriceTotal;
+
+                $("#table_list").footerData('set', { 'remark': '合计',
+                    'sendTotal': sum_sendTotal,
+                    'submitTotal': sum_submitTotal,
+                    'chargeTotal': sum_chargeTotal,
+                    'costpriceStr': costpriceTotal,
+                    'successRate': "-",
+                    'successTotal': sum_successTotal,
+                    'submitsuccess': submitsuccess,
+                    'subretsuccess': sum_subretsuccess,
+                    'reportsuccess': sum_reportsuccess,
+                    'failTotal': sum_failTotal,
+                    'saletotalStr': sum_saletotalStr,
+                    'costtotalStr': sum_costtotalStr,
+                    'profit': sum_profit,
+                    'profitRate': '-'
+                });
+            }
+
+        });
+
+    }
+
+    //导出Excel文件
+    function exportExcel() {
+        var totalCount = $("#table_list").jqGrid('getGridParam', 'records');
+        if (totalCount == 0) {
+            layer.msg("共0条记录，将不导出Excel文件", {icon: 2});
+            return;
+        }
+        if (totalCount > max_export_num) {
+            layer.msg("导出Excel文件条数大于" + max_export_num + "条", {icon: 2});
+            return;
+        }
+        var msg = "正在生成报表，请稍后...";
+        layer.msg('<div style="color:#506470;font-family: "microsoft yahei","Arial Narrow",HELVETICA;">'+msg+'</div>', {icon: 16,shade: [0.5, '#f5f5f5'],scrollbar: false,offset: 'auto',time: 600000}) ;
+        var options = {
+            url:/*[[@{/statistic/exportChannelConsume}]]*/'',
+            data:{
+                _department:$("#departmentId").find("option:selected").text(),
+                _belongBusiness:$("#belongBusiness").find("option:selected").text(),
+                _operatorstype:$("#operatorstype").find("option:selected").text(),
+                _smstype:$("#smstype").find("option:selected").text(),
+                _condition:$("#condition").text()
+            },
+            success : function(result) {
+                layer.closeAll(); //疯狂模式，关闭所有层
+                if(result == null){
+                    layer.msg("导出错误，请稍后重试...", {icon:2});
+                }else if(result.success == true){
+                    var exportFileName = result.data;
+                    var turnForm = document.createElement("form");
+                    document.body.appendChild(turnForm);
+                    turnForm.method = 'post';
+                    turnForm.action = /*[[@{/statistic/downloadExcel}]]*/"";
+                    //创建表单
+                    var newElement = document.createElement("input");
+                    newElement.setAttribute("name","exportFileName");
+                    newElement.setAttribute("type","hidden");
+                    newElement.setAttribute("value",exportFileName);
+                    turnForm.appendChild(newElement);
+                    turnForm.submit();
+                }else{
+                    layer.msg(result.msg, {icon:2});
+
+                }
+            },
+            complete : function(XMLHttpRequest,status){
+
+            },
+            type : "post",
+            async: true,
+            timeout:30000
+        };
+        $("#mainForm").ajaxSubmit(options);
+    }
+
+    $(function () {
+        $.ajax({
+            url:/*[[@{/statistic/getAllDept}]]*/'',
+            type:"POST",
+            success:function(result){
+                var opt = '<option value="">全部</option>';
+                if(result.success == true) {
+                    var deptArr = result.data;
+                    if (!deptArr.length) {
+                        opt = '<option value="' + deptArr.departmentId + '">' + deptArr.departmentName + '</option>';
+                    } else {
+						for (var i = 0; i < deptArr.length; i++) {
+							if (!deptArr[i]) {
+								continue
+							}
+							opt += '<option value="' + deptArr[i].departmentId + '">' + deptArr[i].departmentName + '</option>';
+						}
+                	}
+                }
+                $("#departmentId").html(opt);
+            }
+        });
+        $.ajax({
+            url:/*[[@{/order/resource/getAllBusinessMan}]]*/'',
+            type:"GET",
+            success:function(result){
+                var selection= document.getElementById("belongBusiness");
+                if(result != null && result.data != null){
+                    var bussinessManList = result.data;
+                    for(var i = 0; i< bussinessManList.length;i++){
+                        var _option = document.createElement("option");
+                        _option.text = bussinessManList[i].realname;
+                        _option.value = bussinessManList[i].id;
+                        selection.appendChild(_option);
+                    }
+                }
+            }
+        });
+    })
+	/*]]>*/
+</script>
+</body>
+</html>

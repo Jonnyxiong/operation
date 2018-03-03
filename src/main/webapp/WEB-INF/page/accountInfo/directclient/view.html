@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信平台运营系统 </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet">
+    <!-- jqgrid-->
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+
+	<link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+    <style>
+        /* Additional style to fix warning dialog position */
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+		.js-rule{
+			position:relative;
+		}
+		.js-rule .pop-tip{
+			position:absolute;
+			line-height:40px;
+			font-size:14px;
+			background-color:rgba(0,0,0,.7);
+			color:#FFF;
+			left:0;
+			top:-50px;
+			padding:0 20px;
+			display: none;
+			width:350px;
+		}
+		.js-rule:hover .pop-tip{
+			display: block;
+		}
+    </style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+	<div class="wrapper wrapper-content animated fadeInRight">
+	    <div class="row">
+	        <div class="col-sm-12">
+	            <div class="ibox "> 
+		                <div class="ibox-title">
+		                    <h5>客户信息详情</h5>
+		                </div>
+	                <div class="ibox-content">
+
+						<div class="pull-right tooltip-demo">
+							<!--<a class="btn btn-danger btn-sm" data-toggle="tooltip" data-placement="top" title="返回" onclick="javascript:self.location=document.referrer;"><i class="fa fa-reply"></i>&nbsp;返回</a>-->
+						</div>
+	                    <div class="row">
+	                        <div class="col-sm-6 b-r">
+	                            <form class="form-horizontal m-t" id="manager_form">
+	                                <div class="form-group">
+									    <label class="col-sm-3 control-label">客户账号:</label>
+									    <div class="col-sm-8">
+									      <p class="form-control-static" th:text="${data.clientid}"></p>
+									    </div>
+										<input id="clientid" type="hidden" th:value="${data.clientid}">
+	                                </div>
+	                                <div class="form-group">
+	                                	<label class="col-sm-3 control-label">归属销售:</label>
+	                                    <div class="col-sm-8">
+									      <p class="form-control-static" th:text="${data.userRealName}"></p>
+	                                    </div>
+	                                </div>
+									<!--<div class="form-group">-->
+										<!--<label class="col-sm-3 control-label">归属销售:</label>-->
+										<!--<input type="hidden" id="oldSaleId" th:value="${data.belong_sale}">-->
+										<!--<div class="col-sm-8">-->
+											<!--<select class="form-control" name="saleSelect" id="saleSelect" style="width: 250px">-->
+												<!--<option value="">请选择销售</option>-->
+												<!--<option th:each="sale : ${saleList}" th:value="${sale.id}" th:text="${sale.name}">选项 4</option>-->
+											<!--</select>-->
+										<!--</div>-->
+									<!--</div>-->
+	                                <div class="form-group">
+	                                	<label class="col-sm-3 control-label">付费类型:</label>
+	                                    <div class="col-sm-8">
+									      <p class="form-control-static" th:text="${data.paytypeDesc}"></p>
+								        </div>
+										<input id="paytype" type="hidden" th:value="${data.paytype}">
+	                                </div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label">计费规则:</label>
+										<div class="col-sm-8">
+											<div class="js-rule" style="display: inline-block">
+												<span class="form-control-static" th:text="${data.chargeRuleStr}"></span>
+												<div class="pop-tip" th:text="${data.nextChargeRuleStr}"></div>
+											</div>
+
+											<!--<button type="button" class="btn btn-primary col-sm-offset-2" id="chargeRule">修改计费</button>-->
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label">客户等级:</label>
+										<div class="col-sm-8">
+											<p class="form-control-static" th:text="${data.starLevelStr}"></p>
+										</div>
+									</div>
+	                                <div class="form-group">
+	                                	<label class="col-sm-3 control-label">客户类型:</label>
+	                                	<div class="col-sm-8">
+									      <p class="form-control-static" th:text="${data.clientTypeDesc}"></p>
+	                                	</div>
+	                                </div>
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">客户名称:</label>
+	                                    <div class="col-sm-8">
+									      <p class="form-control-static" th:text="${data.name}"></p>
+	                                    </div>
+										<input id="clientname" type="hidden" th:value="${data.name}">
+	                                </div>
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">登入密码:</label>
+	                                    <div class="col-sm-8">
+											<span class="form-control-static">******</span>
+											<button type="button" class="btn btn-primary col-sm-offset-2" data-toggle="modal" data-target="#exampleModal" id="changePsd">修改密码</button>
+	                                    </div>
+	                                </div>
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">手机:</label>
+	                                    <div class="col-sm-8">
+									      <p class="form-control-static" th:text="${data.mobile}"></p>
+	                                    </div>
+	                                </div>
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">邮箱:</label>
+	                                    <div class="col-sm-8">
+									      <p class="form-control-static" th:text="${data.email}"></p>
+	                                    </div>
+	                                </div>
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">客户地址:</label>
+	                                    <div class="col-sm-8">
+									      <p class="form-control-static" th:text="${data.address}"></p>
+	                                    </div>
+	                                </div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label">是否支持子账户:</label>
+										<div class="col-sm-8">
+											<p class="form-control-static" th:text="${data.extValueStr}"></p>
+										</div>
+									</div>
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">是否需要审核:</label>
+	                                    <div class="col-sm-8">
+									      <p class="form-control-static" th:text="${data.needAuditDesc}"></p>
+	                                    </div>
+	                                </div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label">接口密码:</label>
+										<div class="col-sm-8">
+											<span class="form-control-static">******</span>
+											<button type="button" class="btn btn-primary col-sm-offset-2" data-toggle="modal" data-target="#exampleModal1" id="changePsd1">修改密码</button>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label">短信协议:</label>
+										<div class="col-sm-8">
+											<p class="form-control-static" th:text="${data.smsfromDesc}"></p>
+										</div>
+									</div>
+									<div class="form-group" th:if="${data.smsfrom} ne 6">
+										<label class="col-sm-3 control-label">短信类型:</label>
+										<div class="col-sm-8">
+											<p class="form-control-static" th:text="${data.smstypeDesc}"></p>
+										</div>
+									</div>
+									<div class="form-group" th:if="${data.smsfrom} eq 6">
+										<label class="col-sm-3 control-label">HTTP子协议类型:</label>
+										<div class="col-sm-8">
+											<p class="form-control-static" th:text="${data.httpProtocolTypeStr}"></p>
+										</div>
+									</div>
+									<div class="form-group" th:if="${data.httpProtocolType} eq 2">
+										<label  class="col-sm-3 control-label">短信类型：</label>
+										<div class="col-sm-5">
+											<p class="form-control-static" th:text="${data.smstypeDesc}"></p>
+										</div>
+									</div>
+									<div th:if="${not #lists.isEmpty(data.userPriceList)} and ${#lists.size(data.userPriceList)} gt 0">
+										<div th:each="item : ${data.userPriceList}">
+											<div class="form-group">
+												<label class="col-sm-3 control-label" th:text="${item.smstypeDesc + '单价:'}">通知短信单价:</label>
+												<div class="col-sm-8">
+													<!--<p class="form-control-static" th:text="${data.userPrice}"></p>-->
+													<p class="form-control-static" th:text="${#numbers.formatDecimal(item.userPrice, 1, 4)}"></p>
+												</div>
+											</div>
+										</div>
+									</div>
+									<div th:if="${data.smsfrom} eq 4 ">
+										<div class="form-group" >
+											<label class="col-sm-3 control-label">SGIP协议-客户上行IP:</label>
+											<div class="col-sm-8">
+											  <p class="form-control-static" th:text="${data.moip}"></p>
+											</div>
+										</div>
+										<div class="form-group" >
+											<label class="col-sm-3 control-label">SGIP协议-客户上行端口:</label>
+											<div class="col-sm-8">
+												<p class="form-control-static" th:text="${data.moport}"></p>
+											</div>
+										</div>
+										<div class="form-group" >
+											<label class="col-sm-3 control-label">SGIP协议-客户节点编码:</label>
+											<div class="col-sm-8">
+												<p class="form-control-static" th:text="${data.nodeid}"></p>
+											</div>
+										</div>
+									</div>
+									<div th:if="${data.smsfrom} eq 6 ">
+										<div class="form-group" th:if="${data.needmo} eq 1">
+											<label class="col-sm-3 control-label">上行回调地址:</label>
+											<div class="col-sm-8">
+												<p class="form-control-static" th:text="${data.mourl}"></p>
+											</div>
+										</div>
+										<div class="form-group" th:if="${data.needreport} eq 1 or ${data.needreport} eq 2">
+											<label class="col-sm-3 control-label">状态报告回调地址:</label>
+											<div class="col-sm-8">
+												<p class="form-control-static" th:text="${data.deliveryurl}"></p>
+											</div>
+										</div>
+										<div class="form-group" >
+											<label class="col-sm-3 control-label">模板审核回调地址:</label>
+											<div class="col-sm-8">
+												<p class="form-control-static" th:text="${data.noticeurl}"></p>
+											</div>
+										</div>
+									</div>
+									<div class="form-group">
+	                                    <label class="col-sm-3 control-label">IP白名单:</label>
+	                                    <div class="col-sm-8">
+									      <p class="form-control-static" th:text="${data.ip}"></p>
+	                                    </div>
+	                                </div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label">自扩展:</label>
+										<div class="col-sm-8">
+                                            <p class="form-control-static">
+												<span th:switch="${data.needextend}">
+													<span th:case="0">不支持</span>
+													<span th:case="1">支持,
+														<span th:if="!${#strings.isEmpty(data.extendSize)} " th:text="${data.extendSize} + '位'"></span>
+													</span>
+												</span>
+                                            </p>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label">客户接入速度:</label>
+										<div class="col-sm-8">
+											<p class="form-control-static" th:text="${data.accessSpeed}"></p>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label">认证状态</label>
+										<div class="col-sm-8">
+											<p class="form-control-static" th:text="${data.oauthStatusDesc}"></p>
+										</div>
+									</div>
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">认证时间:</label>
+	                                    <div class="col-sm-8">
+											<p class="form-control-static" th:if="${data.oauthDate}" th:text="${#dates.format(data.oauthDate,'yyyy-MM-dd HH:mm:ss')}"></p>
+	                                    </div>
+	                                </div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label">证件类型:</label>
+										<div class="col-sm-8">
+											<p class="form-control-static" th:text="${id_type}"></p>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label">证件号码:</label>
+										<div class="col-sm-8">
+											<p class="form-control-static" th:text="${id_nbr}"></p>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label">证件图片:</label>
+										<div class="col-sm-8">
+											<img th:src="${smsp_img_url}+'/file/scanPic.html?path='+${img_url}"
+												 width="50" height="35" style="cursor: pointer;" title="点击查看大图"
+												 onclick="viewFile(this)" th:if="${img_url}"/>
+										</div>
+									</div>
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">备注:</label>
+	                                    <div class="col-sm-8">
+									      <p class="form-control-static" th:text="${data.remarks}"></p>
+	                                    </div>
+	                                </div>
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">客户状态 :</label>
+	                                    <div class="col-sm-8">
+									      <p class="form-control-static" th:switch="${data.status}">
+                                              <span th:case="1">注册完成</span>
+                                              <span th:case="5">冻结</span>
+                                              <span th:case="6">注销</span>
+                                              <span th:case="7">锁定</span>
+                                          </p>
+	                                    </div>
+	                                </div>
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">连接节点数 :</label>
+	                                    <div class="col-sm-8">
+									      <p class="form-control-static" th:text="${data.nodenum}"></p>
+	                                    </div>
+	                                </div>
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">用户扩展端口 :</label>
+	                                    <div class="col-sm-8">
+									      <p class="form-control-static" th:text="${data.extendport}"></p>
+	                                    </div>
+	                                </div>
+									<div class="form-group">
+										<label class="col-sm-3 control-label">创建时间:</label>
+										<div class="col-sm-8">
+											<p class="form-control-static" th:text="${#dates.format(data.createtime, 'yyyy-MM-dd')}"></p>
+										</div>
+									</div>
+								     <div class="form-group">
+								        <div class="col-sm-12 col-sm-offset-3">
+											<!--<button type="button" class="btn btn-sm btn-success"  onclick="updateData()" >修改</button>-->
+											<!--<button type="button" class="btn btn-sm btn-success" th:if="${data.oauthStatusDesc eq '已认证'}"  onclick="viewAudit()">查看资质</button>-->
+											<button type="button" class="btn btn-sm"  onclick="goback()" >返回</button>
+								        </div>
+								    </div>
+	                            </form>
+	                        </div>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	</div>
+	<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title" id="exampleModalLabel">修改客户密码</h4>
+				</div>
+				<div class="modal-body">
+					<form>
+						<div class="form-group">
+							<label for="newPsd" class="control-label ">客户新密码:</label>
+							<input type="password" class="form-control " id="newPsd">
+						</div>
+						<div class="form-group">
+							<label for="confirmPsd" class="control-label">确认密码:</label>
+							<input type="password" class="form-control" id="confirmPsd">
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-success" onclick="save()">保存</button>
+					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="exampleModal1" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title" id="exampleModalLabel1">修改【<span style="color: #003399;" th:text="${data.clientid}"></span>-<span style="color: #003399;" th:text="${data.name}"></span>】密码</h4>
+				</div>
+				<div class="modal-body">
+					<form>
+						<div class="form-group">
+							<label  class="control-label ">接口账户:</label>
+							<span  th:text="${data.clientid}"></span>
+						</div>
+						<div class="form-group">
+							<label for="newPsd" class="control-label ">新密码:</label>
+							<input type="password" class="form-control " id="newPsd1">
+						</div>
+						<div class="form-group">
+							<label for="confirmPsd" class="control-label">确认密码:</label>
+							<input type="password" class="form-control" id="confirmPsd1">
+						</div>
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-success" onclick="saveWebPassword()">保存</button>
+					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script th:src="@{/resources/js/hex_ha_ha_ha_ha_ha.js}"></script>
+	<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+	<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+	<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+	<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+	<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+	<script th:src="@{/resources/js/jquery.form.js?v=1.0.0}"></script>
+
+	<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+	<script th:src="@{/resources/js/plugins/validate/jquery.validate.min.js}"></script>
+	<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+	<script th:src="@{/resources/js/layer/layer.js}"></script>
+	<script th:src="@{/resources/js/auth.js?v=1.0.0}"></script>
+
+	<script th:inline="javascript">
+		/*<![CDATA[*/
+        function viewFile(img) {
+            open($(img).attr("src"), "viewFile");
+        }
+        $(function () {
+            //初始化销售id和原因
+            var oldSaleId = $('#oldSaleId').val();
+            if(oldSaleId != null && oldSaleId != ''){
+                $("#saleSelect").val(oldSaleId);
+            }
+            $("#changePsd").click(function () {
+                $("#newPsd").val('')
+                $("#confirmPsd").val('')
+            })
+
+			//修改计费
+			/*$("#chargeRule").click(function(){
+                var url = /!*[[@{/accountInfo/changeRule}]]*!/;
+				var client = $("#clientid").val();
+				var clientName = $("#clientname").val();
+				var paytype = $("#paytype").val();
+                layer.open({
+                    type: 2,
+                    title: "修改【"+ client + "-" + clientName +"】计费规则",
+                    closeBtn: 2,
+                    area: ['770px', '400px'],
+                    fix: false, //不固定
+                    content: url+"?clientId=" + client + "&paytype=" + paytype
+                });
+			})*/
+        });
+
+        function goback(){
+            window.location.href = '/accountInfo/directclient/query'
+        }
+        var msgTime = 1500;
+        function updateData() {
+            var clientid = $("#clientid").val();
+            var viewUrl = /*[[@{/accountInfo/directclient/edit}]]*/;
+            window.location.href = viewUrl+"?clientId="+clientid;
+        }
+        function viewAudit() {
+            var clientid = $("#clientid").val();
+            var viewUrl = /*[[@{/opsAudit/customer/view}]]*/;
+            window.location.href = viewUrl+"?clientId="+clientid+"&type="+3;
+        }
+
+        function saveWebPassword() {
+            var clientid = $("#clientid").val();
+            var b = new Base64();
+            var newPsd = b.encode($("#newPsd1").val());
+            var confirmPsd = b.encode($("#confirmPsd1").val());
+            if (!_Auth.isPassword($("#newPsd1").val()) || !_Auth.isPassword($("#confirmPsd1").val())) {
+                layer.msg('客户密码为8-12之间的字符，不包括特殊字符', {icon: 2, time: msgTime});
+                return;
+            }
+            if (newPsd != confirmPsd) {
+                layer.msg('确认密码和新密码不一致，请重新输入', {icon: 2, time: msgTime});
+                return;
+            } else {
+                $.ajax({
+                    url:/*[[@{/accountInfo/client/updatePsd}]]*/,
+                    type: 'POST',
+                    data: {
+                        newPsd: newPsd,
+                        confirmPsd: confirmPsd,
+                        clientId: clientid
+                    },
+                    success: function (data) {
+                        layer.msg(data.msg, {icon: 1, time: msgTime});
+                        $("#exampleModal1").modal('hide');
+                    }
+                })
+            }
+        }
+
+        function save() {//web_password
+            var clientid = $("#clientid").val();
+            var b = new Base64();
+            var newPsd = b.encode($("#newPsd").val());
+            var confirmPsd = b.encode($("#confirmPsd").val());
+            if(!_Auth.isPassword($("#newPsd").val()) || !_Auth.isPassword($("#confirmPsd").val())){
+                layer.msg('客户密码为8-12之间的字符，不包括特殊字符', {icon: 2, time: msgTime});
+                return;
+            }
+            if(newPsd != confirmPsd){
+                layer.msg('确认密码和新密码不一致，请重新输入', {icon: 2, time: msgTime});
+                return;
+            }else {
+                $.ajax({
+                    url:/*[[@{/accountInfo/client/updateWebPsd}]]*/,
+                    type:'POST',
+                    data:{
+                        newPsd:newPsd,
+                        confirmPsd:confirmPsd,
+                        clientId:clientid
+                    },
+                    success:function (data) {
+                        layer.msg(data.msg, {icon: 1, time: msgTime});
+                        $("#exampleModal").modal('hide');
+                    }
+                })
+            }
+        }
+            function Base64() {
+                // private property
+                _keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+                // public method for encoding
+                this.encode = function (input) {
+                    var output = "";
+                    var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
+                    var i = 0;
+                    input = _utf8_encode(input);
+                    while (i < input.length) {
+                        chr1 = input.charCodeAt(i++);
+                        chr2 = input.charCodeAt(i++);
+                        chr3 = input.charCodeAt(i++);
+                        enc1 = chr1 >> 2;
+                        enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
+                        enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
+                        enc4 = chr3 & 63;
+                        if (isNaN(chr2)) {
+                            enc3 = enc4 = 64;
+                        } else if (isNaN(chr3)) {
+                            enc4 = 64;
+                        }
+                        output = output +
+                            _keyStr.charAt(enc1) + _keyStr.charAt(enc2) +
+                            _keyStr.charAt(enc3) + _keyStr.charAt(enc4);
+                    }
+                    return output;
+                }
+                // public method for decoding
+                this.decode = function (input) {
+                    var output = "";
+                    var chr1, chr2, chr3;
+                    var enc1, enc2, enc3, enc4;
+                    var i = 0;
+                    input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+                    while (i < input.length) {
+                        enc1 = _keyStr.indexOf(input.charAt(i++));
+                        enc2 = _keyStr.indexOf(input.charAt(i++));
+                        enc3 = _keyStr.indexOf(input.charAt(i++));
+                        enc4 = _keyStr.indexOf(input.charAt(i++));
+                        chr1 = (enc1 << 2) | (enc2 >> 4);
+                        chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+                        chr3 = ((enc3 & 3) << 6) | enc4;
+                        output = output + String.fromCharCode(chr1);
+                        if (enc3 != 64) {
+                            output = output + String.fromCharCode(chr2);
+                        }
+                        if (enc4 != 64) {
+                            output = output + String.fromCharCode(chr3);
+                        }
+                    }
+                    output = _utf8_decode(output);
+                    return output;
+                }
+                // private method for UTF-8 encoding
+                _utf8_encode = function (string) {
+                    string = string.replace(/\r\n/g,"\n");
+                    var utftext = "";
+                    for (var n = 0; n < string.length; n++) {
+                        var c = string.charCodeAt(n);
+                        if (c < 128) {
+                            utftext += String.fromCharCode(c);
+                        } else if((c > 127) && (c < 2048)) {
+                            utftext += String.fromCharCode((c >> 6) | 192);
+                            utftext += String.fromCharCode((c & 63) | 128);
+                        } else {
+                            utftext += String.fromCharCode((c >> 12) | 224);
+                            utftext += String.fromCharCode(((c >> 6) & 63) | 128);
+                            utftext += String.fromCharCode((c & 63) | 128);
+                        }
+                    }
+                    return utftext;
+                }
+                // private method for UTF-8 decoding
+                _utf8_decode = function (utftext) {
+                    var string = "";
+                    var i = 0;
+                    var c = c1 = c2 = 0;
+                    while (i < utftext.length) {
+                        c = utftext.charCodeAt(i);
+                        if (c < 128) {
+                            string += String.fromCharCode(c);
+                            i++;
+                        } else if ((c > 191) && (c < 224)) {
+                            c2 = utftext.charCodeAt(i + 1);
+                            string += String.fromCharCode(((c & 31) << 6) | (c2 & 63));
+                            i += 2;
+                        } else {
+                            c2 = utftext.charCodeAt(i + 1);
+                            c3 = utftext.charCodeAt(i + 2);
+                            string += String.fromCharCode(((c & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
+                            i += 3;
+                        }
+                    }
+                    return string;
+                }
+            }
+	    /*]]>*/
+
+	</script>
+</body>
+</html>

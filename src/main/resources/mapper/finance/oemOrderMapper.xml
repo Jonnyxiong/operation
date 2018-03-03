@@ -1,0 +1,407 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 运营平台财务管理 -->
+<mapper namespace="oemOrder">
+	
+	<sql id="agentCommon">
+		<where>
+			<if test="agent_text != null">
+				AND (
+						ao.order_no LIKE '%${agent_text}%'
+						OR ao.product_code LIKE '%${agent_text}%'
+						OR ao.agent_id LIKE '%${agent_text}%'
+					)
+			</if>
+			<if test="operatorCode != null and operatorCode != '' ">
+				AND ao.operator_code = #{operatorCode}
+			</if>
+			<if test="product_type != null and product_type != '' ">
+				AND ao.product_type = #{product_type}
+			</if>
+			<if test="order_type != null and order_type != '' ">
+				AND ao.order_type = #{order_type}
+			</if>
+			<if test="start_time_day != null">
+				AND ao.due_time >= STR_TO_DATE(#{start_time_day},'%Y-%m-%d %T')
+			</if>
+			<if test="end_time_day != null">
+				AND ao.due_time <![CDATA[<= STR_TO_DATE(CONCAT(#{end_time_day},' 23:59:59'),'%Y-%m-%d %T') ]]>
+			</if>
+			<if test="agentIds != null and agentIds.size > 0">
+				AND ao.agent_id IN
+				<foreach collection="agentIds" item="item" separator="," open="(" close=")">
+					#{item}
+				</foreach>
+			</if>
+		</where>
+	</sql>
+	<!-- 查询oem代理商订单 -->
+	<select id="queryAgentOrder" resultType="map">
+		SELECT
+			ao.order_id,
+			ao.order_no,
+			ao.order_type,
+			CASE ao.order_type
+				WHEN 0 THEN '短信购买'
+				WHEN 1 THEN '子账户充值'
+				WHEN 2 THEN '子账户回退'
+				WHEN 3 THEN '回退条数'
+			END AS order_type_name,
+			IFNULL(ao.product_id,'-') AS product_id,
+			ao.product_type,
+			ao.product_code,
+			<!-- 			0：行业，1：营销，2：国际，3：验证码，4：通知，7：USSD，8：闪信，9：挂机短信-->
+			CASE ao.product_type
+				WHEN 0 THEN '行业'
+				WHEN 1 THEN '营销'
+				WHEN 2 THEN '国际'
+				WHEN 3 THEN '验证码'
+				WHEN 4 THEN '通知'
+				WHEN 7 THEN 'USSD'
+				WHEN 8 THEN '闪信'
+				WHEN 9 THEN '挂机短信'
+			END AS product_type_name,
+			<!-- 对应运营商，0：全网，1：移动，2：联通，3：电信，4：国际-->
+			CASE ao.operator_code
+				WHEN 0 THEN '全网'
+				WHEN 1 THEN '移动'
+				WHEN 2 THEN '联通'
+				WHEN 3 THEN '电信'
+				WHEN 4 THEN '国际'
+			END AS operator_code,
+			<!-- 适用区域，0：全国，1：国际-->
+			CASE ao.area_code
+				WHEN 0 THEN '全国'
+				WHEN 1 THEN '国际'
+			END AS area_code,
+			IFNULL(TRUNCATE(ao.unit_price, 4),'-') AS unit_price,
+			IFNULL(ao.order_number,'-') AS order_number,
+			TRUNCATE(IFNULL(ao.order_amount,IFNULL(ao.unit_price,0.0000)*IFNULL(ao.order_number,0.0000)), 4) AS order_amount,
+			ao.agent_id,
+			DATE_FORMAT(ao.due_time,'%Y-%m-%d') AS due_time,
+			DATE_FORMAT(ao.create_time,'%Y-%m-%d') AS create_time,
+			ao.remark
+		FROM
+			t_sms_oem_agent_order ao
+		<include refid="agentCommon"/>
+		ORDER BY ao.create_time DESC, ao.unit_price DESC, order_id DESC
+		${limit}
+	</select>
+	<!-- 查询oem代理商订单总记录数 -->
+	<select id="queryAgentOrderCount" resultType="map">
+		SELECT
+			count(0) AS totalCount
+		FROM
+			t_sms_oem_agent_order ao
+		<include refid="agentCommon" />
+	</select>
+	
+	<!-- 导出OEM代理商订单信息 -->
+	<select id="exportAgentOrder" resultType="map">
+		SELECT
+			ao.order_no,
+			ao.order_type,
+			CASE ao.order_type
+				WHEN 0 THEN '短信购买'
+				WHEN 1 THEN '子账户充值'
+				WHEN 2 THEN '子账户回退'
+				WHEN 3 THEN '回退条数'
+			END AS order_type_name,
+			IFNULL(ao.product_id,'-') AS product_id,
+			ao.product_code,
+			<!-- 			0：行业，1：营销，2：国际，3：验证码，4：通知，7：USSD，8：闪信，9：挂机短信-->
+			CASE ao.product_type
+				WHEN 0 THEN '行业'
+				WHEN 1 THEN '营销'
+				WHEN 2 THEN '国际'
+				WHEN 3 THEN '验证码'
+				WHEN 4 THEN '通知'
+				WHEN 7 THEN 'USSD'
+				WHEN 8 THEN '闪信'
+				WHEN 9 THEN '挂机短信'
+			END AS product_type_name,
+			<!-- 对应运营商，0：全网，1：移动，2：联通，3：电信，4：国际-->
+			CASE ao.operator_code
+				WHEN 0 THEN '全网'
+				WHEN 1 THEN '移动'
+				WHEN 2 THEN '联通'
+				WHEN 3 THEN '电信'
+				WHEN 4 THEN '国际'
+			END AS operator_code,
+			<!-- 适用区域，0：全国，1：国际-->
+			CASE ao.area_code
+				WHEN 0 THEN '全国'
+				WHEN 1 THEN '国际'
+			END AS area_code,
+			IFNULL(TRUNCATE(ao.unit_price, 4),'-') AS unit_price,
+			IFNULL(ao.order_number,'-') AS order_number,
+			TRUNCATE(IFNULL(ao.order_amount,IFNULL(ao.unit_price,0.0000)*IFNULL(ao.order_number,0.0000)), 4) AS order_amount,
+			ao.agent_id,
+			DATE_FORMAT(ao.due_time,'%Y-%m-%d') AS due_time,
+			DATE_FORMAT(ao.create_time,'%Y-%m-%d') AS create_time,
+			ao.remark
+		FROM
+			t_sms_oem_agent_order ao
+		<include refid="agentCommon"/>
+		ORDER BY ao.create_time DESC, ao.unit_price DESC, order_id DESC
+	</select>
+	
+	<!-- 根据orderid 获取oem代理商订单详情 -->
+	<select id="getOEMAgentOrderById" resultType="map">
+		SELECT
+			ao.order_id,
+			ao.order_no,
+      		ao.product_code,
+			CASE ao.order_type
+				WHEN 0 THEN '短信购买'
+				WHEN 1 THEN '子账户充值'
+				WHEN 2 THEN '子账户回退'
+				WHEN 3 THEN '回退条数'
+			END AS order_type_name,
+			ao.product_id,
+			<!-- 0：行业，1：营销，2：国际，3：验证码，4：通知，7：USSD，8：闪信，9：挂机短信-->
+			CASE ao.product_type
+				WHEN 0 THEN '行业'
+				WHEN 1 THEN '营销'
+				WHEN 2 THEN '国际'
+				WHEN 3 THEN '验证码'
+				WHEN 4 THEN '通知'
+				WHEN 7 THEN 'USSD'
+				WHEN 8 THEN '闪信'
+				WHEN 9 THEN '挂机短信'
+			END AS product_type_name,
+			<!-- 对应运营商，0：全网，1：移动，2：联通，3：电信，4：国际-->
+			CASE ao.operator_code
+				WHEN 0 THEN '全网'
+				WHEN 1 THEN '移动'
+				WHEN 2 THEN '联通'
+				WHEN 3 THEN '电信'
+				WHEN 4 THEN '国际'
+			END AS operator_code,
+			<!-- 适用区域，0：全国，1：国际-->
+			CASE ao.area_code
+				WHEN 0 THEN '全国'
+				WHEN 1 THEN '国际'
+			END AS area_code,
+
+			IFNULL(TRUNCATE(ao.unit_price, 4),'-') AS unit_price,
+			IFNULL(ao.order_number,'-') AS order_number,
+			TRUNCATE(IFNULL(ao.order_amount,IFNULL(ao.unit_price,0.0000)*IFNULL(ao.order_number,0.0000)), 4) AS order_amount,
+			IFNULL(TRUNCATE(ao.product_price, 4),'-') AS product_price,
+			ao.agent_id,
+			DATE_FORMAT(ao.due_time,'%Y-%m-%d') AS due_time,
+			DATE_FORMAT(ao.create_time,'%Y-%m-%d') AS create_time
+		FROM
+			t_sms_oem_agent_order ao
+		WHERE ao.order_id = #{orderId}
+	</select>
+	
+	
+	
+	
+	
+	
+	
+	
+	<!-- oem客户订单 -->
+	<sql id="clientCommon">
+		<where>
+			<if test="client_text != null and client_text!=''">
+				AND (
+						co.order_no LIKE '%${client_text}%'
+						OR co.client_id LIKE '%${client_text}%'
+						OR co.agent_id LIKE '%${client_text}%'
+					)
+			</if>
+			<if test="operatorCode != null and operatorCode != '' ">
+				AND co.operator_code = #{operatorCode}
+			</if>
+			<if test="product_type != null and product_type != '' ">
+				AND co.product_type = #{product_type}
+			</if>
+			<choose>
+				<when test="order_type != null and order_type != '' ">
+					AND co.order_type = #{order_type}
+				</when>
+				<otherwise>
+					AND co.order_type != 3
+				</otherwise>
+			</choose>
+			<if test="start_time_day != null">
+				and co.due_time >= STR_TO_DATE(#{start_time_day},'%Y-%m-%d %T')
+			</if>
+			<if test="end_time_day != null">
+				and co.due_time <![CDATA[<= STR_TO_DATE(CONCAT(#{end_time_day},' 23:59:59'),'%Y-%m-%d %T') ]]>
+			</if>
+			<if test="clientids != null and clientids.size > 0">
+				AND co.client_id IN
+				<foreach collection="clientids" item="item" separator="," open="(" close=")">
+					#{item}
+				</foreach>
+			</if>
+		</where>
+	</sql>
+
+	<!-- 查询oem客户订单 -->
+	<select id="queryClientOrder" resultType="map">
+		SELECT
+			co.order_id,
+			co.order_no,
+			TRUNCATE(IFNULL(co.unit_price,0.0000), 4) as unit_price,
+			co.order_type,
+			CASE co.order_type
+				WHEN 0 THEN '客户购买'
+				WHEN 1 THEN '子账户充值'
+				WHEN 2 THEN '子账户回退'
+			END AS order_type_name,
+			co.product_type,
+
+			<!-- 0：行业，1：营销，2：国际，3：验证码，4：通知，7：USSD，8：闪信，9：挂机短信-->
+			CASE co.product_type
+				WHEN 0 THEN '行业'
+				WHEN 1 THEN '营销'
+				WHEN 2 THEN '国际'
+				WHEN 3 THEN '验证码'
+				WHEN 4 THEN '通知'
+				WHEN 7 THEN 'USSD'
+				WHEN 8 THEN '闪信'
+				WHEN 9 THEN '挂机短信'
+			END AS product_type_name,
+			<!-- 对应运营商，0：全网，1：移动，2：联通，3：电信，4：国际-->
+			CASE co.operator_code
+				WHEN 0 THEN '全网'
+				WHEN 1 THEN '移动'
+				WHEN 2 THEN '联通'
+				WHEN 3 THEN '电信'
+				WHEN 4 THEN '国际'
+			END AS operator_code,
+			<!-- 适用区域，0：全国，1：国际-->
+			CASE co.area_code
+				WHEN 0 THEN '全国'
+				WHEN 1 THEN '国际'
+			END AS area_code,
+
+			IFNULL(co.order_number,'-') AS order_number,
+			IFNULL(TRUNCATE(co.order_price, 4),'-') AS order_price,
+			co.client_id,
+			co.agent_id,
+			DATE_FORMAT(co.due_time,'%Y-%m-%d') AS due_time,
+			DATE_FORMAT(co.create_time,'%Y-%m-%d') AS create_time,
+			co.remark
+		FROM
+			t_sms_oem_client_order co
+		<include refid="clientCommon"/>
+		ORDER BY co.create_time DESC, co.unit_price DESC
+		${limit}
+	</select>
+
+	<!-- 查询oem客户订单总记录数 -->
+	<select id="queryClientOrderCount" resultType="map">
+		SELECT
+			COUNT(0) AS totalCount
+		FROM
+			t_sms_oem_client_order co
+		<include refid="clientCommon"/>
+	</select>
+	<!-- 根据orderid 查询oem客户订单详情 -->
+	<select id="getOEMClientOrderById" resultType="map">
+		SELECT
+			co.order_id,
+			co.order_no,
+			TRUNCATE(IFNULL(co.unit_price,0.0000), 4) as unit_price,
+			CASE co.order_type
+				WHEN 0 THEN '客户购买'
+				WHEN 1 THEN '子账户充值'
+				WHEN 2 THEN '子账户回退'
+			END AS order_type_name,
+			<!-- 0：行业，1：营销，2：国际，3：验证码，4：通知，7：USSD，8：闪信，9：挂机短信-->
+			CASE co.product_type
+				WHEN 0 THEN '行业'
+				WHEN 1 THEN '营销'
+				WHEN 2 THEN '国际'
+				WHEN 3 THEN '验证码'
+				WHEN 4 THEN '通知'
+				WHEN 7 THEN 'USSD'
+				WHEN 8 THEN '闪信'
+				WHEN 9 THEN '挂机短信'
+			END AS product_type_name,
+			<!-- 对应运营商，0：全网，1：移动，2：联通，3：电信，4：国际-->
+			CASE co.operator_code
+				WHEN 0 THEN '全网'
+				WHEN 1 THEN '移动'
+				WHEN 2 THEN '联通'
+				WHEN 3 THEN '电信'
+				WHEN 4 THEN '国际'
+			END AS operator_code,
+			<!-- 适用区域，0：全国，1：国际-->
+			CASE co.area_code
+				WHEN 0 THEN '全国'
+				WHEN 1 THEN '国际'
+			END AS area_code,
+			co.order_number, 
+			IFNULL(TRUNCATE(co.order_price, 4),'-') AS order_price,
+			co.client_id,
+			co.agent_id,
+			DATE_FORMAT(co.due_time,'%Y-%m-%d') AS due_time,
+			DATE_FORMAT(co.create_time,'%Y-%m-%d') AS create_time,
+			co.remark
+		FROM
+			t_sms_oem_client_order co
+		WHERE co.order_id = #{orderId}
+	</select>
+	<!-- 导出OEM客户订单信息 -->
+	<select id="exportClientOrder" resultType="map">
+		SELECT
+			co.order_no,
+			IFNULL(co.unit_price,'-') as unit_price,
+			co.order_type,
+			CASE co.order_type
+				WHEN 0 THEN '客户购买'
+				WHEN 1 THEN '子账户充值'
+				WHEN 2 THEN '子账户回退'
+			END AS order_type_name,
+			co.product_type,
+			<!-- 0：行业，1：营销，2：国际，3：验证码，4：通知，7：USSD，8：闪信，9：挂机短信-->
+			CASE co.product_type
+				WHEN 0 THEN '行业'
+				WHEN 1 THEN '营销'
+				WHEN 2 THEN '国际'
+				WHEN 3 THEN '验证码'
+				WHEN 4 THEN '通知'
+				WHEN 7 THEN 'USSD'
+				WHEN 8 THEN '闪信'
+				WHEN 9 THEN '挂机短信'
+			END AS product_type_name,
+			<!-- 对应运营商，0：全网，1：移动，2：联通，3：电信，4：国际-->
+			CASE co.operator_code
+				WHEN 0 THEN '全网'
+				WHEN 1 THEN '移动'
+				WHEN 2 THEN '联通'
+				WHEN 3 THEN '电信'
+				WHEN 4 THEN '国际'
+			END AS operator_code,
+			<!-- 适用区域，0：全国，1：国际-->
+			CASE co.area_code
+				WHEN 0 THEN '全国'
+				WHEN 1 THEN '国际'
+			END AS area_code,
+			IFNULL(co.order_number,'-') AS order_number,
+			IFNULL(TRUNCATE(co.order_price, 4),'-') AS order_price,
+			co.client_id,
+			co.agent_id,
+			DATE_FORMAT(co.due_time,'%Y-%m-%d') AS due_time,
+			DATE_FORMAT(co.create_time,'%Y-%m-%d') AS create_time,
+			co.remark
+		FROM
+			t_sms_oem_client_order co
+		<include refid="clientCommon"/>
+		ORDER BY co.create_time DESC, co.unit_price DESC
+	</select>
+
+	
+	
+	
+	
+</mapper> 

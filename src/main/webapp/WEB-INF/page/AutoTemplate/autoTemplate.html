@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信云平台运营系统 - 管理员中心</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+    <link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+    <link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/select2.css}" rel="stylesheet">
+    <style>
+        /* Additional style to fix warning dialog position */
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+
+        .close {
+            opacity: 1;
+        }
+
+        .modal-content {
+            opacity: 1 !important;
+            border: none;
+        }
+
+        .select2 span {
+            display: block !important;
+            margin-top: 0px !important;
+        }
+
+        .select2-container {
+            width: 171px !important;
+        }
+
+        .select2-dropdown {
+            width: 175px !important;
+        }
+
+        .select2-container .select2-selection--single {
+            width: 175px;
+        }
+
+
+    </style>
+</head>
+<body class="gray-bg">
+<div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="tabs-container">
+                <ul class="nav nav-tabs">
+                    <li th:if="${menus.znmb286}" class="active" id="agentTab1"><a>智能模板</a></li>
+                    <li th:if="${menus.tymb}"><a href="/comTemplate/comTemplateQuery">通用模板</a></li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane active" th:if="${menus.znmb286}">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="ibox ">
+                                        <div class="ibox-content">
+                                            <form role="form" class="form-inline" id="mainForm" method="post">
+                                                <div class="row">
+                                                    <div class="form-group col-sm-3">
+                                                        <label for="stateID">审核状态:</label>
+                                                        <select class="form-control" name="state" id="stateID">
+                                                            <option value="">所有状态</option>
+                                                            <option value="0">待审核</option>
+                                                            <option value="1">审核通过</option>
+                                                            <option value="3">审核不通过</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group col-sm-3">
+                                                        <label>模板属性:</label>
+                                                        <select class="form-control" name="smsType" id="smsTypeID">
+                                                            <option value="">全部属性</option>
+                                                            <option value="10">行业</option>
+                                                            <option value="11">会员营销</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group col-sm-3">
+                                                        <label>模板类型:</label>
+                                                        <select class="form-control" name="templateType"
+                                                                id="templateTypeID">
+                                                            <option value="">全部类型</option>
+                                                            <option value="0">固定模板</option>
+                                                            <option value="1">变量模板</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group col-sm-3">
+                                                        <label>审核人:</label>
+                                                        <input type="text" placeholder="审核人" id="adminNameID"
+                                                               class="form-control"
+                                                               name="adminName">
+                                                    </div>
+                                                </div>
+                                                <div class="row" style="margin-top:20px;margin-bottom: 20px;">
+                                                    <div class="form-group col-sm-3">
+                                                        <label>模板ID:</label>
+                                                        <input type="text" placeholder="请输入模板ID" id="templateID"
+                                                               class="form-control"
+                                                               name="templateId">
+                                                    </div>
+                                                    <div class="form-group col-sm-3">
+                                                        <label>签名:</label>
+                                                        <input type="text" placeholder="签名" id="signID"
+                                                               class="form-control"
+                                                               name="sign">
+                                                    </div>
+                                                    <div class="form-group col-sm-3">
+                                                        <label>模板内容:</label>
+                                                        <input type="text" placeholder="模板内容" id="contentID"
+                                                               class="form-control"
+                                                               name="content">
+                                                    </div>
+                                                    <div class="form-group col-sm-3">
+                                                        <label>用户账号:</label>
+                                                        <select name="clientId" id="clientId"
+                                                                class="form-control"></select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-sm-3" style="padding: 0">
+                                                    <label>提交来源:</label>
+                                                    <select class="form-control" name="submitType" id="submitTypeID">
+                                                        <option value="">全部</option>
+                                                        <option value="0">客户提交</option>
+                                                        <option value="1">代理商提交</option>
+                                                        <option value="2">平台提交</option>
+                                                        <option value="3">系统自动提交</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group col-sm-3" style="padding: 0">
+                                                    <label>创建者:</label>
+                                                    <input type="text" placeholder="创建者" id="userNameID"
+                                                           disabled="disabled"
+                                                           class="form-control " name="userName">
+                                                </div>
+                                                <div class="form-group" id="sandbox-container">
+                                                    <div class="form-group pull-right"><span
+                                                            style="font-weight:700">创建时间:</span>
+                                                        <input placeholder="请选择开始时间" class="form-control layer-date"
+                                                               id="start_time_day"
+                                                               name="createStartTime"/>至
+                                                        <input placeholder="请选择结束时间" class="form-control layer-date"
+                                                               id="end_time_day"
+                                                               name="createEndTime"/>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group" style="margin-top: 10px;float: right">
+                                    <span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-danger"
+                                                              onclick="search()">搜索</button></span>
+                                                    <span>&nbsp;&nbsp;<a href="javascript:;"
+                                                                         class="btn btn-sm btn-primary"
+                                                                         onclick="reset()">重置</a></span>
+                                                    <span>&nbsp;&nbsp;<button type="button"
+                                                                              class="btn btn-sm btn-primary"
+                                                                              onclick="add()">添加模板</button></span>
+                                                    <span>&nbsp;&nbsp;<button type="button"
+                                                                              class="btn btn-sm btn-primary"
+                                                                              data-toggle="modal"
+                                                                              data-target="#myModal">批量导入</button></span>
+                                                    <span>&nbsp;&nbsp;<button type="button"
+                                                                              class="btn btn-sm btn-primary"
+                                                                              onclick="exportExcel()">导出报表</button></span>
+                                                </div>
+                                            </form>
+                                        </div>
+                                        <div class="ibox-content">
+                                            <div class="jqGrid_wrapper">
+                                                <table id="table_list"></table>
+                                                <div id="pager_list"></div>
+                                            </div>
+                                            <p>&nbsp;</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 批量添加模板弹出框 -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" style="height: 300px">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="clean()"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">批量添加智能模板</h4>
+            </div>
+            <div class="modal-body" id="formClick">
+                <form class="form-horizontal" method="post" id="importForm">
+                    <input type="file" id="importInput" name="excel" accept=".xls"/>
+                </form>
+                <br class="controls">
+                <span id="msg" style="display:none;"></span>
+                <br><span id="total" style="display:none;"></span></br>
+                <br><span id="success" style="display:none;"></span></br>
+                <br><span id="fall" style="display:none;"></span></br>
+                &nbsp;&nbsp;<span id="tips" style="display:none;">点击<a href='/autoTemplate/exportImportResult'><font
+                    color="green">下载</font></a>导入失败结果列表</span>
+            </div>
+            <div class="modal-footer">
+                <a href="#" class="btn" onclick="downloadExcelTemplate()">下载Excel模板</a>
+                <a href="#" class="btn" data-dismiss="modal" onclick="clean()">关闭</a>
+                <a href="#" class="btn btn-primary" onclick="importExcel(this)">导入</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/auth.js}"></script>
+<script th:src="@{/resources/js/select2.min.js}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/js/jquery.form.js?v=1.0.0}"></script>
+
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var max_export_num = [[${max_export_num}]];
+    var user_Id = [[${userId}]];
+    var start = {
+        elem: "#start_time_day",
+        format: "YYYY-MM-DD",
+        min: halfYearAgo("yyyy-MM-dd"),
+        max: laydate.now(),
+        istoday: true,
+        choose: function (datas) {
+            end.min = datas;
+        }
+    };
+    var end = {
+        elem: "#end_time_day",
+        format: "YYYY-MM-DD",
+        min: halfYearAgo("yyyy-MM-dd"),
+        max: laydate.now(),
+        istoday: true,
+        choose: function (datas) {
+            start.max = datas;
+        }
+    };
+    laydate(start);
+    laydate(end);
+
+    function clean() {
+        $("#msg").hide();
+        $("#tips").hide();
+        $("#success").hide();
+        $("#fall").hide();
+        $("#total").hide();
+        $("#importInput").val("");
+    }
+
+    function search() {
+        $("#table_list").jqGrid('setGridParam', {
+            datatype: 'json',
+            postData: {
+                templateId: $("#templateID").val(),
+                state: $("#stateID").val(),
+                clientId: $("#clientId").val(),
+                smsType: $("#smsTypeID").val(),
+                templateType: $("#templateTypeID").val(),
+                sign: $("#signID").val(),
+                content: $("#contentID").val(),
+                adminName: $("#adminNameID").val(),
+                createStartTime: $("#start_time_day").val(),
+                createEndTime: $("#end_time_day").val(),
+                submitType: $("#submitTypeID").val(),
+                userName: $("#userNameID").val()
+            }, //发送数据
+//            page:1
+        }).trigger("reloadGrid"); //重新载入
+    }
+
+    function reload() {
+        event.preventDefault();
+        $("#table_list").jqGrid('setGridParam', {
+            datatype: 'json',
+            postData: {
+                condition: $("#condition").val(),
+                agentType: $("#agentType").val(),
+                create_time: $("#create_time").val()
+            }, //发送数据
+        }).trigger("reloadGrid"); //重新载入
+    }
+
+
+    $(document).ready(function () {
+        $.jgrid.defaults.styleUI = "Bootstrap";
+        $("#table_list").jqGrid({
+            url: /*[[@{/autoTemplate/autoTemplateQuery}]]*/'',
+            mtype: 'POST',
+            datatype: "json",
+            jsonReader: {
+                root: "entityList",
+                page: "currentPage",
+                total: "totalPage",
+                records: "totalCount"
+            },
+            height: 'auto',
+            rownumbers: true,
+            autowidth: true,
+            shrinkToFit: false,
+            autoScroll: true,
+            rowNum: 20,
+            rowList: [10, 20, 30, 50],
+            colNames: ["模板ID", "用户账号", "模板属性", "模板类型", "模板内容", "创建者ID(隐藏)", "提交来源(隐藏)", "短信签名", "创建者", "创建时间", "审核状态", "原因", "审核人", "更新时间", "操作"],
+            colModel: [
+                {name: "templateId", align: "left", sortable: false, width: '60'},
+                {name: "clientId", align: "left", sortable: false},
+                {
+                    name: "smsType", align: "left", sortable: false, width: '80',
+                    formatter: function (cellvalue, options, rowObject) {
+                        if (rowObject.smsType == 10) {
+                            cellvalue = '行业';
+                        } else if (rowObject.smsType == 11) {
+                            cellvalue = '会员营销';
+                        } else {
+                            cellvalue = '';
+                        }
+                        return cellvalue;
+                    }
+                },
+                {
+                    name: "templateType", align: "left", sortable: false,
+                    formatter: function (cellvalue, options, rowObject) {
+                        if (rowObject.templateType == 0) {
+                            cellvalue = '固定模板';
+                        } else if (rowObject.templateType == 1) {
+                            cellvalue = '变量模板';
+                        }
+                        return cellvalue;
+                    }
+                },
+                {
+                    name: "content", align: "left", sortable: false, width: '200',
+                    formatter: function (cellvalue, options, rowObject) {
+                        var switcher = "<span str='" + rowObject.content + "' class='table-contant'></span>";
+
+                        return switcher;
+                    }
+                },
+                {name: "userId", align: "left", sortable: false, hidden: true},
+                {name: "submitType", align: "left", sortable: false, hidden: true},
+                {name: "sign", align: "left", sortable: false},
+                {name: "userName", align: "left", sortable: false},
+                {
+                    name: "createTime", align: "left", sortable: false,
+                    formatter: function (cellvalue, options, rowObject) {
+                        var time = rowObject.createTime;
+                        if (time != null) {
+                            cellvalue = $.formatDate(new Date(time), 'yyyy-MM-dd HH:mm:ss');
+                            return cellvalue;
+                        } else {
+                            return "";
+                        }
+                    }
+                },
+                {
+                    name: "state", align: "left", sortable: false,
+                    formatter: function (cellvalue, options, rowObject) {
+                        if (rowObject.state == '0') {
+                            cellvalue = '待审核';
+                        } else if (rowObject.state == '1') {
+                            cellvalue = '审核通过';
+                        } else if (rowObject.state == '3') {
+                            cellvalue = '审核不通过';
+                        }
+                        return cellvalue;
+                    }
+                },
+                {name: "remark", align: "left", sortable: false},
+                {name: "adminName", align: "left", sortable: false},
+                {
+                    name: "updateTime", align: "left", sortable: false,
+                    formatter: function (cellvalue, options, rowObject) {
+                        var time = rowObject.updateTime;
+                        if (time != null) {
+                            cellvalue = $.formatDate(new Date(time), 'yyyy-MM-dd HH:mm:ss');
+                            return cellvalue;
+                        } else {
+                            return "";
+                        }
+                    }
+
+                },
+                {
+                    name: "total", index: "total", align: "left", sortable: false, title: false, width: '180',
+                    formatter: function (cellvalue, options, rowObject) {
+                        var clientId = rowObject.clientId;
+                        var templateId = rowObject.templateId;
+                        var smsType = rowObject.smsType;
+                        var sign = rowObject.sign;
+                        var content = rowObject.content;
+                        var templateType = rowObject.templateType;
+                        var submitType = rowObject.submitType;
+                        var state = rowObject.state;
+                        if (rowObject.state == '3' || rowObject.state == '1') {
+                            if (user_Id == rowObject.userId) {
+                                if (submitType == '2') {
+                                    switcher = "<button type='button' class='btn btn-link btn-xs ' onclick=\"edit('" + templateId + "')\" title='编辑'>编辑</button>";
+                                    switcher += "<button type='button' class='btn btn-link btn-xs'  onclick=\"del('" + templateId + "')\" title='删除'>删除</button>";
+                                }
+                            } else {
+                                switcher = "<button type='button' class='btn btn-link btn-xs ' disabled='disabled'  title='编辑'>编辑</button>";
+                                switcher += "<button type='button' class='btn btn-link btn-xs'  disabled='disabled' title='删除'>删除</button>";
+                            }
+                        } else {
+                            switcher = "<button type='button' class='btn btn-link btn-xs ' disabled='disabled'  title='编辑'>编辑</button>";
+                            switcher += "<button type='button' class='btn btn-link btn-xs'  disabled='disabled' title='删除'>删除</button>";
+                        }
+                        return switcher;
+                    }
+                }
+            ],
+            pager: "#pager_list",
+            viewrecords: true,
+            hidegrid: false,
+            gridComplete: function () {
+
+                $(".table-contant").each(function () {
+                    var str = $(this).attr("str");
+                    $(this).text(str);
+                });
+
+            }
+        });
+
+        $(window).bind("resize", function () {
+            var width = $(".jqGrid_wrapper").width();
+            $("#table_list").setGridWidth(width);
+        })
+
+
+        function keyUp(e) {
+            var currKey = 0, e = e || event;
+            currKey = e.keyCode || e.which || e.charCode;
+            var keyName = String.fromCharCode(currKey);
+            if (currKey == 13) {
+                search();
+            }
+        }
+
+        document.onkeyup = keyUp;
+
+
+        //获取用户账号
+        var select2Date;
+        $.ajax({
+            url: '/autoTemplate/autoTemplateAccounts',
+            dataType: 'json',
+            async: false,
+            success: function (res) {
+                for (var i = 0; i < res.length; i++) {
+                    res[i].id = res[i].clientid;
+                    res[i].text = res[i].clientid + "-" + res[i].name;
+                }
+                res.unshift({id: "", text: ""})
+                select2Date = res;
+            }
+        })
+        //初始化select2
+        $("#clientId").select2({
+            data: select2Date
+        })
+
+    });
+
+    //Excel批量添加智能模板
+    function importExcel(btn) {
+        $("#msg").hide();
+        $("#total").hide();
+        $("#tips").hide();
+        $("#success").hide();
+        $("#fall").hide();
+        var index = "";
+        var options = {
+            beforeSubmit: function () {
+                $(btn).attr("disabled", true);
+                index = layer.load(1, {
+                    shade: [0.5, '#fff'] //0.5透明度的白色背景
+                });
+            },
+            success: function (data) {
+                $(btn).attr("disabled", false);
+                layer.close(index);
+                if (data == null) {
+                    $("#msg").text("服务器错误，请联系管理员").show();
+                    return;
+                }
+                if (data.code == 500) {
+                    $("#msg").text(data.msg).show();
+                } else {
+                    $("#success").show();
+                    $("#fall").show();
+                    $("#total").show();
+                    if (data.data.importFall > 0) {
+                        $("#tips").show();
+                    } else {
+                        $("#tips").hide();
+                    }
+                    $("#total").text("本次共提交模板数量：" + data.data.importTotal + "条").show();
+                    $("#success").text("导入成功模板数量：" + data.data.importSuccess + "条").show();
+                    $("#fall").text("导入失败模板数量：" + data.data.importFall + "条").show();
+                }
+
+            },
+            url: "/autoTemplate/addAutoTemplateBatch",
+            type: "post",
+//            async : false,
+            timeout: 20000
+        };
+        if ($("#importInput").val() != '') {
+            $("#importForm").ajaxSubmit(options);
+        } else {
+            layer.msg("请先选择文件", {icon: 2});
+        }
+    }
+
+    function downloadExcelTemplate() {
+        var url = "/autoTemplate/downloadExcelTemplate";
+        jQuery('<form action="' + url + '" method="post"></form>').appendTo('body').submit().remove();
+    }
+
+    function edit(templateId) {
+        layer.open({
+            type: 2,
+            title: '编辑模板',
+            shadeClose: true,
+            shade: 0.8,
+            area: ['700px', '90%'],
+            content: "/autoTemplate/autoTemplateModify?templateId=" + templateId
+        });
+    }
+
+    function del(templateId) {
+        layer.confirm('确认删除模板？', {
+            btn: ['确定', '取消'] //按钮
+        }, function () {
+            $.ajax({
+                url: "/autoTemplate/autoTemplateDel",
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    templateId: templateId
+                },
+                success: function (res) {
+                    if (res.code != 0) {
+                        layer.msg(res.msg, {icon: 2});
+                        return;
+                    }
+                    layer.msg("删除成功", {icon: 1, time: 2000}, function () {
+                        location.reload();
+                    });
+
+                }
+            })
+        });
+    }
+
+    function reset() {
+        $("#mainForm").find("input").val("");
+        $("#mainForm").find("select").val("");
+        $("#clientId").select2("val", "");
+    }
+
+    function add() {
+        layer.open({
+            type: 2,
+            title: '新增模板',
+            shadeClose: true,
+            shade: 0.8,
+            area: ['700px', '90%'],
+            content: "/autoTemplate/autoTemplateAdd"    //iframe的url
+        });
+    }
+
+    function exportExcel() {
+        var totalCount = $("#table_list").jqGrid('getGridParam', 'records');
+        if (totalCount == 0) {
+            layer.alert("共0条记录，导出Excel文件失败");
+            return;
+        }
+        if (totalCount > max_export_num) {
+            layer.msg("导出Excel文件条数大于" + max_export_num + "条", {icon: 2});
+            return;
+        }
+        var msg = "正在生成报表，请稍后...";
+        layer.msg('<div style="color:#506470;font-family: "microsoft yahei","Arial Narrow",HELVETICA;">' + msg + '</div>', {
+            icon: 16,
+            shade: [0.5, '#f5f5f5'],
+            scrollbar: false,
+            offset: 'auto',
+            time: 600000
+        });
+        var options = {
+            url: '/autoTemplate/autoTemplateExport',
+            success: function (result) {
+                layer.closeAll(); //疯狂模式，关闭所有层
+                if (result == null) {
+                    layer.msg("导出错误，请稍后重试...", {icon: 2});
+                } else if (result.success == true) {
+                    var exportFileName = result.data;
+                    var turnForm = document.createElement("form");
+                    document.body.appendChild(turnForm);
+                    turnForm.method = 'post';
+                    turnForm.action = /*[[@{/statistic/downloadExcel}]]*/"";
+                    //创建表单
+                    var newElement = document.createElement("input");
+                    newElement.setAttribute("name", "exportFileName");
+                    newElement.setAttribute("type", "hidden");
+                    newElement.setAttribute("value", exportFileName);
+                    turnForm.appendChild(newElement);
+                    turnForm.submit();
+                } else {
+                    layer.msg(result.msg, {icon: 2});
+                }
+            },
+            complete: function (XMLHttpRequest, status) {
+                ;
+            },
+            type: "post",
+            async: true,
+            timeout: 30000
+        };
+        $("#mainForm").ajaxSubmit(options);
+    }
+
+    /*function exportExcel(){
+        var totalCount = $("#table_list").jqGrid('getGridParam','records');
+        if (totalCount == 0) {
+            layer.alert("共0条记录，导出Excel文件失败");
+            return;
+        }
+        if(totalCount > max_export_num){
+            layer.msg("导出Excel文件条数大于"+max_export_num+"条", {icon: 2});
+            return;
+        }
+        var mainForm = $("#mainForm");
+        var action = mainForm.attr("action");
+        var exporUrl = /!*[[@{/autoTemplate/autoTemplateExport}]]*!/'';
+        mainForm.attr("action", exporUrl).submit();
+        mainForm.attr("action", action);
+    }*/
+
+    $("#submitTypeID").change(function () {
+        var mark = $(this).val();
+        var userNameID = $("#userNameID").val();
+        if (mark == "2" || mark == "0" || mark == "1") {
+            $("#userNameID").attr("disabled", false);
+        } else if (!mark) {
+            $("#userNameID").attr("disabled", true);
+        } else {
+            $("#userNameID").attr("disabled", true);
+        }
+        if (userNameID != '' && (mark == "" || mark == "3")) {
+            $("#userNameID").val("");
+            layer.msg("只有客户提交、代理商提交和平台提交可以搜索创建者！！");
+        }
+    })
+    /*]]>*/
+</script>
+</body>
+</html>

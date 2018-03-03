@@ -1,0 +1,372 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 运营平台财务管理 -->
+<mapper namespace="oemInventory">
+	
+	<sql id="agentCommon">
+		<where>
+			<if test="agent_text != null and agent_text!=''">
+				AND (
+						ai.agent_id LIKE '%${agent_text}%'
+						OR ai.agent_name LIKE '%${agent_text}%'
+						OR ai.mobile LIKE '%${agent_text}%'
+					)
+			</if>
+			<if test="operatorCode != null and operatorCode != '' ">
+				AND ap.operator_code = #{operatorCode}
+			</if>
+			<choose>
+				<when test="product_type != null and product_type != ''">
+					AND ap.product_type = #{product_type}
+					<choose>
+						<when test='product_type == 2'>
+							AND ap.remain_amount &gt; 0
+						</when>
+						<otherwise>
+							AND ap.remain_number &gt; 0
+						</otherwise>
+					</choose>
+				</when>
+				<otherwise>
+					AND ((ap.product_type = 2 &amp;&amp; ap.remain_amount &gt; 0) OR (ap.product_type != 2 &amp;&amp; ap.remain_number &gt; 0))
+				</otherwise>
+			</choose>
+			<if test="start_time_day != null">
+				AND ap.due_time >= STR_TO_DATE(#{start_time_day},'%Y-%m-%d %T')
+			</if>
+			<if test="end_time_day != null">
+				AND ap.due_time <![CDATA[<= STR_TO_DATE(CONCAT(#{end_time_day},' 23:59:59'),'%Y-%m-%d %T') ]]>
+			</if>
+			<if test="agentIds != null and agentIds.size > 0">
+				AND ap.agent_id IN
+				<foreach collection="agentIds" item="item" separator="," open="(" close=")">
+					#{item}
+				</foreach>
+			</if>
+		</where>
+	</sql>
+	<!-- 查询oem代理商库存 -->
+	<select id="queryAgentInventory" resultType="map">
+		SELECT
+			ap.agent_id,
+			ai.agent_name,
+			ai.mobile,
+			ap.product_type,
+			CASE 
+				WHEN ap.product_type = 2 THEN '-'
+				ELSE IFNULL(TRUNCATE(ap.unit_price, 4), 0.0000)
+			END  AS unit_price,
+
+			<!-- 0：行业，1：营销，2：国际，3：验证码，4：通知，7：USSD，8：闪信，9：挂机短信-->
+			CASE ap.product_type
+				WHEN 0 THEN '行业'
+				WHEN 1 THEN '营销'
+				WHEN 2 THEN '国际'
+				WHEN 3 THEN '验证码'
+				WHEN 4 THEN '通知'
+				WHEN 7 THEN 'USSD'
+				WHEN 8 THEN '闪信'
+				WHEN 9 THEN '挂机短信'
+			END AS product_type_name,
+
+			<!-- 对应运营商，0：全网，1：移动，2：联通，3：电信，4：国际-->
+			CASE ap.operator_code
+				WHEN 0 THEN '全网'
+				WHEN 1 THEN '移动'
+				WHEN 2 THEN '联通'
+				WHEN 3 THEN '电信'
+				WHEN 4 THEN '国际'
+			END AS operator_code,
+
+			<!-- 适用区域，0：全国，1：国际-->
+			CASE ap.area_code
+				WHEN 0 THEN '全国'
+				WHEN 1 THEN '国际'
+			END AS area_code,
+
+			CASE 
+				WHEN ap.product_type = 2 THEN CONCAT(IFNULL(TRUNCATE(ap.remain_amount, 4), 0.0000),'元')
+				ELSE CONCAT(ap.remain_number,'条')
+			END AS remain_num,
+			DATE_FORMAT(ap.due_time,'%Y-%m-%d') AS due_time
+		FROM
+			t_sms_oem_agent_pool ap
+		INNER JOIN
+			t_sms_agent_info ai
+		ON ai.agent_id = ap.agent_id
+		<include refid="agentCommon"/>
+		ORDER BY ap.due_time,ap.unit_price DESC
+		${limit}
+	</select>
+	<!-- 查询oem代理商库存 总计-->
+	<select id="agentTotal" resultType="map">
+		SELECT
+			SUM(
+				CASE 
+					WHEN ap.product_type = 2 THEN 0
+					ELSE ap.remain_number
+				END
+			) AS remain_num_t,
+			SUM(
+				CASE 
+					WHEN ap.product_type = 2 THEN IFNULL(TRUNCATE(ap.remain_amount, 4), 0.0000)
+					ELSE 0.0000
+				END
+			) AS remain_amount_y 
+		FROM
+			t_sms_oem_agent_pool ap
+		INNER JOIN
+			t_sms_agent_info ai
+		ON ai.agent_id = ap.agent_id
+		<include refid="agentCommon"/> 
+	</select>
+	<!-- 查询oem代理商库存总记录数 -->
+	<select id="queryAgentInventoryCount" resultType="map">
+		SELECT
+			COUNT(0) AS totalCount
+		FROM
+			t_sms_oem_agent_pool ap
+		INNER JOIN
+			t_sms_agent_info ai
+		ON ai.agent_id = ap.agent_id
+		<include refid="agentCommon"/>
+	</select>
+	<!-- 导出OEM代理商库存信息 -->
+	<select id="exportAgentInventory" resultType="map">
+		SELECT
+			ap.agent_id,
+			ai.agent_name,
+			ai.mobile,
+			ap.product_type,
+			CASE 
+				WHEN ap.product_type = 2 THEN '-'
+				ELSE IFNULL(TRUNCATE(ap.unit_price, 4), 0.0000)
+			END  AS unit_price,
+
+			<!-- 0：行业，1：营销，2：国际，3：验证码，4：通知，7：USSD，8：闪信，9：挂机短信-->
+			CASE ap.product_type
+				WHEN 0 THEN '行业'
+				WHEN 1 THEN '营销'
+				WHEN 2 THEN '国际'
+				WHEN 3 THEN '验证码'
+				WHEN 4 THEN '通知'
+				WHEN 7 THEN 'USSD'
+				WHEN 8 THEN '闪信'
+				WHEN 9 THEN '挂机短信'
+			END AS product_type_name,
+
+			<!-- 对应运营商，0：全网，1：移动，2：联通，3：电信，4：国际-->
+			CASE ap.operator_code
+				WHEN 0 THEN '全网'
+				WHEN 1 THEN '移动'
+				WHEN 2 THEN '联通'
+				WHEN 3 THEN '电信'
+				WHEN 4 THEN '国际'
+			END AS operator_code,
+
+			<!-- 适用区域，0：全国，1：国际-->
+			CASE ap.area_code
+				WHEN 0 THEN '全国'
+				WHEN 1 THEN '国际'
+			END AS area_code,
+
+			CASE
+				WHEN ap.product_type = 2 THEN CONCAT(IFNULL(TRUNCATE(ap.remain_amount, 4), 0.0000),'元')
+				ELSE CONCAT(ap.remain_number,'条')
+			END AS remain_num,
+			DATE_FORMAT(ap.due_time,'%Y-%m-%d') AS due_time
+		FROM
+			t_sms_oem_agent_pool ap
+		INNER JOIN
+			t_sms_agent_info ai
+		ON ai.agent_id = ap.agent_id
+		<include refid="agentCommon"/>
+		ORDER BY ap.due_time,ap.unit_price DESC
+	</select>
+
+	<!-- oem客户库存 -->
+	<sql id="clientCommon">
+		<where>
+			<if test="client_text != null and client_text!=''">
+				AND (
+						cp.client_id LIKE '%${client_text}%'
+						OR a.name LIKE '%${client_text}%'
+						OR a.mobile LIKE '%${client_text}%'
+					)
+			</if>
+			<if test="operatorCode != null and operatorCode != '' ">
+				AND cp.operator_code = #{operatorCode}
+			</if>
+			<choose>
+				<when test="product_type != null and product_type != ''">
+					AND cp.product_type = #{product_type}
+					<choose>
+						<when test='product_type == 2'>
+							AND cp.remain_amount &gt; 0
+						</when>
+						<otherwise>
+							AND cp.remain_number &gt; 0
+						</otherwise>
+					</choose>
+				</when>
+				<otherwise>
+					AND ((cp.product_type = 2 &amp;&amp; cp.remain_amount &gt; 0) OR (cp.product_type != 2 &amp;&amp; cp.remain_number &gt; 0))
+				</otherwise>
+			</choose>
+			<if test="start_time_day != null">
+				AND cp.due_time >= STR_TO_DATE(#{start_time_day},'%Y-%m-%d %T')
+			</if>
+			<if test="end_time_day != null">
+				AND cp.due_time <![CDATA[<= STR_TO_DATE(CONCAT(#{end_time_day},' 23:59:59'),'%Y-%m-%d %T') ]]>
+			</if>
+			<if test="clientids != null and clientids.size > 0">
+				and cp.client_id IN
+				<foreach collection="clientids" item="item" separator="," open="(" close=")">
+					#{item}
+				</foreach>
+			</if>
+		</where>
+	</sql>
+	<!-- 查询oem客户库存 -->
+	<select id="queryClientInventory" resultType="map">
+		SELECT
+			cp.client_id,
+			a.`name`,
+			a.mobile,
+			cp.product_type,
+			CASE 
+				WHEN cp.product_type = 2 THEN '-'
+				ELSE IFNULL(TRUNCATE(cp.unit_price, 4), 0.0000)
+			END  AS unit_price,
+
+			<!-- 0：行业，1：营销，2：国际，3：验证码，4：通知，7：USSD，8：闪信，9：挂机短信-->
+			CASE cp.product_type
+				WHEN 0 THEN '行业'
+				WHEN 1 THEN '营销'
+				WHEN 2 THEN '国际'
+				WHEN 3 THEN '验证码'
+				WHEN 4 THEN '通知'
+				WHEN 7 THEN 'USSD'
+				WHEN 8 THEN '闪信'
+				WHEN 9 THEN '挂机短信'
+			END AS product_type_name,
+			<!-- 对应运营商，0：全网，1：移动，2：联通，3：电信，4：国际-->
+			CASE cp.operator_code
+				WHEN 0 THEN '全网'
+				WHEN 1 THEN '移动'
+				WHEN 2 THEN '联通'
+				WHEN 3 THEN '电信'
+				WHEN 4 THEN '国际'
+			END AS operator_code,
+			<!-- 适用区域，0：全国，1：国际-->
+			CASE cp.area_code
+				WHEN 0 THEN '全国'
+				WHEN 1 THEN '国际'
+			END AS area_code,
+
+			CASE 
+				WHEN cp.product_type = 2 THEN CONCAT(IFNULL(TRUNCATE(cp.remain_amount, 4), 0.0000),'元')
+				ELSE CONCAT(cp.remain_number,'条')
+			END AS remain_num,
+			DATE_FORMAT(cp.due_time,'%Y-%m-%d') AS due_time
+		FROM
+			t_sms_oem_client_pool cp
+		INNER JOIN
+			t_sms_account a
+		ON a.clientid = cp.client_id
+		<include refid="clientCommon"/>
+		ORDER BY cp.due_time, cp.unit_price DESC
+		${limit}
+	</select>
+	
+	<!-- 查询oem客户库存 总计-->
+	<select id="clientTotal" resultType="map">
+		SELECT
+			SUM(
+				CASE 
+					WHEN cp.product_type = 2 THEN 0
+					ELSE cp.remain_number
+				END
+			) AS remain_num_t,
+			SUM(
+				CASE 
+					WHEN cp.product_type = 2 THEN IFNULL(TRUNCATE(cp.remain_amount, 4), 0.0000)
+					ELSE 0
+				END
+			) AS remain_amount_y 
+		FROM
+			t_sms_oem_client_pool cp
+		INNER JOIN
+			t_sms_account a
+		ON a.clientid = cp.client_id
+		<include refid="clientCommon"/>
+	</select>
+	<!-- 查询oem客户库存总记录数 -->
+	<select id="queryClientInventoryCount" resultType="map">
+		SELECT
+			COUNT(0) AS totalCount
+		FROM
+			t_sms_oem_client_pool cp
+		INNER JOIN
+			t_sms_account a
+		ON a.clientid = cp.client_id
+		<include refid="clientCommon"/>
+	</select>
+	<!-- 导出OEM客户库存信息 -->
+	<select id="exportClientInventory" resultType="map">
+		SELECT
+			cp.client_id,
+			a.`name`,
+			a.mobile,
+			cp.product_type,
+			CASE 
+				WHEN cp.product_type = 2 THEN '-'
+				ELSE IFNULL(TRUNCATE(cp.unit_price, 4), 0.0000)
+			END  AS unit_price,
+			<!-- 0：行业，1：营销，2：国际，3：验证码，4：通知，7：USSD，8：闪信，9：挂机短信-->
+			CASE cp.product_type
+				WHEN 0 THEN '行业'
+				WHEN 1 THEN '营销'
+				WHEN 2 THEN '国际'
+				WHEN 3 THEN '验证码'
+				WHEN 4 THEN '通知'
+				WHEN 7 THEN 'USSD'
+				WHEN 8 THEN '闪信'
+				WHEN 9 THEN '挂机短信'
+			END AS product_type_name,
+			<!-- 对应运营商，0：全网，1：移动，2：联通，3：电信，4：国际-->
+			CASE cp.operator_code
+				WHEN 0 THEN '全网'
+				WHEN 1 THEN '移动'
+				WHEN 2 THEN '联通'
+				WHEN 3 THEN '电信'
+				WHEN 4 THEN '国际'
+			END AS operator_code,
+			<!-- 适用区域，0：全国，1：国际-->
+			CASE cp.area_code
+				WHEN 0 THEN '全国'
+				WHEN 1 THEN '国际'
+			END AS area_code,
+
+			CASE 
+				WHEN cp.product_type = 2 THEN CONCAT(IFNULL(TRUNCATE(cp.remain_amount, 4), 0.0000),'元')
+				ELSE CONCAT(cp.remain_number,'条')
+			END AS remain_num,
+			DATE_FORMAT(cp.due_time,'%Y-%m-%d') AS due_time
+		FROM
+			t_sms_oem_client_pool cp
+		INNER JOIN
+			t_sms_account a
+		ON a.clientid = cp.client_id
+		<include refid="clientCommon"/>
+		ORDER BY cp.due_time,cp.unit_price DESC
+	</select>
+	
+	
+	
+	
+	
+	
+</mapper> 

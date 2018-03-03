@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信平台运营系统 - 管理员中心</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet">
+    <!-- jqgrid-->
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+    <link th:href="@{/resources/js/layer/skin/layer.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+    <link th:href="@{/resources/css/structure.css?v=1.0}" rel="stylesheet">
+    <link th:href="@{/resources/css/jstree/style.min.css?v=1.0}" rel="stylesheet">
+    <style>
+        /* Additional style to fix warning dialog position */
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+        .checkbox input[type=checkbox], .checkbox-inline input[type=checkbox], .radio input[type=radio], .radio-inline input[type=radio]{
+            margin-top:0;
+        }
+        .modal-content{
+            opacity: 1 !important;
+            border:none;
+        }
+    </style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox ">
+                <div class="ibox-title">
+                    <h5>组织架构</h5>
+                </div>
+                <div class="ibox-content">
+                    <div class="grid-structure">
+                        <div class="left-menu">
+                            <div id="jstree"></div>
+                        </div>
+                        <div class="right-ctx hide">
+                            <h3><span class="deptName"></span><a href="javascript:;" class="btn btn-primary btn-sm hide js-editnow" style="margin-left:10px;">编辑</a></h3>
+                            <!--<ol class="breadcrumb">-->
+                            <!--<li><a href="javascript:;">云之讯</a></li>-->
+                            <!--</ol>-->
+                            <div class="line"></div>
+                            <div>
+                                <h4>下级部门 <button class="btn btn-primary btn-sm js-addDept" data-toggle="modal" data-target="#addDept">添加子部门</button></h4>
+                                <table class="table table-bordered">
+                                    <thead>
+                                    <tr class="active">
+                                        <th class="col-sm-4">部门</th>
+                                        <th class="col-sm-4">角色组</th>
+                                        <th class="col-sm-4">操作</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="dept-cont">
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div style="margin-top:40px;">
+                                <h4>部门成员 <button class="btn btn-primary btn-sm " data-toggle="modal" data-target="#addUser">添加成员</button>&nbsp;&nbsp;&nbsp;<button class="btn btn-primary btn-sm openSale" data-toggle="modal" data-target="#addSale">添加销售</button></h4>
+                                <table class="table table-bordered">
+                                    <thead>
+                                    <tr class="active">
+                                        <th>姓名</th>
+                                        <th>账号</th>
+                                        <th>联系方式</th>
+                                        <th>角色</th>
+                                        <th style="width:120px;">数据权限</th>
+                                        <th style="width:45px;">状态</th>
+                                        <th style="width:120px;">操作</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="user-cont">
+                                    <!--<tr>-->
+                                    <!--<td>张三</td>-->
+                                    <!--<td>caosiyuan@ucpaas.com</td>-->
+                                    <!--<td>13912344312</td>-->
+                                    <!--<td>运营人员</td>-->
+                                    <!--<td>所在部门及以下部门</td>-->
+                                    <!--<td>正常</td>-->
+                                    <!--<td>-->
+                                    <!--<a href="javascript:;" class="glyphicon glyphicon-pencil" title="编辑" style="margin-right:10px;"></a>-->
+                                    <!--<a href="javascript:;" class="glyphicon glyphicon-cog" title="调整部门" style="margin-right:10px;"></a>-->
+                                    <!--<a href="javascript:;" class="glyphicon glyphicon-ban-circle" title="禁用" style="margin-right:10px;"></a>-->
+                                    <!--<a href="javascript:;" class="glyphicon glyphicon-trash" title="删除"></a>-->
+                                    <!--</td>-->
+                                    <!--</tr>-->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 编辑部门 -->
+<div class="modal fade" id="editNowDept" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" >编辑部门</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">部门名称</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control top-name" placeholder="10个字以内">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">上级部门</label>
+                        <div class="col-sm-10">
+                            <p class="form-control parent-dept"></p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">角色分配</label>
+                        <div class="col-sm-10   grid-role" id="now-rolelist">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary js-savenow">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 添加子部门 -->
+<div class="modal fade" id="addDept" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="">添加子部门</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">部门名称</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control now-departmentName" placeholder="10个字以内">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">上级部门</label>
+                        <div class="col-sm-10">
+                            <p class="form-control top-dept"></p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">角色分配</label>
+                        <div class="col-sm-10 rolelistSale grid-role" id="dept-rolelist">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary js-saveDept">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 编辑部门 -->
+<div class="modal fade" id="editDept" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">编辑子部门</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal">
+                    <input type="hidden" id="deptId">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">部门名称</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control now-departmentName" placeholder="10个字以内">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">上级部门</label>
+                        <div class="col-sm-10">
+                            <p class="form-control top-dept"></p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">角色分配</label>
+                        <div class="col-sm-10  grid-role" id="edit-dept-rolelist">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary js-editDept">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 添加成员 -->
+<div class="modal fade" id="addUser" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">添加成员</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">账号</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control js-key" data-key="email" placeholder="请输入邮箱">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">姓名</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control js-key" placeholder="" data-key="realname">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">手机号码</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control js-key" placeholder="" data-key="mobile">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">登录密码</label>
+                        <div class="col-sm-4">
+                            <input type="password" class="form-control js-key" placeholder="" data-key="password">
+                        </div>
+                        <div class="col-sm-6">
+                            <span>12个字符允许数字与字母</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">数据权限</label>
+                        <div class="col-sm-4">
+                            <select class="form-control role-auth js-key" data-key="dataAuthority">
+                                <option value="0">仅看自己的数据</option>
+                                <option value="1">所在部门及下级部门</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">角色分配</label>
+                        <div class="col-sm-10 rolelist  grid-role" id="user-rolelist">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary js-saveRole" >保存</button>
+                <button type="button" class="btn btn-success js-saveRoleAdd">保存并继续添加</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 添加销售 -->
+<div class="modal fade" id="addSale" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="">添加销售</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">账号</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control js-Sale" data-key="email" placeholder="请输入邮箱">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">姓名</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control js-Sale" placeholder="" data-key="realname">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">手机号码</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control js-Sale" placeholder="" data-key="mobile">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">登录密码</label>
+                        <div class="col-sm-4">
+                            <input type="password" class="form-control js-Sale" placeholder="" data-key="password">
+                        </div>
+                        <div class="col-sm-6">
+                            <span>12个字符允许数字与字母</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">数据权限</label>
+                        <div class="col-sm-4">
+                            <select class="form-control role-auth js-Sale" data-key="dataAuthority">
+                                <option value="0">仅看自己的数据</option>
+                                <option value="1">所在部门及下级部门</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group" style="display: none">
+                        <label class="col-sm-2 control-label">角色分配</label>
+                        <div class="col-sm-10  grid-role" id="add-sale-rolelist">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary js-saveSale" >保存</button>
+                <button type="button" class="btn btn-success js-saveSaleAdd">保存并继续添加</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 编辑成员 -->
+<div class="modal fade" id="editUser" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">编辑成员</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal">
+                    <input type="hidden" id="roleId">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">账号</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control js-key email" data-key="email" placeholder="请输入邮箱">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">姓名</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control js-key realname" placeholder="" data-key="realname">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">手机号码</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control js-key mobile" placeholder="" data-key="mobile">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">登录密码</label>
+                        <div class="col-sm-4">
+                            <input type="password" class="form-control js-key password" placeholder="" data-key="password">
+                        </div>
+                        <div class="col-sm-6">
+                            <span>12个密文字符允许数字与字母</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">数据权限</label>
+                        <div class="col-sm-4">
+                            <select class="form-control role-auth js-key" data-key="dataAuthority">
+                                <option value="0">仅看自己的数据</option>
+                                <option value="1">所在部门及下级部门</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">角色分配</label>
+                        <div class="col-sm-10 rolelist grid-role" id="edit-user-rolelist">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary js-editRole" >保存</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 编辑销售 -->
+<div class="modal fade" id="editSale" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">编辑成员</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal">
+                    <input type="hidden" id="role_Id">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">账号</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control js-key email" data-key="email" placeholder="请输入邮箱">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">姓名</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control js-key realname" placeholder="" data-key="realname">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">手机号码</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control js-key mobile" placeholder="" data-key="mobile">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">登录密码</label>
+                        <div class="col-sm-4">
+                            <input type="password" class="form-control js-key password" placeholder="" data-key="password">
+                        </div>
+                        <div class="col-sm-6">
+                            <span>12个密文字符允许数字与字母</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">数据权限</label>
+                        <div class="col-sm-4">
+                            <select class="form-control role-auth js-key" data-key="dataAuthority">
+                                <option value="0">仅看自己的数据</option>
+                                <option value="1">所在部门及下级部门</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group" style="display: none">
+                        <label class="col-sm-2 control-label">角色分配</label>
+                        <div class="col-sm-10  grid-role" id="edit-sale-rolelist">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary js-editSale" >保存</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- tiaozheng bumen -->
+<div class="modal fade" id="adjust" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">调整部门</h4>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" class="adjust-user">
+                <input type="hidden" class="adjust-dept">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <h5>选择部门</h5>
+                            <div>
+                                <div id="adjust-tree"></div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <h5>已选部门</h5>
+                            <div>
+                                <h5>当前部门:</h5>
+                                <div class="adjust-now"></div>
+                                <h5>角色分配:</h5>
+                                <div id="adjust-role" class="grid-role"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary save-adjust">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script th:src="@{/resources/js/hex_ha_ha_ha_ha_ha.js}"></script>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/jquery.form.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/plugins/validate/jquery.validate.min.js}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/js/jstree.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/template-web.js}"></script>
+<script th:src="@{/resources/js/tree.js?v=1.2.4}"></script>
+<script type="text/html" id="tpl-dept">
+    {{each list}}
+    <tr>
+        <td>{{$value.departmentName}}</td>
+        <td>{{$value.rolesAsStr}}</td>
+        <td>
+            <a href="javascript:;" class="glyphicon glyphicon-pencil dept-edit" title="编辑" style="margin-right:10px;" data-id="{{$value.departmentId}}"></a>
+            <a href="javascript:;" class="glyphicon glyphicon-trash dept-del" title="删除" data-id="{{$value.departmentId}}" data-name="{{$value.departmentName}}" ></a>
+        </td>
+    </tr>
+    {{/each}}
+</script>
+<script type="text/html" id="tpl-role">
+    {{each list}}
+    <tr>
+        <td>{{$value.realname}}</td>
+        <td>{{$value.email}}</td>
+        <td>{{$value.mobile}}</td>
+        <td>{{$value.rolesAsStr}}</td>
+        <td>{{$value.dataAuthorityDesc}}</td>
+        <td>{{$value.statusDesc}}</td>
+        <td>
+            {{if $value.rolesAsStr.indexOf("销售人员") != -1 && $value.roles.length >1}}
+            {{else}}
+            <a href="javascript:;" class="glyphicon glyphicon-pencil role-edit" title="编辑" style="margin-right:10px;" data-id="{{$value.id}}" data-role="{{$value.rolesAsStr}}"></a>
+            {{/if}}
+            <a href="javascript:;" class="glyphicon glyphicon-cog role-dept" title="调整部门" style="margin-right:10px;" data-id="{{$value.id}}"></a>
+            {{if $value.status == 1}}
+            <a href="javascript:;" class="glyphicon glyphicon-ban-circle role-no" title="禁用" style="margin-right:10px;" data-id="{{$value.id}}" data-name="{{$value.realname}}" data-role="{{$value.rolesAsStr}}"></a>
+            {{else}}
+            <a href="javascript:;" class="glyphicon glyphicon-ok-circle role-start" title="启用" style="margin-right:10px" data-id="{{$value.id}}" data-name="{{$value.realname}}"></a>
+            {{/if}}
+            {{if $value.rolesAsStr.indexOf("销售人员") != -1 }}
+            <a href="javascript:;" class="glyphicon glyphicon-user" title="客户转交" onclick="transferCustomer({{$value.id}})"></a>
+            {{/if}}
+        </td>
+    </tr>
+    {{/each}}
+</script>
+<script type="text/html" id="tpl-rolelist">
+    <label class="checkbox-inline ">
+        <input type="checkbox" value="" class="js-checkall"> 全选
+    </label>
+    {{each list}}
+    {{if $value.roleName != "销售人员"}}
+    {{if $value.roleName != "商务人员"}}
+    <label class="checkbox-inline" >
+        <input type="checkbox" value="{{$value.id}}" class="js-checkbox"> {{$value.roleName}}
+    </label>
+    {{else}}
+    <label class="checkbox-inline isBusiness" >
+        <input type="checkbox" value="{{$value.id}}" class="js-checkbox isBusiness" > {{$value.roleName}}
+    </label>
+    {{/if}}
+    {{else}}
+    {{/if}}
+    {{/each}}
+</script>
+<script type="text/html" id="tpl-rolelist-hassale">
+    <label class="checkbox-inline ">
+        <input type="checkbox" value="" class="js-checkall"> 全选
+    </label>
+    {{each list}}
+    <label class="checkbox-inline" >
+        <input type="checkbox" value="{{$value.id}}" class="js-checkbox "> {{$value.roleName}}
+    </label>
+    {{/each}}
+</script>
+<script type="text/html" id="tpl-rolelist-onlysale">
+    {{each list}}
+    {{if $value.roleName == "销售人员"}}
+    <label class="checkbox-inline" >
+        <input type="checkbox" value="{{$value.id}}" class="js-checkbox" checked>
+    </label>
+    {{/if}}
+    {{/each}}
+</script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    $(function () {
+        //重置宽度
+        var width = $(".grid-structure").width() -300;
+        $(".right-ctx").width(width);
+    })
+    function transferCustomer(userId) {
+        var url = /*[[@{/admin/transferCustomerPage}]]*/;
+        layer.open({
+            type: 2,
+            title: ['客户转交', 'font-size:20px;font-weight: 900'],
+            closeBtn: 2,
+            area: ['380px', '300px'],
+            fix: false, //不固定
+            content: url+"?oldUserId="+userId
+        });
+    }
+    /*]]>*/
+</script>
+</body>
+</html>

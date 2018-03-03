@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信云平台运营系统 </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+    <link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+    <link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+    <style>
+        /* Additional style to fix warning dialog position */
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+    </style>
+</head>
+<body class="gray-bg">
+<div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="tabs-container">
+                <ul class="nav nav-tabs">
+                    <li class="" id="agentTab" th:if="${menus.dlszzsh}">
+                        <a href="/opsAudit/agent/query" id="tab-1">客户资质审核</a>
+                    </li>
+                    <li class="active" th:if="${menus.khzzsh}">
+                        <a data-toggle="tab" href="#tab-2" aria-expanded="true">子账户资质审核</a>
+                    </li>
+                    <li class="" th:if="${menus.dxmbsh}">
+                        <a href="/opsAudit/smsTemplate/query" id="tab-3">短信模板审核</a>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane active" th:if="${menus.khzzsh}">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="ibox ">
+                                        <div class="ibox-content">
+                                            <form role="form" class="form-inline" id="mainForm">
+                                                <div class="form-group">
+                                                    <!-- <label for="example1" class="sr-only">用户名</label> -->
+                                                    <input type="text" placeholder="子账户ID/子账户名称/手机/公司" id="condition"
+                                                           class="form-control">
+                                                </div>
+                                                <!-- 时间选择 -->
+                                                <div class="form-group" id="sandbox-container" style="margin-left:2.5%">
+                                                    <div class="form-group pull-right">
+                                                        <input placeholder="开始时间" class="form-control layer-date"
+                                                               id="start_time"/>至
+                                                        <input placeholder="结束时间" class="form-control layer-date"
+                                                               id="end_time"/>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="oauth_status">审核状态:</label>
+                                                    <select id="oauth_status" class="form-control">
+                                                        <option value="-1">所有</option>
+                                                        <option value="2" selected="selected">待审核</option>
+                                                        <option value="3">审核通过</option>
+                                                        <option value="4">审核不通过</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                    <span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-danger"
+                                                              onclick="search()">搜索</button></span>
+                                                </div>
+                                            </form>
+                                        </div>
+
+                                        <div class="ibox-content">
+                                            <div class="jqGrid_wrapper">
+                                                <table id="table_list"></table>
+                                                <div id="pager_list"></div>
+                                            </div>
+                                            <p>&nbsp;</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var start = {
+        elem: "#start_time",
+        format: "YYYY-MM-DD hh:mm:ss",
+        istime: true,
+        min: halfYearAgo("yyyy-MM-dd hh:mm:ss"),
+        max: laydate.now(),
+        istoday: true,
+        choose: function (datas) {
+            end.min = datas;
+        }
+    };
+    var end = {
+        elem: "#end_time",
+        format: "YYYY-MM-DD hh:mm:ss",
+        istime: true,
+        min: halfYearAgo("yyyy-MM-dd hh:mm:ss"),
+        max: laydate.now(),
+        istoday: true,
+        choose: function (datas) {
+            start.max = datas;
+        }
+    };
+    laydate(start);
+    laydate(end);
+
+    function search() {
+
+        $("#table_list").jqGrid('setGridParam', {
+            datatype: 'json',
+            postData: {
+                condition: $("#condition").val(),
+                start_time: $("#start_time").val(),
+                end_time: $("#end_time").val(),
+                oauth_status: $("#oauth_status").val()
+            }, //发送数据
+//            page:1
+        }).trigger("reloadGrid"); //重新载入
+    }
+
+
+    $(document).ready(function () {
+        $.jgrid.defaults.styleUI = "Bootstrap";
+        $("#table_list").jqGrid({
+            url:/*[[@{/opsAudit/customer/list}]]*/,
+            mtype: 'POST',
+            datatype: "json",
+            postData: {
+                condition: $("#condition").val(),
+                start_time: $("#start_time").val(),
+                end_time: $("#end_time").val(),
+                oauth_status: $("#oauth_status").val()
+            },
+            jsonReader: {
+                root: "list",
+                page: "currentPage",
+                total: "totalPage",
+                records: "totalCount"
+            },
+            height: 'auto',
+            rownumbers: true,
+            autowidth: true,
+            shrinkToFit: false,
+            autoScroll: true,
+            rowNum: 20,
+            rowList: [10, 20, 30, 50],
+            colNames: ["子账户ID", "子账户名称", "手机号码", "个人/公司名称", "认证状态(隐藏)", "证件类型(隐藏)", "认证状态", "提交时间", "操作"],
+            colModel: [
+                {name: "client_id", align: "left", sortable: false},
+                {name: "client_name", align: "left", sortable: false},
+                {name: "mobile", align: "left", sortable: false},
+                {name: "realname", align: "left", sortable: false},
+                {name: "oauth_status", align: "left", sortable: false, hidden: true},
+                {name: "oauth_type", align: "left", sortable: false, hidden: true},
+                {name: "oauth_status_name", align: "left", sortable: false},
+                {name: "submit_time", align: "left", sortable: false},
+                {
+                    name: "total", index: "total", align: "left", sortable: false, title: false,
+                    formatter: function (cellvalue, options, rowObject) {
+
+                        var clientId = rowObject.client_id;
+                        var status = rowObject.oauth_status;
+                        var oauthType = rowObject.oauth_type;
+                        var switcher = '';
+                        //2: 待审核
+                        switcher = "";
+                        if (status == 2) {
+                            switcher += "<button type='button' class='btn btn-link btn-xs'  onclick=\"view('" + clientId + "')\" title='审核'>审核</button>";
+                        }
+                        else {
+                            switcher += "<button type='button' class='btn btn-link btn-xs ' onclick=\"view('" + clientId + "')\" title='查看'>查看</button>";
+                        }
+                        return switcher;
+                    }
+                }
+            ],
+            pager: "#pager_list",
+            viewrecords: true,
+            hidegrid: false
+        });
+
+        $(window).bind("resize", function () {
+            var width = $(".jqGrid_wrapper").width();
+            $("#table_list").setGridWidth(width);
+        })
+
+
+        function keyUp(e) {
+            var currKey = 0, e = e || event;
+            currKey = e.keyCode || e.which || e.charCode;
+            var keyName = String.fromCharCode(currKey);
+            if (currKey == 13) {
+                search();
+            }
+        }
+
+        document.onkeyup = keyUp;
+
+    });
+
+
+    function view(clientId) {
+        var viewUrl = /*[[@{/opsAudit/customer/view}]]*/;
+        window.location.href = viewUrl + "?clientId=" + clientId;
+    }
+
+
+    /*]]>*/
+</script>
+</body>
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+	  lang="zh-cn">
+<head>
+	<meta charset="UTF-8"/>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <title>登陆页面 — 云之迅短信运营系统</title>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link rel="shortcut icon" th:href="@{/resources/img/favicon.ico}" type="image/x-icon">
+    <link rel="stylesheet" th:href="@{/resources/css/bootstrap.min.css}"/>
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet">
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/style.min.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/login.min.css}" rel="stylesheet">
+    <!--[if lt IE 9]>
+    <meta http-equiv="refresh" content="0;ie.html" />
+    <![endif]-->
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        if(window.top!==window.self){window.top.location=window.location};
+        /*]]>*/
+    </script>
+</head>
+
+<body class="signin">
+    <div th:replace="stat :: statCode"></div>
+    <div class="signinpanel">
+        <div class="row">
+            <div class="col-sm-7">
+                <div class="signin-info">
+                    <div class="logopanel m-b">
+                        <h1><strong>[ 云之讯短信平台 ]</strong></h1>
+                    </div>
+                    <div class="m-b"></div>
+                    <h4>欢迎使用 <strong>短信平台运营系统</strong></h4>
+                    <ul class="m-b">
+                        <!--<li><i class="fa fa-arrow-circle-o-right m-r-xs"></i> 优势一</li>-->
+                        <!--<li><i class="fa fa-arrow-circle-o-right m-r-xs"></i> 优势二</li>-->
+                        <!--<li><i class="fa fa-arrow-circle-o-right m-r-xs"></i> 优势三</li>-->
+                        <!--<li><i class="fa fa-arrow-circle-o-right m-r-xs"></i> 优势四</li>-->
+                        <!--<li><i class="fa fa-arrow-circle-o-right m-r-xs"></i> 优势五</li>-->
+                    </ul>
+                    <br/><br/><br/><br/>
+                    <h3 class="">
+                    <!--<h3 class="text-center">-->
+                        <strong>
+                        <a href="http://sms.ucpaas.com" style="color: #1ab394;" onmouseout="this.style.color='#1ab394'" onmouseover="this.style.color='#82d8c7'" target="_blank" >
+                            <i class="glyphicon glyphicon-cloud m-r-lg"></i>前往官网</a>
+                            <!--<i class=" fa fa-soundcloud"></i>&nbsp;去云端看看</a>-->
+                    </strong>
+                    </h3>
+
+                </div>
+            </div>
+            <div class="col-sm-5">
+                <form method="post" id="login-form" action="#" >
+                    <h4 class="no-margins">登录：</h4>
+                    <p class="m-t-md">登录到短信平台运营系统</p>
+                    <input type="text" class="form-control uname" placeholder="用户名" id="username" required="">
+                    <input type="password" class="form-control pword m-b" placeholder="密码" id="password" required="">
+                    <label id="login-error" class="error"></label>
+                    <!--<a href="#">忘记密码了？</a>-->
+                    <button type="submit" onclick="login(this)" id="btn-login" class="btn btn-primary block full-width m-b">登 录</button>
+                    <!--<button type="button" onclick="login1()" id="btn-login" class="btn btn-primary block full-width m-b">登 录</button>-->
+                </form>
+            </div>
+        </div>
+        <div class="signup-footer">
+            <div class="pull-left">
+                &copy;  深圳市云之讯网络技术有限公司. All Rights Reserved 粤B2-20130213
+            </div>
+        </div>
+    </div>
+    <script th:src="@{/resources/js/hex_ha_ha_ha_ha_ha.js}"></script>
+    <script th:src="@{/resources/js/jquery.min.js}"></script>
+    <script th:src="@{/resources/js/jquery.form.js}"></script>
+    <script th:src="@{/resources/js/plugins/layer/layer.min.js}"></script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+
+//        function login1() {
+//            layer.open({
+//                type: 2,
+//                title: false,
+//                area: ['600px', '500px'],
+//                offset: '120px',
+//                fixed: true, //固定
+//                maxmin: false,
+//                loading: 1,
+//                closeBtn: 0,
+//                content: 'http://localhost:8086/index/lockscreen'
+//            });
+//        }
+        
+        function login(btn){
+            var username = $.trim($("#username").val());
+            var password = $.trim($("#password").val());
+            $("#login-error").text("");
+            var options = {
+                beforeSubmit : function() {
+                    $(btn).attr("disabled", true);
+                },
+                data:{
+                    password:hex_ha_ha_ha_ha_ha(password),
+                    username:username
+                },
+                success : function(data) {
+                    $(btn).attr("disabled", false);
+
+                    if(data == null){
+                        $("#login-error").text("请求超时");
+                        return;
+                    }
+
+                    if(data.success){ // 登录成功
+                        window.location.href=/*[[@{/index}]]*/;
+                    }else{
+                        $("#login-error").text(data.msg);
+                    }
+
+                },
+                complete : function(XMLHttpRequest,status){
+
+
+                },
+                url : /*[[@{/login}]]*/,
+                type : "post",
+                timeout:30000
+            };
+            $("#login-form").ajaxForm(options);
+        }
+        function keyUp(e) {
+            var currKey=0,e=e||event;
+            currKey=e.keyCode||e.which||e.charCode;
+            var keyName = String.fromCharCode(currKey);
+            if (currKey == 13){
+                $("#btn-login").click();
+            }
+        }
+        document.onkeyup = keyUp;
+
+
+        /*]]>*/
+    </script>
+
+</body>
+
+</html>

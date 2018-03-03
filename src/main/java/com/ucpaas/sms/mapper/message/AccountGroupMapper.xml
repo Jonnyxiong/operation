@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ucpaas.sms.mapper.message.AccountGroupMapper">
+
+    <sql id="BASE_COLUMN_LIST">
+        account_gid as "accountGid",
+        account_gname as "accountGname",
+        type,
+        state,
+        remarks,
+        create_id as "createId",
+        create_time as "createTime",
+        update_time as "updateTime"
+    </sql>
+
+    <insert id="insert" parameterType="AccountGroup" useGeneratedKeys="true" keyProperty="accountGid">
+        INSERT INTO t_sms_account_group
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="accountGname != null">
+                account_gname,
+            </if>
+            <if test="type != null">
+                type,
+            </if>
+            <if test="state != null">
+                state,
+            </if>
+            <if test="remarks != null">
+                remarks,
+            </if>
+            <if test="createId != null">
+                create_id,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+            <if test="updateTime != null">
+                update_time
+            </if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            <if test="accountGname != null and accountGname != ''">
+                #{accountGname},
+            </if>
+            <if test="type != null">
+                #{type},
+            </if>
+            <if test="state != null">
+                #{state},
+            </if>
+            <if test="remarks != null and remarks != ''">
+                #{remarks},
+            </if>
+            <if test="createId != null">
+                #{createId},
+            </if>
+            <if test="createTime != null">
+                #{createTime},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime}
+            </if>
+        </trim>
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List">
+        INSERT INTO t_sms_account_group (
+            account_gname,
+            type,
+            state,
+            remarks,
+            create_id,
+            create_time,
+            update_time
+        )VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+        (
+            #{item.accountGname},
+            #{item.type},
+            #{item.state},
+            #{item.remarks},
+            #{item.createId},
+            #{item.createTime},
+            #{item.updateTime}
+        )
+        </foreach>
+    </insert>
+
+    <update id="delete">
+        UPDATE t_sms_account_group SET
+            state = 0
+        WHERE account_gid = #{accountGid}
+    </update>
+
+    <update id="update">
+        UPDATE t_sms_account_group
+        SET
+            account_gname = #{accountGname},
+            type          = #{type},
+            state         = #{state},
+            remarks       = #{remarks},
+            update_time   = #{updateTime}
+        WHERE
+            account_gid = #{accountGid}
+    </update>
+
+    <update id="updateSelective">
+        UPDATE t_sms_account_group
+        <set>
+            <if test="accountGname != null and accountGname != ''">
+                account_gname = #{accountGname},
+            </if>
+            <if test="type != null">
+                type = #{type},
+            </if>
+            <if test="state != null">
+                state = #{state},
+            </if>
+            <if test="remarks != null and remarks != ''">
+                remarks = #{remarks},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime}
+            </if>
+        </set>
+        WHERE
+        account_gid = #{accountGid}
+    </update>
+
+    <select id="getByAccountGid" resultType="AccountGroup">
+        SELECT
+        <include refid="BASE_COLUMN_LIST"/>
+        FROM t_sms_account_group
+        WHERE
+        account_gid = #{accountGid}
+    </select>
+
+    <select id="queryList" resultType="AccountGroup">
+        SELECT
+        <include refid="BASE_COLUMN_LIST"/>
+        FROM t_sms_account_group
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            state = 1
+            <if test="params.accountGid != null">
+                and account_gid = #{params.accountGid}
+            </if>
+            <if test="params.accountGname != null and params.accountGname != ''">
+                and (
+                    account_gname like CONCAT('%',#{params.accountGname},'%')
+                    or account_gid in (select account_gid from t_sms_accountgr_ref_account where clientid like CONCAT('%',#{params.accountGname},'%'))
+                )
+            </if>
+            <if test="params.type != null">
+                and type = #{params.type}
+            </if>
+            <if test="params.state != null">
+                and state = #{params.state}
+            </if>
+            <if test="params.remarks != null and params.remarks != ''">
+                and remarks = #{params.remarks}
+            </if>
+            <if test="params.createId != null">
+                and create_id = #{params.createId}
+            </if>
+            <if test="params.createTime != null">
+                and create_time = #{params.createTime}
+            </if>
+            <if test="params.updateTime != null">
+                and update_time = #{params.updateTime}
+            </if>
+        </trim>
+        ORDER BY create_time desc
+    </select>
+
+    <select id="isExistGname" resultType="int">
+        SELECT COUNT(0)
+        FROM t_sms_account_group
+        WHERE
+        1 = 1
+        <if test="accountGid != null">
+            <![CDATA[
+                and account_gid != #{accountGid}
+            ]]>
+        </if>
+        <if test="accountGname != null and accountGname != ''">
+            and account_gname = #{accountGname}
+        </if>
+    </select>
+
+    <select id="count" resultType="int">
+        SELECT COUNT(0)
+        FROM t_sms_account_group
+        WHERE
+        1 = 1
+        <if test="accountGid != null">
+            and account_gid = #{accountGid}
+        </if>
+        <if test="accountGname != null and accountGname != ''">
+            and account_gname = #{accountGname}
+        </if>
+        <if test="type != null">
+            and type = #{type}
+        </if>
+        <if test="state != null">
+            and state = #{state}
+        </if>
+        <if test="remarks != null and remarks != ''">
+            and remarks = #{remarks}
+        </if>
+        <if test="createId != null">
+            and create_id = #{createId}
+        </if>
+        <if test="createTime != null">
+            and create_time = #{createTime}
+        </if>
+    </select>
+
+    <select id="getClientIdsByGroupId" resultType="string">
+        SELECT clientid FROM t_sms_accountgr_ref_account WHERE account_gid = #{accountGid}
+    </select>
+
+    <select id="getClientInfoByGroupId" resultType="Account">
+        SELECT b.clientid as "clientid", b.`name` as "name"
+        FROM t_sms_accountgr_ref_account a
+            JOIN t_sms_account b on b.clientid = a.clientid
+        WHERE a.account_gid = #{accountGid}
+    </select>
+
+    <!-- 添加用户和用户组的关联表数据 -->
+    <insert id="insertAccountAssociationAccountGroup">
+        INSERT INTO t_sms_accountgr_ref_account(account_gid, clientid, update_time)
+        <foreach collection="clients" item="account" separator=" union all ">
+            SELECT #{accountGid}, #{account.clientid}, #{createTime} FROM DUAL
+        </foreach>
+    </insert>
+
+    <!-- 删除用户和用户组的关联表数据 -->
+    <delete id="deleteAccountAssociationAccountGroup">
+        DELETE FROM t_sms_accountgr_ref_account WHERE account_gid = #{accountGid}
+        <if test="clients != null and clients.size != 0">
+            and clientid in
+            <foreach collection="clients" item="item" open="(" close=")" separator=",">
+                #{item.clientid}
+            </foreach>
+        </if>
+    </delete>
+
+    <!-- 根据clientid获取客户组信息,如果没有无则使用t_sms_account表中部分信息代替-->
+    <select id="getByClientId" parameterType="string" resultType="map">
+        SELECT
+            acc.clientid,
+            acc.`name` 'clientName',
+            acc.`realname` 'realname',
+            acc.createtime 'clientCreateTime',
+            ag.account_gname 'accountGname',
+            ag.account_gid
+        FROM
+          t_sms_account acc
+        LEFT JOIN t_sms_accountgr_ref_account arg  ON arg.clientid = acc.clientid
+        LEFT JOIN t_sms_account_group ag ON arg.account_gid = ag.account_gid
+        WHERE
+          acc.clientid = #{clientid}
+    </select>
+
+
+
+</mapper>
+

@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信平台运营系统 - 管理员中心</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+    <!--<link href="../../../resources/css/plugins/iCheck/skins/square/green.css" th:href="@{/resources/css/plugins/iCheck/skins/square/green.css}" rel="stylesheet">-->
+    <link th:href="@{/resources/css/plugins/iCheck/custom.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+    <style>
+        /* Additional style to fix warning dialog position */
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+    </style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox ">
+                <div class="ibox-title">
+                    <h5>角色管理 - 添加角色</h5>
+                <div class="pull-right tooltip-demo">
+                    <a class="btn btn-danger btn-sm" data-toggle="tooltip" data-placement="top" title="返回" onclick="javascript:history.back(-1);"><i class="fa fa-reply"></i>&nbsp;返回</a>
+                </div>
+                </div>
+                <div class="ibox-content">
+                    <form class="form-horizontal m-t">
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">角色名称：</label>
+                            <div class="col-sm-8">
+                                <input id="roleName" name="roleName" type="text" class="form-control" required aria-required="true" th:value="${roleName}"/>
+                                <label id="name-error" class="error"></label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Web应用系统：</label>
+                            <div class="col-sm-8">
+                                <select class="form-control" id="webId" name="webId" >
+                                    <option value="3" th:selected="(${webId} == 3)">运营平台</option>
+			                  		<!--<option value="2" th:selected="(${webId} == 2)">代理商平台</option>
+			                  		<option value="4" th:selected="(${webId} == 4)">OEM代理商平台</option>-->
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="ibox float-e-margins">
+                                <div class="ibox-content">
+                                    <form method="post" class="form-horizontal" id="menu-form">
+                                        <div class="form-group" >
+                                            <div class="col-lg-offset-2  col-sm-8" >
+                                                <!--<div  th:each="menu:${menus}">-->
+                                                <div class="checkbox i-checks grid-checkbox level1-box" th:each="menu:${menus}" th:if="${menu.level == 1}">
+                                                    <label class="col-sm-4 control-label text-navy ">
+                                                        <span th:text="${menu.menuName}"></span>&nbsp;
+                                                        <input type="checkbox" th:value="${menu.menuId}" class="level1" th:id="${menu.menuId}" name="menuId"> <i></i>
+                                                    </label>
+                                                    <div class="row ">
+                                                        <div class="level2-box col-sm-offset-4 col-sm-7" th:each="m:${menus}" th:if="${m.parentId} == ${menu.menuId}">
+                                                            <!--<div th:if="${m.parentId} == ${menu.menuId}">-->
+                                                            <label class="checkbox i-checks " >
+                                                                <input type="checkbox" th:value="${m.menuId}" class="level2" th:id="${m.menuId}" name="menuId"/>&nbsp;
+                                                                <span th:text="${m.menuName}"></span>
+                                                            </label>
+                                                            <div class="row ">
+                                                                <div class="col-sm-offset-2 col-sm-5 level3-box" th:each="f:${menus}" th:if="${f.parentId} == ${m.menuId}">
+                                                                    <label class="checkbox-inline i-checks checkbox" >
+                                                                        <input type="checkbox" class="f-level1 level3" th:value="${f.menuId}"  th:id="${f.menuId}" name="menuId">
+                                                                        <span th:text="${f.menuName}"></span>
+                                                                    </label>
+                                                                    <div class="row ">
+                                                                        <div class="col-sm-offset-2 col-sm-10">
+                                                                            <label class="checkbox-inline i-checks level4-box" th:each="k:${menus}" th:if="${k.parentId} == ${f.menuId}">
+                                                                                <input type="checkbox" class="f-level1 level4" th:value="${k.menuId}"  th:id="${k.menuId}" name="menuId">
+                                                                                <span th:text="${k.menuName}"></span>
+                                                                            </label>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="hr-line-dashed"></div>
+                                                            <!--</div>-->
+                                                        </div>
+                                                    </div>
+                                                    <div class="hr-line-solid"></div>
+                                                </div>
+                                                <!--</div>-->
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-sm-4 col-sm-offset-2">
+                                                <button class="btn btn-primary btn-sm m-r-md" type="button" onclick="save(this)">保 存</button>
+                                                <button class="btn btn-white btn-sm" type="button" onclick="javascript:history.back(-1);">取 消</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                    <p>&nbsp;</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/iCheck/icheck.min.js}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+
+<script th:src="@{/resources/js/jquery.form.js}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    $(document).ready(function(){$(".i-checks").iCheck({checkboxClass:"icheckbox_square-green",radioClass:"iradio_square-green",})});
+//    $(document).ready(function(){ $('.i-checks').iCheck({ checkboxClass: 'icheckbox_square-green',  radioClass: 'iradio_square-green',  increaseArea: '-20%' /*optional*/}); });
+    $(function(){
+
+        $(".level1").on("ifClicked",function () {
+
+            var level2s = $(this).closest(".level1-box").find(".level2:checked").size();
+            if(level2s == 0){
+                $(this).closest(".checkbox").find(".level2").iCheck('check');
+            }
+        });
+        $(".level1").on("ifUnchecked",function () {
+            $(this).closest(".checkbox").find(".level2").iCheck('uncheck');
+        });
+
+        $(".level2").on("ifChecked",function () {
+            $(this).closest(".row").siblings("label").find(".level1").iCheck('check');
+
+            var level3 = $(this).closest(".checkbox").siblings(".row").find(".level3:checked").size();
+            if(level3 == 0){
+                $(this).closest(".level2-box").find(".level3").iCheck('check');
+            }
+        });
+
+        $(".level2").on("ifUnchecked",function () {
+            $(this).closest(".checkbox").siblings(".row").find(".level3").iCheck('uncheck');
+            var level2s =  $(this).closest(".checkbox").parent().siblings().find(".level2:checked").size();
+
+            if(level2s == 0) {
+                $(this).closest(".row").siblings("label").find(".level1").iCheck('uncheck');
+            }
+
+
+        });
+
+        $(".level3").on("ifChecked",function () {
+            $(this).closest(".level2-box").find(".level2").iCheck('check');
+
+            var level4 = $(this).closest(".checkbox").siblings(".row").find(".level4:checked").size();
+            if(level4 == 0){
+                $(this).closest(".level3-box").find(".level4").iCheck('check');
+            }
+        });
+        $(".level3").on("ifUnchecked",function () {
+            $(this).closest(".checkbox").siblings(".row").find(".level4").iCheck('uncheck');
+
+            var level3s =  $(this).closest(".row").find(".level3:checked").size();
+            if(level3s == 0) {
+                $(this).closest(".level2-box").find(".level2").iCheck('uncheck');
+            }
+        });
+
+        $(".level4").on("ifChecked",function () {
+            $(this).closest(".level3-box").find(".level3").iCheck('check');
+        });
+        $(".level4").on("ifUnchecked",function () {
+            var level4s =  $(this).closest(".row").find(".level4:checked").size();
+            if(level4s == 0) {
+                $(this).closest(".level3-box").find(".level3").iCheck('uncheck');
+            }
+        });
+        
+        $("#webId").change(function(){
+        	var web_id = $("#webId").val();
+        	
+        	if(web_id == ''){
+        		$('#web_id-error').html("请选择web应用");
+        		$('#web_id-error').show();
+        	}else{
+        		
+//         		$('#web_id-error').hide();
+        		//重新请求页面
+        		var addUrl = [[@{/authority/add}]];
+        		var role_name = $("#roleName").val();
+        		location.href = addUrl+"?roleName=" + encodeURI(encodeURI(role_name))+"&webId="+web_id;
+        	}
+        });
+    });
+
+    function checkName(){
+        $("#name-error").text("");
+        var name = $("#roleName").val();
+        if(name.trim().length > 0) return true;
+        else{
+            $("#name-error").text("角色名称不能为空");
+            return false;
+        }
+
+
+
+
+    }
+
+    function save(btn){
+        if(! checkName()) return;
+
+        var name = $("#roleName").val();
+        if(name.trim() == '销售人员'){
+            $("#name-error").text("角色名称不能为 ‘销售人员’");
+            return;
+        }
+
+        swal({
+            title: "您确定要添加角色吗？",
+            text: "",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "保存",
+            cancelButtonText: "让我再考虑一下…",
+            closeOnConfirm: false
+        }, function () {
+            var options = {
+                beforeSubmit : function() {
+                    $(btn).attr("disabled", true);
+                },
+                data:{
+                    webId:$("#webId").val(),
+                    roleName:$("#roleName").val()
+                },
+                success : function(data) {
+                    $(btn).attr("disabled", false);
+
+                    if(data == null){
+                        swal("添加失败！", "系统错误，请稍后再试！", "error")
+                    }else if(data.success == true){
+                        swal("添加成功！", "信息已保存！", "success");
+                        $(".confirm").click(function (){
+                            window.location.href = /*[[@{/authority/query}]]*/'';
+                        });
+                    }else{
+                        swal("添加失败！", data.msg, "error")
+                    }
+
+                },
+                url : /*[[@{/authority/add}]]*/,
+                type : "post",
+                timeout:30000
+            };
+            $("#menu-form").ajaxSubmit(options);
+
+        });
+
+
+    }
+
+
+    /*]]>*/
+</script>
+</body>
+</html>

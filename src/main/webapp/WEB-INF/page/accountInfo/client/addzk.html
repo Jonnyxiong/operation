@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信云平台运营系统 </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+    <link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/style.min862f.css?v=4.2.0}" rel="stylesheet">
+    <link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/select2.css}" rel="stylesheet">
+    <style>
+        /* Additional style to fix warning dialog position */
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+        input[type="radio"]{
+            margin-top:0 !important;
+        }
+        .page-title{
+            padding: 20px 0;
+            position: relative;
+            z-index:10;
+        }
+        .page-title .line{
+            position: absolute;
+            width:100%;
+            height:1px;
+            background-color: #DDD;
+            left:0;
+            top:50%;
+        }
+        .page-title .title{
+            padding-left:5px;
+            padding-right:5px;
+            border-left:10px solid #0a8000;
+            position: relative;
+            z-index:11;
+            display: inline-block;
+            background-color: #FFF;
+        }
+        .red{
+            color:#FF0000;
+        }
+        .select2 span{
+            display:block !important;
+            margin-top: 0px !important;
+        }
+        .select2-container {
+            width: 171px !important;
+        }
+        .select2-dropdown {
+            width: 175px !important;
+        }
+        .select2-container .select2-selection--single{
+            width:175px;
+        }
+        .pop{
+            background-color: #FFF;
+            padding:20px;
+        }
+    </style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="tabs-container">
+                <ul class="nav nav-tabs">
+                    <li class="active" th:if="${menus.zkkh}">
+                        <a href="javascript:;" id="zkkh">直客开户</a>
+                    </li>
+                    <li class="" th:if="${menus.zzhkh}">
+                        <a href="/accountInfo/client/add" id="zzhkh">子账户开户</a>
+                    </li>
+                    <li class="" th:if="${menus.khkh}">
+                        <a  href="/agentInfo/add" id="khkh">客户开户</a>
+                    </li>
+                </ul>
+
+                <div class="tab-pane active" th:if="${menus.zkkh}">
+                    <!-- 添加直客 -->
+                    <div class="panel-body">
+                        <div class="page-title">
+                            <span class="title">基本资料</span>
+                            <span class="line"></span>
+                        </div>
+                        <form class="form-horizontal">
+                        <input type="hidden" value="3" name="needaudit" data-key="needaudit" class="js-key">
+                        <!-- 所属代理商 -->
+                            <input type="hidden" name="agentId" class="js-key" data-key="agentId">
+                        <!-- 所属代理商 end-->
+                        <!-- 归属销售 -->
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="red">*</span>归属销售：</label>
+                            <div class="col-sm-3">
+                                <select id="belongSale"  class="form-control"></select>
+                                <input type="hidden" name="belongSale" class="js-key js-sale" data-key="belongSale">
+                            </div>
+                        </div>
+                        <!-- 归属销售 end -->
+                        <!-- 客户类型 -->
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="red">*</span>客户类型：</label>
+                            <div class="col-sm-3">
+                                <select class="form-control js-key" name="clientType" data-key="clientType">
+                                    <option value="2">企业用户</option>
+                                    <option value="1">个人用户</option>
+                                </select>
+                            </div>
+                        </div>
+                        <!-- 客户类型 end -->
+                        <!-- 客户名称 -->
+                        <div class="form-group">
+                            <label for="" class="col-sm-2 control-label"><span class="red">*</span>客户名称：</label>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control js-key" name="name" data-key="name">
+                            </div>
+                        </div>
+                        <!-- 客户名称 end -->
+                        <!-- 邮箱 -->
+                        <div class="form-group">
+                            <label for="" class="col-sm-2 control-label">绑定邮箱：</label>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control js-key" name="email" data-key="email" id="email">
+                            </div>
+                            <div class="col-sm-2 control-label" style="text-align:left;white-space:nowrap;">（选填：绑定唯一邮箱可用于登录。）</div>
+                        </div>
+                        <!-- 邮箱 end -->
+                        <!-- 手机号码 -->
+                        <div class="form-group">
+                            <label for="" class="col-sm-2 control-label">绑定手机：</label>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control js-key" name="mobile" data-key="mobile" id="mobile">
+                            </div>
+                            <div class="col-sm-2 control-label" style="text-align:left;white-space:nowrap;">（选填：绑定唯一手机可用于登录。）</div>
+                        </div>
+                        <!-- 手机号码 end -->
+                        <!-- 客户密码 -->
+                        <div class="form-group">
+                            <label for="" class="col-sm-2 control-label"><span class="red">*</span>登录密码：</label>
+                            <div class="col-sm-4">
+                                <input type="password" class="form-control js-key" name="password" data-key="password">
+                            </div>
+                        </div>
+                        <!-- 客户密码 end -->
+                        <!-- 确认密码 -->
+                        <div class="form-group">
+                            <label for="" class="col-sm-2 control-label"><span class="red">*</span>确认密码：</label>
+                            <div class="col-sm-4">
+                                <input type="password" class="form-control re-pwd">
+                            </div>
+                        </div>
+                        <!-- 确认密码 end -->
+                        <!-- 联系地址 -->
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">联系地址：</label>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control js-key" name="address" data-key="address">
+                            </div>
+                        </div>
+                        <!-- 联系地址end -->
+                        <!-- 是否支持子账户 -->
+                        <div class="form-group">
+                            <label for="" class="col-sm-2 control-label"><span class="red">*</span>是否支持子账户：</label>
+                            <div class="col-sm-4">
+                                <label class="radio-inline">
+                                    <input type="radio" name="extValue" value="1" class="js-extValue"> 支持
+                                </label>
+                                <label class="radio-inline">
+                                    <input type="radio" name="extValue" value="0" class="js-extValue" checked> 不支持
+                                </label>
+                                <input type="hidden" class="js-key extValue" data-key="extValue" value="0">
+                            </div>
+                        </div>
+                        <!-- 是否支持子账户 end -->
+                        <div class="page-title">
+                            <span class="title">付费与接口</span>
+                            <span class="line"></span>
+                        </div>
+                        <!-- 付费方式 -->
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="red">*</span>付费方式：</label>
+                            <div class="col-sm-4">
+                                <label class="radio-inline">
+                                    <input type="radio" name="paytype" value="0" disabled class="js-yufu"> 预付费
+                                </label>
+                                <label class="radio-inline">
+                                    <input type="radio" name="paytype" value="1" checked class="js-houfu"> 后付费
+                                </label>
+                                <input type="hidden" class="js-key paytype" data-key="paytype" value="1">
+                            </div>
+                        </div>
+                        <!-- 付费方式 end -->
+                        <!-- 计费规则 -->
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label"><span class="red">*</span>计费规则：</label>
+                            <div class="col-sm-4">
+                                <select class="form-control js-key" id="chargeRule" data-key="chargeRule">
+                                    <option value="0">提交量</option>
+                                    <option value="1">成功量</option>
+                                    <option value="2">明确成功量</option>
+                                </select>
+                            </div>
+                            <label class="col-sm-2 control-label js-return" style="display: none;"><span class="red">*</span>是否自动返还：</label>
+                            <div class="col-sm-4 js-return" style="display: none;">
+                                <select class="form-control" id="autoReturn">
+                                    <option value="0">不自动返还</option>
+                                    <option value="1" disabled>自动返还</option>
+                                </select>
+                            </div>
+                        </div>
+                        <!-- 计费规则 end-->
+                        <!-- 短信协议 -->
+                        <div class="form-group">
+                            <label for="" class="col-sm-2 control-label"><span class="red">*</span>短信协议：</label>
+                            <div class="col-sm-3 ">
+                                <select class="form-control js-key" id="smsfrom" data-key="smsfrom">
+                                    <option value="6">HTTPS</option>
+                                    <option value="1">CMPP3.0</option>
+                                    <option value="3">CMPP2.0</option>
+                                    <option value="2">SMPP</option>
+                                    <option value="4">SGIP</option>
+                                    <option value="5">SMGP</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-3 grid-smstype  hide">
+                                <select class="form-control js-key js-smstype" name="smstype" data-key="smstype">
+                                    <option value="">请选择短信类型</option>
+                                    <option value="0">通知</option>
+                                    <option value="5">营销</option>
+                                    <option value="4">验证码</option>
+                                </select>
+                            </div>
+                        </div>
+                        <!-- 短信协议end -->
+                        <!-- HTTP子协议类型 -->
+                        <div class="form-group grid-smstype-http">
+                            <label for="" class="col-sm-2 control-label"><span class="red">*</span>HTTP子协议类型：</label>
+                            <div class="col-sm-3 ">
+                                <select class="form-control js-key" id="smsHttp" name="httpProtocolTypeStr"  data-key="httpProtocolType">
+                                    <option value="0">https json</option>
+                                    <option value="1">https get/post</option>
+                                    <option value="2">https tx-json</option>
+                                    <option value="3">https get/post jd</option>
+                                    <option value="4">webservice jd</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-5 grid-sms-http-type hide">
+                                <label for="" class="col-sm-4 control-label">短信类型：</label>
+                                <div class="col-sm-5"><select class="form-control jsmstype js-key" name="smstype" data-key="smstype">
+                                    <option value="">请选择短信类型</option>
+                                    <option value="0">通知</option>
+                                    <option value="5">营销</option>
+                                    <option value="4">验证码</option>
+                                </select>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- HTTP自协议类型 end -->
+                        <!-- 短信单价 -->
+                        <div class="sms-price">
+                            <div class="form-group grid-yz grid-price">
+                                <label for="" class="col-sm-2 control-label"><span class="red">*</span>验证码短信单价：</label>
+                                <div class="col-sm-2">
+                                    <input type="text" class="form-control yz-price js-price" data-str="验证码短信单价" smstype="4">
+                                </div>
+                                <div class="col-sm-2 control-label" style="text-align:left;">元/条</div>
+                            </div>
+                            <div class="form-group grid-tz grid-price">
+                                <label for="" class="col-sm-2 control-label"><span class="red">*</span>通知短信单价：</label>
+                                <div class="col-sm-2">
+                                    <input type="text" class="form-control tz-price js-price" data-str="通知短信单价" smstype="0">
+                                </div>
+                                <div class="col-sm-2 control-label" style="text-align:left;">元/条</div>
+                            </div>
+                            <div class="form-group grid-yx grid-price">
+                                <label for="" class="col-sm-2 control-label"><span class="red">*</span>营销短信单价：</label>
+                                <div class="col-sm-2">
+                                    <input type="text" class="form-control yx-price js-price" data-str="营销短信单价" smstype="5">
+                                </div>
+                                <div class="col-sm-2 control-label" style="text-align:left;">元/条</div>
+                            </div>
+                        </div>
+                        <!-- 短信单价 end -->
+                        <!-- 状态报告获取方式 -->
+                        <div class="form-group">
+                            <label for="" class="col-sm-2 control-label"><span class="red">*</span>状态报告获取方式：</label>
+                            <div class="col-sm-3">
+                                <select class="form-control js-key js-needreport" data-key="needreport">
+                                    <option value="0">不获取</option>
+                                    <option value="1">推送简单状态报告</option>
+                                    <option value="2">推送透传状态报告</option>
+                                    <option value="3">用户主动拉取</option>
+                                </select>
+                            </div>
+                        </div>
+                        <!-- 状态报告获取方式 end -->
+                        <!-- 上行获取方式 -->
+                        <div class="form-group">
+                            <label for="" class="col-sm-2 control-label"><span class="red">*</span>上行获取方式：</label>
+                            <div class="col-sm-3">
+                                <select class="form-control js-key js-needmo" data-key="needmo">
+                                    <option value="0">不获取</option>
+                                    <option value="1">SMSP主动推送</option>
+                                    <option value="3">用户主动拉取</option>
+                                </select>
+                            </div>
+                        </div>
+                        <!-- 上行获取方式 end-->
+                        <!-- http协议展示内容 -->
+                        <div class="grid-https">
+                            <div class="form-group  grid-mourl" style="display: none;">
+                                <label for="" class="col-sm-2 control-label"><span class="red">*</span>上行回调地址：</label>
+                                <div class="col-sm-4">
+                                    <input type="text" class="form-control js-key" data-key="mourl">
+                                </div>
+                            </div>
+                            <div class="form-group grid-deliveryurl" style="display: none;">
+                                <label for="" class="col-sm-2 control-label"><span class="red">*</span>状态报告回调地址：</label>
+                                <div class="col-sm-4">
+                                    <input type="text" class="form-control js-key" name="deliveryurl" data-key="deliveryurl">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="" class="col-sm-2 control-label">模板审核通知回调地址：</label>
+                                <div class="col-sm-4">
+                                    <input type="text" class="form-control js-key" data-key="noticeurl">
+                                </div>
+                            </div>
+                        </div>
+                        <!-- http协议展示内容 end -->
+                        <!-- sgip协议展示内容 -->
+                        <div class="grid-sgip hide">
+                            <div class="form-group">
+                                <label for="" class="col-sm-2 control-label"><span class="red">*</span>SGIP协议-客户上行IP：</label>
+                                <div class="col-sm-4">
+                                    <input type="text" class="form-control js-key js-moip" data-key="moip">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="" class="col-sm-2 control-label"><span class="red">*</span>SGIP协议-客户上行端口：</label>
+                                <div class="col-sm-4">
+                                    <input type="text" class="form-control js-key js-moport" data-key="moport">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="" class="col-sm-2 control-label"><span class="red">*</span>SGIP协议-客户节点编码：</label>
+                                <div class="col-sm-4">
+                                    <input type="text" class="form-control js-key js-nodeid" data-key="nodeid">
+                                </div>
+                            </div>
+                        </div>
+                        <!-- sgip协议展示内容 end -->
+                        <!-- ip白名单 -->
+                        <div class="form-group">
+                            <label for="" class="col-sm-2 control-label">IP白名单：</label>
+                            <div class="col-sm-4">
+                                <textarea name="" id="" class="form-control js-key" data-key="ip"></textarea>
+                            </div>
+                        </div>
+                        <!-- ip白名单 end-->
+                        <!-- 自扩展 -->
+                        <div class="form-group form-inline">
+                            <label class="col-sm-2 control-label"><span class="red">*</span>自扩展：</label>
+                            <div class="col-sm-10">
+                                <label class="radio-inline">
+                                    <input type="radio" name="needextend"  value="0" checked class="js-notextend"> 不支持
+                                </label>
+                                <label class="radio-inline">
+                                    <input type="radio" name="needextend"  value="1" class="js-extend"> 支持
+                                </label>
+                                <input type="text" class="form-control js-key grid-extend hide form-group" data-key="extendSize">
+                                <span class="grid-extend hide" style="margin-left:20px;">0-10之间的数值</span>
+                            </div>
+                            <input type="hidden" class="needextend js-key" data-key="needextend" value="0">
+                        </div>
+                        <!-- 自扩展 end -->
+                        <!-- 客户接入速度 -->
+                        <div class="form-group">
+                            <label for="" class="col-sm-2 control-label"><!--<span class="red">*</span>-->客户接入速度：</label>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control js-key" data-key="accessSpeed">
+                            </div>
+                            <div class="col-sm-2 control-label" style="color:red;text-align:left;">（0-3000之间的数值）</div>
+                        </div>
+                        <!-- 客户接入速度 end -->
+                        <!-- 认证状态 -->
+                        <!--<div class="form-group">-->
+                            <!--<label for="" class="col-sm-2 control-label">认证状态：</label>-->
+                            <!--<div class="col-sm-3">-->
+                                <!--<select class="form-control js-auth js-key" disabled data-key="oauthStatus">-->
+                                    <!--<option value="2">待认证</option>-->
+                                    <!--<option value="3">已认证</option>-->
+                                <!--</select>-->
+                            <!--</div>-->
+                        <!--</div>-->
+                        <!-- 认证状态 end -->
+                        <!-- 备注 -->
+                        <div class="form-group">
+                            <label for="" class="col-sm-2 control-label">备注：</label>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control js-key" data-key="remarks">
+                            </div>
+                        </div>
+                        <!-- 备注 end -->
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-4">
+                                <a class="btn btn-primary js-confirm">确认</a>
+                                <!--<a class="btn btn-default js-close" >取消</a>-->
+                            </div>
+                        </div>
+                    </form>
+                    </div>
+                    <!-- 添加直客 end -->
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+</div>
+<div class="pop"  style="display: none;">
+    <p>开户成功！</p>
+    <h3>一、登录信息</h3>
+    <p>登录账户：<span class="text-clientid"></span></p>
+    <p>绑定邮箱：<span class="text-email"></span></p>
+    <p>绑定手机：<span class="text-mobile"></span></p>
+    <p>登录密码：<span class="text-pwd"></span></p>
+    <h3>二、接口信息</h3>
+    <p>接口账户：<span class="text-clientid"></span></p>
+    <p>接口密码：<span class="text-pwd"></span></p>
+    <h3>开户成功，是否马上资质认证</h3>
+    <a href="javascript:;" class="btn btn-success redirect">资质认证</a>
+    <a href="/accountInfo/clientmanage" class="btn btn-default">关闭</a>
+</div>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script  th:src="@{/resources/js/layer/layer.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/auth.js?v=2.0.0}"></script>
+<script th:src="@{/resources/js/addClient.js?v=3.8.11}"></script>
+<script th:src="@{/resources/js/select2.min.js}"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var menus = [[${menus}]];
+    if (menus.zkkh) {
+
+    } else if (menus.zzhkh) {
+        $("#zzhkh")[0].click();
+//        document.getElementById("zzhkh").click();
+    } else if (menus.khkh) {
+        $("#khkh")[0].click();
+//        document.getElementById("khkh").click();
+
+    }
+
+    /*]]>*/
+</script>
+</body>
+</html>

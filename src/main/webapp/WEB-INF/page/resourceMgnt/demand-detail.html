@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org" lang="zh-cn">
+<head>
+<meta content="云之讯,云通讯,云通讯平台" name="keywords" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport"
+	content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1" />
+<title>短信云平台运营系统 - 管理员中心</title>
+<meta charset="utf-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}"
+	rel="stylesheet">
+<link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}"
+	rel="stylesheet">
+<!-- jqgrid-->
+<link
+	th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}"
+	rel="stylesheet">
+<link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+<link th:href="@{/resources/css/style.min862f.css?v=4.1.0}"
+	rel="stylesheet">
+
+<style>
+    /* Additional style to fix warning dialog position */
+    #alertmod_table_list_2 {
+        top: 900px !important;
+    }
+
+    .submit-title h2{
+        line-height: 50px;
+        border-bottom: 1px solid #DDD;
+        margin-top: 0px;
+        padding:0  15px;
+    }
+
+    .submit-title2 h3{
+        line-height: 40px;
+/*         border-bottom: 1px solid #DDD; */
+/*         margin-bottom: 10px; */
+        margin:0px;
+        padding:0 15px;
+    }
+
+    .submit-ctx {
+        background-color: #FFF;
+        padding-bottom: 50px;
+    }
+    
+    .marginTop30 {
+    	margin-top: 30px;
+    }
+    
+    .grid-detail {
+		background-color: #FFF;
+	}
+	.form-control-static{
+		word-break:break-all;
+	}
+
+</style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+	<div class="wrapper wrapper-content  animated fadeInRight" style="width: 1200px;">
+
+		<div class="container-fluid grid-detail">
+			<div class="row">
+				<div class="col-sm-12 submit-title">
+					<h2>资源需求列表</h2>
+				</div>
+			</div>
+			
+			<div class="form-horizontal grid-detail">
+				<div class="form-group col-lg-7">
+					<label class="col-xs-3 control-label text-right form-title">需求编号：</label>
+					<div class="col-xs-8">
+						<p class="form-control-static" th:text="${model.demandId}"></p>
+					</div>
+				</div>
+				<div class="form-group col-lg-7">
+					<label class="col-xs-3 control-label text-right form-title">所属行业：</label>
+					<div class="col-xs-9">
+						<p class="form-control-static" th:text="${model.industryType}"></p>
+					</div>
+				</div>
+				<div class="form-group col-lg-7">
+					<label class="col-xs-3 control-label text-right form-title">发送类型：</label>
+					<div class="col-xs-9">
+						<p class="form-control-static" th:text="${model.smsType}"></p>
+					</div>
+				</div>
+				<div class="form-group col-lg-7">
+					<label class="col-xs-3 control-label text-right form-title">预计量(条/月)：</label>
+					<div class="col-xs-9">
+						<p class="form-control-static" th:text="${model.expectNumber}"></p>
+					</div>
+				</div>
+				<div class="form-group col-lg-7">
+					<label class="col-xs-3 control-label text-right form-title">是否保底：</label>
+					<div class="col-xs-9">
+						<p class="form-control-static" th:if="${model.minimumGuarantee} gt 0" th:text="${model.minimumGuarantee} + '万条/月'"></p>
+						<p class="form-control-static" th:if="${model.minimumGuarantee} eq 0">不承诺保底</p>
+					</div>
+				</div>
+				<div class="form-group col-lg-7">
+					<label class="col-xs-3 control-label text-right form-title">通道类型：</label>
+					<div class="col-xs-9">
+						<p class="form-control-static" th:text="${model.channelType}"></p>
+					</div>
+				</div>
+				<div class="form-group col-lg-7">
+					<label class="col-xs-3 control-label text-right form-title">是否直连：</label>
+					<div class="col-xs-9" th:switch="${model.directConnect}">
+						<p class="form-control-static" th:case="0">直连</p>
+						<p class="form-control-static" th:case="1">第三方</p>
+					</div>
+				</div>
+				<div class="form-group col-lg-7">
+					<label class="col-xs-3 control-label text-right form-title">扩展位：</label>
+					<div class="col-xs-9">
+						<p class="form-control-static" th:if="${model.extendSize} eq 0">无特殊需求</p>
+						<p class="form-control-static" th:if="${model.extendSize} gt 0" th:text="${model.extendSize} + ' 位'"></p>
+					</div>
+				</div>
+				<div class="form-group col-lg-7">
+					<label class="col-xs-3 control-label text-right form-title">速率：</label>
+					<div class="col-xs-9">
+						<p class="form-control-static" th:text="${model.rate eq null ? '-' : model.rate + ' TPS'}"></p>
+					</div>
+				</div>
+				<div class="form-group col-lg-7">
+					<label class="col-xs-3 control-label text-right form-title">签名：</label>
+					<div class="col-xs-9">
+						<p class="form-control-static" th:text="${model.signType}"></p>
+					</div>
+				</div>
+				<div class="form-group col-lg-7">
+					<label class="col-xs-3 control-label text-right form-title">发送内容模板：</label>
+					<div class="col-xs-9">
+						<p class="form-control-static" th:text="${model.contentTemplate}"></p>
+					</div>
+				</div>
+				<div class="form-group col-lg-7">
+					<label class="col-xs-3 control-label text-right form-title">销售价格(元/条):</label>
+					<div class="col-xs-9">
+						<p class="form-control-static" th:text="${model.salePrice}"></p>
+					</div>
+				</div>
+				<div class="form-group col-lg-7">
+					<label class="col-xs-3 control-label text-right form-title">要求上线时间：</label>
+					<div class="col-xs-9">
+						<p class="form-control-static" th:if="${model.onlineDate} ne null" th:text="${#dates.format(model.onlineDate,'yyyy-MM-dd')}"></p>
+					</div>
+				</div>
+				<div class="form-group col-lg-7">
+					<label class="col-xs-3 control-label text-right form-title">需求发起时间：</label>
+					<div class="col-xs-9">
+						<p class="form-control-static" th:if="${model.createTime} ne null" th:text="${#dates.format(model.createTime,'yyyy-MM-dd')}"></p>
+					</div>
+				</div>
+				<div class="form-group col-lg-7">
+					<label class="col-xs-3 control-label text-right form-title">状态：</label>
+					<div class="col-xs-9" th:switch="${model.state}">
+						<p class="form-control-static" th:case="0">寻资源</p>
+						<p class="form-control-static" th:case="1">已供应</p>
+						<p class="form-control-static" th:case="2">无资源</p>
+						<p class="form-control-static" th:case="3">撤单</p>
+					</div>
+				</div>
+				<div class="form-group col-lg-7" th:if="${model.remark}">
+					<label class="col-xs-3 control-label text-right form-title">备注:</label>
+					<div class="col-xs-9">
+						<p class="form-control-static" th:text="${model.remark}"></p>
+					</div>
+				</div>
+				<div class="form-group col-lg-7" th:switch="${model.state}">
+					<label class="col-xs-3 control-label text-right form-title" th:case="1">处理时间：</label>
+					<label class="col-xs-3 control-label text-right form-title" th:case="2">处理时间：</label>
+					<label class="col-xs-3 control-label text-right form-title" th:case="3">撤单时间：</label>
+					<div class="col-xs-9">
+						<p class="form-control-static" th:if="${model.updateTime} ne null" th:text="${#dates.format(model.updateTime,'yyyy-MM-dd')}"></p>
+					</div>
+				</div>
+				
+                <div class="form-group col-lg-7" th:if="${resourceList} ne null and ${#lists.size(resourceList)} gt 0">
+					<label class="col-xs-3 control-label text-right form-title">已选择资源列表:</label>
+				</div>
+	               
+				<div class="ibox-content" th:if="${resourceList} ne null and ${#lists.size(resourceList)} gt 0">
+					<div class="jqGrid_wrapper">
+						<table id="table_list"></table>
+					</div>
+				</div>
+			</div>
+
+		</div>
+	</div>
+	<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+	<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+	<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+	<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+	<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+	<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+	<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+	<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+	<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+	<script th:src="@{/resources/js/layer/layer.js}"></script>
+
+	<script th:inline="javascript">
+		/*<![CDATA[*/
+		$(document).ready(function() {
+			$.jgrid.defaults.styleUI = "Bootstrap";
+
+			$('#myTabs a').click(function(e) {
+				e.preventDefault()
+				$(this).tab('show')
+			})
+			
+			var resourceList;
+			try {
+				resourceList = [[${resourceList}]];
+			} catch (e) {
+				resourceList = [];
+			}
+			
+			if(resourceList != null && resourceList.length > 0){
+				$("#table_list").jqGrid({
+					datatype: "local",
+					data: resourceList,
+					height: 'auto',
+				          rownumbers:true,
+				          autowidth: true,
+				          shrinkToFit: false,
+				          autoScroll: true,
+				          rowNum: 20,
+				          rowList: [10, 20, 30,50],
+				          colModel: [
+								{ label: "资源编号",name: "resourceId",align: "left",sortable:false, width:110, key: true},
+								{ label:"通道号",name: "channelId",align: "left",sortable:false, width:70},
+								{ label:"通道类型",name: "channelType",align: "left",sortable:false, width:100,
+									formatter:function (cellvalue) {
+					                    var arr = cellvalue.split(",");
+					                    var channelType = '';
+					                    for(var i in arr){
+					                        switch (arr[i]){
+					                            case '0':
+					                                channelType += channelType.length > 0 ? ' , 三网合一' :'三网合一';
+					                                break;
+					                            case '1':
+					                                channelType += channelType.length > 0 ? ' , 移动':'移动';
+					                                break;
+					                            case '2':
+					                                channelType += channelType.length > 0 ? ' , 电信':'电信';
+					                                break;
+					                            case '3':
+					                                channelType += channelType.length > 0 ? ' , 联通':'联通';
+					                                break;
+					                            case '4':
+					                                channelType += channelType.length > 0 ? ' , 全网':'全网';
+					                                break;
+					                        }
+					                    }
+					                    return channelType;
+					                }
+								},
+								{ label:"发送类型",name: "smsType",align: "left",sortable:false,width:100},
+								{ label:"发送内容属性",name: "contentProp",align: "left",sortable:false,width:100},
+								{ label:"是否直连",name: "directConnect",align: "left",sortable:false,width:80,formatter:"select",editoptions:{value:"0:直连;1:第三方"}},
+								{ label:"是否保底",name: "minimumGuarantee",align: "left",sortable:false,width:80,
+									formatter:function(cellvalue){
+					                    if(/^[1-9]\d*$/.test(cellvalue)){
+					                        cellvalue += '万条/月';
+					                    }else{
+					                        cellvalue = '不承诺保底';
+					                    }
+					                    return cellvalue;
+					                }
+								},
+								{ label:"是否授信",name: "isCredit",align: "left",sortable:false,width:80,
+									formatter:function(cellvalue){
+					                    if(/^[1-9]\d*$/.test(cellvalue)){
+					                        cellvalue += '万条/月';
+					                    }else{
+					                        cellvalue = '不授信';
+					                    }
+					                    return cellvalue;
+					                }
+								},
+								{ label:"扩展位",name: "extendSize",align: "left",sortable:false,width:60},
+								{ label:"速率",name: "rate",align: "left",sortable:false,width:80,
+									formatter:function(cellvalue){
+					                    if(/^\d+$/.test(cellvalue)){
+					                        cellvalue += ' TPS';
+					                    }else{
+					                        cellvalue = '-';
+					                    }
+					                    return cellvalue;
+					                }
+								},
+								{ label:"签名",name: "signType",align: "left",sortable:false,width:80,
+									formatter:function (cellvalue) {
+					                    var arr = cellvalue.split(",");
+					                    var signType = '';
+					                    for(var i in arr){
+					                        switch (arr[i]){
+					                            case '0':
+					                                signType += signType.length > 0 ? ' , 自定义' :'自定义';
+					                                break;
+					                            case '1':
+					                                signType += signType.length > 0 ? ' , 报备签名':'报备签名';
+					                                break;
+					                            case '2':
+					                                signType += signType.length > 0 ? ' , 固签':'固签';
+					                                break;
+					                        }
+					                    }
+					                    return signType;
+					                }
+								},
+								{ label:"采购价格（元/条）",name: "purchasePrice",align: "left",width:120,sortable:false},
+								{ label:"待接入时间",name: "onlineDate",align: "left",sortable:false,width:100,formatter:'date',formatoptions: {newformat:'Y-m-d'}},
+								{ label:"状态",name: "state",align: "left",sortable:false,width:'65',formatter:"select",editoptions:{value:"0:待接入;1:已接入"}}
+				          ],
+				          viewrecords: true,
+				          hidegrid: false
+				 });
+			}
+			
+		});
+		/*]]>*/
+	</script>
+</body>
+</html>

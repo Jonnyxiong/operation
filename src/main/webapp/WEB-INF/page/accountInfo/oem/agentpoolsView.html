@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信云平台运营系统 - 客户财务</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+    <link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+    <link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/inputNumber.css}" rel="stylesheet">
+    <style>
+        /* Additional style to fix warning dialog position */
+        body{
+            width:1160px;
+        }
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+        .close{
+            opacity: 1;
+        }
+        .modal-content{
+            opacity: 1 !important;
+            border:none;
+        }
+        .col-price{
+            color:red;
+        }
+        .confirm-table{
+            box-sizing:border-box;
+            padding:20px;
+        }
+        .grid-inputNumber{
+            width:120px;
+            display: inline-block;
+        }
+        *{
+            box-sizing: border-box;
+        }
+        .body-wrap{
+            position: relative;
+            width:100%;
+            height:100%;
+        }
+        .grid-bottom{
+            width:100%;
+            margin-top:20px;
+            padding:0 25px;
+            background-color: #FFF;
+        }
+    </style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="container-fluid body-wrap">
+    <div class="row" style="height:100%;">
+        <div class="col-sm-12">
+            <div class="ibox ">
+                <!-- 搜索条件 -->
+                <div class="ibox-content">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <form role="form" class="form-inline" id="mainForm">
+                                <div class="form-group">
+                                    <label for="product_type">产品类型:</label>
+                                    <select id="product_type" class="form-control" name="product_type">
+                                        <option value="">所有</option>
+                                        <option value="3">验证码</option>
+                                        <option value="4">通知</option>
+                                        <option value="1">会员营销</option>
+                                        <option value="0">行业</option>
+                                        <option value="2">国际短信</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="operator_code">运营商类型:</label>
+                                    <select id="operator_code" class="form-control" name="operator_code">
+                                        <option value="">所有</option>
+                                        <option value="0">全网</option>
+                                        <option value="1">移动</option>
+                                        <option value="2">联通</option>
+                                        <option value="3">电信</option>
+                                        <option value="4">国际</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-danger" onclick="search()">搜索</button></span>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="ibox-content" id="grid-radio">
+                    <div class="jqGrid_wrapper">
+                        <table id="table_list"></table>
+                        <div id="pager_list"></div>
+                    </div>
+                    <div style="text-align: right;" class="grid-bottom">
+                        <a href="javascript:;" class="btn btn-md btn-primary js-reback">立即充值</a>
+                    </div>
+                    <p>&nbsp;</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div style="display: none;" id="confirm-table" class="confirm-table">
+
+</div>
+
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/auth.js}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/common.js?v=1.1.0}"></script>
+<script th:src="@{/resources/js/grid-radio.js?v=1.1.2}"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    $(function(){
+        var clientId = getQueryString("clientId");
+        var _tableInit = false;
+        //初始化表格
+        $.jgrid.defaults.styleUI = "Bootstrap";
+        $("#table_list").jqGrid({
+            url:"/agentInfo/agentpools/" + clientId,
+            mtype: 'GET',
+            datatype: "json",
+            jsonReader : {
+                root:"entityList",
+                page: "currentPage",
+                total: "totalPage",
+                records: "totalCount"
+            },
+            height: 'auto',
+            width:'100%',
+            autowidth: true,
+            rownumbers:true,
+            shrinkToFit: false,
+            autoScroll: true,
+            multiselect : true,
+            colNames: [ "产品id","产品类型", "运营商","区域", "短信单价", "到期时间", "剩余数量", "充值条数"],
+            colModel: [
+                {name: "productId",align: "left",sortable:false,hidden:true},
+                {name: "productType",align: "left",sortable:false,
+                    formatter : function(cellvalue, options, rowObject){
+                        var product_type = rowObject.productType, switcher;
+                        if(product_type == 0){
+                            switcher = "<span>行业</span>"
+                        } else if(product_type == 1){
+                            switcher = "<span>会员营销</span>"
+                        } else if(product_type == 2){
+                            switcher = "<span>国际短信</span>"
+                        } else if(product_type == 3){
+                            switcher = "<span>验证码</span>"
+                        } else if(product_type == 4){
+                            switcher = "<span>通知</span>"
+                        }
+
+                        return switcher;
+                    }
+                },
+                {name: "operatorCode", align: "left",sortable:false,
+                    formatter : function(cellvalue, options, rowObject){
+                        var operator_code = rowObject.operatorCode, switcher;
+                        if(operator_code == 0){
+                            switcher = "<span>全网</span>"
+                        } else if(operator_code == 1){
+                            switcher = "<span>移动</span>"
+                        } else if(operator_code == 2){
+                            switcher = "<span>联通</span>"
+                        } else if(operator_code == 3){
+                            switcher = "<span>电信</span>"
+                        } else if(operator_code == 4){
+                            switcher = "<span>国际</span>"
+                        }
+
+                        return switcher;
+                    }
+                },
+                {name: "areaCode", align: "left",sortable:false,
+                    formatter : function(cellvalue, options, rowObject){
+                        var area_code = rowObject.areaCode, switcher;
+                        if(area_code == 0){
+                            switcher = "<span>全国</span>"
+                        } else if(area_code == 1){
+                            switcher = "<span>国际</span>"
+                        } else if(area_code == 2){
+                            switcher = "<span>省网</span>"
+                        }
+                        return switcher;
+                    }
+                },
+                {name: "unitPrice", align: "left",sortable:false,
+                    formatter:function(cellvalue, options, rowObject){
+                        var productType = rowObject.productType;
+                        var switcher = "";
+                        if(productType == 2){
+                            switcher = '<span class="unit" data-price="'+ rowObject.unitPrice +'">' + '-' + '</span>';
+                        } else {
+                            switcher = '<span class="unit" data-price="'+ rowObject.unitPrice +'">' + rowObject.unitPrice + "元" + '</span>';
+                        }
+
+                        return switcher;
+                    }
+                },
+                {name: "dueTime", align: "left",sortable:false},
+                {name: "remainNumber", align: "left",sortable:false,
+                    formatter:function(cellvalue, options, rowObject){
+                        var productType = rowObject.productType;
+                        var switcher = "";
+                        if(productType == 2){
+                            switcher = '<span class="unit" data-price="'+ rowObject.unitPrice +'">' + rowObject.remainAmount  + "元" + '</span>';
+                        } else {
+                            switcher = '<span class="unit" data-price="'+ rowObject.unitPrice +'">' + rowObject.remainNumber + '</span>';
+                        }
+
+                        return switcher;
+                    }
+                },
+                { align: "left",sortable:false,
+                    formatter : function(ellvalue, options, rowObject){
+                        var productType = rowObject.productType, unit, remain;
+                        if(productType == 2){
+                            unit = "元"
+                            remain = rowObject.remainAmount;
+                        } else {
+                            unit = "条"
+                            remain = rowObject.remainNumber;
+                        }
+                        var switcher = "<div class='grid-inputNumber js-table-number'>" +
+                            "<span class='sub js-table-sub' data-remain='"+ remain +"'>-</span>" +
+                            "<input type='text' class='num js-table-input' value='1' old='1' data-remain='"+ remain +"' data-arr='"+ JSON.stringify(rowObject) + "' >" +
+                            "<span class='add js-table-add' data-remain='"+ remain +"'>+</span>" +
+                            "</div>" + unit;
+                        return switcher;
+                    }
+                }
+            ],
+            viewrecords: true,
+            hidegrid: false,
+            gridComplete:function(){
+                if(!_tableInit){
+                    _tableInit = true;
+                    $("#grid-radio").countTable("#table_list");
+                }
+            },
+            onSelectAll: function(){
+
+            },
+            onSelectRow : function(){
+
+            }
+        });
+
+    
+        var params = {
+            clientId : clientId,
+            poolPos : [],
+        }
+        $(".js-reback").click(function(){
+            var arr_commit = [];
+            $("#table_list").find("input[type=checkbox]:checked").each(function(){
+                var input = $(this).closest("tr").find(".num");
+                var num   = input.val();
+                var row = input.data("arr");
+                row.updateNum = num;
+                arr_commit.push(row);
+            })
+
+            for(var i = 0; i < arr_commit.length; i++){
+                arr_commit[i].clientId = clientId;
+            }
+            params.poolPos = arr_commit;
+            if(params.poolPos.length == 0){
+                layer.msg("请选择产品",{icon:2})
+                return;
+            }
+            $.ajax({
+                url:'/accountInfo/client/recharge',
+                type:'POST',
+                dataType:'json',
+                contentType: 'application/json',
+                data:JSON.stringify(params),
+                success : function(res){
+                    if(res.code != 0){
+                        layer.msg(res.msg,{icon:2})
+                        return;
+                    }
+                    var _p = parent;
+                    parent.layer.msg(res.msg, {icon: 1,time: 1500},function(){
+                        _p.location.reload();
+                    });
+
+                }
+            })
+
+
+        })
+    })
+    
+    function search() {
+        $("#table_list").jqGrid('setGridParam',{
+            datatype:'json',
+            postData: {
+                productType: $("#product_type").val(),
+                operatorCode: $("#operator_code").val()
+            }, //发送数据
+//            page:1
+        }).trigger("reloadGrid"); //重新载入
+    }
+    /*]]>*/
+</script>
+</body>
+</html>

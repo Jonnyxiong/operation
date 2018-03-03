@@ -1,0 +1,51 @@
+/**
+* 加减输入框
+*/
+.grid-inputNumber{
+    position:relative;
+    width:100px;
+    height:27px;
+    border:1px solid #DDD;
+    padding-left:26px;
+    padding-right:26px;
+    background-color: #FFF;
+}
+.grid-inputNumber,.grid-inputNumber *{
+    box-sizing:border-box;
+}
+.grid-inputNumber span{
+    cursor: pointer;
+    position:absolute;
+    font-size:14px;
+    color:#333;
+    width:26px;
+    height:26px;
+    text-align: center;
+    line-height: 26px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -user-select:none;
+}
+.grid-inputNumber span:hover{
+    background-color: #DDD;
+}
+.grid-inputNumber .sub{
+    top:0;
+    left:0;
+    border-right:1px solid #DDD;
+}
+.grid-inputNumber .add{
+    top:0;
+    right:0;
+    border-left:1px solid #DDD;
+}
+.grid-inputNumber input{
+    text-align: center;
+    display: block;
+    width:100%;
+    border:0 none;
+    height:25px;
+    line-height: 25px;
+    outline:none;
+}

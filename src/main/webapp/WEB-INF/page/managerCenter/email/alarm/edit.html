@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信平台运营系统 - 管理员中心</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    <!--<link th:href="@{/resources/css/jquery.datetimepicker.css}" rel="stylesheet">-->
+
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+    <link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/timePicker.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+    <link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+
+    <style>
+        /* Additional style to fix warning dialog position */
+        body{
+            width:769px;
+        }
+        .container-fluid{
+            background-color:#FFF;
+        }
+        .page-title{
+            padding: 20px 0;
+            position: relative;
+            z-index:10;
+        }
+        .page-title .line{
+            position: absolute;
+            width:100%;
+            height:1px;
+            background-color: #DDD;
+            left:0;
+            top:50%;
+        }
+        .page-title .title{
+            padding-left:5px;
+            padding-right:5px;
+            border-left:10px solid #0a8000;
+            position: relative;
+            z-index:11;
+            display: inline-block;
+            background-color: #FFF;
+        }
+        .checkbox input[type=checkbox], .checkbox-inline input[type=checkbox], .radio input[type=radio], .radio-inline input[type=radio]{
+            margin-top:0;
+        }
+        .port{
+            width:55px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="container-fluid animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-horizontal">
+                <div class="page-title">
+                    <span class="title">应用信息</span>
+                    <span class="line"></span>
+                </div>
+                <!-- 用途 -->
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">用途：</label>
+                    <div class="col-sm-9">
+                        <input type="text" name="alarmName" class="form-control js-alarmName">
+                    </div>
+                </div>
+                <!-- 提醒邮箱 -->
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">提醒邮箱：</label>
+                    <div class="col-sm-9">
+                        <input type="text" name="alarmEmail" class="form-control js-alarmEmail">
+                    </div>
+                </div>
+                <div class="form-group text-center">
+                    多个邮箱可用英文逗号隔开,例如：nic@ucpaas.com,neo@ucpaas.com
+                </div>
+                <!-- 应用系统 -->
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">应用系统：</label>
+                    <div class="col-sm-8">
+                        <label class="checkbox-inline">
+                            <input type="radio" name="webId" class="js-webId" value="4"> 用户中心
+                        </label>
+                        <label class="checkbox-inline">
+                            <input type="radio" name="webId" class="js-webId" value="5"> OEM客户端
+                        </label>
+                        <label class="checkbox-inline">
+                            <input type="radio" name="webId" class="js-webId" value="2"> 品牌代理商平台
+                        </label>
+                        <label class="checkbox-inline">
+                            <input type="radio" name="webId" class="js-webId" value="6"> 品牌客户端平台
+                        </label>
+                        <label class="checkbox-inline">
+                            <input type="radio" name="webId" class="js-webId" value="3"> 运营平台
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-3 control-label"></label>
+                    <div class="col-sm-5">
+                        <a href="javascript:;" class="btn btn-primary js-confirm">确定</a>
+                        <a href="javascript:;" class="btn btn-default js-cancel" style="margin-left:30px;">取消</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<!--<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>-->
+<script th:src="@{/resources/js/jquery.1.7.2.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/jquery.datetimepicker.full.min.js}"></script>
+<script th:src="@{/resources/js/plugins/timePicker/jquery.timePicker.js}"></script>
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/auth.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+    $(document).ready(function () {
+        var id = getQueryString("id");
+        if(id){
+            $(".js-alarmName").attr("readonly", true);
+        }
+        $.ajax({
+            url:"/managerCenter/taskAlarmSetting/email/alarm/edit/" + id,
+            type:"GET",
+            success : function(res){
+                if(res.code != 0){
+                    layer.msg(res.msg,{icon:2});
+                    return;
+                }
+                $(".js-alarmName").val(res.data.alarmName);
+                $(".js-alarmEmail").val(res.data.alarmEmail);
+                $(".js-webId").each(function(){
+                    if($(this).val() == res.data.webId){
+                        $(this)[0].checked = true;
+                    }
+                })
+            }
+
+        })
+
+        $(".js-confirm").click(function(){
+            var params = {};
+            params.alarmEmail = $(".js-alarmEmail").val();
+            params.alarmName = $(".js-alarmName").val();
+            params.webId = $(".js-webId:checked").val();
+            params.id = id;
+
+            var emailArr = params.alarmEmail.split(",");
+
+            if(_Auth.isNull(params.alarmName)){
+                layer.msg("邮件提醒用途不能为空",{icon:2});
+                return false;
+            }
+            if(_Auth.isNull($(".js-webId:checked")) || _Auth.isNull($(".js-webId:checked").val())){
+                layer.msg("请选择应用系统",{icon:2});
+                return false;
+            }
+            if(emailArr.length > 1){
+                for(var i = 0; i < emailArr.length; i ++){
+                    if(!_Auth.isEmail(emailArr[i])){
+                        layer.msg("电子邮件地址不正确",{icon:2});
+                        return false;
+                    }
+                }
+            } else if(!_Auth.isEmail(params.alarmEmail)){
+                layer.msg("电子邮件地址不正确",{icon:2});
+                return false;
+            }
+
+
+            $.ajax({
+                url:"/managerCenter/taskAlarmSetting/email/alarm/edit",
+                type:"POST",
+                contentType:"application/json",
+                data : JSON.stringify(params),
+                success: function(res){
+                    if(res.code !== 0){
+                        layer.msg(res.msg);
+                        return false;
+                    }
+                    var _p = parent;
+                    parent.layer.msg(res.msg, {icon: 1,time: 1000},function(){
+                        _p.location.reload();
+                    });
+                }
+            })
+        })
+        $(".js-cancel").click(function(){
+            parent.layer.closeAll();
+        })
+
+    })
+
+
+    /*]]>*/
+</script>
+</body>
+</html>

@@ -1,0 +1,763 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ucpaas.sms.mapper.message.OrderListMapper">
+     
+        
+    <resultMap id="rowMapper" type="OrderList">
+        <result property="orderId" jdbcType="VARCHAR" column="order_id"/>
+        <result property="companyName" jdbcType="VARCHAR" column="company_name"/>
+        <result property="industryType" jdbcType="VARCHAR" column="industry_type"/>
+        <result property="belongSale" jdbcType="BIGINT" column="belong_sale"/>
+        <result property="smsType" jdbcType="VARCHAR" column="sms_type"/>
+        <result property="expectNumber" jdbcType="VARCHAR" column="expect_number"/>
+        <result property="minimumGuarantee" jdbcType="VARCHAR" column="minimum_guarantee"/>
+        <result property="channelType" jdbcType="VARCHAR" column="channel_type"/>
+        <result property="directConnect" jdbcType="INTEGER" column="direct_connect"/>
+        <result property="extendSize" jdbcType="INTEGER" column="extend_size"/>
+        <result property="rate" jdbcType="INTEGER" column="rate"/>
+        <result property="signType" jdbcType="VARCHAR" column="sign_type"/>
+        <result property="contentTemplate" jdbcType="VARCHAR" column="content_template"/>
+        <result property="payType" jdbcType="VARCHAR" column="pay_type"/>
+        <result property="salePrice" jdbcType="VARCHAR" column="sale_price"/>
+        <result property="invoiceType" jdbcType="INTEGER" column="invoice_type"/>
+        <result property="onlineDate" jdbcType="DATE" column="online_date"/>
+        <result property="isAudit" jdbcType="INTEGER" column="is_audit"/>
+        <result property="state" jdbcType="INTEGER" column="state"/>
+        <result property="remark" jdbcType="VARCHAR" column="remark"/>
+        <result property="auditorId" jdbcType="BIGINT" column="auditor_id"/>
+        <result property="operatorId" jdbcType="BIGINT" column="operator_id"/>
+        <result property="createTime" jdbcType="TIMESTAMP" column="create_time"/>
+        <result property="updateTime" jdbcType="TIMESTAMP" column="update_time"/>
+    </resultMap> 
+     
+    <sql id="BASE_COLUMN_LIST">
+        order_id,
+        company_name,
+        industry_type,
+        belong_sale,
+        sms_type,
+        expect_number,
+        minimum_guarantee,
+        channel_type,
+        direct_connect,
+        extend_size,
+        rate,
+        sign_type,
+        content_template,
+        pay_type,
+        sale_price,
+        invoice_type,
+        online_date,
+        is_audit,
+        state,
+        remark,
+        auditor_id,
+        operator_id,
+        create_time,
+        update_time
+    </sql>
+
+    <insert id="insert" parameterType="OrderList" >
+        INSERT INTO t_sms_order_list 
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="orderId != null" >
+                order_id,
+            </if>
+            <if test="companyName != null" >
+                company_name,
+            </if>
+            <if test="industryType != null" >
+                industry_type,
+            </if>
+            <if test="belongSale != null" >
+                belong_sale,
+            </if>
+            <if test="smsType != null" >
+                sms_type,
+            </if>
+            <if test="expectNumber != null" >
+                expect_number,
+            </if>
+            <if test="minimumGuarantee != null" >
+                minimum_guarantee,
+            </if>
+            <if test="channelType != null" >
+                channel_type,
+            </if>
+            <if test="directConnect != null" >
+                direct_connect,
+            </if>
+            <if test="extendSize != null" >
+                extend_size,
+            </if>
+            <if test="rate != null" >
+                rate,
+            </if>
+            <if test="signType != null" >
+                sign_type,
+            </if>
+            <if test="contentTemplate != null" >
+                content_template,
+            </if>
+            <if test="payType != null" >
+                pay_type,
+            </if>
+            <if test="salePrice != null" >
+                sale_price,
+            </if>
+            <if test="invoiceType != null" >
+                invoice_type,
+            </if>
+            <if test="onlineDate != null" >
+                online_date,
+            </if>
+            <if test="isAudit != null" >
+                is_audit,
+            </if>
+            <if test="state != null" >
+                state,
+            </if>
+            <if test="remark != null" >
+                remark,
+            </if>
+            <if test="auditorId != null" >
+                auditor_id,
+            </if>
+            <if test="operatorId != null" >
+                operator_id,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+            <if test="updateTime != null" >
+                update_time
+            </if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides="," >
+            <if test="orderId != null" >
+                #{orderId},
+            </if>
+            <if test="companyName != null" >
+                #{companyName},
+            </if>
+            <if test="industryType != null" >
+                #{industryType},
+            </if>
+            <if test="belongSale != null" >
+                #{belongSale},
+            </if>
+            <if test="smsType != null" >
+                #{smsType},
+            </if>
+            <if test="expectNumber != null" >
+                #{expectNumber},
+            </if>
+            <if test="minimumGuarantee != null" >
+                #{minimumGuarantee},
+            </if>
+            <if test="channelType != null" >
+                #{channelType},
+            </if>
+            <if test="directConnect != null" >
+                #{directConnect},
+            </if>
+            <if test="extendSize != null" >
+                #{extendSize},
+            </if>
+            <if test="rate != null" >
+                #{rate},
+            </if>
+            <if test="signType != null" >
+                #{signType},
+            </if>
+            <if test="contentTemplate != null" >
+                #{contentTemplate},
+            </if>
+            <if test="payType != null" >
+                #{payType},
+            </if>
+            <if test="salePrice != null" >
+                #{salePrice},
+            </if>
+            <if test="invoiceType != null" >
+                #{invoiceType},
+            </if>
+            <if test="onlineDate != null" >
+                #{onlineDate},
+            </if>
+            <if test="isAudit != null" >
+                #{isAudit},
+            </if>
+            <if test="state != null" >
+                #{state},
+            </if>
+            <if test="remark != null" >
+                #{remark},
+            </if>
+            <if test="auditorId != null" >
+                #{auditorId},
+            </if>
+            <if test="operatorId != null" >
+                #{operatorId},
+            </if>
+            <if test="createTime != null" >
+                #{createTime},
+            </if>
+            <if test="updateTime != null" >
+                #{updateTime}
+            </if>
+        </trim>
+    </insert>
+
+    <insert id="insertBatch" parameterType="java.util.List" >
+        INSERT INTO t_sms_order_list (
+            order_id,
+            company_name,
+            industry_type,
+            belong_sale,
+            sms_type,
+            expect_number,
+            minimum_guarantee,
+            channel_type,
+            direct_connect,
+            extend_size,
+            rate,
+            sign_type,
+            content_template,
+            pay_type,
+            sale_price,
+            invoice_type,
+            online_date,
+            is_audit,
+            state,
+            remark,
+            auditor_id,
+            operator_id,
+            create_time,
+            update_time
+        )VALUES
+        <foreach collection="list" item="item" index="index" separator="," >  
+            (
+                #{item.orderId},
+                #{item.companyName},
+                #{item.industryType},
+                #{item.belongSale},
+                #{item.smsType},
+                #{item.expectNumber},
+                #{item.minimumGuarantee},
+                #{item.channelType},
+                #{item.directConnect},
+                #{item.extendSize},
+                #{item.rate},
+                #{item.signType},
+                #{item.contentTemplate},
+                #{item.payType},
+                #{item.salePrice},
+                #{item.invoiceType},
+                #{item.onlineDate},
+                #{item.isAudit},
+                #{item.state},
+                #{item.remark},
+                #{item.auditorId},
+                #{item.operatorId},
+                #{item.createTime},
+                #{item.updateTime}
+            )
+        </foreach>
+    </insert>
+    
+    
+    <delete id="delete" parameterType="java.lang.Long">
+        DELETE FROM t_sms_order_list WHERE order_id = #{orderId} 
+    </delete>
+    
+
+    <!-- <update id="update" parameterType="OrderList">
+        UPDATE t_sms_order_list SET 
+            order_id=#{orderId},
+            company_name=#{companyName},
+            industry_type=#{industryType},
+            belong_sale=#{belongSale},
+            sms_type=#{smsType},
+            expect_number=#{expectNumber},
+            minimum_guarantee=#{minimumGuarantee},
+            channel_type=#{channelType},
+            direct_connect=#{directConnect},
+            extend_size=#{extendSize},
+            rate=#{rate},
+            sign_type=#{signType},
+            content_template=#{contentTemplate},
+            pay_type=#{payType},
+            sale_price=#{salePrice},
+            invoice_type=#{invoiceType},
+            online_date=#{onlineDate},
+            is_audit=#{isAudit},
+            state=#{state},
+            remark=#{remark},
+            auditor_id=#{auditorId},
+            create_time=#{createTime},
+            UPDATE_TIME = now(),
+            OPERATOR_ID = #{operatorId}
+        WHERE 
+            order_id = #{order_id} 
+    </update> -->
+    
+    <update id="update" parameterType="OrderList">
+        UPDATE t_sms_order_list SET 
+            company_name=#{companyName},
+            industry_type=#{industryType},
+            belong_sale=#{belongSale},
+            sms_type=#{smsType},
+            expect_number=#{expectNumber},
+            minimum_guarantee=#{minimumGuarantee},
+            channel_type=#{channelType},
+            direct_connect=#{directConnect},
+            extend_size=#{extendSize},
+            rate=#{rate},
+            sign_type=#{signType},
+            content_template=#{contentTemplate},
+            pay_type=#{payType},
+            sale_price=#{salePrice},
+            invoice_type=#{invoiceType},
+            online_date=#{onlineDate},
+            is_audit=#{isAudit},
+            state=#{state},
+            remark=#{remark},
+            auditor_id=#{auditorId},
+            operator_id=#{operatorId},
+            create_time=#{createTime},
+            update_time=#{updateTime}
+        WHERE 
+            order_id = #{orderId} 
+    </update>
+    
+    
+    
+    
+<!-- 
+    <update id="updateStatus" parameterType="OrderList">
+        UPDATE t_sms_order_list 
+            <set>
+                STATUS = #{status}
+            </set>
+        WHERE 
+            ORDERID = #{orderId} 
+    </update>
+ -->
+ 
+    <!-- <update id="updateSelective" parameterType="OrderList">
+        UPDATE t_sms_order_list 
+            <set>
+                <if test="orderId != null and orderId != ''">
+                    order_id = #{orderId},
+                </if>
+                <if test="companyName != null and companyName != ''">
+                    company_name = #{companyName},
+                </if>
+                <if test="industryType != null and industryType != ''">
+                    industry_type = #{industryType},
+                </if>
+                <if test="belongSale != null and belongSale != ''">
+                    belong_sale = #{belongSale},
+                </if>
+                <if test="smsType != null and smsType != ''">
+                    sms_type = #{smsType},
+                </if>
+                <if test="expectNumber != null and expectNumber != ''">
+                    expect_number = #{expectNumber},
+                </if>
+                <if test="minimumGuarantee != null and minimumGuarantee != ''">
+                    minimum_guarantee = #{minimumGuarantee},
+                </if>
+                <if test="channelType != null and channelType != ''">
+                    channel_type = #{channelType},
+                </if>
+                <if test="directConnect != null and directConnect != ''">
+                    direct_connect = #{directConnect},
+                </if>
+                <if test="extendSize != null and extendSize != ''">
+                    extend_size = #{extendSize},
+                </if>
+                <if test="rate != null and rate != ''">
+                    rate = #{rate},
+                </if>
+                <if test="signType != null and signType != ''">
+                    sign_type = #{signType},
+                </if>
+                <if test="contentTemplate != null and contentTemplate != ''">
+                    content_template = #{contentTemplate},
+                </if>
+                <if test="payType != null and payType != ''">
+                    pay_type = #{payType},
+                </if>
+                <if test="salePrice != null and salePrice != ''">
+                    sale_price = #{salePrice},
+                </if>
+                <if test="invoiceType != null and invoiceType != ''">
+                    invoice_type = #{invoiceType},
+                </if>
+                <if test="onlineDate != null and onlineDate != ''">
+                    online_date = #{onlineDate},
+                </if>
+                <if test="isAudit != null and isAudit != ''">
+                    is_audit = #{isAudit},
+                </if>
+                <if test="state != null and state != ''">
+                    state = #{state},
+                </if>
+                <if test="remark != null and remark != ''">
+                    remark = #{remark},
+                </if>
+                <if test="auditorId != null and auditorId != ''">
+                    auditor_id = #{auditorId},
+                </if>
+                <if test="createTime != null and createTime != ''">
+                    create_time = #{createTime},
+                </if>
+                <if test="operatorId != null and operatorId != ''">    
+                    OPERATOR_ID = #{operatorId},
+                </if>
+                UPDATE_TIME = now()
+            </set>
+        WHERE 
+            order_id = #{orderId} 
+    </update> -->
+    
+    
+    <update id="updateSelective" parameterType="OrderList">
+        UPDATE t_sms_order_list 
+            <set>
+                <if test="companyName != null and companyName != ''">
+                    company_name = #{companyName},
+                </if>
+                <if test="industryType != null and industryType != ''">
+                    industry_type = #{industryType},
+                </if>
+                <if test="belongSale != null and belongSale != ''">
+                    belong_sale = #{belongSale},
+                </if>
+                <if test="smsType != null and smsType != ''">
+                    sms_type = #{smsType},
+                </if>
+                <if test="expectNumber != null and expectNumber != ''">
+                    expect_number = #{expectNumber},
+                </if>
+                <if test="minimumGuarantee != null and minimumGuarantee != ''">
+                    minimum_guarantee = #{minimumGuarantee},
+                </if>
+                <if test="channelType != null and channelType != ''">
+                    channel_type = #{channelType},
+                </if>
+                <if test="directConnect != null and directConnect != ''">
+                    direct_connect = #{directConnect},
+                </if>
+                <if test="extendSize != null and extendSize != ''">
+                    extend_size = #{extendSize},
+                </if>
+                <if test="rate != null and rate != ''">
+                    rate = #{rate},
+                </if>
+                <if test="signType != null and signType != ''">
+                    sign_type = #{signType},
+                </if>
+                <if test="contentTemplate != null and contentTemplate != ''">
+                    content_template = #{contentTemplate},
+                </if>
+                <if test="payType != null and payType != ''">
+                    pay_type = #{payType},
+                </if>
+                <if test="salePrice != null and salePrice != ''">
+                    sale_price = #{salePrice},
+                </if>
+                <if test="invoiceType != null and invoiceType != ''">
+                    invoice_type = #{invoiceType},
+                </if>
+                <if test="onlineDate != null">
+                    online_date = #{onlineDate},
+                </if>
+                <if test="isAudit != null and isAudit != ''">
+                    is_audit = #{isAudit},
+                </if>
+                <if test="state != null">
+                    state = #{state},
+                </if>
+                <if test="remark != null and remark != ''">
+                    remark = #{remark},
+                </if>
+                <if test="auditorId != null and auditorId != ''">
+                    auditor_id = #{auditorId},
+                </if>
+                <if test="operatorId != null and operatorId != ''">
+                    operator_id = #{operatorId},
+                </if>
+                <if test="updateTime != null">
+                    update_time = #{updateTime}
+                </if>
+            </set>
+        WHERE 
+            order_id = #{orderId} 
+            <if test="lastUpdateTime != null">
+                AND update_time = #{lastUpdateTime}
+            </if>
+    </update>
+
+    <select id="getById" parameterType="java.lang.String" resultMap="rowMapper">
+        SELECT 
+            <include refid="BASE_COLUMN_LIST" />
+        FROM t_sms_order_list
+        WHERE 
+            order_id = #{orderId}
+    </select>
+
+    <select id="getPoById" parameterType="java.lang.String" resultType="com.ucpaas.sms.entity.po.OrderListPo">
+        SELECT
+            t.order_id AS orderId,
+            t.company_name as companyName,
+            t.industry_type as industryType,
+            t.belong_sale as belongSale,
+            u.realname as belongSaleName,
+            t.sms_type as smsType,
+            t.expect_number as expectNumber,
+            t.minimum_guarantee as minimumGuarantee,
+            t.channel_type as channelType,
+            t.direct_connect as directConnect,
+            t.extend_size as extendSize,
+            t.rate as rate,
+            t.sign_type as signType,
+            t.content_template as contentTemplate,
+            t.pay_type as payType,
+            t.sale_price as salePrice,
+            t.invoice_type as invoiceType,
+            t.online_date as onlineDate,
+            t.is_audit as isAudit,
+            t.state as state,
+            t.remark as remark,
+            t.auditor_id as auditorId,
+            t.operator_id as operatorId,
+            t.create_time as createTime,
+            t.update_time as updateTime
+        FROM
+            t_sms_order_list t
+            INNER JOIN t_sms_user u ON t.belong_sale = u.id
+        WHERE
+            t.order_id = #{orderId}
+    </select>
+
+    <select id="queryListNew" parameterType="com.ucpaas.sms.model.Page" resultType="com.ucpaas.sms.entity.po.OrderListPo">
+        SELECT 
+            t.order_id AS orderId,
+            t.company_name as companyName,
+            t.industry_type as industryType,
+            t.belong_sale as belongSale,
+            u.realname as belongSaleName,
+            t.sms_type as smsType,
+            t.expect_number as expectNumber,
+            t.minimum_guarantee as minimumGuarantee,
+            t.channel_type as channelType,
+            t.direct_connect as directConnect,
+            t.extend_size as extendSize,
+            t.rate as rate,
+            t.sign_type as signType,
+            t.content_template as contentTemplate,
+            t.pay_type as payType,
+            t.sale_price as salePrice,
+            t.invoice_type as invoiceType,
+            t.online_date as onlineDate,
+            t.is_audit as isAudit,
+            t.state as state,
+            t.remark as remark,
+            t.auditor_id as auditorId,
+            t.operator_id as operatorId,
+            t.create_time as createTime,
+            t.update_time as updateTime
+        FROM
+            t_sms_order_list t
+            INNER JOIN t_sms_user u ON t.belong_sale = u.id
+        WHERE
+            1 = 1
+            <if test="params.state != null and params.state != ''">
+                AND t.state = #{params.state}
+            </if>
+            <!--<if test="params.operatorId != null ">
+                AND t.operator_id = #{params.operatorId}
+            </if>-->
+            ORDER BY t.create_time DESC
+    </select>
+
+
+    <select id="queryList" parameterType="com.ucpaas.sms.model.Page" resultMap="rowMapper">
+        SELECT
+        <include refid="BASE_COLUMN_LIST" />
+        FROM t_sms_order_list
+        <trim prefix="WHERE" prefixOverrides="AND |OR ">
+            <if test="params.orderId != null and params.orderId != ''">
+                and order_id = #{params.orderId}
+            </if>
+            <if test="params.companyName != null and params.companyName != ''">
+                and company_name = #{params.companyName}
+            </if>
+            <if test="params.industryType != null and params.industryType != ''">
+                and industry_type = #{params.industryType}
+            </if>
+            <if test="params.belongSale != null and params.belongSale != ''">
+                and belong_sale = #{params.belongSale}
+            </if>
+            <if test="params.smsType != null and params.smsType != ''">
+                and sms_type = #{params.smsType}
+            </if>
+            <if test="params.expectNumber != null and params.expectNumber != ''">
+                and expect_number = #{params.expectNumber}
+            </if>
+            <if test="params.minimumGuarantee != null and params.minimumGuarantee != ''">
+                and minimum_guarantee = #{params.minimumGuarantee}
+            </if>
+            <if test="params.channelType != null and params.channelType != ''">
+                and channel_type = #{params.channelType}
+            </if>
+            <if test="params.directConnect != null and params.directConnect != ''">
+                and direct_connect = #{params.directConnect}
+            </if>
+            <if test="params.extendSize != null and params.extendSize != ''">
+                and extend_size = #{params.extendSize}
+            </if>
+            <if test="params.rate != null and params.rate != ''">
+                and rate = #{params.rate}
+            </if>
+            <if test="params.signType != null and params.signType != ''">
+                and sign_type = #{params.signType}
+            </if>
+            <if test="params.contentTemplate != null and params.contentTemplate != ''">
+                and content_template = #{params.contentTemplate}
+            </if>
+            <if test="params.payType != null and params.payType != ''">
+                and pay_type = #{params.payType}
+            </if>
+            <if test="params.salePrice != null and params.salePrice != ''">
+                and sale_price = #{params.salePrice}
+            </if>
+            <if test="params.invoiceType != null and params.invoiceType != ''">
+                and invoice_type = #{params.invoiceType}
+            </if>
+            <if test="params.onlineDate != null">
+                and online_date = #{params.onlineDate}
+            </if>
+            <if test="params.isAudit != null and params.isAudit != ''">
+                and is_audit = #{params.isAudit}
+            </if>
+            <if test="params.state != null and params.state != ''">
+                and state = #{params.state}
+            </if>
+            <if test="params.remark != null and params.remark != ''">
+                and remark = #{params.remark}
+            </if>
+            <if test="params.auditorId != null and params.auditorId != ''">
+                and auditor_id = #{params.auditorId}
+            </if>
+            <if test="params.operatorId != null and params.operatorId != ''">
+                and operator_id = #{params.operatorId}
+            </if>
+            <if test="params.createTime != null and params.createTime != ''">
+                and create_time = #{params.createTime}
+            </if>
+            <if test="params.updateTime != null and params.updateTime != ''">
+                and update_time = #{params.updateTime}
+            </if>
+        </trim>
+    </select>
+
+    <select id="count" parameterType="OrderList" resultType="int">
+        SELECT COUNT(0) 
+        FROM t_sms_order_list 
+        WHERE 
+            1 = 1
+            <if test="orderId != null and orderId != ''">
+                and order_id = #{orderId}
+            </if>
+            <if test="companyName != null and companyName != ''">
+                and company_name = #{companyName}
+            </if>
+            <if test="industryType != null and industryType != ''">
+                and industry_type = #{industryType}
+            </if>
+            <if test="belongSale != null and belongSale != ''">
+                and belong_sale = #{belongSale}
+            </if>
+            <if test="smsType != null and smsType != ''">
+                and sms_type = #{smsType}
+            </if>
+            <if test="expectNumber != null and expectNumber != ''">
+                and expect_number = #{expectNumber}
+            </if>
+            <if test="minimumGuarantee != null and minimumGuarantee != ''">
+                and minimum_guarantee = #{minimumGuarantee}
+            </if>
+            <if test="channelType != null and channelType != ''">
+                and channel_type = #{channelType}
+            </if>
+            <if test="directConnect != null and directConnect != ''">
+                and direct_connect = #{directConnect}
+            </if>
+            <if test="extendSize != null and extendSize != ''">
+                and extend_size = #{extendSize}
+            </if>
+            <if test="rate != null and rate != ''">
+                and rate = #{rate}
+            </if>
+            <if test="signType != null and signType != ''">
+                and sign_type = #{signType}
+            </if>
+            <if test="contentTemplate != null and contentTemplate != ''">
+                and content_template = #{contentTemplate}
+            </if>
+            <if test="payType != null and payType != ''">
+                and pay_type = #{payType}
+            </if>
+            <if test="salePrice != null and salePrice != ''">
+                and sale_price = #{salePrice}
+            </if>
+            <if test="invoiceType != null and invoiceType != ''">
+                and invoice_type = #{invoiceType}
+            </if>
+            <if test="onlineDate != null">
+                and online_date = #{onlineDate}
+            </if>
+            <if test="isAudit != null and isAudit != ''">
+                and is_audit = #{isAudit}
+            </if>
+            <if test="state != null and state != ''">
+                and state = #{state}
+            </if>
+            <if test="remark != null and remark != ''">
+                and remark = #{remark}
+            </if>
+            <if test="auditorId != null and auditorId != ''">
+                and auditor_id = #{auditorId}
+            </if>
+            <if test="createTime != null and createTime != ''">
+                and create_time = #{createTime}
+            </if>
+    </select>
+
+    <delete id="deleteResourceRefById">
+        delete from t_sms_order_ref_resource where order_id=#{orderId}
+    </delete>
+
+    <insert id="batchInsertResourceRef" parameterType="java.util.Map" >
+        INSERT INTO t_sms_order_ref_resource (
+            order_id,
+            resource_id,
+            create_time
+        )
+        VALUES
+        <foreach collection="resourceIds" item="item" index="index" separator="," >
+            (
+            #{orderId},
+            #{item},
+            #{now}
+            )
+        </foreach>
+    </insert>
+</mapper>
+

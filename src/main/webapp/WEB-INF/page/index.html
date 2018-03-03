@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:th="http://www.thymeleaf.org"
+	  lang="zh-cn">
+<head>
+	<meta charset="UTF-8"/>
+	<meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+	<title>云之讯短信运营系统</title>
+	<meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+	<!--[if lt IE 9]>
+	<meta http-equiv="refresh" content="0;ie.html" />
+	<![endif]-->
+	<link rel="shortcut icon" href="../../../resources/img/favicon.ico" th:href="@{/resources/img/favicon.ico}" type="image/x-icon">
+
+	<link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+	<link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet">
+	<link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/style.min862f.css?v=4.1.1}" rel="stylesheet">
+</head>
+<style>
+	.img-circle{
+		width:30px;
+		height:30px;
+	}
+</style>
+<body class="fixed-sidebar full-height-layout gray-bg" style="overflow:hidden">
+<div th:replace="stat :: statCode"></div>
+<div id="wrapper">
+	<!--左侧导航开始-->
+	<nav class="navbar-default navbar-static-side" role="navigation">
+		<div class="nav-close"><i class="fa fa-times-circle"></i>
+		</div>
+		<div class="sidebar-collapse">
+			<ul class="nav" id="side-menu">
+				<li class="nav-header">
+					<div class="dropdown profile-element">
+						<span><img alt="image" class="img-circle" th:src="@{/resources/img/logo.png}" /></span>
+						<span style="color: #fff;">短信运营管理平台</span>
+						<a data-toggle="dropdown" class="dropdown-toggle" href="#">
+							<span class="clear">
+                                <span class="block m-t-xs"><strong class="font-bold" th:text="${session.SESSION_USER.realname}">Be</strong></span>
+                                <span class="text-muted text-xs block" th:text="${session.SESSION_USER.roleName}" >whoAmI<b class="caret"></b></span>
+							</span>
+						</a>
+						<ul class="dropdown-menu animated fadeInRight m-t-xs">
+							<!--<li><a class="J_menuItem" href="form_avatar.html">修改头像</a>-->
+							<!--</li>-->
+							<!--<li><a class="J_menuItem" href="profile.html">个人资料</a>-->
+							<!--</li>-->
+							<!--<li><a class="J_menuItem" href="contacts.html">联系我们</a>-->
+							<!--</li>-->
+							<!--<li><a class="J_menuItem" href="mailbox.html">信箱</a></li>-->
+
+							<!--<li class="divider"></li>-->
+							<li><a href="login.html" th:href="@{/logout}">安全退出</a>
+							</li>
+						</ul>
+					</div>
+					<div class="logo-element"></div>
+				</li>
+
+				<li th:each="menu:${menus}" th:if="${menu.level eq 1}">
+					<a href="#" >
+						<i class="fa fa fa-bar-chart-o" th:class="'fa '+${menu.menu_class}"></i>
+						<span class="nav-label" th:text="${menu.menu_name}">一级菜单</span><span class="fa arrow">
+						<!--<span class="label label-warning pull-right">16</span>-->
+					</span>
+					</a>
+					<ul class="nav nav-second-level" >
+						<li th:each="m:${menus}" th:if="${m.parent_id} == ${menu.menu_id}">
+							<a class="J_menuItem" href="graph_echarts.html" th:href="@{${m.menu_url}}"  >
+								<span th:text="${m.menu_name}">二级菜单</span>
+								<!--<span class="label label-warning pull-right">16</span>-->
+							</a>
+						</li>
+					</ul>
+				</li>
+
+
+			</ul>
+		</div>
+	</nav>
+	<!--左侧导航结束-->
+	<!--右侧部分开始-->
+	<div id="page-wrapper" class="gray-bg dashbard-1">
+		<div class="row border-bottom" style="display:none">
+			<nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0">
+				<div class="navbar-header"><a class="navbar-minimalize minimalize-styl-2 btn btn-primary " href="#"><i class="fa fa-bars"></i> </a>
+
+				</div>
+
+			</nav>
+		</div>
+		<div class="row content-tabs">
+			<button class="roll-nav roll-left J_tabLeft"><i class="fa fa-backward"></i>
+			</button>
+			<nav class="page-tabs J_menuTabs">
+				<button class="navbar-minimalize float-e-margins pull-left" href="#"><i class="fa fa-bars"></i> </button>
+
+				<div class="page-tabs-content">
+					<a href="javascript:;" class="active J_menuTab" data-id="index_v1.html">首页</a>
+				</div>
+			</nav>
+			<button class="roll-nav roll-right J_tabRight"><i class="fa fa-forward"></i>
+			</button>
+			<div class="btn-group roll-nav roll-right">
+				<button class="dropdown J_tabClose" data-toggle="dropdown">关闭操作<span class="caret"></span>
+
+				</button>
+				<ul role="menu" class="dropdown-menu dropdown-menu-right">
+					<li class="J_tabShowActive"><a>定位当前选项卡</a>
+					</li>
+					<li class="divider"></li>
+					<li class="J_tabCloseAll"><a>关闭全部选项卡</a>
+					</li>
+					<li class="J_tabCloseOther"><a>关闭其他选项卡</a>
+					</li>
+				</ul>
+			</div>
+			<a href="login.html" th:href="@{/logout}" class="roll-nav roll-right J_tabExit"><i class="fa fa fa-sign-out"></i> 退出</a>
+		</div>
+		<div class="row J_mainContent" id="content-main" style="height:90%">
+			<iframe class="J_iframe" name="iframe0" width="100%" height="100%" src="home.html?v=1.0.0" th:src="@{/index/welcome}" frameborder="0" data-id="index_v1.html" seamless></iframe>
+		</div>
+		<div class="footer">
+			<div class="text-center">&copy;  深圳市云之讯网络技术有限公司. All Rights Reserved 粤B2-20130213 &nbsp;&nbsp;
+				<a href="http://smsc.ucpaas.com/" style="color: #1ab394;" onmouseout="this.style.color='#1ab394'" onmouseover="this.style.color='#82d8c7'" th:href="${smsc_web_url}" target="_blank">
+					<i>云之讯短信平台</i>
+				</a>
+			</div>
+		</div>
+	</div>
+	<!--右侧部分结束-->
+	<!--右侧边栏开始-->
+	<!--右侧边栏结束-->
+	<!--mini聊天窗口开始-->
+</div>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/plugins/metisMenu/jquery.metisMenu.js}"></script>
+<script th:src="@{/resources/js/plugins/slimscroll/jquery.slimscroll.min.js}"></script>
+<script th:src="@{/resources/js/plugins/layer/layer.min.js}"></script>
+<script th:src="@{/resources/js/hplus.min.js?v=4.1.0}"></script>
+<script th:src="@{/resources/js/contabs.min.js}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/pace/pace.min.js}"></script>
+<script th:inline="javascript">
+	/*<![CDATA[*/
+    $.ajaxSetup( {
+        //设置ajax请求结束后的执行动作
+        complete :
+            function(XMLHttpRequest, textStatus) {
+                // 通过XMLHttpRequest取得响应头，sessionstatus
+                var sessionstatus = XMLHttpRequest.getResponseHeader("sessionstatus");
+                if (sessionstatus == "TIMEOUT") {
+                    var win = window;
+                    while (win != win.top){
+                        win = win.top;
+                    }
+                    win.location.href= XMLHttpRequest.getResponseHeader("CONTEXTPATH");
+                }
+            }
+    });
+
+		$(".J_menuItem").on("click",function () {
+		    var tabName = $.trim($(this).text());
+            var tabs = $(".J_menuTab");
+            var data_id = '';
+			for (var t = 0;t < tabs.length;t++){
+                if ($.trim(tabs[t].innerText) == tabName){
+                    data_id = tabs[t].attributes["data-id"].value;
+					break;
+				}
+			}
+            if (data_id == ''){
+                return;
+            }
+			var iframes = $(".J_iframe");
+			for (var j = 0;j < iframes.length;j++){
+                var d = iframes[j].attributes["data-id"].value;
+			    if (d == data_id){
+                    iframes[j].contentWindow.location=data_id;
+                    break
+                };
+
+			}
+
+        });
+
+
+
+
+		/*]]>*/
+
+
+</script>
+</body>
+
+
+</html>

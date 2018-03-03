@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 运营平台首页 -->
+<mapper namespace="opsplatform.index">
+
+	<!-- 查询月新增代理商个数和当前代理商总数 -->
+	<select id="getAgentNum" resultType="map">
+		SELECT
+			IFNULL(SUM(IF(data_time = #{data_time}, agent_increase_num, 0)), 0) AS agent_increase_num,
+			IFNULL(SUM(agent_increase_num), 0) AS agent_num_total
+		FROM
+			t_sms_agent_num_tendency
+		WHERE
+			data_type = 2
+	</select>
+	
+	<!-- 查询月新增客户数和当前用户总数 -->
+	<select id="getAgentUserNum" resultType="map">
+		SELECT
+			IFNULL(SUM(IF(data_time = #{data_time}, user_increase_num, 0)), 0) AS user_increase_num,
+			IFNULL(SUM(user_increase_num), 0) AS user_num_total
+		FROM
+			t_sms_client_num_tendency
+		WHERE
+			data_type = 2
+	</select>
+	
+	<!-- 查询本月消费和当前总消费 -->
+	<select id="getAgentConsume" resultType="map">
+		SELECT
+			ROUND(IFNULL(SUM(IF(data_time = #{data_time}, consume, 0)), 0), 2) AS consume,
+			ROUND(IFNULL(SUM(consume), 0), 2) AS consume_total
+		FROM
+			t_sms_agent_consume_tendency
+		WHERE
+			data_type = 2
+	</select>
+
+	<!-- 查询代理商趋势 -->
+	<select id="queryAgentTendency" resultType="map">
+		SELECT
+			SUM(t.agent_increase_num) AS increase_num,
+			t.data_time
+		FROM
+			t_sms_agent_num_tendency t
+		WHERE
+			t.data_type = #{data_type}
+		AND
+			t.data_time BETWEEN #{start_time}
+			AND #{end_time}
+		GROUP BY
+			t.data_time
+		ORDER BY
+			t.data_time
+	</select>
+	
+	<!-- 查询客户趋势 -->
+	<select id="queryClientTendency" resultType="map">
+		SELECT
+			SUM(t.user_increase_num) AS increase_num,
+			t.data_time
+		FROM
+			t_sms_client_num_tendency t
+		WHERE
+			t.data_type = #{data_type}
+		AND
+			t.data_time BETWEEN #{start_time}
+			AND #{end_time}
+		GROUP BY
+			t.data_time
+		ORDER BY
+			t.data_time
+	</select>
+	
+	<!-- 查询消费趋势 -->
+	<select id="queryConsumeTendency" resultType="map">
+		SELECT
+			SUM(t.consume) AS increase_num,
+			t.data_time
+		FROM
+			t_sms_agent_consume_tendency t
+		WHERE
+			t.data_type = #{data_type}
+		AND
+			t.data_time BETWEEN #{start_time}
+			AND #{end_time}
+		GROUP BY
+			t.data_time
+		ORDER BY
+			t.data_time
+	</select>
+	<!--按权限查询代理商趋势(needQuerySaleIsNullData)-->
+	<select id="getAgentTendency" resultType="map">
+		SELECT
+		COUNT(0) AS increase_num,
+		DATE_FORMAT(create_time,'%Y%m%d')AS data_time
+		FROM
+		t_sms_agent_info
+		WHERE (belong_sale IN
+		<foreach collection="ids" index="index" item="item" open="(" close=")" separator=",">
+			#{item}
+		</foreach>
+		<if test="needQuerySaleIsNullData">
+			OR belong_sale IS NULL
+		</if>
+		)
+		AND create_time BETWEEN #{start_time} AND #{end_time}
+		GROUP BY data_time
+		ORDER BY data_time
+	</select>
+	<!--按权限查询代理商趋势(needQuerySaleIsNullData)-->
+	<select id="getClientTendency" resultType="map">
+		SELECT
+		COUNT(0) AS increase_num,
+		DATE_FORMAT(createtime,'%Y%m%d')AS data_time
+		FROM
+		t_sms_account
+		WHERE (belong_sale IN
+		<foreach collection="ids" index="index" item="item" open="(" close=")" separator=",">
+			#{item}
+		</foreach>
+		<if test="needQuerySaleIsNullData">
+			OR belong_sale IS NULL
+		</if>
+		)
+		AND createtime BETWEEN #{start_time} AND #{end_time}
+		GROUP BY data_time
+		ORDER BY data_time
+	</select>
+
+</mapper> 

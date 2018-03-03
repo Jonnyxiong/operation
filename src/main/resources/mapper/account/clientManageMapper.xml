@@ -1,0 +1,868 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 客户信息 -->
+<mapper namespace="clientManage">
+	<!-- 查询条件 -->
+	<sql id="queryCondition">
+		<if test="condition != null and condition!=''">
+			and (
+					a.clientid like CONCAT('%',#{condition},'%') 
+					or a.name like CONCAT('%',#{condition},'%') 
+					or a.mobile like CONCAT('%',#{condition},'%')
+					or u.realname like CONCAT('%',#{condition},'%')
+					or a.agent_id like CONCAT('%',#{condition},'%')
+			)
+		</if>
+		<if test="status != null and status!=''">
+			and a.status = #{status}
+		</if>
+		<if test="starLevel != null and starLevel!=''">
+			and tc.star_level = #{starLevel}
+		</if>
+		<if test="agent_type != null and agent_type!=''">
+			and i.agent_type = #{agent_type}
+		</if>
+		<if test="extValue != null">
+			and tc.ext_value = #{extValue}
+		</if>
+		<if test="paytype != null and paytype!=''">
+			and a.paytype = #{paytype}
+		</if>
+		<if test="start_time_day != null and start_time_day!=''">
+			and a.createtime >= STR_TO_DATE(#{start_time_day},'%Y-%m-%d')
+		</if>
+		<if test="end_time_day != null and end_time_day!=''">
+			and a.createtime <![CDATA[<= STR_TO_DATE(#{end_time_day},'%Y-%m-%d %T') ]]>
+		</if>
+		<if test="value == 0">
+			AND ((property = 'charge_rule'
+			AND value = #{value})  or (value is null and IFNULL(a.agent_id,0) &gt; 10))
+		</if>
+		<if test="value == 1">
+			AND ((property = 'charge_rule'
+			AND value = #{value})  or (value is null and IFNULL(a.agent_id,0) &lt; 10))
+		</if>
+		<if test="value == 2">
+			AND property = 'charge_rule'
+			AND value = #{value}
+		</if>
+
+		<if test="dataAuthorityCondition != null">
+			<choose>
+				<when test="dataAuthorityCondition.needQuerySaleIsNullData">
+					AND(
+						a.belong_sale in
+						<foreach collection="dataAuthorityCondition.ids" index="index" item="item" open="(" close=")" separator=",">
+							#{item}
+						</foreach>
+						OR
+						ISNULL(a.belong_sale)
+					)
+				</when>
+				<otherwise>
+					AND a.belong_sale in
+					<foreach collection="dataAuthorityCondition.ids" index="index" item="item" open="(" close=")" separator=",">
+						#{item}
+					</foreach>
+				</otherwise>
+			</choose>
+		</if>
+	</sql>
+
+	<!-- 查询客户信息 -->
+	<select id="queryClientInfo" resultType="map">
+		SELECT
+			a.clientid,
+			a.name,
+			a.mobile,
+			a.status,
+			a.paytype,
+		tc.ext_value,
+		CASE tc.ext_value
+		WHEN 0 THEN '不支持'
+		WHEN 1 THEN '支持'
+		END AS extValueStr,
+		tc.star_level,
+		CASE tc.star_level
+		WHEN 1 THEN '1星'
+		WHEN 2 THEN '2星'
+		WHEN 3 THEN '3星'
+		WHEN 4 THEN '4星'
+		WHEN 5 THEN '5星'
+		END AS starLevelStr,
+			CASE a.paytype
+				WHEN 0 THEN '预付'
+				WHEN 1 THEN '后付'
+			END AS paytypeDesc,
+			u.realname as userRealName,
+		CASE a.status
+			WHEN 0 THEN '未激活'
+			WHEN 1 THEN '已启用'
+			WHEN 5 THEN '已冻结'
+			WHEN 6 THEN '已注销'
+			WHEN 7 THEN '已锁定'
+			END AS statusName,
+		i.agent_type,
+		CASE i.agent_type
+			WHEN 1 THEN '销售代理商'
+			WHEN 2 THEN '品牌代理商'
+			WHEN 3 THEN '资源合作商'
+			WHEN 4 THEN '代理商和资源合作'
+			WHEN 5 THEN 'OEM代理商'
+		END AS agent_type_name,
+		CASE
+			WHEN a.oauth_status IS NULL THEN '待认证'
+			WHEN a.oauth_status = 2 THEN '待认证'
+			WHEN a.oauth_status = 3 THEN '已认证'
+			WHEN a.oauth_status = 4 THEN '认证不通过'
+			END AS oauth_status,
+		upl.`value`,
+		CASE upl.`value`
+			WHEN 0 THEN '提交量'
+			WHEN 1 THEN '成功量'
+			WHEN 2 THEN '明确成功量'
+			ELSE
+				CASE WHEN IFNULL(a.agent_id,0) &gt; 10 THEN '提交量'
+				ELSE '成功量' END
+		END AS valueStr,
+		(select count(0) from t_sms_oauth_pic tp where tp.client_id = a.clientid ) as flag,
+			a.agent_id,
+			DATE_FORMAT(a.createtime,'%Y-%m-%d %T') AS createtime
+		FROM
+			t_sms_account a
+		INNER JOIN 
+			t_sms_agent_info i
+		ON a.agent_id = i.agent_id
+		LEFT JOIN t_sms_user u ON a.belong_sale = u.id
+		LEFT JOIN t_sms_client_info_ext tc on tc.clientid = a.clientid
+		LEFT JOIN
+		(	SELECT
+				tmp1.effect_date,property,`value`,tmp1.clientid
+			FROM
+			t_sms_user_property_log tmp1
+			JOIN (
+				SELECT MAX(effect_date) AS effect_date,clientid FROM t_sms_user_property_log
+				WHERE effect_date &lt; NOW() AND property = 'charge_rule'
+				GROUP BY clientid
+			) tmp2 ON tmp1.effect_date = tmp2.effect_date AND tmp1.clientid = tmp2.clientid
+		)upl on upl.clientid = a.clientid
+		WHERE
+		 1 = 1
+<!-- 		a.status &lt;&gt; 6 -->
+<!-- 		<if test="agentId!=null"> -->
+<!-- 			and a.agent_id=#{agentId} -->
+<!-- 		</if> -->
+		<include refid="queryCondition" />
+		ORDER BY a.createtime desc
+		${limit}
+	</select>
+
+	<!-- 查询客户信息 -->
+	<select id="queryClientInfoNew" resultType="map">
+		SELECT
+			a.clientid,
+			a.name,
+			a.mobile,
+			a.status,
+			a.paytype,
+			a.agent_id,
+			a.belong_sale,
+			a.oauth_status,
+			u.realname as userRealName,
+            i.agent_type,
+			(select count(0) from t_sms_oauth_pic tp where tp.client_id = a.clientid ) as flag,
+			DATE_FORMAT(a.createtime,'%Y-%m-%d %T') AS createtime
+		FROM
+			t_sms_account a
+        JOIN t_sms_agent_info i ON a.agent_id = i.agent_id
+		LEFT JOIN t_sms_user u ON a.belong_sale = u.id
+		WHERE
+			IFNULL(a.agent_id, 0) > 10
+		<include refid="queryConditionNew" />
+		ORDER BY a.createtime desc
+		${limit}
+	</select>
+
+	<!-- 查询条件 -->
+	<sql id="queryConditionNew">
+		<if test="condition != null and condition!=''">
+			and (
+			a.clientid like CONCAT('%',#{condition},'%')
+			or a.name like CONCAT('%',#{condition},'%')
+			or a.mobile like CONCAT('%',#{condition},'%')
+			<!-- 此处是或者的条件，不能剥离，可行性：将销售名字在前台页面单独分离为一个输入框可剥离 -->
+			or u.realname like CONCAT('%',#{condition},'%')
+            or a.agent_id like CONCAT('%',#{condition},'%'))
+
+		</if>
+		<if test="status != null and status!=''">
+			and a.status = #{status}
+		</if>
+		<if test="paytype != null and paytype!=''">
+			and a.paytype = #{paytype}
+		</if>
+		<if test="start_time_day != null and start_time_day!=''">
+			and a.createtime >= STR_TO_DATE(#{start_time_day},'%Y-%m-%d')
+		</if>
+		<if test="end_time_day != null and end_time_day!=''">
+			and a.createtime <![CDATA[<= STR_TO_DATE(#{end_time_day},'%Y-%m-%d %T') ]]>
+		</if>
+		<if test="clientids != null and clientids.size > 0">
+			and a.clientid in
+			<foreach collection="clientids" index="index" item="item" open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if>
+        <if test="agent_type != null and agent_type!=''">
+            and i.agent_type = #{agent_type}
+        </if>
+		<if test="dataAuthorityCondition != null">
+			<choose>
+				<when test="dataAuthorityCondition.needQuerySaleIsNullData">
+					AND
+					(
+						a.belong_sale in
+						<foreach collection="dataAuthorityCondition.ids" index="index" item="item" open="(" close=")" separator=",">
+							#{item}
+						</foreach>
+						OR ISNULL(a.belong_sale)
+					)
+				</when>
+				<otherwise>
+					AND a.belong_sale in
+					<foreach collection="dataAuthorityCondition.ids" index="index" item="item" open="(" close=")" separator=",">
+						#{item}
+					</foreach>
+				</otherwise>
+			</choose>
+		</if>
+	</sql>
+
+<!-- 	<select id="queryAllClientInfoCount" resultType="map"> -->
+<!-- 		SELECT count(0) as totalCount -->
+<!-- 		FROM -->
+<!-- 			t_sms_account a -->
+<!-- 		INNER JOIN  -->
+<!-- 			t_sms_agent_info i -->
+<!-- 		ON a.agent_id = i.agent_id -->
+<!-- 		WHERE -->
+<!-- 		 1 = 1 -->
+<!-- 		<include refid="queryCondition" /> -->
+<!-- 	</select> -->
+	
+	
+	<!-- 查询所有客户信息 -->
+	<select id="queryAllClientInfo" resultType="map">
+		SELECT
+			a.clientid,
+			a.name,
+			a.mobile,
+			u.realname as userRealName,
+			a.paytype,
+		tc.ext_value,
+		CASE tc.ext_value
+		WHEN 0 THEN '不支持'
+		WHEN 1 THEN '支持'
+		END AS extValueStr,
+			CASE a.paytype
+				WHEN 0 THEN '预付'
+				WHEN 1 THEN '后付'
+			END AS paytypeDesc,
+		tc.star_level,
+		CASE tc.star_level
+		WHEN 1 THEN '1星'
+		WHEN 2 THEN '2星'
+		WHEN 3 THEN '3星'
+		WHEN 4 THEN '4星'
+		WHEN 5 THEN '5星'
+		END AS starLevelStr,
+			CASE a.status
+				WHEN 0 THEN '未激活'
+				WHEN 1 THEN '已启用'
+				WHEN 5 THEN '已冻结'
+				WHEN 6 THEN '已注销'
+				WHEN 7 THEN '已锁定'
+				END AS status,
+			CASE i.agent_type
+				WHEN 1 THEN '销售代理商'
+				WHEN 2 THEN '品牌代理商'
+				WHEN 3 THEN '资源合作商'
+				WHEN 4 THEN '代理商和资源合作'
+				WHEN 5 THEN 'OEM代理商'
+			END AS agent_type_name,
+			CASE 
+				WHEN a.oauth_status IS NULL THEN '待认证'
+				WHEN a.oauth_status = 2 THEN '待认证'
+				WHEN a.oauth_status = 3 THEN '已认证'
+				WHEN a.oauth_status = 4 THEN '认证不通过'
+				END AS oauth_status,
+			a.agent_id,
+			CASE upl.`value`
+				WHEN 0 THEN '提交量'
+				WHEN 1 THEN '成功量'
+				WHEN 2 THEN '明确成功量'
+		ELSE
+		CASE WHEN IFNULL(a.agent_id,0) &gt; 10 THEN '提交量'
+		ELSE '成功量' END
+				END AS valueStr,
+			DATE_FORMAT(a.createtime,'%Y-%m-%d %T') AS createtime
+		FROM
+			t_sms_account a
+		INNER JOIN 
+			t_sms_agent_info i
+		ON a.agent_id = i.agent_id
+		LEFT JOIN t_sms_user u ON a.belong_sale = u.id
+		LEFT JOIN t_sms_client_info_ext tc on tc.clientid = a.clientid
+		LEFT JOIN
+		(	SELECT
+		tmp1.effect_date,property,`value`,tmp1.clientid
+		FROM
+		t_sms_user_property_log tmp1
+		JOIN (
+		SELECT MAX(effect_date) AS effect_date,clientid FROM t_sms_user_property_log
+		WHERE effect_date &lt; NOW() AND property = 'charge_rule'
+		GROUP BY clientid
+		) tmp2 ON tmp1.effect_date = tmp2.effect_date AND tmp1.clientid = tmp2.clientid
+		)upl on upl.clientid = a.clientid
+		WHERE
+		 1 = 1
+		<include refid="queryCondition" />
+		ORDER BY a.createtime desc
+	</select>
+
+	<select id="queryAllClientInfoNew" resultType="map">
+		SELECT
+			a.clientid,
+			a.name,
+			a.mobile,
+			a.status,
+			a.paytype,
+			a.agent_id,
+			a.belong_sale,
+			a.oauth_status,
+			u.realname as userRealName,
+            i.agent_type,
+			(select count(0) from t_sms_oauth_pic tp where tp.client_id = a.clientid ) as flag,
+			DATE_FORMAT(a.createtime,'%Y-%m-%d %T') AS createtime
+		FROM t_sms_account a
+        JOIN t_sms_agent_info i ON a.agent_id = i.agent_id
+		LEFT JOIN t_sms_user u ON a.belong_sale = u.id
+		WHERE
+			IFNULL(a.agent_id, 0) > 10
+		<include refid="queryConditionNew" />
+		ORDER BY a.createtime desc
+	</select>
+
+	<select id="queryClientInfoCount" resultType="map">
+		SELECT count(0) as totalCount
+		FROM
+			t_sms_account a
+		INNER JOIN 
+			t_sms_agent_info i
+		ON a.agent_id = i.agent_id
+		LEFT JOIN t_sms_user u ON a.belong_sale = u.id
+		LEFT JOIN t_sms_client_info_ext tc on tc.clientid = a.clientid
+		LEFT JOIN
+		(	SELECT
+		tmp1.effect_date,property,`value`,tmp1.clientid
+		FROM
+		t_sms_user_property_log tmp1
+		JOIN (
+		SELECT MAX(effect_date) AS effect_date,clientid FROM t_sms_user_property_log
+		WHERE effect_date &lt; NOW() AND property = 'charge_rule'
+		GROUP BY clientid
+		) tmp2 ON tmp1.effect_date = tmp2.effect_date AND tmp1.clientid = tmp2.clientid
+		)upl on upl.clientid = a.clientid
+		WHERE
+		 1 = 1
+<!-- 		a.status &lt;&gt; 6 -->
+<!-- 		AND a.status &lt;&gt; 6      运营平台:注销客户是否可见-->
+		<include refid="queryCondition" />
+	</select>
+
+	<select id="queryClientInfoCountNew" resultType="map">
+		SELECT count(0) as totalCount
+		FROM
+			t_sms_account a
+        JOIN t_sms_agent_info i ON a.agent_id = i.agent_id
+		LEFT JOIN t_sms_user u ON a.belong_sale = u.id
+		WHERE
+			IFNULL(a.agent_id, 0) > 10
+		<include refid="queryConditionNew" />
+	</select>
+
+	<select id="queryClientDetailInfo" resultType="map">
+		SELECT  
+			a.id,
+			a.clientid,
+			a.name,
+			CASE a.status
+				WHEN 0 THEN '未激活'
+				WHEN 1 THEN '已启用'
+				WHEN 5 THEN '已冻结'
+				WHEN 6 THEN '已注销'
+				WHEN 7 THEN '已锁定'
+				END AS status,
+			a.agent_id,
+			CASE i.agent_type
+				WHEN 1 THEN '销售代理商'
+				WHEN 2 THEN '品牌代理商'
+				WHEN 3 THEN '资源合作商'
+				WHEN 4 THEN '代理商和资源合作'
+				WHEN 5 THEN 'OEM代理商'
+			END AS agent_type_name,
+			CASE 
+				WHEN a.oauth_status IS NULL THEN '待认证'
+				WHEN a.oauth_status = 2 THEN '待认证'
+				WHEN a.oauth_status = 3 THEN '已认证'
+				WHEN a.oauth_status = 4 THEN '认证不通过'
+				END AS oauth_status,
+			DATE_FORMAT(a.oauth_date,'%Y-%m-%d %T') AS oauth_date,
+			a.mobile,
+			a.email,
+			a.province,
+			a.city,
+			a.area,
+			a.address,
+			a.realname,
+		  	a.belong_sale,
+			CASE
+				WHEN a.client_level IS NULL THEN ''
+				WHEN a.client_level = 1 THEN '普通客户'
+				WHEN a.client_level = 2 THEN '中小企业'
+				WHEN a.client_level = 3 THEN '大型企业'
+				END AS client_level,
+			a.client_type,
+			CASE a.needreport
+				WHEN 0 THEN '不需要'
+				WHEN 1 THEN '需要简单状态报告'
+				WHEN 2 THEN '需要透传状态报告'
+				END AS needreport,
+			CASE a.needmo
+				WHEN 0 THEN '不需要'
+				WHEN 1 THEN '需要'
+				END AS needmo,
+			CASE a.needaudit
+				WHEN 0 THEN '不需要'
+				WHEN 1 THEN '营销需要'
+				WHEN 1 THEN '全部需要'
+				END AS needaudit,	
+			DATE_FORMAT(a.createtime,'%Y-%m-%d %T') AS createtime,
+			CASE
+				WHEN a.ip = '*' THEN ''
+				ELSE ip
+			END AS ip,
+			a.deliveryurl,
+			a.mourl,
+			a.nodenum,
+			CASE a.paytype
+				WHEN 0 THEN '预付费'
+				WHEN 1 THEN '后付费'
+				END AS paytype,		
+			CASE a.needextend
+				WHEN 0 THEN '不支持'
+				WHEN 1 THEN '支持'
+				END AS needextend,		
+			a.remarks
+		FROM
+			t_sms_account a
+		INNER JOIN 
+			t_sms_agent_info i
+		ON a.agent_id = i.agent_id
+		WHERE
+			a.clientid = #{clientId}
+	</select>
+	
+	
+	<!-- 修改客户状态 -->
+	<update id="updateStatus">
+		UPDATE t_sms_account
+		<set>
+			<if test="status != null and status != ''">
+				status = #{status},
+			</if>
+			<if test="status != null and status == 6">
+				extendtype = NULL,
+				extendport = NULL
+			</if>
+
+		</set>
+		WHERE
+			clientid = #{clientId}
+	</update>
+	<!-- 释放端口号 -->
+	<update id="releaseExtendport">
+		UPDATE t_sms_extendport_assign
+			SET reusenumber = CONCAT(#{extendport}, IF(reusenumber = '', '', ','), reusenumber)
+			WHERE
+			extendtype = #{extendtype}
+	</update>
+
+	<select id="getClientInfo" resultType="map">
+		SELECT extendport,extendtype FROM t_sms_account WHERE clientid = #{clientId}
+	</select>
+
+	<update id="updateBelongSaleForClient">
+		UPDATE
+			t_sms_account
+		SET
+			belong_sale = #{belong_sale}
+		<where>
+			1 = 1
+			<if test="agent_id != null and agent_id != ''">
+				and agent_id = #{agent_id}
+			</if>
+			<if test="clientid != null and clientid != ''">
+				and clientid = #{clientid}
+			</if>
+			<if test="oldBelongSale != null and oldBelongSale != ''">
+				AND belong_sale = #{oldBelongSale}
+			</if>
+
+		</where>
+
+	</update>
+
+
+	<select id="queryCustomerStarLevel" resultType="map">
+		SELECT
+			a.clientid,
+		    a.agent_id,
+			a.name,
+			a.createtime,
+		tc.star_level,
+		DATE_FORMAT(a.createtime,'%Y-%m-%d %H:%i:%s') as createtimeStr,
+		CASE
+		WHEN a.agent_id is null THEN '直客'
+		ELSE '代理商子客户'
+		END AS agentIdStr,
+		CASE tc.star_level
+		WHEN 1 THEN '1星'
+		WHEN 2 THEN '2星'
+		WHEN 3 THEN '3星'
+		WHEN 4 THEN '4星'
+		WHEN 5 THEN '5星'
+		END AS starLevelStr
+		FROM t_sms_account a
+		LEFT JOIN t_sms_client_info_ext tc on tc.clientid = a.clientid
+		WHERE 1=1
+		<if test="customerID != null and customerID!=''">
+			and a.clientid  LIKE CONCAT('%',#{customerID},'%')
+		</if>
+		<if test="customerName != null and customerName!=''">
+			and a.name LIKE CONCAT('%',#{customerName},'%')
+		</if>
+		<choose>
+			<when test="status != null and status!=''">
+				<if test="status==2">
+					and a.agent_id is null
+				</if>
+				<if test="status==1">
+					and a.agent_id is not null
+				</if>
+			</when>
+		</choose>
+		<if test="starLevel != null and starLevel !=''">
+			and tc.star_level = #{starLevel}
+		</if>
+		ORDER BY a.createtime desc
+		${limit}
+	</select>
+
+	<select id="queryCustomerStarLevelCount" resultType="map">
+		SELECT count(0) as totalCount FROM t_sms_account a
+		LEFT JOIN t_sms_client_info_ext tc on tc.clientid = a.clientid
+		WHERE 1=1
+		<if test="customerID != null and customerID!=''">
+			and a.clientid LIKE CONCAT('%',#{customerID},'%')
+		</if>
+		<if test="customerName != null and customerName!=''">
+			and a.name LIKE CONCAT('%',#{customerName},'%')
+		</if>
+		<choose>
+			<when test="status != null and status!=''">
+				<if test="status==2">
+					and a.agent_id is null
+				</if>
+				<if test="status==1">
+					and a.agent_id is not null
+				</if>
+			</when>
+		</choose>
+		<if test="starLevel != null and starLevel !=''">
+			and tc.star_level = #{starLevel}
+		</if>
+		ORDER BY a.createtime desc
+	</select>
+
+	<select id="queryAllCustomerStarLevel" resultType="map">
+		SELECT
+		a.clientid,
+		a.agent_id,
+		a.name,
+		DATE_FORMAT(a.createtime,'%Y-%m-%d %H:%i:%s') as createtimeStr,
+		CASE
+		WHEN a.agent_id is null THEN '直客'
+		ELSE '代理商子客户'
+		END AS agentIdStr,
+		a.createtime,
+		tc.star_level,
+		CASE tc.star_level
+		WHEN 1 THEN '1星'
+		WHEN 2 THEN '2星'
+		WHEN 3 THEN '3星'
+		WHEN 4 THEN '4星'
+		WHEN 5 THEN '5星'
+		END AS starLevelStr
+		FROM t_sms_account a
+		LEFT JOIN t_sms_client_info_ext tc on tc.clientid = a.clientid
+		WHERE 1=1
+		<if test="customerID != null and customerID!=''">
+			and a.clientid  LIKE CONCAT('%',#{customerID},'%')
+		</if>
+		<if test="customerName != null and customerName!=''">
+			and a.name LIKE CONCAT('%',#{customerName},'%')
+		</if>
+		<choose>
+			<when test="status != null and status!=''">
+				<if test="status==2">
+					and a.agent_id is null
+				</if>
+				<if test="status==1">
+					and a.agent_id is not null
+				</if>
+			</when>
+		</choose>
+		<if test="starLevel != null and starLevel !=''">
+			and tc.star_level = #{starLevel}
+		</if>
+		ORDER BY a.createtime desc
+	</select>
+
+	<select id="findList" resultType="map">
+		SELECT
+		a.clientid,
+		a.name,
+		a.mobile,
+		a.status,
+		tc.ext_value,
+		CASE tc.ext_value
+		WHEN 0 THEN '不支持'
+		WHEN 1 THEN '支持'
+		END AS extValueStr,
+		tc.star_level,
+		CASE tc.star_level
+		WHEN 1 THEN '1星'
+		WHEN 2 THEN '2星'
+		WHEN 3 THEN '3星'
+		WHEN 4 THEN '4星'
+		WHEN 5 THEN '5星'
+		END AS starLevelStr,
+		CASE a.status
+		WHEN 0 THEN '未激活'
+		WHEN 1 THEN '已启用'
+		WHEN 5 THEN '已冻结'
+		WHEN 6 THEN '已注销'
+		WHEN 7 THEN '已锁定'
+		END AS statusName,
+		CASE
+		WHEN a.oauth_status IS NULL THEN '待认证'
+		WHEN a.oauth_status = 2 THEN '待认证'
+		WHEN a.oauth_status = 3 THEN '已认证'
+		WHEN a.oauth_status = 4 THEN '认证不通过'
+		END AS oauthStatusDesc,
+		u.realname as userRealName,
+		a.paytype,
+		CASE a.paytype
+		WHEN 0 THEN '预付'
+		WHEN 1 THEN '后付'
+		END AS paytypeDesc,
+		a.smsfrom,
+		CASE a.smsfrom
+		WHEN 1 THEN 'CMPP3.0'
+		WHEN 2 THEN 'SMPP'
+		WHEN 3 THEN 'CMPP2.0'
+		WHEN 4 THEN 'SGIP'
+		WHEN 5 THEN 'SMGP'
+		WHEN 6 THEN 'HTTPS'
+		END AS smsfromDesc,
+		a.smstype,
+		CASE a.smstype
+		WHEN 0 THEN '通知'
+		WHEN 4 THEN '验证码'
+		WHEN 5 THEN '营销'
+		END AS smstypeDesc,
+		upl.`value`,
+		CASE upl.`value`
+		WHEN 0 THEN '提交量'
+		WHEN 1 THEN '成功量'
+		WHEN 2 THEN '明确成功量'
+		ELSE
+		CASE WHEN IFNULL(a.agent_id,0) &gt; 10 THEN '提交量'
+		ELSE '成功量' END
+		END AS valueStr,
+		(select count(0) from t_sms_oauth_pic tp where tp.client_id = a.clientid ) as flag,
+		DATE_FORMAT(a.createtime,'%Y-%m-%d %T') AS createtime
+		FROM t_sms_account a
+		LEFT JOIN t_sms_user u ON a.belong_sale = u.id
+		LEFT JOIN t_sms_client_info_ext tc on tc.clientid = a.clientid
+		LEFT JOIN
+		(	SELECT
+		tmp1.effect_date,property,`value`,tmp1.clientid
+		FROM
+		t_sms_user_property_log tmp1
+		JOIN (
+		SELECT MAX(effect_date) AS effect_date,clientid FROM t_sms_user_property_log
+		WHERE effect_date &lt; NOW() AND property = 'charge_rule'
+		GROUP BY clientid
+		) tmp2 ON tmp1.effect_date = tmp2.effect_date AND tmp1.clientid = tmp2.clientid
+		)upl on upl.clientid = a.clientid
+		<where>
+			((a.agent_id is null) or a.agent_id in(0,1,2))
+			<if test="condition != null and condition!=''">
+				and (
+				a.clientid like CONCAT('%',#{condition},'%')
+				or a.name like CONCAT('%',#{condition},'%')
+				or a.mobile like CONCAT('%',#{condition},'%')
+				or u.realname like CONCAT('%',#{condition},'%')
+				)
+			</if>
+			<if test="status != null and status!=''">
+				and a.status = #{status}
+			</if>
+			<if test="starLevel != null and starLevel!=''">
+				and tc.star_level = #{starLevel}
+			</if>
+			<if test="paytype != null and paytype!=''">
+				and a.paytype = #{paytype}
+			</if>
+			<if test="extValue != null and extValue!=''">
+				and tc.ext_value = #{extValue}
+			</if>
+			<if test="start_time_day != null and start_time_day!=''">
+				and a.createtime >= STR_TO_DATE(#{start_time_day},'%Y-%m-%d')
+			</if>
+			<if test="end_time_day != null and end_time_day!=''">
+				and a.createtime <![CDATA[<= STR_TO_DATE(#{end_time_day},'%Y-%m-%d %T') ]]>
+			</if>
+			<if test="value == 0">
+				AND ((property = 'charge_rule'
+				AND value = #{value})  or (value is null and  IFNULL(agent_id,0) &gt; 10))
+			</if>
+			<if test="value == 1">
+				AND ((property = 'charge_rule'
+				AND value = #{value})  or (value is null and IFNULL(agent_id,0) &lt; 10))
+			</if>
+			<if test="value == 2">
+				AND property = 'charge_rule'
+				AND value = #{value}
+			</if>
+			<if test="dataAuthorityCondition != null">
+				<choose>
+					<when test="dataAuthorityCondition.needQuerySaleIsNullData">
+						AND(
+						a.belong_sale in
+						<foreach collection="dataAuthorityCondition.ids" index="index" item="item" open="(" close=")" separator=",">
+							#{item}
+						</foreach>
+						OR
+						ISNULL(a.belong_sale)
+						)
+					</when>
+					<otherwise>
+						AND a.belong_sale in
+						<foreach collection="dataAuthorityCondition.ids" index="index" item="item" open="(" close=")" separator=",">
+							#{item}
+						</foreach>
+					</otherwise>
+				</choose>
+			</if>
+		</where>
+		ORDER BY a.createtime desc
+		${limit}
+	</select>
+
+	<select id="findListCount" resultType="map">
+
+		SELECT count(0) as totalCount
+		FROM t_sms_account a
+		LEFT JOIN t_sms_user u ON a.belong_sale = u.id
+		LEFT JOIN t_sms_client_info_ext tc on tc.clientid = a.clientid
+		LEFT JOIN
+		(	SELECT
+		tmp1.effect_date,property,`value`,tmp1.clientid
+		FROM
+		t_sms_user_property_log tmp1
+		JOIN (
+		SELECT MAX(effect_date) AS effect_date,clientid FROM t_sms_user_property_log
+		WHERE effect_date &lt; NOW() AND property = 'charge_rule'
+		GROUP BY clientid
+		) tmp2 ON tmp1.effect_date = tmp2.effect_date AND tmp1.clientid = tmp2.clientid
+		)upl on upl.clientid = a.clientid
+		<where>
+			((a.agent_id is null) or a.agent_id in(0,1,2))
+			<if test="condition != null and condition!=''">
+				and (
+				a.clientid like CONCAT('%',#{condition},'%')
+				or a.name like CONCAT('%',#{condition},'%')
+				or a.mobile like CONCAT('%',#{condition},'%')
+				or u.realname like CONCAT('%',#{condition},'%')
+				)
+			</if>
+			<if test="status != null and status!=''">
+				and a.status = #{status}
+			</if>
+			<if test="starLevel != null and starLevel!=''">
+				and tc.star_level = #{starLevel}
+			</if>
+			<if test="paytype != null and paytype!=''">
+				and a.paytype = #{paytype}
+			</if>
+			<if test="extValue != null and extValue!=''">
+				and tc.ext_value = #{extValue}
+			</if>
+			<if test="start_time_day != null and start_time_day!=''">
+				and a.createtime >= STR_TO_DATE(#{start_time_day},'%Y-%m-%d')
+			</if>
+			<if test="end_time_day != null and end_time_day!=''">
+				and a.createtime <![CDATA[<= STR_TO_DATE(#{end_time_day},'%Y-%m-%d %T') ]]>
+			</if>
+			<if test="value == 0">
+				AND ((property = 'charge_rule'
+				AND value = #{value})  or (value is null and  IFNULL(agent_id,0) &gt; 10))
+			</if>
+			<if test="value == 1">
+				AND ((property = 'charge_rule'
+				AND value = #{value})  or (value is null and IFNULL(agent_id,0) &lt; 10))
+			</if>
+			<if test="value == 2">
+				AND property = 'charge_rule'
+				AND value = #{value}
+			</if>
+			<if test="dataAuthorityCondition != null">
+				<choose>
+					<when test="dataAuthorityCondition.needQuerySaleIsNullData">
+						AND(
+						a.belong_sale in
+						<foreach collection="dataAuthorityCondition.ids" index="index" item="item" open="(" close=")" separator=",">
+							#{item}
+						</foreach>
+						OR
+						ISNULL(a.belong_sale)
+						)
+					</when>
+					<otherwise>
+						AND a.belong_sale in
+						<foreach collection="dataAuthorityCondition.ids" index="index" item="item" open="(" close=")" separator=",">
+							#{item}
+						</foreach>
+					</otherwise>
+				</choose>
+			</if>
+		</where>
+		ORDER BY a.createtime desc
+	</select>
+
+</mapper> 

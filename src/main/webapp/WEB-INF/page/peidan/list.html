@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信云平台运营系统 </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link href="/resources/css/bootstrap.min14ed.css?v=3.3.6" th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    <link href="/resources/css/font-awesome.min93e3.css?v=4.4.0" th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+    <link href="/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css" th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+    <link href="/resources/css/animate.min.css" th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+    <link href="/resources/css/style.min862f.css?v=4.1.0" th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+    <link href="/resources/css/plugins/sweetalert/sweetalert.css" th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+    <style>
+        /* Additional style to fix warning dialog position */
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+        .modal-body input{
+            width:150px;
+        }
+    </style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="tabs-container">
+                <ul class="nav nav-tabs">
+                    <li class="active" id="agentTab" th:if="${menus.pdzx}"><a data-toggle="tab" href="#tab-1" aria-expanded="true">配单中心</a>
+                    </li>
+                    <!--<li class=""  id="clientTab"><a data-toggle="tab" href="#tab-2" id="rebateConfigPage" aria-expanded="false">我审批的</a>-->
+                    <!--</li>-->
+                </ul>
+                <div class="tab-content">
+                    <div id="tab-1" class="tab-pane active" th:if="${menus.pdzx}">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="ibox ">
+                                        <!-- 搜索条件 -->
+                                        <div class="ibox-content">
+                                            <div class="row">
+                                                <form role="form" class="form-inline">
+
+                                                    <div class="form-group pull-right m-r-md">
+                                                        <span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-danger" onclick="search()">搜索</button></span> 
+                                                    </div>
+                                                    <div class="form-group pull-right m-r-md">
+                                                        <label for="status">订单状态:</label>
+                                                        <select id="status" class="form-control">
+                                                            <!--0：待配单，1：待匹配，2：待审批（二级审核），3：退单，4：撤单，5：匹配成功，6：寻资源，7：待审核（销售总监），8：待审核（订单运营）-->
+                                                            <option value="">全部</option>
+                                                            <option value="3">退单</option>
+                                                            <option value="4">撤单</option>
+                                                            <option value="0" selected="selected">待配单</option>
+                                                            <option value="6">寻资源</option>
+                                                            <option value="1">待匹配</option>
+                                                            <option value="2">待审批</option>
+                                                            <option value="5">匹配成功</option>
+                                                        </select>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+
+                                        <div class="ibox-content">
+                                            <div class="jqGrid_wrapper">
+                                                <table id="table_list"></table>
+                                                <div id="pager_list"></div>
+                                            </div>
+                                            <p>&nbsp;</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div><!-- panel-body -->
+                    </div><!-- tab-1 -->
+
+
+
+                </div><!-- panel-body -->
+            </div><!-- tab-2 -->
+        </div><!-- tab-content -->
+    </div><!-- tabs-container-->
+</div><!-- col-sm-12 -->
+</div><!-- row -->
+</div>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/plugins/validate/jquery.validate.min.js}"></script>
+<script th:src="@{/resources/js/jquery.form.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+    function search(){
+
+        $("#table_list").jqGrid('setGridParam',{
+            datatype:'json',
+            postData: {
+                state: $("#status").val()
+            }, //发送数据
+//            page:1
+        }).trigger("reloadGrid"); //重新载入
+    }
+
+
+
+    $(document).ready(function () {
+        $.jgrid.defaults.styleUI = "Bootstrap";
+        $("#table_list").jqGrid({
+            url:/*[[@{/demandOrder/list}]]*/'',
+            mtype: 'POST',
+            datatype: "json",
+            jsonReader : {
+                root:"data",
+                page: "pageNo",
+                total: "totalPage",
+                records: "totalRecord"
+            },
+            postData : {
+				state:0
+			},
+            height: 'auto',
+            rownumbers:true,
+            autowidth: true,
+            shrinkToFit: false,
+            autoScroll: true,
+            rowNum: 20,
+            rowList: [10, 20, 30,50],
+            colModel: [
+                {label:'订单号',name: "orderId",align: "left",sortable:false,width:'120'},
+                {label:'客户名称',name: "companyName",align: "left",sortable:false,width:'100'},
+//                {label:'所属行业',name: "industryType", align: "left",sortable:false,width:'75',formatter:"select",editoptions:{value:"0:三网合一;1:移动;2:电信;3:联通;4:全网"}},
+                {label:'所属行业',name: "industryType", align: "left",sortable:false,width:'75'},
+                {label:'归属销售',name: "belongSaleName", align: "left",sortable:false,width:'70'},
+                {label:'预计量(条/月)',name: "expectNumber", align: "left",sortable:false,width:'100'},
+                {label:'是否保底',name: "minimumGuarantee", align: "left",sortable:false,width:'90',
+                    formatter:function(cellvalue){
+                        if(/^[1-9]\d*$/.test(cellvalue)){
+                            cellvalue += '万条/月';
+                        }else{
+                            cellvalue = '不承诺保底';
+                        }
+                        return cellvalue;
+                    }
+                },
+                {label:'发送类型',name: "smsType", align: "left",sortable:false,width:'120'},
+                {label:'通道类型',name: "channelType", align: "left",sortable:false,width:'80',
+                    formatter:function (cellvalue) {
+                        var arr = cellvalue.split(",");
+                        var channelType = '';
+                        for(var i in arr){
+                            switch (arr[i]){
+                                case '0':
+                                    channelType += channelType.length > 0 ? ' , 三网合一' :'三网合一';
+                                    break;
+                                case '1':
+                                    channelType += channelType.length > 0 ? ' , 移动':'移动';
+                                    break;
+                                case '2':
+                                    channelType += channelType.length > 0 ? ' , 电信':'电信';
+                                    break;
+                                case '3':
+                                    channelType += channelType.length > 0 ? ' , 联通':'联通';
+                                    break;
+                                case '4':
+                                    channelType += channelType.length > 0 ? ' , 全网':'全网';
+                                    break;
+                            }
+                        }
+                        return channelType;
+                    }
+                },
+                {label:'是否直连',name: "directConnect",align: "left",sortable:false,width:'65',formatter:"select",editoptions:{value:"0:直连;1:第三方"}},
+                {label:'扩展位',name: "extendSize",align: "left",sortable:false,width:'55',
+                    formatter:function(cellvalue){
+                        if(/^[1-9]\d*$/.test(cellvalue)){
+                            cellvalue += '位';
+                        }else{
+                            cellvalue = '无要求';
+                        }
+                        return cellvalue;
+                    }
+                },
+                {label:'速率',name: "rate",align: "left",sortable:false,width:'50',
+                    formatter:function(cellvalue){
+                        if(/^\d+$/.test(cellvalue)){
+                            cellvalue += 'TPS';
+                        }else{
+                            cellvalue = '-';
+                        }
+                        return cellvalue;
+                    }
+                },
+                {label:'签名',name: "signType",align: "left",sortable:false,width:'60',
+                    formatter:function (cellvalue) {
+                        var arr = cellvalue.split(",");
+                        var signType = '';
+                        for(var i in arr){
+                            switch (arr[i]){
+                                case '0':
+                                    signType += signType.length > 0 ? ' , 自定义' :'自定义';
+                                    break;
+                                case '1':
+                                    signType += signType.length > 0 ? ' , 报备签名':'报备签名';
+                                    break;
+                                case '2':
+                                    signType += signType.length > 0 ? ' , 固签':'固签';
+                                    break;
+                            }
+                        }
+                        return signType;
+                    }
+                },
+                {label:'发送内容模板',name: "contentTemplate",align: "left",sortable:false,width:'120'},
+                {label:'结算方式',name: "payType",align: "left",sortable:false,width:'65'},
+                {label:'销售价格(元/条)',name: "salePrice",align: "left",sortable:false,width:'100'},
+                {label:'要求上线时间',name: "onlineDate",align: "left",sortable:false,width:'100',
+                    formatter:function (cellvalue) {
+                        if(cellvalue){
+                            return cellvalue;
+                        }else{
+                            return "-";
+                        }
+                    }
+                },
+                {label:'订单状态',name: "state",align: "left",sortable:false,width:'65',formatter:"select",editoptions:{value:"0:待配单;1:待匹配;2:待审批;3:退单;4:撤单;5:匹配成功;6:寻资源;7:待审核;8:待审核"}},
+                {label:'需求状态',name: "demandStateName",align: "left",sortable:false,width:'65'},
+                {label:"操作",name: "",align: "left",sortable:false,width:'100',title: false,
+                    formatter:function(cellvalue, options, rowObject){
+                        var status = rowObject.state;
+                        var orderId = rowObject.orderId;
+                        var updateTime = rowObject.updateTime;
+                        var switcher = "<button type='button' class='btn btn-link btn-xs ' onclick=\"getDetails('"+orderId+"')\" title='查看'>查看</button>";
+                        if(/^[0,1]$/.test(status)){ //带配单和带匹配
+                            switcher += "<button type='button' class='btn btn-link btn-xs ' onclick=\"peidan('"+orderId+"')\" title='配单'>配单</button>";
+                        }else if(/^[5]$/.test(status)){//匹配成功
+                            switcher += "<button type='button' class='btn btn-link btn-xs ' onclick=\"view('"+orderId+"')\" title='匹配结果'>匹配结果</button>";
+                        }
+                        return switcher;
+                    }
+                }
+            ],
+            pager: "#pager_list",
+            viewrecords: true,
+            hidegrid: false
+        });
+
+        $(window).bind("resize", function () {
+            var width = $(".jqGrid_wrapper").width();
+            $("#table_list").setGridWidth(width);
+        })
+
+
+        function keyUp(e) {
+            var currKey=0,e=e||event;
+            currKey=e.keyCode||e.which||e.charCode;
+            var keyName = String.fromCharCode(currKey);
+            if (currKey == 13){
+                search();
+            }
+        }
+        document.onkeyup = keyUp;
+
+
+        var page =  /*[[${page}]]*/'';
+        if(page=="toRebatePage"){
+            $("#rebateConfigPage").click();
+        }
+    });
+
+
+
+  
+
+    //编辑
+    function view(id) {
+        var viewUrl = /*[[@{/peidan/view/}]]*/'';
+        location.href = viewUrl + id;
+    }
+
+    //修改状态
+    function peidan(orderId) {
+        var peidanUrl = /*[[@{/peidan/peidan/}]]*/'';
+        location.href = peidanUrl + orderId;
+    }
+
+
+    function getDetails(id){
+        var detailUrl = /*[[@{/demandOrder/}]]*/'';
+        layer.open({
+            type: 2,
+            title: ['查看详情', 'font-size:18px;'],
+            closeBtn: 2,
+            area: ['800px', '610px'],
+            fix: false, //不固定 
+            area: ['600px', '600px'],
+            content: detailUrl + id + '/view'
+        });
+
+    }
+
+
+
+    /*]]>*/
+</script>
+</body>
+</html>

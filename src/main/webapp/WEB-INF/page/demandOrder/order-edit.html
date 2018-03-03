@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org" lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport"
+          content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信云平台运营系统 - 管理员中心</title>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}"
+          rel="stylesheet">
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}"
+          rel="stylesheet">
+    <!-- jqgrid-->
+    <link
+            th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}"
+            rel="stylesheet">
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/style.min862f.css?v=4.1.0}"
+          rel="stylesheet">
+
+    <style>
+        /* Additional style to fix warning dialog position */
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+
+        .submit-title h2{
+            line-height: 50px;
+            border-bottom: 1px solid #DDD;
+            margin-top: 0px;
+            padding:0  15px;
+        }
+
+        .submit-title2 h3{
+            line-height: 40px;
+            border-bottom: 1px solid #DDD;
+            margin-bottom: 10px;
+            margin-top:0px;
+            padding:0 15px;
+        }
+
+        .submit-ctx {
+            background-color: #FFF;
+            padding-bottom: 50px;
+        }
+
+        .radio-group label span {
+            vertical-align: middle;
+        }
+
+        .radio-group input {
+            margin-top: 0 !important;
+            vertical-align: middle;
+            position: static !important;
+        }
+
+        .other-ctx {
+            display: none;
+        }
+    </style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content  animated fadeInRight">   
+     <div class="ibox submit-ctx container-fluid">
+           <div class="row">
+               <div class="col-sm-12 submit-title ">
+                   <h2>编辑订单</h2>
+               </div>
+           </div>
+
+           <form class="form-horizontal" id="order-form">
+	           <div class="row">
+	               <div class="form-group col-lg-7">
+	                   <label for="orderId" class="col-sm-2 control-label">订单号</label>
+	                   <div class="col-sm-5">
+	                       <!--<p id="orderId" class="form-control" name="orderId" th:value="${model.orderId}" th:text="${model.orderId}"></p>-->
+	                       <input type="text" class="form-control" id="orderId" name="orderId" readonly th:value="${model.orderId}">
+	                   </div>
+	               </div>
+               </div>
+               <!-- 公司名称 -->
+               <div class="row">
+	               <div class="form-group col-lg-7">
+	                   <label for="inputCompany" class="col-sm-2 control-label">公司名称</label>
+	                   <div class="col-sm-5">
+	                       <input type="text"
+	                              style="position: fixed; top: -1000px; left: -3000px;">
+	                       <input type="text" class="form-control" id="inputCompany"
+	                              name="companyName" placeholder="请输入公司名称" th:value="${model.companyName}">
+	                   </div>
+	               </div>
+               </div>
+               <!-- 公司名称 end -->
+               <!-- 所属行业 -->
+               <div class="row">
+	               <div class="form-group col-lg-7">
+	                   <label class="col-sm-2 control-label">所属行业</label>
+	                   <div class="radio-group" style="float:left;width:535px;margin-left:15px;">
+	                       <label class="radio-inline pull-right" >
+	                           <input type="radio" name="industryType1" checked  class="js-other" value="" data-class="industry-other">
+	                           <span>其他</span>
+	                       </label>
+	                       <label class="radio-inline">
+	                           <input type="radio" name="industryType1" th:checked="${model.industryType} eq '同行'" value="同行" data-class="industry-other">
+	                           <span>同行</span>
+	                       </label>
+	                       <label class="radio-inline">
+	                           <input type="radio" name="industryType1" th:checked="${model.industryType} eq '互联网'" value="互联网" data-class="industry-other">
+	                           <span>互联网</span>
+	                       </label>
+	                       <label class="radio-inline">
+	                           <input type="radio" name="industryType1" th:checked="${model.industryType} eq '出行'" value="出行" data-class="industry-other">
+	                           <span>出行</span>
+	                       </label>
+	                       <label class="radio-inline">
+	                           <input type="radio" name="industryType1"th:checked="${model.industryType} eq '电商'" value="电商" data-class="industry-other">
+	                           <span>电商</span>
+	                       </label>
+	                       <label class="radio-inline" data-class="industry-other">
+	                           <input type="radio" name="industryType1" th:checked="${model.industryType} eq '地产'" value="地产">
+	                           <span>地产</span>
+	                       </label>
+	                       <label class="radio-inline" data-class="industry-other">
+	                           <input type="radio" name="industryType1" th:checked="${model.industryType} eq '教育'" value="教育" data-class="industry-other">
+	                           <span>教育</span>
+	                       </label>
+	                       <label class="radio-inline">
+	                           <input type="radio" name="industryType1" th:checked="${model.industryType} eq '金融'" value="金融" data-class="industry-other">
+	                           <span>金融</span>
+	                       </label>
+	
+	                   </div>
+	               </div>
+	               <div class="form-group industry-other other-ctx col-lg-5">
+						<label for="industryType" class="col-sm-2 control-label">其他行业</label>
+						<div class="col-sm-5">
+							<input type="text" class="form-control" name="industryType" th:value="${model.industryType}"
+								id="industryType" placeholder="其他行业" data-pattern="^\S{1,50}$" data-tip="其他行业名称长度不能超过50个字">
+						</div>
+					</div>
+				</div>
+               <!-- 所属行业  end -->
+               <!--  归属销售 -->
+               <div class="row">
+	               <div class="form-group col-lg-7">
+	                   <label for="inputCompany" class="col-sm-2 control-label">归属销售</label>
+	                   <div class="col-sm-3">
+	                       <select class="form-control" name="belongSale" id="belongSale">
+	                           <option th:each="saler:${saleList}" th:value="${saler.id}"
+	                                   th:selected="${model.belongSale} eq ${saler.id}"
+	                                   th:text="${saler.name}"></option>
+	                       </select>
+	                   </div>
+	               </div>
+               </div>
+               <!--  归属销售 end  -->
+               <!-- 发送类型  -->
+               <div class="row">
+	               <div class="form-group col-lg-7">
+						<label class="col-sm-2 control-label">发送类型</label>
+						<div class="radio-group" style="width:610px;margin-left:15px;float:left;">
+							<label class="radio-inline">
+					                           <input type="radio" th:checked="${#strings.equals(model.smsType,'验证码')}"
+								name="smsType1" value="验证码" data-class="type-other"> <span>验证码</span>
+							</label>
+					                       <label class="radio-inline">
+					                           <input type="radio" th:checked="${#strings.equals(model.smsType,'验证码+通知')}"
+								name="smsType1" value="验证码+通知" data-class="type-other"> <span>验证码+通知</span>
+							</label>
+					                       <label class="radio-inline">
+					                           <input type="radio" th:checked="${#strings.equals(model.smsType,'验证码+通知+普通营销')}"
+								name="smsType1" value="验证码+通知+普通营销" data-class="type-other"> <span>验证码+通知+普通营销</span>
+							</label>
+					                       <label class="radio-inline">
+					                           <input type="radio" th:checked="${#strings.equals(model.smsType,'普通营销')}"
+								name="smsType1" value="普通营销" data-class="type-other"> <span>普通营销</span>
+							</label>
+					                       <label class="radio-inline">
+					                           <input type="radio" th:checked="${#strings.startsWith(model.smsType,'特殊营销:')}"
+								name="smsType1" data-str="特殊营销" value="" data-class="type-other"  class="js-other js-smstype" > <span>特殊营销</span>
+							</label>
+					                       <label class="radio-inline">
+					                           <input type="radio" value="" th:checked="${#strings.startsWith(model.smsType,'其他:')}"
+								name="smsType1" class="js-other js-smstype" data-class="type-other" data-str="其他">
+								<span>其他</span>
+							</label>
+						</div>
+					</div>
+					<div class="form-group type-other other-ctx col-lg-5">
+						<label  class="col-sm-2 control-label type-title"></label>
+						<div class="col-sm-5">
+	                       <input type="text" class="form-control" name="smsType"
+	                              th:value="${#strings.startsWith(model.smsType,'其他:')} ? ${#strings.substring(model.smsType,3)} : (${#strings.startsWith(model.smsType,'特殊营销:')} ? ${#strings.substring(model.smsType,5)} : ${model.smsType})"
+	                                                 data-pattern="^\S{1,50}$" data-tip="发送类型名称长度不能超过50个字">
+						</div>
+					</div>
+				</div>
+				<input type="hidden" name="smsTypeFlag" id="smsTypeFlag">
+               <!-- 发送类型 end -->
+               <!-- 预计量 -->
+              <div class="row">
+	               <div class="form-group col-lg-7">
+	                   <label class="col-sm-2 control-label">预计量(条/月)</label>
+	                   <div class="radio-group" style="float:left;width:505px;margin-left:15px;">
+	                       <label class="radio-inline pull-right" >
+	                           <input type="radio" name="expectNumber1" checked class="js-other" value="" data-class="quantity-other">
+	                           <span>其他</span>
+	                       </label>
+	                       <label class="radio-inline">
+	                           <input type="radio" name="expectNumber1" th:checked="${model.expectNumber} eq '100万以下'" value="100万以下" data-class="quantity-other">
+	                           <span>100万以下</span>
+	                       </label>
+	                       <label class="radio-inline">
+	                           <input type="radio" name="expectNumber1" th:checked="${model.expectNumber} eq '100万-500万'" value="100万-500万" data-class="quantity-other">
+	                           <span>100万-500万</span>
+	                       </label>
+	                       <label class="radio-inline">
+	                           <input type="radio" name="expectNumber1" th:checked="${model.expectNumber} eq '500万-1000万'" value="500万-1000万" data-class="quantity-other">
+	                           <span>500万-1000万</span>
+	                       </label>
+	                       <label class="radio-inline">
+	                           <input type="radio" name="expectNumber1" th:checked="${model.expectNumber} eq '1000万以上'" value="1000万以上" data-class="quantity-other">
+	                           <span>1000万以上</span>
+	                       </label>
+	                   </div>
+	               </div>
+	               <div class="form-group quantity-other other-ctx col-lg-5">
+						<label for="expectNumber" class="col-sm-2 control-label">预计量</label>
+						<div class="col-sm-5">
+							<input type="text" class="form-control" name="expectNumber"
+								id="expectNumber" placeholder="其他预计量" data-pattern="^\S{1,50}$" data-tip="预计量的长度不能超过50个字" th:value="${model.expectNumber}">
+						</div>
+					</div>
+				</div>
+               <!-- 预计量 end -->
+               <!-- 是否保底 -->
+               <div class="row">
+	               <div class="form-group col-lg-7">
+	                   <label class="col-sm-2 control-label">是否保底</label>
+	                   <div class="col-sm-10 radio-group">
+	                       <label class="radio-inline">
+	                           <input type="radio" th:checked="${model.minimumGuarantee} gt '0'"
+	                                  name="minimumGuarantee1" class="js-other" value=""
+	                                  data-class="insured-other">
+	                           <span>保底</span>
+	                       </label> <label class="radio-inline">
+	                       <input type="radio" th:checked="${model.minimumGuarantee} eq '0'"
+	                              name="minimumGuarantee1" value=""
+	                              data-class="insured-other">
+	                       <span>不承诺保底</span>
+	                   </label>
+	                   </div>
+	               </div>
+	               <div class="form-group insured-other other-ctx col-lg-5">
+	                   <label for="minimumGuarantee" class="col-sm-2 control-label">保底数量</label>
+	                   <div class="col-sm-5">
+	                       <input type="text" class="form-control" name="minimumGuarantee" th:value="${model.minimumGuarantee}"
+	                              id="minimumGuarantee" placeholder="保底数量" data-pattern="^\d{1,10}$" data-tip="保底数量只能填写10位以内数字" >
+	                   </div>
+	                   <label for="minimumGuarantee" class="col-sm-5 control-label"
+	                          style="text-align: left;">万条/月</label>
+	               </div>
+               </div>
+               <!-- 保底价格 end -->
+               <div class="row ">
+                   <div class="col-sm-12 submit-title2">
+                       <h3>通道要求</h3>
+                   </div>
+               </div>
+               <!-- 通道类型 -->
+               <div class="row">
+	               <div class="form-group col-lg-7">
+	                   <label class="col-sm-2 control-label">通道类型</label>
+	                   <div class="col-sm-10 radio-group">
+	                       <label class="checkbox-inline">
+	                           <input type="checkbox" name="channelType" th:checked="${#strings.contains(model.channelType,0)}" value="0">
+	                           <span>三网合一</span>
+	                       </label>
+	                       <label class="checkbox-inline">
+	                           <input type="checkbox" name="channelType"  th:checked="${#strings.contains(model.channelType,1)}" value="1">
+	                           <span>移动</span>
+	                       </label>
+	                       <label class="checkbox-inline">
+	                           <input type="checkbox" name="channelType"  th:checked="${#strings.contains(model.channelType,2)}" value="2">
+	                           <span>电信</span>
+	                       </label>
+	                       <label class="checkbox-inline">
+	                           <input type="checkbox" name="channelType"  th:checked="${#strings.contains(model.channelType,3)}" value="3">
+	                           <span>联通</span>
+	                       </label>
+	                       <label class="checkbox-inline">
+	                           <input type="checkbox" name="channelType" th:checked="${#strings.contains(model.channelType,4)}" value="4">
+	                           <span>全网</span>
+	                       </label>
+	                   </div>
+	               </div>
+               </div>
+               <!-- 通道类型 end -->
+               <!-- 是否直连 -->
+               <div class="row">
+	               <div class="form-group col-lg-7">
+	                   <label class="col-sm-2 control-label">是否直连</label>
+	                   <div class="col-sm-10 radio-group">
+	                       <label class="radio-inline">
+	                           <input type="radio" name="directConnect" th:checked="${model.directConnect} eq '0'" value="0">
+	                           <span>直连</span>
+	                       </label>
+	                       <label class="radio-inline">
+	                           <input type="radio" name="directConnect" th:checked="${model.directConnect} eq '1'" value="1">
+	                           <span>第三方</span>
+	                       </label>
+	                   </div>
+	               </div>
+               </div>
+               <!--  是否直连 end -->
+               <!--  扩展位  -->
+               <div class="row">
+	               <div class="form-group col-lg-7">
+	                   <label class="col-sm-2 control-label">扩展位</label>
+	                   <div class="col-sm-10 radio-group">
+	                       <label class="radio-inline">
+	                           <input type="radio" th:checked="${model.extendSize} eq 0"
+	                                  name="extendSize1" value="0" data-class="extend-other">
+	                           <span>无特殊要求</span>
+	                       </label>
+	                       <label class="radio-inline">
+	                           <input type="radio" value="" th:checked="${model.extendSize} gt 0"
+	                                  name="extendSize1" class="js-other"
+	                                  data-class="extend-other">
+	                           <span>要求</span>
+	                       </label>
+	                   </div>
+	               </div>
+	               <div class="form-group extend-other other-ctx col-lg-5">
+	                   <label for="extendSize" class="col-sm-2 control-label">扩展位数</label>
+	                   <div class="col-sm-5">
+	                       <input type="text" class="form-control" name="extendSize" th:value="${model.extendSize}"
+	                              id="extendSize" placeholder="请输入扩展位数 "
+	                              data-pattern="^(\d|1[0-2])$", data-tip="扩展位数为不大于12的整数">
+	                   </div>
+	               </div>
+               </div>
+               <!-- 扩展位 end -->
+               <!--  速率  -->
+               <div class="row">
+	               <div class="form-group col-lg-7">
+	                   <label for="rate" class="col-sm-2 control-label">速率（tps）</label>
+	                   <div class="col-sm-3">
+	                       <input type="text" class="form-control" id="rate" name="rate" th:value="${model.rate}"
+	                              placeholder="可为空 ">
+	                   </div>
+	               </div>
+               </div>
+               <!-- 速率 end -->
+               <!-- 签名 -->
+               <div class="row">
+	               <div class="form-group col-lg-7">
+	                   <label class="col-sm-2 control-label">签名</label>
+	                   <div class="col-sm-10 radio-group">
+	                       <label class="checkbox-inline">
+	                           <input type="checkbox" th:checked="${#strings.contains(model.signType,0)}"
+	                                  name="signType" value="0">
+	                           <span>自定义</span>
+	                       </label>
+	                       <label class="checkbox-inline">
+	                           <input type="checkbox" th:checked="${#strings.contains(model.signType,1)}"
+	                                  name="signType" value="1">
+	                           <span>报备签名</span>
+	                       </label>
+	                       <label class="checkbox-inline">
+	                           <input type="checkbox" th:checked="${#strings.contains(model.signType,2)}"
+	                                  name="signType" value="2">
+	                           <span>固签</span>
+	                       </label>
+	                   </div>
+	               </div>
+	           </div>
+               <!-- 签名 end -->
+               <!-- 发送内容模板 -->
+               <div class="row">
+	               <div class="form-group col-lg-7">
+	                   <label for="contentTemplate" class="col-sm-2 control-label">发送内容模板</label>
+	                   <div class="col-sm-5">
+	                       <textarea class="form-control" name="contentTemplate"
+	                                 id="contentTemplate" th:text="${model.contentTemplate}"></textarea>
+	                   </div>
+	               </div>
+               </div>
+               <!-- 发送内容模板  -->
+               <!-- 结算方式 -->
+               <div class="row">
+	               <div class="form-group col-lg-7">
+	                   <label class="col-sm-2 control-label">结算方式</label>
+	                   <div class="radio-group" style="float:left;margin-left:15px;width:220px;">
+	                       <label class="radio-inline pull-right">
+	                           <input type="radio" value="" name="payType1" checked class="js-other" data-class="settlement-other">
+	                           <span>其他</span>
+	                       </label>
+	                       <label class="radio-inline">
+	                           <input type="radio" name="payType1" th:checked="${model.payType} eq '预付'" value="预付" data-class="settlement-other">
+	                           <span>预付</span>
+	                       </label>
+	                       <label class="radio-inline">
+	                           <input type="radio" name="payType1" th:checked="${model.payType} eq '按月结算'" value="按月结算" data-class="settlement-other">
+	                           <span>按月结算</span>
+	                       </label>
+	                   </div>
+	               </div>
+	               <div class="form-group settlement-other other-ctx col-lg-5">
+						<label for="payType" class="col-sm-2 col-lg-3 control-label">其他结算方式 </label>
+						<div class="col-sm-5">
+							<input type="text" class="form-control" name="payType"
+								id="payType" placeholder="请输入其他结算方式 "
+								data-pattern="^\S{1,50}$" data-tip="结算方式描述不能超过50个字" th:value="${model.payType}">
+						</div>
+						<span class="required">*</span>
+					</div>
+				</div>
+               <!--  结算方式 end -->
+               <!--  销售价格   -->
+               <div class="row">
+	               <div class="form-group col-lg-7">
+	                   <label class="col-sm-2 control-label">销售价格(元/条)</label>
+	                   <div class="col-sm-10 radio-group">
+	                       <label class="radio-inline">
+	                           <input type="radio" name="salePrice1" value="" th:checked="${#strings.contains(model.salePrice,'统一价')}" class="js-other js-price js-uniform" data-class="uniform-other" data-str="统一价">
+	                           <span>统一价</span>
+	                       </label>
+	                       <label class="radio-inline">
+	                           <input type="radio" name="salePrice1" value="" th:checked="${#strings.contains(model.salePrice,'阶梯价')}" class="js-other js-price" data-class="uniform-other" data-str="阶梯价">
+	                           <span>阶梯价</span>
+	                       </label>
+	                   </div>
+	               </div>
+	               <div class="form-group uniform-other other-ctx col-lg-5">
+	                   <label class="col-sm-2 control-label price-title">统一价</label>
+	                   <div class="col-sm-5">
+	                       <input type="text" class="form-control val-saleprice" th:value="${#strings.substring(model.salePrice,4)}" name="salePrice">
+	                   </div>
+	               </div>
+               </div>
+               <input type="hidden" name="salePriceFlag" th:value="${#strings.substring(model.salePrice,0,3)}" id="salePriceFlag">
+               <input type="hidden" name="updateTime" th:value="${#dates.format(model.updateTime,'yyyy-MM-dd HH:mm:ss')}" />
+               <!-- 销售价格 end -->
+               <!-- 发票  -->
+               <div class="row">
+	               <div class="form-group col-lg-7">
+	                   <label class="col-sm-2 control-label">发票</label>
+	                   <div class="col-sm-10 radio-group">
+	                       <label class="radio-inline">
+	                           <input type="radio" name="invoiceType" th:checked="${model.invoiceType} eq 0" value="0">
+	                           <span>专票</span>
+	                       </label>
+	                       <label class="radio-inline">
+	                           <input type="radio" name="invoiceType" th:checked="${model.invoiceType} eq 1" value="1">
+	                           <span>普票</span>
+	                       </label>
+	                       <label class="radio-inline">
+	                           <input type="radio" name="invoiceType" th:checked="${model.invoiceType} eq 2" value="2">
+	                           <span>不要票</span>
+	                       </label>
+	                   </div>
+	               </div>
+               </div>
+               <!-- 发票 end -->
+               <!-- 上线时间 -->
+               <div class="row">
+	               <div class="form-group col-lg-7">
+	                   <label for="inputCompany" class="col-sm-2 control-label">要求上线时间</label>
+	                   <div class="col-sm-3">
+
+	                       <input placeholder="上线时间" class="form-control layer-date" th:if="${model.onlineDate} ne null"
+	                              name="onlineDate" id="start_time" th:value="${#dates.format(model.onlineDate,'yyyy-MM-dd')}"/>
+	                   </div>
+	               </div>
+               </div>
+               <!-- 先不做 --
+            <div class="form-group">
+              <label  class="col-sm-2 control-label">是否需要上级审批</label>
+              <div class="col-sm-10 radio-group">
+                    <label class="radio-inline">
+                     <input type="radio" name="inlineRadioOptions"  value="0">
+                     <span>否</span>
+                   </label>
+                   <label class="radio-inline">
+                     <input type="radio" name="inlineRadioOptions"  value="1">
+                     <span>是</span>
+                   </label>
+              </div>
+            </div>
+            <!-- 先不做 end -->
+               <!-- 上线时间 end -->
+               <div class="row">
+	               <div class="form-group col-lg-7">
+	                   <div class="col-sm-offset-2 col-sm-10">
+	                       <button type="button" class="btn btn-success submit">提交</button>
+	                       <button type="button" class="btn btn-default" onclick="backList()"
+	                               style="margin-left: 40px;">取消
+	                       </button>
+	                   </div>
+	               </div>
+               </div>
+           </form>
+       </div>
+
+</div>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/jquery.form.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var start = {
+        elem: "#start_time",
+        format: "YYYY-MM-DD",
+        min: laydate.now(),
+//        max: laydate.now(),
+        start: /*[[${start_time}]]*/'',
+        istoday: true,
+        choose: function (datas) {
+            end.min = datas;
+        }
+    };
+    laydate(start);
+    function backList() {
+        var mainUrl = /*[[@{/demandOrder/list}]]*/'';
+        window.location.href = mainUrl;
+    }
+
+    $(document).ready(function () {
+        $.jgrid.defaults.styleUI = "Bootstrap";
+		//js钩子 处理统一价的显示
+		if($(".js-uniform")[0].checked){
+			$(".price-title").text("统一价");
+		} else {
+			$(".price-title").text("阶梯价");
+		}
+        //radio 处理
+        $(".js-other").each(function () {
+            var classname = $(this).data("class");
+            var target = $("." + classname);
+
+            if (this.checked) {
+                target.show();
+                target.addClass("other-input");
+            }
+        })
+        $(".js-other").click(function () {
+            
+            var classname = $(this).data("class");
+            var target = $("." + classname);
+            var value = $(this).val();
+
+            if (this.checked) {
+                target.addClass("other-input")
+                target.show();
+                target.find("input").val(value)
+                /* other_target.removeClass("other-input").hide(); */
+            }
+        })
+        $("input[type='radio']").not(".js-other").click(function () {
+            var other = $(this).closest(".radio-group").find(".js-other");
+
+            var value = $(this).val();
+            
+            var target_class = "." + other.data("class");
+            var target = $(target_class);
+            target.removeClass("other-input").hide();
+
+            target.find("input").val(value);
+
+        })
+
+        //销售价格统一处理
+        $(".js-price").click(function () {
+            var str = $(this).data("str");
+            $(".price-title").text(str);
+            $("#salePriceFlag").val(str);
+        })
+		//发送类型处理
+        $(".js-smstype").click(function(){
+        	var str = $(this).data("str");
+      		$(".type-title").text(str);
+            $("#smsTypeFlag").val(str);
+        	
+        })
+        
+        
+        //表单提交
+        $(".submit").click(function () {
+            var flag = true;
+            var saleprice = $(".val-saleprice").val();
+        	var contentTemplate = $("#contentTemplate").val();
+        	var rate =$("#rate").val();
+        	
+        	//循环所有其他的弹框，并进行验证
+            $(".other-input input").each(function () {
+                var value = $(this).val();
+                var pattern = $(this).data("pattern");
+                var tip = $(this).data("tip");
+                var text = $(this).closest(".other-input").find("label").text();
+                if ($(this).val() === "" || $(this).val() === undefined) {
+
+                    layer.alert("请填写" + text);
+                    flag = false;
+                    return;
+                }
+                if (pattern != "") {
+                    var reg = new RegExp(pattern);
+                    value = $.trim(value);
+
+                    if (!reg.test(value)) {
+                    	layer.alert(tip);
+                        flag = false;
+                        return;
+                    }
+                }
+            })
+            if ($("#inputCompany").val() === "" || $("#inputCompany").val() === undefined || $("#inputCompany").val().length > 50) {
+                layer.alert("公司名称不能为空且不能超过50个字符");
+                return;
+            }
+            if(rate.length > 0 && !/^(([1,2]?\d{1,3})|(3000))$/.test(rate)){
+        		layer.alert("发送速率不能超过3000TPS");
+        		return;
+        	}
+            
+            if (contentTemplate.length > 100) {
+                layer.alert("发送内容模板的长度不能超过100");
+                return;
+            }
+            if (contentTemplate === "" || contentTemplate === undefined) {
+                layer.alert("发送内容模板不能为空");
+                return;
+            }
+            if(saleprice === "" || saleprice === undefined){
+        		layer.alert("销售价格不能为空");
+        		return;
+        	}
+            if($(".js-uniform")[0].checked && !(/^0\.[0-9]{1,4}$/.test(saleprice))){
+				//选中统一价
+				layer.alert("统一价格只能是小于1小数，最多保留四位");
+				return;
+			} else if(saleprice.length > 50){
+				//选中阶梯价
+				layer.alert("阶梯价格描述不能超过50个字符");
+				return;
+			}
+            var options = {
+                beforeSubmit: function () {
+//                    $(btn).attr("disabled", true);
+                },
+                success: function (data) {
+//                    $(btn).attr("disabled", false);
+                    if (data == "" || data == null) {
+                        return; //session超时
+                    }
+                    if (data.success) {
+                        layer.msg(data.msg, {icon: 1, time: 1500}, function () {
+                            var mainUrl = /*[[@{/demandOrder/list}]]*/'';
+                            window.location.href = mainUrl;
+                        });
+                    } else {
+                        layer.msg(data.msg, {
+                            icon: 2
+                        });
+                    }
+                },
+                url: /*[[@{/demandOrder/edit}]]*/'',
+                type: "post"
+            };
+            flag && $("#order-form").ajaxSubmit(options);
+        })
+    });
+    /*]]>*/
+</script>
+</body>
+</html>

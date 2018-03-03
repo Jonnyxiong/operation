@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:th="http://www.thymeleaf.org"
+	  lang="zh-cn">
+<head>
+	<meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+	<meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+	<title>短信云平台运营系统 - 已返还发票</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+	<link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+	<link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+	<link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+	<link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/inputNumber.css}" rel="stylesheet">
+	<style>
+		/* Additional style to fix warning dialog position */
+		input[type=radio]{
+			margin-top:0 !important;
+		}
+		.col-price{
+			color:red;
+		}
+
+		.grid-inputNumber{
+			width:95%;
+		}
+		html,body{
+			width:100%;
+			height:100%;
+		}
+		body{
+			overflow-y: auto;
+		}
+		*{
+			box-sizing: border-box;
+		}
+		/*#gbox_table_list1 {*/
+			/*border: none !important;*/
+		/*}*/
+
+	</style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="container-fluid body-wrap">
+	<div class="row" style="height:100%;">
+		<div class="col-sm-12" style="height:100%;">
+			<div class="ibox " style="height:100%;">
+				<div class="ibox-content wrap-ctx">
+					<div class="form-horizontal">
+						<div class="form-group">
+							<label  class="col-sm-2 control-label"><span class="red">*</span>开票客户：</label>
+							<div class="col-sm-10" style="margin-top: 6px;">
+								<span class=" js-name" ></span>
+							</div>
+						</div>
+						<div class="form-group hide change-invioce">
+							<label  class="col-sm-2 control-label"><span class="red">*</span>是否已开票：</label>
+							<div class="col-sm-10">
+								<div class="radio">
+									<label class="radio-inline ">
+										<input type="radio" name="inlineRadioOptions"  value="true" class="js-radio" checked> 是
+									</label>
+									<label class="radio-inline radio-invoice hide">
+										<input type="radio" name="inlineRadioOptions"  value="false" class="js-radio"> 否
+									</label>
+								</div>
+							</div>
+						</div>
+						<div class="form-group grid-noInvoice hide">
+							<label  class="col-sm-2 control-label"><span class="red">*</span>发票类型：</label>
+							<div class="col-sm-10">
+								<div class="radio">
+									<label class="radio-inline">
+										<input type="radio" name="invoice_type" class="js-invoiceType" value="1" checked> 普通发票（电子）
+									</label>
+									<label class="radio-inline">
+										<input type="radio" name="invoice_type" class="js-invoiceType"  value="2"> 增值税专用票
+									</label>
+								</div>
+							</div>
+						</div>
+						<div class="form-group grid-noInvoice hide">
+							<label  class="col-sm-2 control-label"><span class="red">*</span>开票主体：</label>
+							<div class="col-sm-10">
+								<div class="radio">
+									<label class="radio-inline">
+										<input type="radio" name="invoice_body" class="js-invoiceBody" value="1"> 个人
+									</label>
+									<label class="radio-inline">
+										<input type="radio" name="invoice_body" class="js-invoiceBody" value="2" checked> 企业
+									</label>
+								</div>
+							</div>
+						</div>
+						<div class="form-group grid-noInvoice hide">
+							<label  class="col-sm-2 control-label"><span class="red">*</span>开票抬头：</label>
+							<div class="col-sm-10">
+								<input type="text" class="form-control js-invoiceHead">
+							</div>
+						</div>
+						<div class="form-group grid-noInvoice hide">
+							<label  class="col-sm-2 control-label"><span class="red">*</span>返还发票金额：</label>
+							<div class="col-sm-10">
+								<input type="text" class="form-control js-invoiceAmount">
+							</div>
+						</div>
+						<div class="form-group grid-hasInvoice ">
+							<label  class="col-sm-2 control-label"><span class="red">*</span>已开发票：</label>
+							<div class="col-sm-10">
+								<button type="botton" class="btn btn-success js-getInvoiceList">选择已开发票</button>
+							</div>
+						</div>
+						<div class="form-group grid-hasInvoice ">
+							<label  class="col-sm-2 control-label">已选发票列表：</label>
+						</div>
+						<div class="grid-tablelist hide">
+							<div class="jqGrid_wrapper" style="margin-top:10px;">
+								<table id="table_list1"></table>
+								<div id="pager_list1"></div>
+							</div>
+						</div>
+						<div class="form-group" style="margin-top: 10px">
+							<div class="col-sm-offset-2 col-sm-10">
+								<button type="botton" class="btn btn-success js-sendData">确定</button>
+								<button type="botton" class="btn btn-default js-backToList" style="margin-left:20px;">取消</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div style="display: none;" id="invoice_list" class="invoice_list">
+	<div class="ibox " style="height:100%;">
+		<div class="ibox-content wrap-ctx">
+			<div class="form-inline" method="post" id="mainForm" >
+				<div class="form-group m-r-md">
+					<!--<input type="text" placeholder="订单号/产品ID/客户ID/代理商ID" name="condition" id="condition" class="form-control">-->
+					<input type="text" placeholder="发票抬头/申请ID" name="condition" id="condition" class="form-control" style="width: 150px;">
+				</div>
+				<div class="form-group">
+					<label for="invoiceType">发票类型:</label>
+					<select id="invoiceType" name="operatorCode" class="form-control ">
+						<option value="">全部</option>
+						<option value="1">普通发票(电子)</option>
+						<option value="2">增值税发票</option>
+					</select>
+				</div>
+				<!-- 时间选择 -->
+				<div class="form-group" id="sandbox-container" style="margin-left:2.5%">
+					<div class="form-group pull-right">申请时间:
+						<input placeholder="开始时间" class="form-control layer-date" name="startDateTime" id="startDateTime" />至
+						<input placeholder="结束时间" class="form-control layer-date" name="endDateTime" id="endDateTime" />
+					</div>
+				</div>
+				<div class="form-group">
+					<span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-danger js-search">搜索</button></span>
+				</div>
+			</div>
+
+			<div class="jqGrid_wrapper" style="margin-top:10px;width:800px;">
+				<table id="table_list"></table>
+				<div id="pager_list"></div>
+			</div>
+			<div class="text-center" style="margin-top:10px;">
+				<button class="btn btn-success js-confirmReturn">确定</button>
+				<button class="btn btn-default js-cancelReturn">取消</button>
+			</div>
+
+		</div>
+	</div>
+
+</div>
+
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/auth.js}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/common.js?v=1.1.0}"></script>
+<script th:src="@{/resources/js/grid-radio.js}"></script>
+<script th:inline="javascript">
+    $(function(){
+        var returnInvoiceIds = [],returnInvoiceData = [];
+        $(".grid-tablelist").removeClass("hide");
+        var start = {
+            elem: "#startDateTime",
+            format: "YYYY-MM-DD hh:mm:ss",
+            min: halfYearAgo("yyyy-MM-dd hh:mm:ss"),
+            max: laydate.now(),
+            istoday: true,
+            istime: true,
+            choose: function (datas) {
+                end.min = datas;
+            }
+        };
+
+        var end = {
+            elem: "#endDateTime",
+            format: "YYYY-MM-DD hh:mm:ss",
+            min: halfYearAgo("yyyy-MM-dd hh:mm:ss"),
+            max: laydate.now(),
+            istoday: true,
+            istime: true,
+            choose: function (datas) {
+                start.max = datas;
+            }
+        };
+        laydate(start);
+        laydate(end);
+
+        var agentId = getQueryString("agentId");
+        var agentName = getQueryString("name");
+		$(".js-name").text(agentId+"-"+agentName);
+		$(".js-invoiceHead").val(agentName);
+
+		//获取信息
+		$.ajax({
+		    url :'/finance/invoice/retuan/hastakeinit/' + agentId,
+			type : "GET",
+			success : function(res){
+				if(res.code != 0){
+				    layer.msg(res.msg, {icon:2});
+				    return;
+				}
+				$(".js-invoiceAmount").attr("placeholder","可返还发票金额为" + res.data + "元");
+				if(res.data*1 <= 0){
+				    $(".grid-noInvoice").addClass("hide");
+				    $(".change-invioce").addClass("hide");
+				} else {
+                    $(".radio-invoice").removeClass("hide");
+                    $(".change-invioce").removeClass("hide");
+				}
+
+			}
+		})
+		$(".js-getInvoiceList").click(function(){
+		    layer.open({
+		        type : '1',
+				title:"选择已开发票",
+				area:['950px', '99.9%'],
+				content : $(".invoice_list")
+			})
+		})
+        //初始化表格
+        $.jgrid.defaults.styleUI = "Bootstrap";
+        var initdata = {
+            agentId : agentId,
+			condition : $("#condition").val(),
+            invoiceType : $("#invoiceType").val(),
+			startTime : $("#startDateTime").val(),
+			endTime : $("#endDateTime").val()
+        }
+		//弹框表格
+        $("#table_list").jqGrid({
+            url:/*[[@{/finance/invoice/retuan/invoicelist}]]*/,
+            mtype: 'POST',
+            datatype: "json",
+
+            postData: initdata,
+            jsonReader : {
+                root:"data",
+                page: "currentPage",
+                total: "totalPage",
+                records: "totalCount"
+            },
+            height: 'auto',
+            width:'100%',
+            autowidth: true,
+            shrinkToFit: false,
+            autoScroll: true,
+            multiselect : true,
+            colNames: [ "申请ID", "发票金额","发票类型", "发票主体","发票抬头", "申请时间", "申请状态"],
+            colModel: [
+                {name: "invoiceId",align: "left",sortable:false},
+                {name: "invoiceAmount", align: "left",sortable:false},
+                {name: "invoiceType", align: "left",sortable:false,
+                    formatter:function(cellvalue, options, rowObject){
+                        var switcher,
+                            invoiceType = rowObject.invoiceType;
+                        if(invoiceType == '1'){
+                            switcher = "普通发票(电子)"
+                        } else if(invoiceType == 2){
+                            switcher = "增值税专票"
+                        }
+                        return switcher;
+                    }
+                },
+                {name: "invoice_body", align: "left",sortable:false,width:80,
+                    formatter:function(cellvalue, options, rowObject){
+                        var switcher,
+                            invoiceBody = rowObject.invoiceBody;
+                        if(invoiceBody == '1'){
+                            switcher = "个人"
+                        } else if(invoiceBody == 2){
+                            switcher = "企业"
+                        }
+                        return switcher;
+                    }
+                },
+                {name: "invoiceHead", align: "left",sortable:false},
+                {name: "createTime", align: "left",sortable:false},
+                {name: "status", align: "left",sortable:false,
+                    formatter: function(ellvalue, options, rowObject){
+                        var switcher,
+                            status = rowObject.status;
+                        if(status == '0'){
+                            switcher = "待审核"
+                        } else if(status == '1'){
+                            switcher = "已取消"
+                        } else if(status == '2'){
+                            switcher = "审核不通过"
+                        } else if(status == '3'){
+                            switcher = "开票中"
+                        } else if(status == '4'){
+                            switcher = "已邮寄"
+                        } else if(status == '5'){
+                            switcher = "已返还"
+                        }
+                        return switcher;
+                    }
+                }
+            ],
+            viewrecords: true,
+            hidegrid: false,
+            gridComplete:function(){
+            },
+            onSelectAll: function(){
+                rowHanddle();
+
+            },
+            onSelectRow : function(){
+                rowHanddle();
+
+            }
+        });
+		//页面表格
+		$("#table_list1").jqGrid({
+		    datatype:'local',
+            height: 'auto',
+            shrinkToFit: false,
+            autowidth: true,
+            colNames: [ "申请ID", "发票金额","发票类型", "发票主体", "发票抬头","申请时间", "申请状态"],
+            colModel: [
+                {name: "invoiceId",align: "left",sortable:false},
+                {name: "invoiceAmount", align: "left",sortable:false,width:85},
+                {name: "invoiceType", align: "left",sortable:false},
+                {name: "invoice_body", align: "left",sortable:false,width:100},
+                {name: "invoiceHead", align: "left",sortable:false},
+                {name: "createTime", align: "left",sortable:false},
+                {name: "status", align: "left",sortable:false,width:90}
+            ],
+        })
+		$(".js-search").click(function(){
+            search();
+		})
+
+		$(".js-cancelReturn").click(function(){
+		    layer.closeAll();
+		});
+		//确认返还发票的id
+		$(".js-confirmReturn").click(function(){
+		    console.log(returnInvoiceData)
+            for ( var i = 0; i <= returnInvoiceData.length; i++){
+                $("#table_list1").jqGrid('addRowData', i + 1, returnInvoiceData[i]);
+            }
+            $(".grid-tablelist").removeClass("hide");
+			layer.closeAll();
+		})
+		$(".js-radio").click(function(){
+		    var val = $(this).val();
+		    console.log(val);
+		    if(val == 'true'){
+				$(".grid-noInvoice").addClass("hide");
+				$(".grid-hasInvoice").removeClass("hide");
+				$(".grid-tablelist").removeClass("hide");
+			} else {
+                $(".grid-noInvoice").removeClass("hide");
+                $(".grid-hasInvoice").addClass("hide");
+                $(".grid-tablelist").addClass("hide");
+            }
+		});
+		$(".js-sendData").click(function(){
+		    var params = {};
+		    var openInvoice = $(".js-radio:checked").val();
+            params.agentId = agentId;
+            params.openInvoice = openInvoice;
+		    if(openInvoice == 'true'){
+		        params.returnInvoiceIds = returnInvoiceIds;
+			} else {
+				params.invoiceType = $(".js-invoiceType:checked").val();
+				params.invoiceHead = $(".js-invoiceHead").val();
+				params.invoiceBody = $(".js-invoiceBody:checked").val();
+				params.invoiceAmount = $(".js-invoiceAmount").val();
+			}
+
+
+
+			$.ajax({
+			    url :'/finance/invoice/retuan/save',
+				type:"POST",
+				contentType :'application/json',
+				dataType :'json',
+				data : JSON.stringify(params),
+				success : function (res){
+					if(res.code != 0){
+					    layer.msg(res.msg, {icon:2});
+					    return;
+					}
+                    var _p = parent;
+                    parent.layer.msg(res.msg, {icon: 1,time: 1000},function(){
+                        _p.location.reload();
+                    });
+				}
+			})
+		});
+		$(".js-backToList").click(function(){
+			parent.layer.closeAll();
+		})
+
+
+
+        function search(){
+            //event.preventDefault();
+            $("#table_list").jqGrid('setGridParam',{
+                datatype:'json',
+                postData: {
+                    agentId : agentId,
+                    condition : $("#condition").val(),
+                    invoiceType : $("#invoiceType").val(),
+                    startTime : $("#startDateTime").val(),
+                    endTime : $("#endDateTime").val()
+				}, //发送数据
+            }).trigger("reloadGrid"); //重新载入
+        }
+        //选中行的回调
+		function rowHanddle(){
+            returnInvoiceIds = [];
+            var arr = countTotal("table_list");
+            for(var i =0; i < arr.length; i++){
+                returnInvoiceIds[i] = arr[i].invoiceId;
+                returnInvoiceData[i] = arr[i];
+
+            }
+		}
+        //所有选中数据
+        function countTotal(id){
+            var ids = $('#' + id).jqGrid('getGridParam','selarrrow');
+            var arr = [];
+            for(var i = 0; i < ids.length; i++){
+                var rowData = $("#" + id).jqGrid('getRowData',ids[i]);
+                arr.push(rowData)
+            }
+            return arr;
+
+        }
+    })
+
+</script>
+
+</body>
+</html>

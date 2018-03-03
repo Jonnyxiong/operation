@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 产品管理-产品列表 -->
+<mapper namespace="oemProduct">
+	<!-- 4.3.1 oem需求	start -->
+	<!-- 查询oem产品包 -->
+	<sql id="oemCommon">
+		<where>
+			<if test="multi_text != null and multi_text != ''">
+				(
+					opi.product_code LIKE '%${multi_text}%'
+					OR opi.product_name LIKE '%${multi_text}%'
+				)
+			</if>
+			<if test="status != null and status != ''">
+				AND opi.`status` = #{status}
+			</if>
+			<if test="start_time_day != null">
+				AND opi.due_time >= STR_TO_DATE(#{start_time_day},'%Y-%m-%d %T')
+			</if>
+			<if test="end_time_day != null">
+				AND opi.due_time <![CDATA[<= STR_TO_DATE(CONCAT(#{end_time_day},' 23:59:59'),'%Y-%m-%d %T') ]]>
+<!-- 				AND opi.due_time <![CDATA[<= STR_TO_DATE(#{end_time_day},'%Y-%m-%d %T') ]]> -->
+			</if>
+		</where>
+	</sql>
+	<select id="queryProduct" resultType="map">
+		SELECT
+			opi.product_id,
+			opi.product_name,
+			opi.product_code,
+			opi.product_type,
+
+			<!-- 0：行业，1：营销，2：国际，3：验证码，4：通知，7：USSD，8：闪信，9：挂机短信-->
+			CASE opi.product_type
+				WHEN 0 THEN '行业'
+				WHEN 1 THEN '营销'
+				WHEN 2 THEN '国际'
+				WHEN 3 THEN '验证码'
+				WHEN 4 THEN '通知'
+				WHEN 7 THEN 'USSD'
+				WHEN 8 THEN '闪信'
+				WHEN 9 THEN '挂机短信'
+			END AS product_type_name,
+
+			<!-- 对应运营商，0：全网，1：移动，2：联通，3：电信，4：国际-->
+			CASE opi.operator_code
+				WHEN 0 THEN '全网'
+				WHEN 1 THEN '移动'
+				WHEN 2 THEN '联通'
+				WHEN 3 THEN '电信'
+				WHEN 4 THEN '国际'
+			END AS operator_code,
+
+			<!-- 适用区域，0：全国，1：国际-->
+			CASE opi.area_code
+				WHEN 0 THEN '全国'
+				WHEN 1 THEN '国际'
+			END AS area_code,
+
+			opi.is_show,
+			CASE opi.is_show
+				when 1 then '是'
+				else '否'
+			END AS is_show_name,
+			IFNULL(TRUNCATE(opi.unit_price, 4), 0.0000) as "unit_price",
+			opi.`status`,
+			CASE opi.`status`
+				WHEN 0 THEN '待上架'
+				WHEN 1 THEN '已上架'
+				WHEN 2 THEN '已下架'
+				END AS status_name,
+			b.realname as "creator",
+			DATE_FORMAT(opi.create_time,'%Y-%m-%d') AS create_time,
+			DATE_FORMAT(opi.due_time,'%Y-%m-%d') AS due_time
+		FROM
+			t_sms_oem_product_info opi
+		JOIN t_sms_user b on b.id = opi.creator
+		<include refid="oemCommon"/>
+		ORDER BY opi.create_time DESC
+		${limit}
+	</select>
+	<!-- 查询oem产品包	总记录数 -->
+	<select id="queryProductCount" resultType="map">
+		SELECT
+			COUNT(0) AS totalCount
+		FROM
+			t_sms_oem_product_info opi
+		<include refid="oemCommon"/>
+	</select>
+	<!-- 获取指定产品代码的产品数量 -->
+	<select id="queryProductNumByCode" resultType="int">
+		SELECT 
+			COUNT(0) 
+		FROM 
+			t_sms_oem_product_info
+		WHERE 
+			product_code = #{product_code}
+		<if test="product_id != null and product != ''">
+			AND product_id != #{product_id}
+		</if>
+	</select>
+	
+	<!-- 添加oem产品 -->
+	<insert id="addProduct">
+		INSERT INTO 
+			t_sms_oem_product_info
+			(product_code,product_name,product_desc,operator_code,product_type,area_code,
+			due_time,unit_price,status,is_show,creator,create_time,updator,update_time,remark)
+		VALUES
+			(#{product_code},#{product_name},#{product_desc},#{operator_code},#{product_type},#{area_code},
+			#{due_time},#{unit_price},#{status},#{isShow},#{creator},NOW(),#{creator}, NOW(),#{remark});
+	</insert>
+	
+	<!-- 获取oem产品详情 -->
+	<select id="getProductDetail" resultType="map">
+		SELECT
+			a.product_id,
+			a.product_code,
+			a.product_name,
+			a.product_desc,
+			a.operator_code,
+			CASE a.operator_code
+				WHEN 0 THEN '全网'
+				WHEN 1 THEN '移动'
+				WHEN 2 THEN '联通'
+				WHEN 3 THEN '电信'
+				WHEN 4 THEN '国际'
+			END AS 'operator_code_name',
+			a.product_type,
+			CASE a.product_type
+				WHEN 0 THEN '行业'
+				WHEN 1 THEN '营销'
+				WHEN 2 THEN '国际'
+				WHEN 3 THEN '验证码'
+				WHEN 4 THEN '通知'
+				WHEN 7 THEN 'USSD'
+				WHEN 8 THEN '闪信'
+				WHEN 9 THEN '挂机短信'
+			END AS product_type_name,
+			a.area_code,
+			CASE a.area_code
+				WHEN 0 THEN '全国'
+				WHEN 1 THEN '国际'
+			END AS area_code_name,
+			DATE_FORMAT(due_time, '%Y-%m-%d') AS due_time,
+			IFNULL(TRUNCATE(a.unit_price, 4), 0.0000) as "unit_price",
+			a.status,
+			CASE a.status
+				WHEN 0 THEN '待上架'
+				WHEN 1 THEN '已上架'
+				WHEN 2 THEN '已下架'
+			END AS status_name,
+			a.is_show,
+			b.realname as "creator",
+			DATE_FORMAT(a.create_time, '%Y-%m-%d %T') AS create_time,
+			a.updator,
+			DATE_FORMAT(a.update_time, '%Y-%m-%d %T') AS update_time,
+			a.remark
+		FROM
+			t_sms_oem_product_info a
+		JOIN t_sms_user b on b.id = a.creator
+		WHERE
+			product_id = #{product_id}
+	</select>
+	<!-- 修改产品 -->
+	<!--<update id="editProduct">-->
+		<!--UPDATE t_sms_oem_product_info-->
+		<!--SET product_code = #{product_code},-->
+			<!--product_name = #{product_name},-->
+			<!--product_desc = #{product_desc},-->
+			<!--operator_code = #{operator_code},-->
+			<!--product_type = #{product_type},-->
+			<!--area_code = #{area_code},-->
+			<!--due_time = #{due_time},-->
+			<!--unit_price = #{unit_price},-->
+			<!--is_show = #{isShow},-->
+			<!--updator = #{updator},-->
+			<!--update_time = NOW(),-->
+			<!--remark = #{remark}-->
+		<!--WHERE product_id = #{product_id}-->
+	<!--</update>-->
+
+	<update id="editProduct" >
+		UPDATE t_sms_oem_product_info
+		<set>
+			<if test="product_code != null and product_code != ''">
+				product_code = #{product_code},
+			</if>
+			<if test="product_name != null and product_name != ''">
+				product_name = #{product_name},
+			</if>
+			<if test="product_desc != null and product_desc != ''">
+				product_desc = #{product_desc},
+			</if>
+			<if test="operator_code != null and operator_code != ''">
+				operator_code = #{operator_code},
+			</if>
+			<if test="product_type != null and product_type != ''">
+				product_type = #{product_type},
+			</if>
+			<if test="area_code != null and area_code != ''">
+				area_code = #{area_code},
+			</if>
+			<if test="due_time != null and due_time != ''">
+				due_time = #{due_time},
+			</if>
+			<if test="unit_price != null and unit_price != ''">
+				unit_price = #{unit_price},
+			</if>
+			<if test="isShow != null and isShow != ''">
+				is_show = #{isShow},
+			</if>
+			<if test="updator != null and updator != ''">
+				updator = #{updator},
+			</if>
+			<if test="true">
+				update_time = NOW(),
+			</if>
+			<if test="remark != null and remark != ''">
+				remark = #{remark}
+			</if>
+		</set>
+		WHERE
+		product_id = #{product_id}
+	</update>
+
+	<!-- 修改产品状态 : 上架  | 下架 产品-->
+	<update id="updateStatus">
+		UPDATE 
+			t_sms_oem_product_info
+		SET 
+			status = #{state},
+			updator = #{updator},
+			update_time = NOW()
+		WHERE
+			product_id = #{id}
+	</update>
+	<!-- 获取OEM代理商返点比例 -->
+	<select id="getAgentRebate" resultType="map">
+		SELECT
+			r.id,
+			r.start_line,
+			r.end_line,
+<!-- 			CONCAT(ROUND(r.rebate_proportion*100,2),'%') AS rebate_proportion, -->
+			ROUND(r.rebate_proportion*100,2) AS rebate_proportion,
+			r.updator,
+			DATE_FORMAT(r.update_time,'%Y-%m-%d %T') AS update_time 
+		FROM
+			`t_sms_oem_agent_rebate` r
+		ORDER BY r.start_line
+	</select>
+	
+	<!-- 添加OEM代理商返点比例 -->
+	<insert id="insertAgentRebate">
+		INSERT INTO `t_sms_oem_agent_rebate` (
+			`start_line`,
+			`end_line`,
+			`rebate_proportion`,
+			`updator`,
+			`update_time`,
+			`remark`
+		)
+		VALUES(
+			#{start_line},
+			#{end_line},
+			(#{rebate_proportion} / 100),
+			#{updator},
+			NOW(),
+			#{remark}
+		)
+	</insert>
+	
+	<!-- 修改OEM代理商返点比例 -->
+	<update id="updateAgentRebate">
+		UPDATE `t_sms_oem_agent_rebate`
+		SET
+		 `start_line` = #{start_line},
+		 `end_line` = #{end_line},
+		 `rebate_proportion` = (#{rebate_proportion} / 100),
+		 `updator` = #{updator},
+		 `update_time` = NOW(),
+		 `remark` = #{remark}
+		WHERE
+			`id` = #{rebateId}
+	</update>
+	
+	<!-- 删除OEM代理商返点比例 -->
+	<delete id="deleteAgentRebate">
+		DELETE FROM
+			`t_sms_oem_agent_rebate`
+		WHERE
+			`id` = #{rebateId}
+	</delete>
+	
+	
+	<!-- 4.3.1 oem需求	end -->
+</mapper> 

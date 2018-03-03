@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ucpaas.sms.mapper.message.RoleMapper">
+ 
+    <resultMap id="rowMapper" type="com.ucpaas.sms.entity.message.Role">
+        <result property="id" jdbcType="INTEGER" column="id"/>
+        <result property="roleName" jdbcType="VARCHAR" column="role_name"/>
+        <result property="welcomePage" jdbcType="VARCHAR" column="welcome_page"/>
+        <result property="createDate" jdbcType="TIMESTAMP" column="create_date"/>
+        <result property="updateDate" jdbcType="TIMESTAMP" column="update_date"/>
+        <result property="status" jdbcType="CHAR" column="status"/>
+        <result property="webId" jdbcType="INTEGER" column="web_id"/>
+    </resultMap> 
+     
+    <sql id="BASE_COLUMN_LIST">
+        id,
+        role_name,
+        welcome_page,
+        create_date,
+        update_date,
+        status,
+        web_id
+    </sql>
+
+    <insert id="insert" parameterType="com.ucpaas.sms.entity.message.Role" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `t_sms_role` (
+        `role_name`,
+        `create_date`,
+        `update_date`,
+        `status`,
+        `web_id`
+        )
+        VALUES
+        (
+        #{roleName},
+        NOW(),
+        NOW(),
+        '1',
+        #{webId}
+        )
+    </insert>
+
+    <select id="checkRoleName" parameterType="com.ucpaas.sms.entity.message.Role" resultType="int">
+        SELECT
+        count(0)
+        FROM
+        t_sms_role
+        WHERE
+        role_name = #{roleName}
+        <if test="id != null and id &gt; 0">
+            AND id != #{id}
+        </if>
+    </select>
+
+    <!-- 添加角色菜单 -->
+    <insert id="insertRoleMenu" parameterType="com.ucpaas.sms.entity.message.Role">
+        INSERT INTO t_sms_role_menu (role_id, menu_id)
+        VALUES
+        <foreach collection="menu" item="item" separator="," >
+            (#{id},#{item.menuId})
+        </foreach>
+    </insert>
+
+    <delete id="deleteRoleMenu" parameterType="integer">
+        DELETE FROM
+        t_sms_role_menu
+        WHERE role_id = #{roleId}
+    </delete>
+
+    <delete id="deleteRole" parameterType="integer">
+        DELETE FROM
+        t_sms_role
+        WHERE id = #{roleId}
+    </delete>
+
+    <select id="countRoleUser" parameterType="integer" resultType="integer">
+        SELECT COUNT(0) FROM t_sms_user_role WHERE role_id = #{roleId}
+    </select>
+
+    <delete id="deleteRoleUser" parameterType="integer">
+        DELETE FROM t_sms_user_role WHERE role_id = #{roleId}
+    </delete>
+
+    <!-- 获取用户菜单 -->
+    <select id="countRoleMenu" parameterType="integer" resultType="integer">
+        SELECT
+        COUNT(0)
+        FROM
+        t_sms_role_menu rm
+        INNER JOIN
+        t_sms_role r ON r.id = rm.role_id
+        WHERE
+        r.`web_id` = 3
+        AND r.id = #{roleId}
+    </select>
+
+    <update id="update" parameterType="com.ucpaas.sms.entity.message.Role">
+        UPDATE t_sms_role SET
+        role_name=#{roleName},
+        update_date=NOW()
+        WHERE
+        id = #{id}
+        AND web_id=3
+    </update>
+
+    <update id="updateStatus" parameterType="com.ucpaas.sms.entity.message.Role">
+        UPDATE t_sms_role SET
+        update_date=NOW(),
+        status=#{status}
+        WHERE
+        id = #{id}
+        AND web_id = 3
+    </update>
+
+    <select id="getById" parameterType="integer" resultType="com.ucpaas.sms.entity.message.Role">
+        SELECT
+        id,
+        role_name as roleName,
+        create_date as createDate,
+        update_date as updateDate,
+        `status`,
+        web_id as webId
+        FROM
+        t_sms_role
+        WHERE
+ 		 id = #{id}
+    </select>
+ 
+    <!-- 权限管理列表 -->
+    <select id="queryRoleList"  resultMap="rowMapper">
+        SELECT
+        r.id,
+        r.role_name,
+        r.web_id,
+        CASE r.web_id
+        WHEN 3 THEN
+        '运营平台'
+        WHEN 2 THEN
+        '代理商平台'
+        WHEN 4 THEN
+        'OEM代理商平台'
+        WHEN 5 THEN
+        '云运营平台'
+        WHEN 6 THEN
+        '云运维平台'
+        END AS web_id_name,
+        r.`status`
+        FROM
+        t_sms_role r
+        WHERE
+        <choose>
+        	 <when test="_parameter  != null and _parameter  != ''">
+              r.web_id = #{_parameter}
+		    </when>
+		    <otherwise>
+              r.web_id = 3
+		    </otherwise>
+		</choose> 
+    </select>
+
+    <!-- 分页获取权限列表 -->
+    <select id="queryList" parameterType="com.ucpaas.sms.model.Page" resultMap="rowMapper">
+        SELECT
+        r.id,
+        r.role_name,
+        r.web_id,
+        CASE r.web_id
+        WHEN 3 THEN
+        '运营平台'
+        WHEN 2 THEN
+        '代理商平台'
+        WHEN 4 THEN
+        'OEM代理商平台'
+        END AS web_id_name,
+        r.`status`
+        FROM
+        t_sms_role r
+        WHERE
+        r.web_id = 3
+        <if test="params.condition != null and params.condition != ''">
+            AND r.role_name LIKE '%${params.condition}%'
+        </if>
+    </select>
+
+     
+ <!-- 获取用户菜单 -->
+    <select id="queryRoleMenuList"  resultType="com.ucpaas.sms.entity.message.Menu">
+        SELECT  
+        m.menu_id as menuId,
+        m.menu_name as menuName,
+        m.`level` "menu.level",
+        m.parent_id as parentId,
+        m.`status` as status,
+        IF ( rm.role_menu_Id IS NULL, '','checked') AS checked,
+        r.web_id as webId
+        FROM
+        t_sms_menu m
+        INNER JOIN
+        t_sms_role_menu rm ON rm.menu_id = m.menu_id
+        INNER JOIN
+        t_sms_role r ON r.id = rm.role_id
+        WHERE
+        m.`status` = 1
+        AND m.`web_id` = #{webId}
+        AND r.id = #{id}
+        ORDER BY
+        m.web_id,
+        m. LEVEL,
+        m.parent_id,
+        m.sort
+    </select>
+    
+    
+    <!-- 获取所有菜单 -->
+    <select id="queryMenuList" resultType="com.ucpaas.sms.entity.message.Menu">
+        SELECT
+        m.menu_id as menuId,
+        m.menu_name as menuName,
+        m.`level`,
+        m.menu_url as menuUrl,
+        m.parent_id as parentId,
+        m.sort,
+        m.web_id as webId
+        FROM
+        t_sms_menu m
+        WHERE
+        m.`status` = 1
+        <choose>
+        	 <when test="_parameter  != null and _parameter  != ''">
+             AND m.`web_id` = #{_parameter}
+		    </when>
+		    <otherwise>
+             AND m.`web_id` = 3
+		    </otherwise>
+		</choose>
+        ORDER BY
+        m.web_id,
+        m. LEVEL,
+        m.parent_id,
+        m.sort
+    </select>
+
+    <select id="findRoleList" resultType="Role">
+        select id, role_name as "roleName"
+        from t_sms_role
+        <where>
+            <if test="webId != null">
+                and web_id = #{webId}
+            </if>
+            <if test="status != null and status !=''">
+                and status = #{status}
+            </if>
+        </where>
+    </select>
+
+</mapper>

@@ -1,0 +1,20 @@
+/*
+ 组织架构css
+ */
+.grid-structure{
+    width:100%;
+    overflow: hidden;
+}
+.grid-structure .left-menu{
+    float:left;
+    width:260px;
+}
+.grid-structure .right-ctx{
+    float:left;
+    padding:0 10px;
+}
+.line{
+    width:100%;
+    height:1px;
+    border-top:1px solid #DDD;
+}

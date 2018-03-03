@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信平台运营系统 </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet">
+    <!-- jqgrid-->
+    <!--<link th:href="@{/resources/css/plugins/jqgrid/ui.jqgridffe4.css?0820}" rel="stylesheet">-->
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/select2.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+    <style>
+        /* Additional style to fix warning dialog position */
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+		.select2 span{
+			display:block !important;
+			margin-top: 0px !important;
+		}
+		.select2-container {
+			width: 171px !important;
+		}
+		.select2-dropdown {
+			width: 175px !important;
+		}
+		.select2-container .select2-selection--single{
+			width:175px;
+		}
+    </style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+	<div class="wrapper wrapper-content">
+	    <div class="row">
+	        <div class="col-sm-12">
+	            <div class="ibox ">
+					<div class="ibox-title">
+						<h5>修改客户信息(直客)</h5>
+					</div>
+	                <div class="ibox-content">
+
+						<div class="pull-right tooltip-demo">
+							<!--<a class="btn btn-danger btn-sm" data-toggle="tooltip" data-placement="top" title="返回" onclick="javascript:self.location=document.referrer;"><i class="fa fa-reply"></i>&nbsp;返回</a>-->
+						</div>
+	                    <div class="row">
+							<div class="col-sm-12 bg-fff">
+								<form class="form-horizontal">
+									<div class="form-group">
+										<label class="col-sm-2 control-label">客户账号：</label>
+										<div class="col-sm-3">
+											<p class="form-control-static" th:text="${data.clientid}"></p>
+										</div>
+										<input id="clientid" type="hidden" th:value="${data.clientid}" class="js-key" data-key="clientid" >
+									</div>
+									<div class="form-group">
+										<label class="col-sm-2 control-label">归属销售：</label>
+										<input type="hidden" name="oldBelongSale" id="oldSaleId" th:value="${data.belongSale}">
+										<div class="col-sm-8">
+											<select class="form-control js-key" name="belongSale" id="saleSelect"  style="width: 250px" data-key="belongSale"></select>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-2 control-label">付费方式：</label>
+										<div class="col-sm-4">
+											<label class="radio-inline">
+												<input type="radio" name="paytype" value="0" th:checked="${data.paytype} eq 0" readonly disabled> 预付费
+											</label>
+											<label class="radio-inline">
+												<input type="radio" name="paytype" value="1" th:checked="${data.paytype} eq 1" class="js-houfu"> 后付费
+											</label>
+											<input type="hidden" class="js-key paytype" data-key="paytype" th:value="${data.paytype}">
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-2 control-label">客户等级：</label>
+										<div class="col-sm-3">
+											<p class="form-control-static" th:text="${data.starLevelStr}"></p>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-2 control-label">客户类型：</label>
+										<div class="col-sm-3">
+											<select class="form-control js-key" name="clientType" data-key="clientType">
+												<option value="2" th:selected="${data.clientType} eq 2">企业用户</option>
+												<option value="1" th:selected="${data.clientType} eq 1">个人用户</option>
+											</select>
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="" class="col-sm-2 control-label">客户名称：</label>
+										<div class="col-sm-4">
+											<input type="text" class="form-control js-key" name="name" data-key="name" th:value="${data.name}">
+										</div>
+									</div>
+									<!--<div class="form-group">-->
+										<!--<label for="" class="col-sm-2 control-label">客户密码：</label>-->
+										<!--<div class="col-sm-4">-->
+											<!--<input type="text" name="name" style="position: fixed;top:-999999999px;left:-999999px;">-->
+											<!--<input type="password" name="password" style="position: fixed;top:-999999999px;left:-999999px;">-->
+											<!--<input type="password" class="form-control js-key" name="password" data-key="password">-->
+										<!--</div>-->
+									<!--</div>-->
+									<div class="form-group">
+										<label for="" class="col-sm-2 control-label">邮箱：</label>
+										<div class="col-sm-4">
+											<input type="text" class="form-control js-key" name="email" data-key="email" th:value="${data.email}">
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="" class="col-sm-2 control-label">手机号码：</label>
+										<div class="col-sm-4">
+											<input type="text" class="form-control js-key" name="mobile" data-key="mobile" th:value="${data.mobile}">
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-2 control-label">客户地址：</label>
+										<div class="col-sm-4">
+											<input type="text" class="form-control js-key" name="address" data-key="address" th:value="${data.address}">
+										</div>
+									</div>
+									<!-- 是否支持子账户 -->
+									<div class="form-group">
+										<label for="" class="col-sm-2 control-label"><span class="red">*</span>是否支持子账户：</label>
+										<div class="col-sm-4">
+											<div>
+												<span  th:if="${count}==0">
+													<label class="radio-inline">
+														<input type="radio" name="extValue" value="1"  th:checked="${data.ext_value} eq 1" class="js-extValue"> 支持
+													</label>
+												</span>
+												<span>
+												<label class="radio-inline">
+													<input type="radio" name="extValue" value="0"  th:checked="${data.ext_value} eq 0" class="js-extValue"> 不支持
+												</label>
+												</span>
+											</div>
+										</div>
+										<input type="hidden"  class="js-key extValue" data-key="extValue" th:value="${data.ext_value}" >
+									</div>
+									<!-- 是否支持子账户 end -->
+									<div class="form-group">
+										<label for="" class="col-sm-2 control-label">是否审核：</label>
+										<div class="col-sm-3">
+											<select class="form-control js-key" readonly name="needaudit" data-key="needaudit">
+												<option value="3">审核关键字</option>
+												<!--<option>个人用户</option> 现在只有审核关键字这一个选项 -->
+											</select>
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="" class="col-sm-2 control-label">短信协议：</label>
+										<div class="col-sm-3 ">
+											<select class="form-control js-key" id="smsfrom" data-key="smsfrom">
+												<option value="6" th:selected="${data.smsfrom} eq 6">HTTPS</option>
+												<option value="1" th:selected="${data.smsfrom} eq 1">CMPP3.0</option>
+												<option value="3" th:selected="${data.smsfrom} eq 3">CMPP2.0</option>
+												<option value="2" th:selected="${data.smsfrom} eq 2">SMPP</option>
+												<option value="4" th:selected="${data.smsfrom} eq 4">SGIP</option>
+												<option value="5" th:selected="${data.smsfrom} eq 5">SMGP</option>
+											</select>
+										</div>
+										<div class="col-sm-3 grid-smstype" th:classappend="${data.smsfrom} eq 6 ? 'hide' : ''">
+											<select class="form-control js-key js-smstype" name="smstype" data-key="smstype">
+												<option value="">请选择短信类型</option>
+												<option value="0" th:selected="${data.smstype} eq 0">通知</option>
+												<option value="5" th:selected="${data.smstype} eq 5">营销</option>
+												<option value="4" th:selected="${data.smstype} eq 4">验证码</option>
+											</select>
+										</div>
+									</div>
+									<div class="form-group grid-smstype-http">
+										<label for="" class="col-sm-2 control-label">HTTP子协议类型：</label>
+										<div class="col-sm-3 ">
+											<select class="form-control js-key" id="smsHttp" name="httpProtocolTypeStr"  data-key="httpProtocolType">
+												<option value="0" th:selected="${data.httpProtocolType} eq 0">https json</option>
+												<option value="1" th:selected="${data.httpProtocolType} eq 1">https get/post</option>
+												<option value="2" th:selected="${data.httpProtocolType} eq 2">https tx-json</option>
+												<option value="3" th:selected="${data.httpProtocolType} eq 3">https get/post jd</option>
+												<option value="4" th:selected="${data.httpProtocolType} eq 4">webservice jd</option>
+											</select>
+										</div>
+										<div class="col-sm-5 grid-sms-http-type hide">
+											<label for="" class="col-sm-4 control-label">短信类型：</label>
+											<div class="col-sm-5"><select class="form-control  js-key jsmstype" name="smstype" data-key="smstype">
+												<option value="">请选择短信类型</option>
+												<option value="0" th:selected="${data.smstype} eq 0" >通知</option>
+												<option value="5" th:selected="${data.smstype} eq 5">营销</option>
+												<option value="4" th:selected="${data.smstype} eq 4">验证码</option>
+											</select>
+											</div>
+										</div>
+									</div>
+									<div class="sms-price" style="" th:styleappend="${data.paytype} eq 1 ? '' :'display: none;' " >
+										<div class="form-group grid-yz grid-price" th:styleappend="${data.smstype} eq 4 or ${data.smsfrom} eq 6 ? '' :'display: none;' ">
+											<label for="" class="col-sm-2 control-label">验证码短信单价：</label>
+											<div class="col-sm-2">
+												<input type="text" class="form-control yz-price js-price" data-str="验证码短信单价" smstype="4">
+											</div>
+											<div class="col-sm-2 control-label" style="text-align:left;">元/条</div>
+										</div>
+										<div class="form-group grid-tz grid-price" th:styleappend="${data.smstype} eq 0 or ${data.smsfrom} eq 6? '' :'display: none;' ">
+											<label for="" class="col-sm-2 control-label">通知短信单价：</label>
+											<div class="col-sm-2">
+												<input type="text" class="form-control tz-price js-price" data-str="通知短信单价" smstype="0">
+											</div>
+											<div class="col-sm-2 control-label" style="text-align:left;">元/条</div>
+										</div>
+										<div class="form-group grid-yx grid-price" th:styleappend="${data.smstype} eq 5 or ${data.smsfrom} eq 6? '' :'display: none;' ">
+											<label for="" class="col-sm-2 control-label">营销短信单价：</label>
+											<div class="col-sm-2">
+												<input type="text" class="form-control yx-price js-price" data-str="营销短信单价" smstype="5" >
+											</div>
+											<div class="col-sm-2 control-label" style="text-align:left;">元/条</div>
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="" class="col-sm-2 control-label">状态报告获取方式：</label>
+										<div class="col-sm-3">
+											<select class="form-control js-key js-needreport" data-key="needreport">
+												<option value="0" th:selected="${data.needreport} eq 0">不获取</option>
+												<option value="1" th:selected="${data.needreport} eq 1">推送简单状态报告</option>
+												<option value="2" th:selected="${data.needreport} eq 2">推送透传状态报告</option>
+												<option value="3" th:selected="${data.needreport} eq 3">用户主动拉取</option>
+											</select>
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="" class="col-sm-2 control-label">上行获取方式：</label>
+										<div class="col-sm-3">
+											<select class="form-control js-key js-needmo" data-key="needmo">
+												<option value="0" th:selected="${data.needmo} eq 0">不获取</option>
+												<option value="1" th:selected="${data.needmo} eq 1">SMSP主动推送</option>
+												<option value="3" th:selected="${data.needmo} eq 3">用户主动拉取</option>
+											</select>
+										</div>
+									</div>
+									<!--<input type="hidden" th:value="${data.needreport}" data-key="needreport" class="js-key">-->
+									<!--<input type="hidden" th:value="${data.needmo}" data-key="needmo" class="js-key">-->
+									<div class="grid-https " th:classappend="${data.smsfrom} eq 6 ? '' : 'hide'">
+										<div class="form-group grid-mourl" th:classappend="${data.needmo} eq 1 ? '' : 'hide'">
+											<label for="" class="col-sm-2 control-label">上行回调地址：</label>
+											<div class="col-sm-4">
+												<input type="text" class="form-control js-key" data-key="mourl" th:value="${data.mourl}">
+											</div>
+										</div>
+										<div class="form-group grid-deliveryurl" th:classappend="${data.needreport} eq 1 or ${data.needreport} eq 2 ? '' : 'hide'">
+											<label for="" class="col-sm-2 control-label">状态报告回调地址：</label>
+											<div class="col-sm-4">
+												<input type="text" class="form-control js-key" name="deliveryurl" data-key="deliveryurl" th:value="${data.deliveryurl}">
+											</div>
+										</div>
+										<div class="form-group">
+											<label for="" class="col-sm-2 control-label">模板审核通知回调地址：</label>
+											<div class="col-sm-4">
+												<input type="text" class="form-control js-key" data-key="noticeurl" th:value="${data.noticeurl}">
+											</div>
+										</div>
+									</div>
+									<div class="grid-sgip" th:classappend="${data.smsfrom} eq 4 ? '' : 'hide'">
+										<div class="form-group">
+											<label for="" class="col-sm-2 control-label"><span class="red">*</span>SGIP协议-客户上行IP：</label>
+											<div class="col-sm-4">
+												<input type="text" class="form-control js-key js-moip" data-key="moip" th:value="${data.moip}">
+											</div>
+										</div>
+										<div class="form-group">
+											<label for="" class="col-sm-2 control-label"><span class="red">*</span>SGIP协议-客户上行端口：</label>
+											<div class="col-sm-4">
+												<input type="text" class="form-control js-key js-moport" data-key="moport" th:value="${data.moport}">
+											</div>
+										</div>
+										<div class="form-group">
+											<label for="" class="col-sm-2 control-label"><span class="red">*</span>SGIP协议-客户节点编码：</label>
+											<div class="col-sm-4">
+												<input type="text" class="form-control js-key js-nodeid" data-key="nodeid" th:value="${data.nodeid}">
+											</div>
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="" class="col-sm-2 control-label">IP白名单：</label>
+										<div class="col-sm-4">
+											<textarea name="" id="" class="form-control js-key" data-key="ip" th:text="${data.ip}"></textarea>
+										</div>
+									</div>
+									<div class="form-group form-inline">
+										<label class="col-sm-2 control-label">自扩展：</label>
+										<div class="col-sm-10">
+											<label class="radio-inline">
+												<input type="radio" name="needextend"  value="0" th:checked="${data.needextend} eq 0" class="js-notextend"> 不支持
+											</label>
+											<label class="radio-inline">
+												<input type="radio" name="needextend"  value="1" th:checked="${data.needextend} eq 1" class="js-extend"> 支持
+											</label>
+											<input type="text" class="form-control js-key grid-extend form-group" data-key="extendSize" th:value="${data.extendSize}" th:classappend="${data.needextend} eq 1 ? '' : 'hide'">
+											<span class="grid-extend hide" style="margin-left:20px;">0-10之间的数值</span>
+										</div>
+										<input type="hidden" class="needextend js-key" data-key="needextend" th:value="${data.needextend}">
+									</div>
+									<div class="form-group">
+										<label for="" class="col-sm-2 control-label">客户接入速度：</label>
+										<div class="col-sm-4">
+											<input type="text" class="form-control js-key" data-key="accessSpeed" th:value="${data.accessSpeed}">
+										</div>
+										<div class="col-sm-2 control-label" style="color:red;text-align:left;">（0-3000之间的数值）</div>
+									</div>
+									<div class="form-group">
+										<label for="" class="col-sm-2 control-label">认证状态：</label>
+										<div class="col-sm-3">
+											<p class="form-control" th:text="${data.oauthStatusDesc}"></p>
+										</div>
+										<input type="hidden" class="js-key" th:value="${data.oauthStatus}" data-key="oauthStatus">
+									</div>
+									<div class="form-group">
+										<label class="col-sm-2 control-label">证件类型:</label>
+										<div class="col-sm-3">
+											<p class="form-control-static" th:text="${id_type}"></p>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-2 control-label">证件号码:</label>
+										<div class="col-sm-3">
+											<p class="form-control-static" th:text="${id_nbr}"></p>
+										</div>
+									</div>
+									<div class="form-group">
+										<label class="col-sm-2 control-label">证件图片:</label>
+										<div class="col-sm-3">
+											<img th:src="${smsp_img_url}+'/file/scanPic.html?path='+${img_url}"
+												 width="50" height="35" style="cursor: pointer;" title="点击查看大图"
+												 onclick="viewFile(this)" th:if="${img_url}"/>
+										</div>
+									</div>
+									<div class="form-group">
+										<label for="" class="col-sm-2 control-label">备注：</label>
+										<div class="col-sm-4">
+											<input type="hidden" class="form-control js-key" data-key="remarks" th:value="${data.remarks}">
+										</div>
+									</div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">客户状态 :</label>
+                                        <div class="col-sm-8">
+                                            <p class="form-control-static" th:switch="${data.status}">
+                                                <span th:case="1">注册完成</span>
+                                                <span th:case="5">冻结</span>
+                                                <span th:case="6">注销</span>
+                                                <span th:case="7">锁定</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">连接节点数 :</label>
+                                        <div class="col-sm-8">
+                                            <p class="form-control-static" th:text="${data.nodenum}"></p>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">用户扩展端口 :</label>
+                                        <div class="col-sm-8">
+                                            <p class="form-control-static" th:text="${data.extendport}"></p>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">创建时间:</label>
+                                        <div class="col-sm-8">
+                                            <p class="form-control-static" th:text="${#dates.format(data.createtime, 'yyyy-MM-dd')}"></p>
+                                        </div>
+                                    </div>
+									<div class="form-group">
+										<div class="col-sm-offset-2 col-sm-4 m-r-md">
+											<input type="hidden" id="oldUserPriceList">
+											<a class="btn btn-primary js-confirm">确定</a>
+											<a class="btn btn-default" onclick="history.back()">取消</a>
+										</div>
+									</div>
+								</form>
+							</div>
+
+	                    </div>
+	                </div>
+					<!-- -->
+	            </div>
+	        </div>
+	    </div>
+	</div>
+	<script th:src="@{/resources/js/hex_ha_ha_ha_ha_ha.js}"></script>
+	<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+	<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+	<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+	<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+	<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+	<script th:src="@{/resources/js/jquery.form.js?v=1.0.0}"></script>
+
+	<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+	<script th:src="@{/resources/js/plugins/validate/jquery.validate.min.js}"></script>
+	<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+	<script th:src="@{/resources/js/layer/layer.js}"></script>
+    <script th:src="@{/resources/js/auth.js?v=1.1.0}"></script>
+    <script th:src="@{/resources/js/directrEditClient.js?v=2.2.6}"></script>
+	<script th:src="@{/resources/js/select2.min.js}"></script>
+	<script th:inline="javascript">
+		/*<![CDATA[*/
+        var userPriceList = [[${data.userPriceList}]];
+
+		for(var i = 0;i < userPriceList.length; i++){
+		    if(userPriceList[i].smstype == "0"){
+		        $(".tz-price").val((userPriceList[i].userPrice * 1).toFixed(4))
+                $(".tz-price").attr("oldVal", (userPriceList[i].userPrice * 1).toFixed(4))
+			} else if(userPriceList[i].smstype == "5"){
+                $(".yx-price").val((userPriceList[i].userPrice * 1).toFixed(4))
+                $(".yx-price").attr("oldVal", (userPriceList[i].userPrice * 1).toFixed(4))
+			} else if(userPriceList[i].smstype == "4"){
+                $(".yz-price").val((userPriceList[i].userPrice * 1).toFixed(4))
+                $(".yz-price").attr("oldVal", (userPriceList[i].userPrice * 1).toFixed(4))
+			}
+		}
+
+		// 储存旧的价格信息
+        $("#oldUserPriceList").val(JSON.stringify(userPriceList));
+
+		function goback(){
+            window.history.back();
+        }
+        $(function () {
+
+            //初始化销售id
+            var oldSaleId = $('#oldSaleId').val();
+
+
+            //加载代理商和销售
+
+            var  sale_list = [];
+            $.ajax({
+                url : '/accountInfo/client/add/data2',
+                type : "GET",
+                success : function (res) {
+                    if(res.code != "0"){
+                        return;
+                    }
+
+                    for(var i = 0; i < res.data.saleList.length; i++){
+                        sale_list[i] = {};
+                        sale_list[i].id = res.data.saleList[i].id;
+                        sale_list[i].text = res.data.saleList[i].name;
+                    }
+                    //初始化select2
+
+                    $("#saleSelect").select2({
+                        data : sale_list
+                    })
+                    $("#saleSelect").val(oldSaleId).trigger('change')
+                }
+            })
+            if(oldSaleId != null && oldSaleId != ''){
+                $("#saleSelect").val(oldSaleId);
+            }
+
+        });
+	    /*]]>*/
+	    
+	</script>
+</body>
+</html>

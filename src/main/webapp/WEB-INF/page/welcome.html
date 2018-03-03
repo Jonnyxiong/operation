@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:th="http://www.thymeleaf.org"
+	  lang="zh-cn">
+<head>
+	<meta charset="UTF-8"/>
+	<meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+	<title>101短信云平台 — 融合通讯开放平台让通讯更简单</title>
+	<meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+	<!--[if lt IE 9]>
+	<meta http-equiv="refresh" content="0;ie.html" />
+	<![endif]-->
+
+	<link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet"/>
+	<link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"/>
+	<link th:href="@{/resources/css/animate.min.css}" rel="stylesheet"/>
+	<link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet"/>
+	
+	<style type="text/css">
+	.content,.crumbs{position: relative;width: 92%;margin: 0 auto;/*margin-top: 30px;*/padding-right: 2%;}
+	.crumbs a,.crumbs span{display: inline-block;font-size: 16px;padding: 6px 20px;}
+	.crumbs a.active{border-bottom: 4px solid #2ea967;}
+	</style>
+</head>
+<style>
+	ul {
+		list-style: none;
+		padding: 0;
+	}
+	li{
+		height: 25px;
+		line-height: 25px;
+		text-align: left;
+		position: relative;
+	}
+	li:hover{
+		color: #0d8ddb;
+	}
+	.contact-box{
+		height:280px !important;
+	}
+</style>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content animated fadeInRight">
+	<div class="row">
+	<div class="col-sm-12">
+		<div class="col-sm-4">
+			<div class=" contact-box">
+				<div>
+					<h5>代理商信息</h5>
+					<!--<div class="ibox-tools">-->
+					<!--<span class="label label-warning-light">10条未读</span>-->
+					<!--</div>-->
+				</div>
+				<div class="ibox-content">
+					<a>
+						<div class="col-sm-12">
+							<div>代理商总数:<span th:text="${data.agent_num_total}"></span></div>
+						</div>
+						<div class="clearfix"></div>
+					</a>
+					<a>
+						<div class="col-sm-12">
+							<div>本月新增代理个数: <span th:text="${data.agent_increase_num}"></span></div>
+						</div>
+						<div class="clearfix"></div>
+					</a>
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-4">
+			<div class=" contact-box">
+				<div>
+					<h5>客户信息</h5>
+					<div class="ibox-tools">
+						<!--<i class="fa fa-flag-checkered"></i>-->
+					</div>
+				</div>
+				<div class="ibox-content">
+					<a>
+						<div class="col-sm-12">
+							<div>客户总数: <span th:text="${data.user_num_total}"></span></div>
+						</div>
+						<div class="clearfix"></div>
+					</a>
+					<a>
+						<div class="col-sm-12">
+							<div>本月新增客户个数: <span th:text="${data.user_increase_num}"></span></div>
+						</div>
+						<div class="clearfix"></div>
+					</a>
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-4">
+			<div class=" contact-box">
+				<div>
+					<h5>公告</h5>
+				</div>
+				<div class="ibox-content">
+					<ul th:each="noticeDetails:${data.noticeList}">
+						<li ><a th:href="@{'/notice/noticeDetails?id='+ ${noticeDetails.id}}">
+							<span  th:text="${noticeDetails.noticeName}"></span>
+							<span style="position: absolute;right: 0;"  th:text="${'[' + noticeDetails.releaseTimeToStr +']'}"></span>
+						</a></li>
+					</ul>
+					<div style="text-align: center"><a href="javascript:;" onclick="moreContent()">更多...</a></div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+	</div><!-- end 第一row -->
+	
+	<div class="row">
+		<div class=" contact-box">
+			<div class="crumbs">
+				<a href="javascript:;" class="active"><span>代理商趋势图</span></a>
+				<a href="javascript:;"><span>客户趋势图</span></a>
+				<!--<a href="javascript:;"><span>消费趋势图</span></a>-->
+				<div style="display: inline-block;float: right;"> 
+				<form class="form-inline">
+				  <div class="form-group">
+				    <label for="exampleInputName2">  时间段：</label>
+	                 <input placeholder="起始时间" class="form-control layer-date" id="start_time" name="startTime" style="width: 100px">
+				  </div>
+				  <div class="form-group">
+				    <label for="exampleInputEmail2">至</label>
+				    <input placeholder="截止时间" class="form-control layer-date" id="end_time" name="endTime" style="width: 100px">
+				  </div>
+					<button type="button" class="btn btn-success btn-sm" onclick="getTendency()">确定</button>
+				</form>			
+ 			
+				</div>
+			</div>
+			<div class="widget-content nopadding">
+				<!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+	 			<div id="myChart" style="min-width: 600px;min-height:480px;max-height: 500px;"></div>
+			</div>
+		</div>
+	</div> <!-- end第二row -->
+</div>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/echarts/echarts.common.min.js}"></script>
+<script th:src="@{/resources/js/plugins/layer/layer.min.js}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:inline="javascript">
+	/*<![CDATA[*/
+ 
+    var start = {
+        elem: "#start_time",
+        format: "YYYY-MM-DD",
+		min: halfYearAgo("yyyy-MM-dd"),
+        max: laydate.now(),  
+        istoday: true,
+        choose: function (datas) {
+            end.min = datas;
+        }
+    };
+    var end = {
+        elem: "#end_time",
+        format: "YYYY-MM-DD",
+		min: halfYearAgo("yyyy-MM-dd"),
+        max: laydate.now(),  
+        istoday: true,
+        choose: function (datas) {
+            start.max = datas;
+        }
+    }; 
+
+	    laydate(start);
+	    laydate(end);
+	
+var myChart = echarts.init(document.getElementById('myChart'));
+var increaseArr = new Array();
+var url = /*[[@{/index/agentTendency}]]*/;
+var chartTitle = "代理商趋势图";
+var unit = "";
+var xData = new Array();
+option = {
+    backgroundColor: "#F3F3F3",
+    "title": {
+        "text": '',
+        "subtext": "BY Ucpaas SMSP",
+        x: "4%",
+
+        textStyle: {
+            color: '#28724E',
+            fontSize: '22'
+        },
+        subtextStyle: {
+            color: '#90979c',
+            fontSize: '16',
+
+        },
+    },
+    "tooltip": {
+        "trigger": "axis",
+        "axisPointer": {
+            "type": "shadow",
+            textStyle: {
+                color: "#fff"
+            }
+
+        },
+    },
+    "grid": {
+        "borderWidth": 0,
+        "top": 110,
+        "bottom": 95,
+        textStyle: {
+            color: "#fff"
+        }
+    },
+    "legend": {
+        x: '4%',
+        top: '11%',
+        textStyle: {
+            color: '#90979c',
+        },
+        "data": ['新增']
+    },
+    toolbox: {
+        show : true,
+        feature : {
+            mark : {show: false},
+            dataView : {show: false, readOnly: false},
+            magicType : {show: false, type: ['line', 'bar']},
+            restore : {show: false},
+            saveAsImage : {show: true}
+        }
+    },
+
+    "calculable": true,
+    "xAxis": [{
+        "type": "category",
+        "axisLine": {
+            lineStyle: {
+                color: '#90979c'
+            }
+        },
+        "splitLine": {
+            "show": false
+        },
+        "axisTick": {
+            "show": false
+        },
+        "splitArea": {
+            "show": false
+        },
+        "axisLabel": {
+            "interval": 0,
+            "rotate": 45
+        },
+        "data": []
+    }],
+    "yAxis": [{
+        "type": "value",
+        "splitLine": {
+            "show": false
+        },
+        "axisLine": {
+            lineStyle: {
+                color: '#90979c'
+            }
+        },
+        "axisTick": {
+            "show": false
+        },
+        "axisLabel": {
+            "interval": 0,
+
+        },
+        "splitArea": {
+            "show": false
+        },
+
+    }],
+    "series": [{
+            "name": "新增",
+            "type": "line",
+            "stack": "总量",
+            symbolSize:10,
+            symbol:'circle',
+            "itemStyle": {
+                "normal": {
+                    "color": "rgba(51,153,102,1)",
+                    "barBorderRadius": 0,
+                    "label": {
+                        "show": true,
+                        "position": "top",
+                        formatter: function(p) {
+                            return p.value > 0 ? (p.value) : '';
+                        }
+                    }
+                }
+            },
+            "data": []
+        },
+    ]
+}
+// 为echarts对象加载数据 
+myChart.setOption(option); 
+	function queryTendency(url,title,unit){
+		var start_time = $("#start_time").val();
+		var end_time = $("#end_time").val();
+		$.ajax({
+			type: "POST",
+			url: url,
+			data: {
+				start_time:start_time,
+				end_time:end_time
+			},
+			success: function(data){
+				if(data != null){
+					var count = 0;
+					xData = [];
+					increaseArr = [];
+					for(var d in data){
+						xData.push(data[d].data_time);
+						increaseArr.push(data[d].increase_num);
+				 	}
+					myChart.setOption({
+						title:{text:title},
+						xAxis:{data:xData},
+						series:[{
+							data: increaseArr
+						}]
+				 	}); 
+				}
+			}
+		});
+	}
+	
+	function getTendency(){
+		var start_time = $("#start_time").val();
+		var end_time = $("#end_time").val();
+		/*
+		if(start_time == "" || end_time == ""){
+			layer.msg("请选择时间段",{icon : 0});
+			return;
+		}*/
+		$(".crumbs .active").click();
+	}
+
+	function moreContent() {
+		window.location.href = '/notice/list'
+    }
+	
+	$(function(){
+		$(".crumbs a").bind({click:function(){
+			$(this).addClass("active").siblings().removeClass("active");
+			chartTitle = $(this).text();
+			switch (chartTitle){
+			case "代理商趋势图":
+				url =  /*[[@{/index/agentTendency}]]*/;
+				break;
+			case "客户趋势图":
+				url =  /*[[@{/index/clientTendency}]]*/;
+				break;
+			case "消费趋势图":
+				url =  /*[[@{/index/consumeTendency}]]*/;
+				break;
+			default:
+				url =  /*[[@{/index/agentTendency}]]*/;
+			}
+			queryTendency(url,chartTitle,unit);
+		}});
+		queryTendency(url,chartTitle,unit);
+	});
+	/*]]>*/
+</script>
+</body>
+
+</html>

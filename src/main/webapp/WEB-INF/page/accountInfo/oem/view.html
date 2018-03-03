@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信平台运营系统 </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet">
+    <!-- jqgrid--> 
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+
+	<link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+    <style>
+        /* Additional style to fix warning dialog position */
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+    </style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+	<div class="wrapper wrapper-content animated fadeInRight">
+	    <div class="row">
+	        <div class="col-sm-12">
+	            <div class="ibox "> 
+	                <div class="ibox-content">
+						
+						<div class="pull-right tooltip-demo">
+							<!--<a class="btn btn-danger btn-sm" data-toggle="tooltip" data-placement="top" title="返回" onclick="javascript:self.location=document.referrer;"><i class="fa fa-reply"></i>&nbsp;返回</a>-->
+						</div>
+						<div class="row">
+							<div class="col-sm-12">
+								<div class="table-responsive">
+								  <table class="table">
+									<tr class="active">
+										<th>代理商ID</th>
+										<th>代理商名称</th>
+										<th>手机号码</th>
+										<th>代理商状态</th>
+										<th>认证状态</th>
+										<th>余额</th>
+										<th>注册时间</th>
+									</tr>
+									<tr>
+										<td th:text="${data.agent_id}"></td>
+										<td th:text="${data.agent_name}"></td>
+										<td th:text="${data.mobile}"></td>
+										<td th:text="${data.status_name}"></td>
+										<td th:text="${data.oauth_status_name}"></td>
+										<td th:text="${data.balance}"></td>
+										<td th:text="${data.create_time}"></td>
+									</tr>
+								  </table>
+								</div>
+							</div>
+						</div>
+	                    <div class="row">
+	                        <div class="col-sm-12 b-r">
+	                            <form class="form-horizontal m-t" id="mainForm">
+	                            	<input type="hidden" name="agentId" id="agentId" th:value="${data.agent_id}"/>
+	                            	<input type="hidden" name="smsp_img_url" id="smsp_img_url" th:value="${data.smsp_img_url}"/>
+	                                <div class="form-group">
+									    <label class="col-sm-3 control-label">域名:</label>
+									    <div class="col-sm-8">
+									      <p class="form-control-static" th:text="${data.domain_name}"></p>
+									    </div> 
+	                                </div>
+	                                <div class="form-group">
+	                                	<label class="col-sm-3 control-label">版权文字:</label>
+	                                    <div class="col-sm-8">
+									      <p class="form-control-static" th:text="${data.copyright_text}"></p>
+	                                    </div>
+	                                </div>
+	                                <div class="form-group">
+	                                	<label class="col-sm-3 control-label">导航栏背景色:</label>
+	                                    <div class="col-sm-8">
+									      <p class="form-control-static" th:text="${data.navigation_backcolor}"></p>
+								        </div>
+	                                </div>	                                
+	                                <div class="form-group">
+	                                	<label class="col-sm-3 control-label">导航栏文字颜色:</label>
+	                                	<div class="col-sm-8">
+									      <p class="form-control-static" th:text="${data.navigation_text_color}"></p>
+	                                	</div>
+	                                </div>
+	                                <!--<div class="form-group">-->
+	                                    <!--<label class="col-sm-3 control-label">行业短信折扣率:</label>-->
+	                                    <!--<div class="col-sm-8">-->
+									      <!--<p class="form-control-static" th:text="${data.hy_sms_discount}"></p>-->
+	                                    <!--</div>-->
+	                                <!--</div>-->
+	                                <!--<div class="form-group">-->
+	                                    <!--<label class="col-sm-3 control-label">营销短信折扣率:</label>-->
+	                                    <!--<div class="col-sm-8">-->
+									      <!--<p class="form-control-static" th:text="${data.yx_sms_discount}"></p>-->
+	                                    <!--</div>-->
+	                                <!--</div>-->
+	                                <!--<div class="form-group">-->
+	                                    <!--<label class="col-sm-3 control-label">国际短信折扣率:</label>-->
+	                                    <!--<div class="col-sm-8">-->
+									      <!--<p class="form-control-static" th:text="${data.gj_sms_discount}"></p>-->
+	                                    <!--</div>-->
+	                                <!--</div>-->
+
+									<div class="form-group" th:if="${data.isHavetestSmsNum eq 'yes'}">
+										<label class="col-sm-3 control-label">测试短信赠送:</label>
+										<div class="col-sm-8" style="width: 180px">
+											<select class="form-control" name="productType" id="productType" disabled="disabled">
+												<option value="0">行业短信</option>
+											</select>
+										</div>
+										<div class="col-sm-8" style="width: 230px">
+											<select class="form-control" name="productId" id="productId" disabled="disabled">
+												<option value="" th:text="${data.product_name}">请选择产品</option>
+											</select>
+										</div>
+										<div class="col-sm-8" style="width: 230px">
+											<input type="text" id="productNum" name="productNum" class="form-control" placeholder="请填写赠送的短信条数" th:value="${data.test_sms_number}" readonly="true">
+										</div>
+									</div>
+
+	                            </form>
+	                            
+             					<form class="form-horizontal" method="post" id="tab_logo_form">
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">标签页图标:<br/> (尺寸：48px*48px)</label>
+	                                    <div class="col-sm-8">
+											<img id="preview_tab_logo" style="width: 48px;height: 48px;cursor: pointer;" name="preview_tab_logo" class="eg-preview" th:src="@{/resources/img/tab-logo_model.png}" alt="示例：标签图标" th:if="${#strings.isEmpty(data.tab_logo_url)}" />
+											<img id="preview_tab_logo" style="" name="preview_tab_logo" class="eg-preview" th:src="${data.smsp_img_url}+'/file/scanPic.html?path='+${data.tab_logo_url}"  alt="示例：标签图标" th:unless="${#strings.isEmpty(data.tab_logo_url)}"/>
+	                                    </div>
+	                                </div>  
+             					</form>
+             					
+					            <form class="form-horizontal" method="post" id="logo_form">
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">LOGO图:<br/> (尺寸：41px*43px)</label>
+	                                    <div class="col-sm-8">
+											<img id="preview_logo" class="eg-preview" style="width: 41px;height: 43px;cursor: pointer;" th:src="@{/resources/img/logo_model.png}" alt="示例：logo"  th:if="${#strings.isEmpty(data.logo_url)}" />
+											<img id="preview_logo" class="eg-preview" style="width: 41px;height: 43px;cursor: pointer;" th:src="${data.smsp_img_url}+'/file/scanPic.html?path='+${data.logo_url}" alt="示例：logo" th:unless="${#strings.isEmpty(data.logo_url)}"/>
+	                                    </div>
+	                                </div>
+					            </form>
+             					<form class="form-horizontal" method="post" id="company_logo_form">
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">LOGO + 公司名称图:<br/> (尺寸：184px*30px)</label>
+	                                    <div class="col-sm-8">
+											<img id="preview_company_logo" class="eg-preview" style="width: 184px;height: 30px;cursor: pointer;" th:src="@{/resources/img/logo-company_model.png}" alt="示例：logo+公司名"   th:if="${#strings.isEmpty(data.company_logo_url)}"/>
+											<img id="preview_company_logo" class="eg-preview" style="width: 184px;height: 30px;cursor: pointer;" th:src="${data.smsp_img_url}+'/file/scanPic.html?path='+${data.company_logo_url}" alt="示例：logo+公司名"  th:unless="${#strings.isEmpty(data.company_logo_url)}"/>
+	                                    </div>
+	                                </div>  
+             					</form>
+             					<form class="form-horizontal" method="post" id="api_document_Form">
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">接口文档<br/>(文件不大于5MB):</label>
+	                                    <div class="col-sm-8">
+											<a th:href="@{/accountInfo/downloadFile?fileName=sms-api}" th:text="默认-接口文档" th:if="${#strings.isEmpty(data.api_document_url)}"></a>
+											<a th:href="${data.smsp_img_url}+'/file/downloadFile.html?path='+${data.api_document_url}" th:text="${data.agent_name}+'-接口文档'" th:unless="${#strings.isEmpty(data.api_document_url)}"></a>
+	                                    </div>
+	                                </div>  
+             					</form>
+					            <form class="form-horizontal" method="post" id="FAQ_document_Form">	  
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">FAQ文档<br/>(文件不大于5MB):</label>
+	                                    <div class="col-sm-8">
+											<a  th:href="@{/accountInfo/downloadFile?fileName=sms-fqa}" th:text="默认-FAQ文档" th:if="${#strings.isEmpty(data.FAQ_document_url)}"></a>
+											<a  th:href="${data.smsp_img_url}+'/file/downloadFile.html?path='+${data.FAQ_document_url}" th:text="${data.agent_name}+'-FAQ文档'" th:unless="${#strings.isEmpty(data.FAQ_document_url)}"></a>
+	                                    </div>
+	                                </div> 
+					            </form>
+             					
+             					<form class="form-horizontal" >
+								     <div class="form-group">
+								        <div class="col-sm-12 col-sm-offset-3">
+								            <button type="button" class="btn btn-sm btn-success" onclick="editOemData()">修改</button> 
+								            <button type="button" class="btn btn-sm btn-error" onclick="goback()">返回</button> 
+								        </div>
+								    </div>
+             					</form>
+	                        </div>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	</div>
+	<script th:src="@{/resources/js/hex_ha_ha_ha_ha_ha.js}"></script>
+	<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+	<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+	<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+	<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+	<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+	<script th:src="@{/resources/js/jquery.form.js?v=1.0.0}"></script>
+
+	<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+	<script th:src="@{/resources/js/plugins/validate/jquery.validate.min.js}"></script>
+	<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+	
+	<script th:inline="javascript">
+		/*<![CDATA[*/
+		  
+	  	
+	  	function editOemData(){
+			var editUrl =  /*[[@{/accountInfo/oem/edit}]]*/;
+	  		window.location.href=editUrl+"?agentId="+$("#agentId").val();
+	  	}
+		
+	  	function goback(){
+			var editUrl =  /*[[@{/accountInfo/agent/view}]]*/;
+			window.location.href=editUrl+"?agentId="+$("#agentId").val();
+		}
+
+	    /*]]>*/
+	    
+	</script>
+</body>
+</html>

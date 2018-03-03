@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信云平台运营系统 - 管理员中心</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+    <link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+    <link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/select2.css}" rel="stylesheet">
+    <style>
+        /* Additional style to fix warning dialog position */
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+        .close{
+            opacity: 1;
+        }
+        .modal-content{
+            opacity: 1 !important;
+            border:none;
+        }
+        .select2 span{
+            display:block !important;
+            margin-top: 0px !important;
+        }
+        .select2-container {
+            width: 171px !important;
+        }
+        .select2-dropdown {
+            width: 175px !important;
+        }
+        .select2-container .select2-selection--single{
+            width:175px;
+        }
+        .js-confirm  {
+            width:120px;
+            margin-right: 40px;
+        }
+        .js-cancel {
+            width:120px;
+        }
+        .fix-content {
+            text-align: center;
+            margin-top: 50px;
+            margin-bottom: 50px;
+        }
+        #form_msg label {
+            text-align: right;
+        }
+        #form_change label {
+            position: relative;
+            text-align: right;
+        }
+        #form_msg .form-group {
+            margin-top: 20px;
+        }
+        #form_change .form-group {
+            margin-top: 20px;
+        }
+        .explain {
+            position: absolute;
+            background-color: rgb(0, 128, 0);
+            color: #fff;
+            padding: 5px 0;
+            bottom:70px;
+        }
+    </style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox ">
+                <div class="ibox-title">
+                    <h5>在线支付</h5>
+                </div>
+
+                <div class="ibox-content">
+                    <form role="form" class="form-inline" id="mainForm">
+                        <input type="hidden" th:value="${jsmsMenu.menuId}" id="menuId">
+                        <div class="form-group">
+                            <input type="text" id="idOrAmount" name="idOrAmount" class="form-control"
+                                   placeholder="支付订单号/金额" style="width:140px">
+                        </div>
+                        <div class="form-group" style="margin-left:20px">
+                            <input type="text" id="idOrNameOrSaler" name="idOrNameOrSaler"
+                                   class="form-control" placeholder="客户ID/客户名称/销售名称" style="width:240px">
+                        </div>
+                        <div class="form-group" style="margin-left:20px">
+                            <label for="paymentMode">支付方式:</label>
+                            <select id="paymentMode" class="form-control" name="paymentMode"
+                                    style="width:210px">
+                                <option value="">全部</option>
+                                <option value="0">支付宝</option>
+                                <option value="1">微信支付</option>
+
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="paymentState">支付状态:</label>
+                            <select id="paymentState" class="form-control" name="paymentState"
+                                    style="width:210px">
+                                <option value="">全部</option>
+                                <option value="2">支付成功</option>
+                                <option value="3">支付失败</option>
+                                <option value="0">待支付</option>
+                                <option value="1">支付已提交</option>
+                                <option value="4">支付已取消</option>
+                            </select>
+                        </div>
+
+
+                        <!-- 时间选择 -->
+
+                        <div class="form-group sandbox-container" style="margin-left:20px">
+
+                            <div class="form-group pull-right"><span style="font-weight:700">支付时间:</span>
+                                <input placeholder="起始时间" class="form-control layer-date"
+                                       id="start_time_day" name="payTimeStart"/>&nbsp;&nbsp;至
+                                <input placeholder="截止时间" class="form-control layer-date" id="end_time_day"
+                                       name="payTimeEnd"/>
+                            </div>
+                        </div>
+                        <div class="form-group" style="float: right;">
+                                        <span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-primary "
+                                                                  onclick="search()">查询</button></span>
+                            <span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-primary hide"
+                                                      data-menuId="6304" onclick="exportExcel()">导出</button></span>
+                            <!--<span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-primary" onclick="exportExcel()">导出Excel</button></span>-->
+                        </div>
+                    </form>
+                </div>
+
+                <div class="ibox-content">
+                    <div class="jqGrid_wrapper">
+                        <table id="table_list"></table>
+                        <div id="pager_list"></div>
+                    </div>
+                    <p>&nbsp;</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" id="paymentId">
+<div class="pop-grid" id="pop" style="display: none;">
+    <div class="form-group" style="margin-top: 30px;">
+        <label for="" style="vertical-align: top;margin-left: 20px;">订单说明:</label>
+        <textarea name="description" id="description" cols="60" rows="10" style="overflow:hidden" maxlength="50" ></textarea>
+    </div>
+    <p style="margin-left: 80px;color: rgb(207, 219, 237);">说明内容不得超过50字符</p>
+    <div style="text-align: center">
+        <a href="javascript:;" class="btn  btn-primary js-confirm" onclick="editDes()">确定</a>
+        <a href="javascript:;" class="btn  btn-default js-cancel" onclick="cancel()">取消</a>
+    </div>
+</div>
+<div class="pop-grid" id="fixed" style="display: none;">
+    <p class="fix-content">确认将该订单置为人工已解决？</p>
+    <div style="text-align: center">
+        <a href="javascript:;" class="btn  btn-primary js-confirm" onclick="solve()">确定</a>
+        <a href="javascript:;" class="btn  btn-default js-cancel" onclick="cancel()">取消</a>
+    </div>
+</div>
+<div class="pop-grid" id="change" style="display: none;">
+    <form role="form" class="form-inline" id="form_msg">
+        <div class="form-group col-sm-6">
+            <label class="col-sm-5 control-label">支付订单号：</label>
+            <div class="col-sm-7">
+                <div class="from-control js-key paymentId" data-key="paymentId"></div>
+            </div>
+        </div>
+        <div class="form-group col-sm-6">
+            <label class="col-sm-5 control-label">金额：</label>
+            <div class="col-sm-7">
+                <div class="from-control js-key paymentAmount" data-key="paymentAmount"></div>
+            </div>
+        </div>
+        <div class="form-group col-sm-6">
+            <label class="col-sm-5 control-label">支付方式：</label>
+            <div class="col-sm-7">
+                <div class="from-control js-key paymentMode" data-key="paymentMode"></div>
+            </div>
+        </div>
+        <div class="form-group col-sm-6">
+            <label class="col-sm-5 control-label">支付时间：</label>
+            <div class="col-sm-7">
+                <div class="from-control js-key payTime" data-key="payTime"></div>
+            </div>
+        </div>
+        <div class="form-group col-sm-6">
+            <label class="col-sm-5 control-label">客户ID：</label>
+            <div class="col-sm-7">
+                <div class="from-control js-key agentId" data-key="agentId"></div>
+            </div>
+        </div>
+        <div class="form-group col-sm-6">
+            <label class="col-sm-5 control-label">客户名称：</label>
+            <div class="col-sm-7">
+                <div class="from-control js-key agentName" data-key="agentName"></div>
+            </div>
+        </div>
+    </form>
+    <form action="" id="form_change">
+        <div class="form-group col-sm-6">
+            <label class="col-sm-5 control-label">支付状态：</label>
+            <div class="col-sm-7">
+                <select name="" class="js-key paymentState" id="paymentState_fail"  data-key="paymentState">
+                    <option value="3">支付失败</option>
+                    <option value="2">支付成功</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group col-sm-7" style="margin-top: 10px;">
+            <label class="col-sm-4 control-label" style="width: 35.333333%">订单说明：</label>
+            <div class="col-sm-4">
+                <textarea name="" id="description_fail" cols="50" rows="6" maxlength="50" style="overflow:hidden" class="description"></textarea>
+            </div>
+            <p class="col-sm-8" style="margin-left: 115px;color: rgb(207, 219, 237);">说明内容不得超过50字符</p>
+        </div>
+        <p class="form-group col-sm-12 explain" style="text-align: center">
+            修改支付状态将导致资金变化，请谨慎操作
+        </p>
+        <div class="form-group col-sm-12" style="text-align: center;margin-top: 50px;">
+            <a href="javascript:;" class="btn  btn-primary js-confirm" onclick="editPay()">确定</a>
+            <a href="javascript:;" class="btn  btn-default js-cancel" onclick="cancel()">取消</a>
+        </div>
+    </form>
+</div>
+<div class="pop-grid" id="change_success" style="display: none;">
+    <form role="form" class="form-inline" id="form_msg">
+        <div class="form-group col-sm-6">
+            <label class="col-sm-5 control-label">支付订单号：</label>
+            <div class="col-sm-7">
+                <div class="from-control js-key paymentId" data-key="paymentId"></div>
+            </div>
+        </div>
+        <div class="form-group col-sm-6">
+            <label class="col-sm-5 control-label">金额：</label>
+            <div class="col-sm-7">
+                <div class="from-control js-key paymentAmount" data-key="paymentAmount"></div>
+            </div>
+        </div>
+        <div class="form-group col-sm-6">
+            <label class="col-sm-5 control-label">支付方式：</label>
+            <div class="col-sm-7">
+                <div class="from-control js-key paymentMode" data-key="paymentMode"></div>
+            </div>
+        </div>
+        <div class="form-group col-sm-6">
+            <label class="col-sm-5 control-label">支付时间：</label>
+            <div class="col-sm-7">
+                <div class="from-control js-key payTime" data-key="payTime"></div>
+            </div>
+        </div>
+        <div class="form-group col-sm-6">
+            <label class="col-sm-5 control-label">客户ID：</label>
+            <div class="col-sm-7">
+                <div class="from-control js-key agentId" data-key="agentId"></div>
+            </div>
+        </div>
+        <div class="form-group col-sm-6">
+            <label class="col-sm-5 control-label">客户名称：</label>
+            <div class="col-sm-7">
+                <div class="from-control js-key agentName" data-key="agentName"></div>
+            </div>
+        </div>
+    </form>
+    <form action="" id="form_change">
+        <div class="form-group col-sm-6">
+            <label class="col-sm-5 control-label">支付状态：</label>
+            <div class="col-sm-7">
+                <select name="" class="js-key paymentState" id="paymentState_success"  data-key="paymentState">
+                    <option value="1">支付已提交</option>
+                    <option value="2">支付成功</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group col-sm-7" style="margin-top: 10px;">
+            <label class="col-sm-4 control-label" style="width: 35.333333%">订单说明：</label>
+            <div class="col-sm-4">
+                <textarea name="" id="description_success" cols="50" rows="6" maxlength="50" style="overflow:hidden" class="description_success"></textarea>
+            </div>
+            <p class="col-sm-8" style="margin-left: 115px;color: rgb(207, 219, 237);">说明内容不得超过50字符</p>
+        </div>
+        <p class="form-group col-sm-12 explain" style="text-align: center">
+            修改支付状态将导致资金变化，请谨慎操作
+        </p>
+        <div class="form-group col-sm-12" style="text-align: center;margin-top: 50px;">
+            <a href="javascript:;" class="btn  btn-primary js-confirm" onclick="editPaySuccess()">确定</a>
+            <a href="javascript:;" class="btn  btn-default js-cancel" onclick="cancel()">取消</a>
+        </div>
+    </form>
+</div>
+<div id="result" style="display: none">
+    <p id="result_msg" style="text-align: center;margin-top: 50px;">支付状态修改成功！</p>
+    <div  style="text-align: center;">
+        <a href="javascript:;" class="btn  btn-default js-cancel" onclick="closedown()" style="text-align: center;margin-top: 20px;">关闭</a>
+    </div>
+</div>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/auth.js}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/js/select2.min.js}"></script>
+
+
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var start = {
+        elem: "#start_time_day",
+        format: "YYYY-MM-DD hh:mm:ss",
+        max: laydate.now(),
+        istime: true,
+        istoday: true,
+        choose: function (datas) {
+            end.min = datas;
+        }
+    };
+
+    var end = {
+        elem: "#end_time_day",
+        format: "YYYY-MM-DD hh:mm:ss",
+        min: "#start_time_day",
+        max: laydate.now(),
+        start:/*[[${end_time}]]*/'',
+        istime: true,
+        istoday: true,
+        choose: function (datas) {
+            start.max = datas;
+        }
+    };
+    laydate(start);
+    laydate(end);
+//    $("#start_time_day").val((new Date()).Format("yyyy-MM-dd") + " 00:00:00");
+//    $("#end_time_day").val((new Date()).Format("yyyy-MM-dd hh:mm:ss"));
+
+    function search(){
+        var date_start = $("#start_time_day").val();
+        var date_end = $("#end_time_day").val();
+        $("#table_list").jqGrid('setGridParam',{
+            datatype:'json',
+            postData: {
+                idOrAmount:$("#idOrAmount").val(),
+                idOrNameOrSaler:$("#idOrNameOrSaler").val(),
+                paymentState: $("#paymentState").val(),
+                payTimeStart : $("#start_time_day").val(),
+                payTimeEnd: $("#end_time_day").val(),
+                paymentMode: $("#paymentMode").val()
+            }, //发送数据
+            page:1
+        }).trigger("reloadGrid"); //重新载入
+    }
+    function reload() {
+//        event.preventDefault();
+        $("#table_list").jqGrid('setGridParam',{
+            datatype:'json',
+            postData: {
+                idOrAmount:$("#idOrAmount").val(),
+                idOrNameOrSaler:$("#idOrNameOrSaler").val(),
+                paymentState: $("#paymentState").val(),
+                payTimeStart : $("#start_time_day").val(),
+                payTimeEnd: $("#end_time_day").val(),
+                paymentMode: $("#paymentMode").val()
+            }, //发送数据
+        }).trigger("reloadGrid"); //重新载入
+    }
+    $(document).ready(function () {
+        $.jgrid.defaults.styleUI = "Bootstrap";
+        $(window).bind("resize", function () {
+            var width = $(".jqGrid_wrapper").width();
+            $("#table_list").setGridWidth(width);
+        })
+        function keyUp(e) {
+            var currKey=0,e=e||event;
+            currKey=e.keyCode||e.which||e.charCode;
+            var keyName = String.fromCharCode(currKey);
+            if (currKey == 13){
+                search();
+            }
+        }
+        document.onkeyup = keyUp;
+
+        loadTable();
+
+    });
+    function loadTable(){
+        $("#table_list").jqGrid({
+            url:/*[[@{/finance/onlinepay/pay/list}]]*/'',
+            mtype: 'POST',
+            datatype: "json",
+            jsonReader : {
+                root:"data.entityList",
+                page: "data.currentPage",
+                total: "data.totalPage",
+                records: "data.totalCount"
+            },
+            height: 'auto',
+            rownumbers:true,
+            autowidth: true,
+            shrinkToFit: false,
+            autoScroll: true,
+            rowNum: 20,
+            rowList: [10, 20, 30,50],
+            colModel: [
+                {label:'支付订单号',name: "paymentId",align: "left",sortable:false},
+                {label:'金额（元）',name: "paymentAmount",align: "left",sortable:false},
+                {label:'支付方式',name: "paymentMode",align: "left",sortable:false,
+                    formatter:function(cellvalue, options, rowObject){
+                        var switcher,
+                            paymentMode = cellvalue;
+                        if(paymentMode == '0'){
+                            switcher = "支付宝"
+                        } else if(paymentMode == '1'){
+                            switcher = "微信"
+                        }
+
+                        return switcher;
+                    }
+                },
+                {label:'支付流水号',name: "flowId",align: "left",sortable:false},
+                {label:'支付时间',name: "payTime",align: "left",sortable:false,
+                    formatter:function (cellvalue, options, rowObject) {
+                        var switcher;
+                        var _payTime = cellvalue;
+                        if(_payTime == null){
+                            switcher = " "
+                        } else {
+                            switcher = _payTime;
+                        }
+                        return switcher;
+                    }
+                },
+                {label:'支付状态',name: "paymentState",align: "left",sortable:false,
+                    formatter:function(cellvalue, options, rowObject){
+                        var switcher,
+                            paymentState = cellvalue;
+                        if(paymentState == '0'){
+                            switcher = "待支付"
+                        } else if(paymentState == '1'){
+                            switcher = "支付已提交"
+                        }else if(paymentState == '3'){
+                            switcher = "支付失败"
+                        }else if(paymentState == '4'){
+                            switcher = "支付已取消"
+                        }else {
+                            switcher = "支付成功"
+                        }
+                        return switcher;
+                    }
+                },
+                {label:'客户ID',name: "agentId",align: "left",sortable:false},
+                {label:'客户名称',name: "agentName",align: "left",sortable:false},
+                {label:'adminId',name: "adminId",align: "left",sortable:false,hidden:true},
+                {label:'归属销售',name: "saler",align: "left",sortable:false},
+                {label:'操作者',name: "operation",align: "left",sortable:false,
+                    formatter:function(cellvalue, options, rowObject){
+                        var switcher,
+                            adminId = rowObject.adminId;
+                        if(adminId == '0'){
+                            switcher = "系统"
+                        }else {
+                            switcher = cellvalue
+                        }
+                        return switcher;
+                    }
+                },
+                {label:'备注',name: "remark",align: "left",sortable:false},
+                {label:'订单说明',name: "description",align: "left",sortable:false},
+                {label:'操作',name: "op",index: "op",align: "left",sortable:false,title:false,
+                    formatter:function(cellvalue, options, rowObject){
+                        var _paymentId = rowObject.paymentId;
+                        var _paymentState = rowObject.paymentState;
+                        var _remark = rowObject.remark;
+                        var nowTime=new Date();
+                        var submittime;
+                        var state;
+                        if(rowObject.submitDeadline){
+                            var t= new Date(rowObject.submitDeadline);
+                            submittime=nowTime.getTime()-t.getTime();
+                            if(submittime>604800000&&(_paymentState == '3')){
+                                state=7;
+                            }
+                        }
+                        var _description = rowObject.description;
+                        var switcher = '';
+                        var _paymentAmount = rowObject.paymentAmount +"";
+                        if(rowObject.paymentMode == '0'){
+                            var _paymentMode = "支付宝" ;
+                        }else {
+                            var _paymentMode = "微信" ;
+                        }
+                        var _agentId = rowObject.agentId;
+                        var _payTime = rowObject.payTime;
+                        var _agentName = rowObject.agentName;
+//                            switcher += "<button type='button' class='btn btn-link btn-xs '  onclick=\"addCredit('"+_agent_id+"','"+_agentName+"')\" >编辑成功</button>";
+                        if(_paymentState == '1'||_paymentState == '2' || _paymentState == '3' || (_paymentState == '5' ) || (_paymentState == '6') )
+                            switcher += "<button type='button' class='btn btn-link btn-xs hide' data-menuId='6305' onclick=\"editExplain('"+_paymentId+"','"+_description+"')\">编辑说明</button>";
+                        if((_paymentState == '5'&& _remark != '已人工解决') || (_paymentState == '6'&& _remark != '已人工解决'))
+                            switcher += "<button type='button' class='btn btn-link btn-xs hide' data-menuId='6303'  onclick=\"fixed('"+_paymentId+"')\">已解决</button>";
+                        if(_paymentState == '1' && state != 7)
+                            switcher += "<button type='button' class='btn btn-link btn-xs hide' data-menuId='6306' onclick=\"changeOrder('"+_paymentId+"','"+_paymentAmount+"','"+_paymentState+"','"+_paymentMode+"','"+_agentId+"','"+_payTime+"','"+_agentName+"','"+_description+"')\">修改订单</button>";
+                        if(_paymentState == '3' && state != 7)
+                            switcher += "<button type='button' class='btn btn-link btn-xs hide' data-menuId='6306' onclick=\"changeOrder('"+_paymentId+"','"+_paymentAmount+"','"+_paymentState+"','"+_paymentMode+"','"+_agentId+"','"+_payTime+"','"+_agentName+"','"+_description+"')\">修改订单</button>";
+                        return switcher;
+
+                    }
+                }
+            ],
+            pager: "#pager_list",
+            viewrecords: true,
+            hidegrid: false,
+            gridComplete:function(){
+                var menuId = $("#menuId").val();
+                checkMenu(menuId);
+            }
+        });
+
+    }
+
+    var max_export_num = /*[[${max_export_num}]]*/;
+    //导出Excel文件
+    function exportExcel() {
+        var totalCount = $("#table_list").jqGrid('getGridParam','records');
+        if (totalCount == 0) {
+            layer.msg("共0条记录，将不导出Excel文件", {icon: 2});
+            return;
+        }
+        if(totalCount > max_export_num){
+            layer.msg("导出Excel文件条数大于"+max_export_num+"条", {icon: 2});
+            return;
+        }
+        var mainForm = $("#mainForm");
+        var action = mainForm.attr("action");
+        var exporUrl = /*[[@{/finance/onlinepay/pay/export}]]*/;
+        mainForm.attr("action", exporUrl).submit();
+        mainForm.attr("action", action);
+    }
+
+    //编辑说明弹窗
+    function editExplain(paymentId,description) {
+        layer.open({
+            title:'<p style="text-align:center;">编辑说明</p>',
+            type: 1,
+            area: ['600px', '400px'], //宽高
+            content: $("#pop")
+        });
+        $("#paymentId").val(paymentId);
+        if(description != 'null' && description !=null){
+            $("#description").val(description);
+        }
+    }
+
+    //已解决弹窗
+    function fixed(paymentId) {
+        layer.open({
+            title:'<p style="text-align:center;">修改订单</p>',
+            type: 1,
+            area: ['400px', '250px'], //宽高
+            content: $("#fixed")
+        });
+        $("#paymentId").val(paymentId);
+    }
+
+    //修改订单弹窗
+    function changeOrder(paymentId,paymentAmount,paymentState,paymentMode,agentId,payTime,agentName,description) {
+        $("#description_fail").val('');
+        if(paymentState == '1'){
+            layer.open({
+                title:'<p style="text-align:center;">修改订单</p>',
+                type: 1,
+                area: ['600px', '520px'], //宽高
+                content: $("#change_success")
+            });
+        }else {
+            layer.open({
+                title:'<p style="text-align:center;">修改订单</p>',
+                type: 1,
+                area: ['600px', '520px'], //宽高
+                content: $("#change")
+            });
+        }
+
+        if(description != 'null' && description !=null){
+            $("#description_fail").val(description);
+            $("#description_success").val(description);
+        }
+
+
+        $(".paymentId").html(paymentId);
+        $(".paymentAmount").html(paymentAmount);
+        $(".paymentState").val(paymentState);
+        $(".paymentMode").html(paymentMode);
+        $(".agentId").html(agentId);
+        if(payTime != 'null'){
+            $(".payTime").html(payTime);
+        }
+        $(".agentName").html(agentName);
+        $("#paymentId").val(paymentId);
+    }
+
+
+
+    function cancel() {
+        layer.closeAll();
+    }
+
+    //执行已解决操作
+    function solve(paymentId) {
+        $.ajax({
+            url:/*[[@{/finance/onlinepay/pay/solve}]]*/,
+            type:"POST",
+            data:{
+                paymentId:$("#paymentId").val()
+            },
+            success:function(data){
+                    layer.msg(data.msg,{icon:1,time:1500},function () {
+                        layer.closeAll();
+                        search();
+
+                    })
+            }
+        })
+    }
+
+    //执行编辑说明操作
+    function editDes(paymentId) {
+        if(!$("#description").val().trim()){
+            layer.msg("订单说明为空不能保存");
+            return;
+        }
+        $.ajax({
+            url:/*[[@{/finance/onlinepay/pay/editDes}]]*/,
+            type:"POST",
+            data:{
+                paymentId:$("#paymentId").val(),
+                description : $("#description").val()
+            },
+            success:function(data){
+                    layer.msg(data.msg,{icon:1,time:1500},function () {
+                        layer.closeAll();
+                        search();
+
+                    })
+            }
+        })
+    }
+    //执行修改订单操作
+    function editPay(paymentId) {
+        if(!$(".description").val()){
+            layer.msg("订单说明不能为空")
+            return;
+        }
+        $.ajax({
+            url:/*[[@{/finance/onlinepay/pay/editPay}]]*/,
+            type:"POST",
+            data:{
+                paymentId:$("#paymentId").val(),
+                description : $(".description").val(),
+                paymentState: $("#paymentState_fail").val()
+            },
+            success:function(data){
+                if(data.code == '0'){
+                    layer.open({
+                        title:'<p style="text-align:center;">修改结果</p>',
+                        type: 1,
+                        area: ['400px', '200px'], //宽高
+                        content: $("#result")
+                    });
+                }else {
+                    layer.msg(data.msg);
+                }
+            }
+        })
+    }
+    //执行修改订单操作
+    function editPaySuccess(paymentId) {
+        $.ajax({
+            url:/*[[@{/finance/onlinepay/pay/editPay}]]*/,
+            type:"POST",
+            data:{
+                paymentId:$("#paymentId").val(),
+                description : $(".description_success").val(),
+                paymentState: $("#paymentState_success").val()
+            },
+            success:function(data){
+                if(data.code == '0'){
+                    layer.open({
+                        title:'<p style="text-align:center;">修改结果</p>',
+                        type: 1,
+                        area: ['400px', '200px'], //宽高
+                        content: $("#result")
+                    });
+                }else {
+                    layer.msg(data.msg);
+                }
+            }
+        })
+    }
+
+    function closedown() {
+        layer.closeAll();
+        search();
+    }
+    /*]]>*/
+</script>
+</body>
+</html>

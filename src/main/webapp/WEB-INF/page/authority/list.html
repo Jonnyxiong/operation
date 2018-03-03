@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信平台运营系统 - 管理员中心</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+    <link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+    <link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+
+    <style>
+        /* Additional style to fix warning dialog position */
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+    </style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="ibox ">
+                <div class="ibox-title">
+                    <h5>角色管理</h5>
+                </div>
+                <div class="ibox-content">
+                    <div class="row">
+                        <div class="col-md-12 ">
+                            <div class="input-group col-md-12 ">
+                                <input type="text" id="condition" class="form-control pull-right  col-md-4" placeholder="角色名称" />
+                                <span class="input-group-btn">
+                                    <button type="button" class="btn btn-primary" onclick="reload()">搜索</button>
+                                </span>
+                                <a type="button" id="btn-crt" class="btn btn-primary btn-sm col-sm-4 col-md-3 col-lg-3 pull-right" th:href="@{/authority/add}">新建角色</a>
+                            </div>
+                        </div>
+
+                    </div>
+                    <hr>
+                    <div class="jqGrid_wrapper">
+                        <table id="table_list"></table>
+                        <div id="pager_list"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+    function reload(){
+        $("#table_list").jqGrid('setGridParam',{
+            datatype:'json',
+            postData: {
+            	text: $("#condition").val()
+
+            }, //发送数据
+//            page:1
+        }).trigger("reloadGrid"); //重新载入
+    }
+
+    function edit(id,btn){
+        var url = /*[[@{/authority/edit}]]*/;
+        window.location.href=url + '?id=' + id;
+    }
+ 
+    function del(id, btn){
+        var msg = $(btn).text();
+        swal({
+            title: "您确定要删除角色吗？",
+            text: "删除后，对应该角色的管理员需要重新分配角色才能使用！",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: msg,
+            cancelButtonText: "让我再考虑一下…",
+            closeOnConfirm: false
+        }, function () {
+            $.ajax({
+                url:/*[[@{/authority/delete}]]*/,
+                type:"post",
+                data:{
+                    id: id
+                },
+                success:function(data){
+                    if(data == null){
+                        swal(msg + "失败！", "系统错误，请稍后再试！", "error")
+                    }else if(data.success == true){
+                        swal(msg + "成功！", "角色已"+msg, "success")
+                    }else{
+                        swal(msg + "失败！", data.msg, "error")
+                    }
+                    reload ();
+                }
+            });
+        });
+    }
+
+    $(document).ready(function () {
+        $.jgrid.defaults.styleUI = "Bootstrap";
+        $("#table_list").jqGrid({
+            url:/*[[@{/authority/list}]]*/,
+            mtype: 'POST',
+            datatype: "json",
+            jsonReader : {
+                root:"list",
+                page: "currentPage",
+                total: "totalPage",
+                records: "totalCount"
+            },
+            height: 'auto',
+            rownumbers:true,
+            autowidth: true,
+            shrinkToFit: true,
+            rowNum: 20,
+            rowList: [10, 20, 30,50],
+            colNames: ["角色名称", "web应用", "状态", "操作"],
+            colModel: [
+                {name: "role_name",index: "role_name",width: 60,align: "left",sortable:false},
+                {name: "web_id",index: "web_id",width: 80,align: "left",formatter: "select", editoptions:{value:"1:短信调度系统;2:代理商平台;3:运营平台;4:OEM代理商平台;5:云运营平台"},sortable:false},
+                {name: "status", index: "status", width: 50, align: "left",formatter: "select", editoptions:{value:"0:禁用;1:正常"},sortable:false},
+                {name: "total",index: "total",width: 120,align: "left",sortable:false,title:false,
+                    formatter:function(cellvalue, options, rowObject){
+
+                        var roleId = rowObject.id;
+                        var switcher = '';
+
+                        switcher = "<button type='button' class='btn btn-link btn-xs ' onclick=\"edit('"+roleId+"',this)\" title='编辑'>编辑</button>";
+                        if(rowObject.role_name == '运营超级管理员'){
+                            return "<button type='button' class='btn btn-link btn-xs' disabled title='编辑'>编辑</button>" +
+                                    "<button type='button' class='btn btn-link btn-xs' disabled title='删除'>删除</button>";
+                        }
+                        if(rowObject.web_id==3 && (rowObject.role_name != '销售人员' && rowObject.role_name != '商务人员' )){
+                        	switcher += "<button type='button' class='btn btn-link btn-xs' onclick=\"del('"+roleId+"',this)\" title='删除'>删除</button>"
+                        }
+                        return switcher;
+                    }
+                }
+            ],
+            pager: "#pager_list",
+            viewrecords: true,
+            hidegrid: false
+        });
+      
+        $(window).bind("resize", function () {
+            var width = $(".jqGrid_wrapper").width();
+            $("#table_list").setGridWidth(width);
+        })
+    });
+    function keyUp(e) {
+        var currKey=0,e=e||event;
+        currKey=e.keyCode||e.which||e.charCode;
+        var keyName = String.fromCharCode(currKey);
+        if (currKey == 13){
+            reload();
+        }
+    }
+    document.onkeyup = keyUp;
+    /*]]>*/
+</script>
+</body>
+</html>

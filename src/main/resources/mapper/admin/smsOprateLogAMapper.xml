@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 系统配置-系统日志 -->
+<mapper namespace="smsOprateLog">
+	<select id="query" resultType="map">
+		SELECT 
+		t2.id,t2.realname,t2.email,t2.mobile,t2.username,
+		t1.log_id, t1.page_url ,t1.op_type ,
+		t1.page_id,
+<!-- 		CASE t1.page_id -->
+<!-- 		WHEN 1 THEN '管理中心' -->
+<!-- 		WHEN 2 THEN '系统配置' -->
+<!-- 		WHEN 3 THEN '用户短信通道管理' -->
+<!-- 		WHEN 4 THEN '短信通道质量实时监控' -->
+<!-- 		WHEN 5 THEN '短信通道历史记录查询' -->
+<!-- 		WHEN 6 THEN '短信发送记录' -->
+<!-- 		WHEN 7 THEN '验证质量实时监控' -->
+<!-- 		WHEN 8 THEN '验证质量历史记录监控' -->
+<!-- 		WHEN 9 THEN '验证消费实时监控' -->
+<!-- 		WHEN 10 THEN '验证消费历史记录' -->
+<!-- 		WHEN 11 THEN '短信报表' -->
+<!-- 		WHEN 12 THEN '销售统计报表' -->
+<!-- 		WHEN 13 THEN '账户管理' -->
+<!-- 		WHEN 14 THEN '短信审核' -->
+<!-- 		WHEN 15 THEN '通道管理' -->
+<!-- 		END AS page_id_name, -->
+		
+		CASE t1.op_type
+		WHEN 1 THEN '查看'
+		WHEN 2 THEN '查询'
+		WHEN 3 THEN '增加'
+		WHEN 4 THEN '修改'
+		WHEN 5 THEN '删除'
+		END AS op_type_name,
+		t1.op_desc ,
+		t1.ip ,t1.create_date,
+		t1.admin_id
+		FROM t_sms_operation_operate_log t1 LEFT JOIN t_sms_user t2 
+		ON t1.admin_id = t2.id 
+		<where>
+			<if test="realname != null and realname!=''">
+				t2.realname = #{realname}
+			</if>
+			<if test="email != null and email!=''">
+				AND t2.email = #{email}
+			</if>
+			<if test="pageUrl != null and pageUrl!=''">
+				AND t1.page_url = #{pageUrl}
+			</if>
+			<if test="page_id != null and page_id!=''">
+				AND t1.page_id = #{page_id}
+			</if>
+			<if test="module != null and module!=''">
+				AND t1.page_id = #{module}
+			</if>
+			<if test="op_type != null and op_type!=''">
+				AND t1.op_type = #{op_type}
+			</if>
+			<if test="opDesc != null and opDesc!=''">
+				AND t1.op_desc LIKE concat('%',#{opDesc}, '%')
+			</if>
+			<if test="ip!=null and ip!=''">
+				AND t1.ip = #{ip}
+			</if>
+			<if test="start_time != null">
+			   <![CDATA[AND t1.create_date >= #{start_time}]]>
+			</if>
+			<if test="end_time != null">
+			   <![CDATA[AND t1.create_date <= #{end_time}]]>
+			</if>
+		</where>
+		ORDER BY
+			t1.create_date DESC
+			${limit}
+	</select>
+	
+	<select id="queryCount" resultType="map">
+		SELECT 
+		COUNT(1) AS totalCount
+		FROM t_sms_operation_operate_log t1 LEFT JOIN t_sms_user t2 
+		ON t1.admin_id = t2.id 
+		<where>
+			<if test="realname != null and realname!=''">
+				t2.realname = #{realname}
+			</if>
+			<if test="email != null and email!=''">
+				AND t2.email = #{email}
+			</if>
+			<if test="pageUrl != null and pageUrl!=''">
+				AND t1.page_url = #{pageUrl}
+			</if>
+			<if test="page_id != null and page_id!=''">
+				AND t1.page_id = #{page_id}
+			</if>
+			<if test="module != null and module!=''">
+				AND t1.page_id = #{module}
+			</if>
+			<if test="op_type != null and op_type!=''">
+				AND t1.op_type = #{op_type}
+			</if>
+			<if test="opDesc != null and opDesc!=''">
+				AND t1.op_desc LIKE concat('%',#{opDesc}, '%')
+			</if>
+			<if test="ip!=null and ip!=''">
+				AND t1.ip = #{ip}
+			</if>
+			<if test="start_time != null">
+			   <![CDATA[AND t1.create_date >= #{start_time}]]>
+			</if>
+			<if test="end_time != null">
+			   <![CDATA[AND t1.create_date <= #{end_time}]]>
+			</if>
+		</where>
+	</select>
+	
+	
+    <!-- 获取操作类型 -->
+    <select id="queryModuleList" resultType="map">
+        SELECT
+        `param_key`,
+        `param_value`
+        FROM
+        t_sms_dict
+        WHERE
+        `param_type` = 'operation_module'
+        ORDER BY
+        param_order
+    </select>
+</mapper> 

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+
+<head>
+	<link th:href="@{/resources/css/layui/css/layui.css}" media="all" rel="stylesheet">
+</head>
+<body><div th:replace="stat :: statCode"></div>
+	<div style="margin-top: 20px;">
+
+
+
+		<form class="layui-form" >
+
+			<div class="layui-form-item">
+
+				<div class="layui-inline">
+					<label class="layui-form-label">客户转交至</label>
+					<div class="layui-input-inline" style="width: 200px">
+						<select id="saleId" name="modules" lay-verify="required" lay-search="" >
+							<option value="">请选择销售</option>
+							<option th:each="sale : ${saleList}" th:value="${sale.id}" th:text="${sale.name}">选项 4</option>
+						</select>
+					</div>
+				</div>
+
+
+			</div>
+
+			<div class="layui-form-item" style="margin-top: 100px">
+				<div class="layui-input-block">
+					<button class="layui-btn" onclick="confirmTransfer()" type="button">确定</button>
+					<button class="layui-btn layui-btn-primary" style="margin-left: 60px" onclick="closePage()">取消</button>
+				</div>
+			</div>
+
+
+		</form>
+
+		<input type="hidden" id="oldUserId" th:value="${oldUserId}">
+
+	</div>
+
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/css/layui/layui.js}"></script>
+
+
+
+
+<script th:inline="javascript">
+	/*<![CDATA[*/
+
+
+	$(function () {
+
+        var oldUserId = $("#oldUserId").val();
+        if(oldUserId != null || oldUserId != ''){
+            $("#saleId option[value='"+oldUserId+"']").remove();
+		}
+    });
+
+
+	//不可省略，让选择样式有效
+    layui.use(['form'], function(){
+        var form = layui.form()
+    });
+
+
+    var index = parent.layer.getFrameIndex(window.name); //获取当前窗体索引
+    function closePage() {
+        parent.layer.close(index); //执行关闭
+    }
+
+
+    var msgTime = 1500;
+
+    //新增加销售
+    function confirmTransfer(){
+        var saleId = $("#saleId").val();
+
+        if(saleId=="" || saleId==null){
+			parent.layer.msg("请选择对应的销售！", {icon: 2,time: msgTime});
+            return;
+        }
+
+        var oldUserId = $("#oldUserId").val();
+
+
+        $.ajax({
+            url: /*[[@{/admin/confirmTransfer}]]*/,
+            type:"POST",
+            data:{
+                oldUserId: oldUserId,
+                newUserId:saleId
+            },
+            success:function(data){
+
+                if(data == null){
+                    parent.layer.msg(data.msg, {icon: 2,time: msgTime});
+                }else if(data.success == true){
+                    var _p = parent;
+                    parent.layer.msg(data.msg, {icon: 1,time: msgTime},function(){
+                        _p.location.reload();
+					});
+                }else{
+                    parent.layer.msg(data.msg, {icon: 2,time: msgTime});
+                }
+            }
+        });
+    }
+
+	/*]]>*/
+</script>
+
+
+
+
+</body>
+
+<head>
+	<title>添加销售</title>
+
+
+</head>
+</html>

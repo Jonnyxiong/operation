@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信平台运营系统 - 管理员中心</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    <!--<link th:href="@{/resources/css/jquery.datetimepicker.css}" rel="stylesheet">-->
+
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+    <link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/timePicker.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+    <link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+
+    <style>
+        /* Additional style to fix warning dialog position */
+        .select-width{
+            width:250px !important;
+        }
+        .ml30{
+            margin-left: 30px;
+        }
+        .red{
+            color: red;
+        }
+        .mt20{
+            margin-top: 20px;
+        }
+        #editor{
+            margin-top: -25px !important;
+        }
+        label{
+            font-size: 14px;
+        }
+        input[type='radio'] {
+            margin-top: 5px !important;
+        }
+        #create_time.isTime{
+            display: none !important;
+        }
+        body{
+            background-color: #fff !important;
+        }
+        #editor{
+            position: absolute;
+            left: 71px;
+        }
+        .disblock{
+            display: block !important;
+        }
+    </style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+    <div class="row">
+        <div class="col-sm-12">
+            <a href="/notice/noticeList" class="btn btn-white">返回</a>
+            <div class="ibox ">
+                        <form role="form" class="form-inline" id="mainForm">
+                            <div class="form-group col-md-10 col-md-offset-2 disblock">
+                                <label for="webId"><span class="red">*</span>公告标题:</label>
+                                <input type="text" placeholder="公告标题" id="noticeName" th:value="${r.data.noticeDetails.noticeName}" name="noticeName" class="form-control" style="width:780px">
+                            </div>
+                            <div class="form-group col-md-10 col-md-offset-2 disblock" >
+                                <label class="mt20"><span class="red">*</span>公告内容:</label>
+                                <div style="position: relative;height: 300px;width: 100%">
+                                    <div class="" id="editor"  type="text/plain" style="width:780px;margin-top: 0;"></div>
+                                </div>
+                                <input type="hidden" th:value="${r.data.noticeDetails.noticeContent}" id="noticeContent">
+                                <input type="hidden" th:value="${r.data.noticeDetails.id}" id="noticeId">
+                            </div>
+                            <div class="form-group col-md-10 col-md-offset-2 disblock">
+                                <label class="mt20"><span class="red">*</span>应用系统:</label>
+                                <label class="radio-inline ml30">
+                                    <input type="radio" name="webId" th:checked="${r.data.noticeDetails.webId eq 4}" id="" value="4" class="inlineradio" checked>用户中心
+                                </label>
+                                <label class="radio-inline">
+                                    <input type="radio" name="webId" th:checked="${r.data.noticeDetails.webId eq 3}" id="" value="3" class="inlineradio" >运营平台
+                                </label>
+                                <label class="radio-inline">
+                                    <input type="radio" name="webId" th:checked="${r.data.noticeDetails.webId eq 1}" id="" value="1" class="inlineradio" >调度系统
+                                </label>
+                            </div>
+                            <div class="form-group col-md-10 col-md-offset-2 disblock">
+                                <label class="mt20"><span class="red">*</span>是否置顶:</label>
+                                <label class="radio-inline ml30">
+                                    <input type="radio" name="isTop" th:checked="${r.data.noticeDetails.isTop eq 0}" id="" value="0" class="inlineradio" checked>否
+                                </label>
+                                <label class="radio-inline">
+                                    <input type="radio" name="isTop" th:checked="${r.data.noticeDetails.isTop eq 1}" id="" value="1" class="inlineradio" >是
+                                </label>
+                            </div>
+                            <div class="form-group col-md-10 col-md-offset-2 disblock">
+                                <label class="mt20"><span class="red">*</span>发布时间:</label>
+                                <label class="radio-inline ml30">
+                                    <input type="radio" name="immediately" th:checked="${r.data.noticeDetails.releaseTimeToStr eq null}"  id="" value="0" class="inlineradio" checked>立即发布
+                                </label>
+                                <label class="radio-inline">
+                                    <input type="radio" name="immediately" th:checked="${r.data.noticeDetails.releaseTimeToStr ne null}" id="" value="1" class="inlineradio" >定时发布
+                                </label>
+                                <input placeholder="时间"  class="form-control layer-date isTime" th:value="${r.data.noticeDetails.releaseTimeToStr}" name="releaseTime" id="create_time" />
+                                <input type="hidden" th:value="${r.data.noticeDetails.releaseTimeToStr}"  id="time" />
+                            </div>
+                            <div class="form-group col-md-10 col-md-offset-2 ">
+                                <a  class="btn btn-lg btn-primary mt20 fabu" style="width: 120px;" >发布</a>
+                                <a  class="btn btn-lg btn-white ml30 mt20" style="width: 120px;" onclick="cancel()">取消</a>
+                            </div>
+                        </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script th:src="@{/resources/js/jquery.1.7.2.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/jquery.datetimepicker.full.min.js}"></script>
+<script th:src="@{/resources/js/plugins/timePicker/jquery.timePicker.js}"></script>
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/auth.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/wangEditor.min.js?v=1.0.0}"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+    $(function () {
+        var uploadPath = [[${r.data.path}]];
+        var webId = [[${r.data.noticeDetails.webId}]];
+        var isTop = [[${r.data.noticeDetails.isTop}]];
+        var releaseTime = [[${r.data.noticeDetails.releaseTimeToStr}]];
+        var webIds = document.getElementsByName("webId");
+        var isTops = document.getElementsByName("isTop");
+        var immediatelys = document.getElementsByName("immediately");
+        if(!webId){
+            for (var i=0; i<webIds.length; i++){
+                if (webIds[i].value=="4") {
+                    webIds[i].checked= true;
+                    break;
+                }
+            }
+        }
+        if(!isTop){
+            for (var i=0; i<isTops.length; i++){
+                if (isTops[i].value=="0") {
+                    isTops[i].checked= true;
+                    break;
+                }
+            }
+        }
+        if(!releaseTime){
+            for (var i=0; i<immediatelys.length; i++){
+                if (immediatelys[i].value=="0") {
+                    immediatelys[i].checked= true;
+                    break;
+                }
+            }
+        }
+
+        var Content = $("#noticeContent").val();
+        var time = $("#time").val();
+//        var ue = UE.getEditor('editor');
+        var E = window.wangEditor;
+        var editor = new E('#editor');
+        editor.customConfig.uploadFileName = 'photoFile';
+        // 配置服务器端地址
+//        editor.customConfig.uploadImgShowBase64 = true   // 使用 base64 保存图片
+        //editor.customConfig.uploadImgServer = '/notice/uploadAuto';
+        editor.customConfig.uploadImgServer = uploadPath;
+
+        editor.customConfig.uploadImgHooks = {
+            before: function (xhr, editor, files) {
+                // 图片上传之前触发
+                // xhr 是 XMLHttpRequst 对象，editor 是编辑器对象，files 是选择的图片文件
+                // 如果返回的结果是 {prevent: true, msg: 'xxxx'} 则表示用户放弃上传
+                // return {
+                //     prevent: true,
+                //     msg: '放弃上传'
+                // }
+            },
+            success: function (xhr, editor, result) {
+                // 图片上传并返回结果，图片插入成功之后触发
+                // xhr 是 XMLHttpRequst 对象，editor 是编辑器对象，result 是服务器端返回的结果
+            },
+            fail: function (xhr, editor, result) {
+                // 图片上传并返回结果，但图片插入错误时触发
+                // xhr 是 XMLHttpRequst 对象，editor 是编辑器对象，result 是服务器端返回的结果
+            },
+            error: function (xhr, editor) {
+                // 图片上传出错时触发
+                // xhr 是 XMLHttpRequst 对象，editor 是编辑器对象
+            },
+            timeout: function (xhr, editor) {
+                // 图片上传超时时触发
+                // xhr 是 XMLHttpRequst 对象，editor 是编辑器对象
+            },
+            // 如果服务器端返回的不是 {errno:0, data: [...]} 这种格式，可使用该配置
+            // （但是，服务器端返回的必须是一个 JSON 格式字符串！！！否则会报错）
+            customInsert: function (insertImg, result, editor) {
+                // 图片上传并返回结果，自定义插入图片的事件（而不是编辑器自动插入图片！！！）
+                // insertImg 是插入图片的函数，editor 是编辑器对象，result 是服务器端返回的结果
+
+                // 举例：假如上传图片成功后，服务器端返回的是 {url:'....'} 这种格式，即可这样插入图片：
+                var url = result
+                insertImg(result.path)
+
+                // result 必须是一个 JSON 格式字符串！！！否则报错
+            }
+        }
+
+        editor.create();
+        editor.txt.text(Content);
+        var start = {
+            elem: "#create_time",
+            format: "YYYY-MM-DD hh:mm",
+            min: laydate.now(),
+            istime: true,
+            istoday: true
+        };
+
+        laydate(start);
+        if(time != ''){
+            $("#create_time").removeClass('isTime')
+        }else {
+            $("#create_time").addClass('isTime')
+        }
+        $("input:radio[name='immediately']").click(function () {
+            if($(this).val() == '0'){
+                $("#create_time").addClass('isTime')
+            }else {
+                $("#create_time").removeClass('isTime')
+            }
+        })
+
+        var submit_flag = true;
+        $(".fabu").click(function () {
+            var html = editor.txt.html();
+            var noticeName = $("#noticeName").val();
+            var id = $("#noticeId").val();
+            var noticeContent = html.replace('<p></p>','');
+            var webId = $("input[name='webId']:checked").val();
+            var isTop = $("input[name='isTop']:checked").val();
+            var immediately = $("input[name='immediately']:checked").val();
+            var releaseTime = $("#create_time").val() || '';
+
+            var obj = {};
+            if(id){
+                if(immediately == 0){
+                    obj = {
+                        noticeName:noticeName,
+                        noticeContent:noticeContent,
+                        webId:webId,
+                        isTop:isTop,
+                        id:id
+                    };
+                }else {
+                    obj = {
+                        noticeName:noticeName,
+                        noticeContent:noticeContent,
+                        webId:webId,
+                        isTop:isTop,
+                        releaseTime:releaseTime,
+                        id:id
+                    };
+                }
+
+            }else {
+                if(immediately == 0){
+                    obj = {
+                        noticeName:noticeName,
+                        noticeContent:noticeContent,
+                        webId:webId,
+                        isTop:isTop
+                    };
+                }else {
+                    obj = {
+                        noticeName:noticeName,
+                        noticeContent:noticeContent,
+                        webId:webId,
+                        isTop:isTop,
+                        releaseTime:releaseTime
+                    };
+                }
+
+            }
+            if(immediately == 1){
+                if(!$("#create_time").val()){
+                    layer.msg("请输入发布时间",{icon:2})
+                    return;
+                }
+            }
+
+            $.ajax({
+                url :'/notice/addNotice',
+                type : "POST",
+                //contentType:"application/json",
+                //data : JSON.stringify(obj),
+                data : obj,
+                success : function(res){
+                    submit_flag = false;
+                    if(res.code == 0){
+                        layer.msg(res.msg,{icon:1,time:1500},function () {
+                            window.location.href = '/notice/noticeList'
+                        });
+                    }else {
+                        layer.msg(res.msg,{icon:2,time:1500});
+                    }
+                }
+            })
+        })
+
+    });
+
+    function cancel() {
+        window.location.href = '/notice/noticeList'
+    }
+    /*]]>*/
+</script>
+</body>
+</html>

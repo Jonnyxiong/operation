@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:th="http://www.thymeleaf.org"
+	  lang="zh-cn">
+<head>
+	<meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+	<meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+	<title>短信云平台运营系统 - 客户财务</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+	<link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+	<link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+	<link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+	<link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+	<style>
+		/* Additional style to fix warning dialog position */
+		#alertmod_table_list_2 {
+			top: 900px !important;
+		}
+		.close{
+			opacity: 1;
+		}
+		.modal-content{
+			opacity: 1 !important;
+			border:none;
+		}
+	</style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="tabs-container">
+				<ul class="nav nav-tabs">
+					<li id="tabOne" class="active" onclick="doResize(1)" th:if="${menus.dlscw}"><a
+							href="/finance/agentFinance">客户财务</a>
+					</li>
+					<li id="tabTwo" class="" th:if="${menus.lssj}"><a
+							href="/finance/hisAgentFinance">历史数据</a>
+					</li>
+					<li th:if="${menus.yezd}"><a href="/finance/bill/balanceBill?tab=1"> 余额账单</a>
+					</li>
+					<li class="" th:if="${menus.yajinzd}"><a href="/finance/bill/balanceBill?tab=4">
+						押金账单</a>
+					</li>
+				</ul>
+				<div class="tab-content">
+					<!-- 代理商财务 -->
+					<div id="tab-1" class="tab-pane active" th:if="${menus.dlscw}">
+						<div class="panel-body">
+							<div class="ibox ">
+								<div class="col-sm-12">
+									<div class="ibox ">
+										<!-- 搜索条件 -->
+										<div class="ibox-content">
+
+											<div class="row">
+												<div class="col-sm-12">
+													<form class="form-inline" id="mainForm_1">
+														<input type="hidden" th:value="${jsmsMenu.menuId}" id="menuId">
+														<div class="form-group">
+															<input type="text" style="width:250px;"
+																   placeholder="客户ID/客户名称/手机号码/邮箱"
+																   name="condition" id="condition_1"
+																   class="form-control"
+																   onkeydown="if(event.keyCode==13){return false;}">
+														</div>
+														<div class="form-group">
+															<label for="agentType_1">客户类型:</label>
+															<select id="agentType_1" name="agentType"
+																	class="form-control">
+																<option value="">全部</option>
+																<option value="5">OEM代理商</option>
+																<option value="2">品牌代理商</option>
+																<option value="1">销售代理商</option>
+															</select>
+
+														</div>
+
+														<div class="form-group">
+														<span>&nbsp;&nbsp;<button type="button"
+																				  class="btn btn-sm btn-danger"
+																				  onclick="search()">搜索</button></span>
+															<span>&nbsp;&nbsp;<button type="button"
+																					  class="btn btn-sm btn-primary"
+																					  onclick="exportExcel(1)">导出Excel</button></span>
+														</div>
+													</form>
+												</div>
+											</div>
+										</div>
+
+										<div class="ibox-content">
+											<div class="jqGrid_wrapper">
+												<table id="table_list_1"></table>
+												<div id="pager_list"></div>
+											</div>
+											<p>&nbsp;</p>
+										</div>
+									</div>
+								</div>
+								<!-- Modal -->
+								<div class="modal fade" id="myModal1" tabindex="2" role="dialog"
+									 aria-labelledby="myModalLabel">
+									<div class="modal-dialog" role="document">
+										<div class="modal-content">
+											<div class="modal-header">
+												<button type="button" class="close" data-dismiss="modal"
+														aria-label="Close"><span
+														aria-hidden="true">&times;</span></button>
+												<h4 class="modal-title" id="myModalLabel1">充值</h4>
+											</div>
+											<div class="modal-body">
+												<form class="form-horizontal" id="myModalOne">
+													<div class="form-group">
+														<label class="col-sm-4 control-label">充值类型</label>
+														<input type="hidden" id="agentType" value=""/>
+														<div class="col-sm-6">
+															<select class="form-control" name=""
+																	id="operateType">
+																<option value="余额">余额</option>
+																<option value="押金">押金</option>
+															</select>
+														</div>
+													</div>
+													<div class="form-group" id="xsagent1"
+														 style="display: none;">
+														<label for=""
+															   class="col-sm-4 control-label">子客户ID</label>
+														<div class="col-sm-6">
+															<input type="text" class="form-control"
+																   id="ClientId1">
+															<input type="hidden" id="ClientId11">
+															<div id="msg1"></div>
+
+														</div>
+													</div>
+													<div class="form-group">
+														<label for=""
+															   class="col-sm-4 control-label">充值金额</label>
+														<div class="col-sm-6">
+															<input type="text" class="form-control"
+																   id="inputOne" placeholder="低于100万">
+															<input type="hidden" id="agent_one">
+															<p class="remind text-danger"
+															   style="display: none">请最多保留两位小数</p>
+														</div>
+													</div>
+													<div class="form-group">
+														<label class="col-sm-4 control-label">备注</label>
+														<div class="col-sm-6">
+															<input type="text" class="form-control"
+																   placeholder="选填" id="remarkOne">
+														</div>
+													</div>
+													<div class="form-group">
+														<div class="col-sm-offset-4 col-sm-10">
+															<a class="btn btn-primary"
+															   id="operateOne">确定</a>
+															<button type="button"
+																	class="btn btn-default col-sm-offset-4"
+																	data-dismiss="modal">取消
+															</button>
+														</div>
+													</div>
+												</form>
+											</div>
+										</div>
+									</div>
+								</div>
+								<!-- Modal -->
+								<div class="modal fade" id="myModal2" tabindex="2" role="dialog"
+									 aria-labelledby="myModalLabel">
+									<div class="modal-dialog" role="document">
+										<div class="modal-content">
+											<div class="modal-header">
+												<button type="button" class="close" data-dismiss="modal"
+														aria-label="Close"><span
+														aria-hidden="true">&times;</span></button>
+												<h4 class="modal-title" id="myModalLabel2">退款</h4>
+											</div>
+											<div class="modal-body">
+												<form class="form-horizontal">
+													<div class="form-group">
+														<label class="col-sm-4 control-label">退款类型</label>
+														<div class="col-sm-6">
+															<select id="opttwo" class="form-control"
+																	name="">
+																<option value="余额">余额</option>
+																<option value="押金">押金</option>
+															</select>
+														</div>
+													</div>
+													<div class="form-group" id="xsagent2"
+														 style="display: none;">
+														<label for=""
+															   class="col-sm-4 control-label">子客户ID</label>
+														<div class="col-sm-6">
+															<input type="text" class="form-control"
+																   id="ClientId2">
+															<input type="hidden" id="ClientId22">
+															<div id="msg2"></div>
+
+														</div>
+													</div>
+													<div class="form-group">
+														<label class="col-sm-4 control-label">退款金额</label>
+														<div class="col-sm-6">
+															<input type="text" class="form-control"
+																   id="inputTwo" placeholder="">
+															<input type="hidden" id="agent_two">
+															<p class="remindtwo text-danger"
+															   style="display: none">请最多保留两位小数</p>
+														</div>
+
+													</div>
+													<p class="col-xs-offset-2" id="backAmountTip">注：余额≥可开票金额，则可退金额=可开票金额；余额≤可开票金额，则可退金额=余额</p>
+													<div class="form-group">
+														<label class="col-sm-4 control-label">备注</label>
+														<div class="col-sm-6">
+															<input type="text" class="form-control"
+																   placeholder="选填" id="remarkTwo">
+														</div>
+													</div>
+													<div class="form-group">
+														<div class="col-sm-offset-4 col-sm-10">
+															<a class="btn btn-primary"
+															   id="operateTwo">确定</a>
+															<button type="button"
+																	class="btn btn-default col-sm-offset-4"
+																	data-dismiss="modal">取消
+															</button>
+														</div>
+													</div>
+												</form>
+											</div>
+										</div>
+									</div>
+								</div>
+								<!-- Modal -->
+								<div class="modal fade" id="myModal3" tabindex="2" role="dialog"
+									 aria-labelledby="myModalLabel">
+									<div class="modal-dialog" role="document">
+										<div class="modal-content">
+											<div class="modal-header">
+												<button type="button" class="close" data-dismiss="modal"
+														aria-label="Close"><span
+														aria-hidden="true">&times;</span></button>
+												<h4 class="modal-title" id="myModalLabel3">赠送</h4>
+											</div>
+											<div class="modal-body">
+												<form class="form-horizontal">
+													<div class="form-group">
+														<label class="col-sm-4 control-label">赠送类型</label>
+														<div class="col-sm-6">
+															<select id="" class="form-control" name="">
+																<option value="余额">余额</option>
+															</select>
+														</div>
+													</div>
+													<div class="form-group" id="xsagent3"
+														 style="display: none;">
+														<label for=""
+															   class="col-sm-4 control-label">子客户ID</label>
+														<div class="col-sm-6">
+															<input type="text" class="form-control"
+																   id="ClientId3">
+															<div id="msg3"></div>
+
+														</div>
+													</div>
+													<div class="form-group">
+														<label class="col-sm-4 control-label">赠送金额</label>
+														<div class="col-sm-6">
+															<input type="text" class="form-control"
+																   id="inputThree" placeholder="低于100万">
+															<input type="hidden" id="agent_three">
+															<p class="remindThree text-danger"
+															   style="display: none">请最多保留两位小数</p>
+														</div>
+													</div>
+													<div class="form-group">
+														<label class="col-sm-4 control-label">备注</label>
+														<div class="col-sm-6">
+															<input type="text" class="form-control"
+																   placeholder="选填" id="remarkThree">
+														</div>
+													</div>
+													<div class="form-group">
+														<div class="col-sm-offset-4 col-sm-10">
+															<a class="btn btn-primary"
+															   id="operateThree">确定</a>
+															<button type="button"
+																	class="btn btn-default col-sm-offset-4"
+																	data-dismiss="modal">取消
+															</button>
+														</div>
+													</div>
+												</form>
+											</div>
+										</div>
+									</div>
+								</div>
+								<!-- Modal -->
+								<div class="modal fade" id="myModal4" tabindex="2" role="dialog"
+									 aria-labelledby="myModalLabel">
+									<div class="modal-dialog" role="document">
+										<div class="modal-content">
+											<div class="modal-header">
+												<button type="button" class="close" data-dismiss="modal"
+														aria-label="Close"><span
+														aria-hidden="true">&times;</span></button>
+												<h4 class="modal-title" id="myModalLabel4">扣减</h4>
+											</div>
+											<div class="modal-body">
+												<form class="form-horizontal">
+													<div class="form-group">
+														<label class="col-sm-4 control-label">扣减类型</label>
+														<div class="col-sm-6">
+															<select id="optfour" class="form-control"
+																	name="">
+																<option value="余额">余额</option>
+																<option value="押金">押金</option>
+															</select>
+														</div>
+													</div>
+													<div class="form-group" id="xsagent4"
+														 style="display: none;">
+														<label for=""
+															   class="col-sm-4 control-label">子客户ID</label>
+														<div class="col-sm-6">
+															<input type="text" class="form-control"
+																   id="ClientId4">
+															<input type="hidden" id="ClientId44">
+															<div id="msg4"></div>
+														</div>
+													</div>
+													<div class="form-group">
+														<label class="col-sm-4 control-label">扣减金额</label>
+														<div class="col-sm-6">
+															<input type="text" class="form-control"
+																   id="inputFour" placeholder=""
+																   balace="">
+															<input type="hidden" id="agent_four">
+															<p class="remindFour text-danger"
+															   style="display: none">请最多保留两位小数</p>
+														</div>
+													</div>
+													<div class="form-group">
+														<label class="col-sm-4 control-label">备注</label>
+														<div class="col-sm-6">
+															<input type="text" class="form-control"
+																   placeholder="选填" id="remarkFour">
+														</div>
+													</div>
+													<div class="form-group">
+														<div class="col-sm-offset-4 col-sm-10">
+															<a class="btn btn-primary"
+															   id="operateFour">确定</a>
+															<button type="button"
+																	class="btn btn-default col-sm-offset-4"
+																	data-dismiss="modal">取消
+															</button>
+														</div>
+													</div>
+												</form>
+											</div>
+										</div>
+									</div>
+								</div>
+								<!-- Modal -->
+								<div class="modal fade" id="myModal5" tabindex="2" role="dialog"
+									 aria-labelledby="myModalLabel">
+									<div class="modal-dialog" role="document">
+										<div class="modal-content">
+											<div class="modal-header">
+												<button type="button" class="close" data-dismiss="modal"
+														aria-label="Close"><span
+														aria-hidden="true">&times;</span></button>
+												<h4 class="modal-title" id="myModalLabel5">修改授信</h4>
+											</div>
+											<div class="modal-body">
+												<form class="form-horizontal">
+													<div class="form-group">
+														<label class="col-sm-4 control-label">授信金额(元)</label>
+														<div class="col-sm-6">
+															<input type="text" class="form-control"
+																   id="inputFive">
+															<input type="hidden" id="agent_five">
+														</div>
+													</div>
+													<div class="form-group">
+														<label class="col-sm-4 control-label">备注</label>
+														<div class="col-sm-6">
+															<input type="text" class="form-control"
+																   placeholder="选填，20个字符以内"
+																   id="remarkFive">
+														</div>
+													</div>
+													<div class="form-group">
+														<label class="text-center">注：如果已授信，那么点击授信按钮时，可以针对原先的授信额度进行修改，且授信额度为修改后的额度。</label>
+													</div>
+													<div class="form-group">
+														<div class="col-sm-offset-4 col-sm-10">
+															<a class="btn btn-primary"
+															   id="operateFive">确定</a>
+															<button type="button"
+																	class="btn btn-default col-sm-offset-4"
+																	data-dismiss="modal">取消
+															</button>
+														</div>
+													</div>
+												</form>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/auth.js}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:inline="javascript">
+
+
+
+    var grid_width = 1200; // 默认宽度
+
+
+    var max_export_num = [[${max_export_num}]];
+
+    function search(){
+        //event.preventDefault();
+        $("#table_list_1").jqGrid('setGridParam',{
+            datatype:'json',
+            postData: {
+                condition: $("#condition_1").val(),
+                agentType:$("#agentType_1").val()
+
+            }, //发送数据
+        }).trigger("reloadGrid"); //重新载入
+
+
+    }
+
+    function reload() {
+        //event.preventDefault();
+        $("#table_list_1").jqGrid('setGridParam',{
+            datatype:'json',
+            postData: {
+                condition: $("#condition").val(),
+                agentType:$("#agentType").val()
+            }, //发送数据
+        }).trigger("reloadGrid"); //重新载入
+    }
+
+    //解决合计精度问题
+    Math.add = function(v1, v2)
+    {
+        var r1, r2, m;
+        try
+        {
+            r1 = v1.toString().split(".")[1].length;
+        }
+        catch (e)
+        {
+            r1 = 0;
+        }
+        try
+        {
+            r2 = v2.toString().split(".")[1].length;
+        }
+        catch (e)
+        {
+            r2 = 0;
+        }
+        m = Math.pow(10, Math.max(r1, r2));
+
+        return (v1 * m + v2 * m) / m;
+    };
+
+    // 导出Excel文件
+    function exportExcel(type) {
+        var data1="";
+        var totalCount = $("#table_list_"+type).jqGrid('getGridParam','records');
+        if (totalCount == 0) {
+            layer.alert("共0条记录，导出Excel文件失败");
+            return;
+        }
+        if(totalCount > max_export_num){
+            layer.msg("导出Excel文件条数大于"+max_export_num+"条", {icon: 2});
+            return;
+        }
+        var mainForm = $("#mainForm_"+type);
+        var action = mainForm.attr("action");
+        var exporUrl = [[@{/finance/agentFinance/export}]];
+        mainForm.attr("method", "post");
+        mainForm.attr("action", exporUrl).submit();
+        mainForm.attr("action", action);
+
+//		if(type==2){
+//            data1=$("#create_time").val();
+//        }
+//        $.ajax({
+//            type : "post",
+//            url : [[@{/finance/agentFinance/export}]],
+//        data : {
+//            condition: $("#condition_"+type).val(),
+//			agentType:$("#agentType_"+type).val(),
+//			create_time: data1
+//
+//        },async:true,
+//           success : function(data) {
+//
+//
+//        }
+//		});
+
+    }
+
+    function doResize(type){
+        var width = $(".jqGrid_wrapper").width();
+        if(width > 0){
+            grid_width = width;
+        }
+        $("#table_list_"+ type).setGridWidth(grid_width);
+    }
+
+    $(document).ready(function () {
+
+        $.jgrid.defaults.styleUI = "Bootstrap";
+        $("#table_list_1").jqGrid({
+            url:/*[[@{/finance/agentFinance/list}]]*/,
+            mtype: 'POST',
+            datatype: "json",
+            jsonReader : {
+                root:"list",
+                page: "currentPage",
+                total: "totalPage",
+                records: "totalCount",
+                balanceTotal: "balanceTotal",
+                commissionTotal: "commissionTotal",
+                rebateTotal: "rebateTotal",
+                depositTotal: "depositTotal"
+//              amountTotal: "amountTotal"
+            },
+            height: 'auto',
+            rownumbers:true,
+            autowidth: true,
+            shrinkToFit: true,
+            autoScroll: true,
+            footerrow:true,
+            rowNum: 20,
+            rowList: [10, 20, 30,50],
+            colNames: ["客户ID","客户名称","客户类型","邮箱","手机号码","余额（元）","佣金剩余（元）","返点剩余（元）","押金（元）","操作"],
+            colModel: [
+                {name: "agent_id",align: "left",sortable:false},
+                {name: "agent_name",align: "left",sortable:false},
+                {name: "agent_type",align: "left",sortable:false,
+                    formatter:function(cellvalue, options, rowObject){
+                        var type=cellvalue;
+
+                        if (type==1){
+                            return "销售代理商";
+                        } else if(type==2) {
+                            return "品牌代理商";
+                        } else if(type==3){
+                            return "资源合作商";
+                        }
+                        else if(type==4){
+                            return "代理商和资源合作";
+                        }
+                        else if(type==5){
+                            return "OEM代理商";
+                        }else {
+                            return "-";
+                        }
+
+                    }},
+                {name: "email",align: "left",sortable:false},
+                {name: "mobile",align: "left",sortable:false},
+                {name: "balance",align: "left",sortable:false, width: 100},
+                {name: "commission_income",align: "left",sortable:false, width: 100},
+                {name: "rebate_income",align: "left",sortable:false, width: 100},
+                {name: "deposit",align: "left",sortable:false, width: 100},
+//				{name: "amount",align: "left",sortable:false, width: 100},
+                // 操作
+                {name: "bp",index: "bp",align: "left",sortable:false, width: 280,title:false,
+                    formatter:function(cellvalue, options, rowObject){
+                        var _status = rowObject.status;
+                        var _balance = rowObject.balance;
+                        var _deposit = rowObject.deposit;
+                        var _amount = rowObject.amount;
+                        var _oauth_status = rowObject.oauth_status;
+                        var _agent_id = rowObject.agent_id;
+                        var _agent_type = rowObject.agent_type;
+                        var _agent_name = rowObject.agent_name;
+                        var switcher = "";
+
+                        if (_oauth_status == 3 && _status == 1){
+                            _canBackMoney = 0;
+                            if (_agent_type == 5 && _balance > 0)
+                            {
+                                var _canBackMoney;
+
+                                $.ajax({
+                                    url : "/finance/invoice/canbackmoney/"+ _agent_id,
+                                    type : "GET",
+                                    async : false,
+                                    success : function(res) {
+                                        if(res.code != 0){
+                                            layer.msg(res.msg, {icon:2});
+                                            return;
+                                        }
+
+                                        _canBackMoney = res.data;
+                                    }
+                                })
+                            }
+
+                            switcher += "<button type='button' class='btn btn-link btn-xs hide' data-menuId='6329' agent_type='"+_agent_type+"'  data-toggle='modal' data-target='#myModal1' onclick=\"balanceOperate('"+_agent_id+"',this)\"   title='充值'>充值</button>";
+                            switcher += "<button type='button' class='btn btn-link btn-xs hide' data-menuId='6330' agent_type='"+_agent_type+"' balance='"+_balance+"' canBackMoney='"+_canBackMoney+"' deposit='"+_deposit+"' data-toggle='modal' data-target='#myModal2' onclick=\"balanceOperate('"+_agent_id+"',this)\"  title='退款'>退款</button>";
+                            //      switcher += "<button type='button' class='btn btn-link btn-xs ' agent_type='"+_agent_type+"' data-toggle='modal' data-target='#myModal3' onclick=\"balanceOperate('"+_agent_id+"',this)\"  title='赠送'>赠送</button>";
+                            switcher += "<button type='button' class='btn btn-link btn-xs hide' data-menuId='6331' agent_type='"+_agent_type+"' balance='"+_balance+"' deposit='"+_deposit+"' data-toggle='modal' data-target='#myModal4' onclick=\"balanceOperate('"+_agent_id+"',this)\"  title='扣减'>扣减</button>";
+//                           if(_agent_type!=1){
+//                               switcher += "<button type='button' class='btn btn-link btn-xs ' amount='"+_amount+"' data-toggle='modal' data-target='#myModal5' onclick=\"balanceOperate('"+_agent_id+"',this)\" title='授信'>授信</button>";
+//						   }
+                            switcher += "<button type='button' class='btn btn-link btn-xs hide' data-menuId='6332' onclick=\"reback('"+_agent_id+"', '"+ _agent_type +"', '"+ _agent_name +"')\"  title='回退条数'>回退条数</button>";
+
+                            if (_agent_type == 5)
+                            {
+                                switcher += "<button type='button' class='btn btn-link btn-xs hide'  data-menuId='6333' onclick=\"returnInvoice('"+_agent_id+"','"+_agent_name+"')\"  title='返还发票'>返还发票</button>";
+                            }
+                        } else {
+//                              switcher += "<span  style='color:red;'>该代理商暂未进行资质认证</span>";
+                            switcher += "<button type='button' class='btn btn-link btn-xs hide'  data-menuId='6329' onclick=\"noidentify('"+_oauth_status+"','"+_status+"')\"   title='充值'>充值</button>";
+                            switcher += "<button type='button' class='btn btn-link btn-xs hide'  data-menuId='6330' onclick=\"noidentify('"+_oauth_status+"','"+_status+"')\"  title='退款'>退款</button>";
+                            //     switcher += "<button type='button' class='btn btn-link btn-xs '  onclick=\"noidentify('"+_oauth_status+"','"+_status+"')\"  title='赠送'>赠送</button>";
+                            switcher += "<button type='button' class='btn btn-link btn-xs hide'  data-menuId='6331' onclick=\"noidentify('"+_oauth_status+"','"+_status+"')\"  title='扣减'>扣减</button>";
+//                                if(_agent_type!=1){
+//                                switcher += "<button type='button' class='btn btn-link btn-xs '  onclick=\"noidentify('"+_oauth_status+"','"+_oauth_status+"')\"  title='授信'>授信</button>";
+//                            }
+                            switcher += "<button type='button' class='btn btn-link btn-xs hide'  data-menuId='6332' onclick=\"noidentify('"+_oauth_status+"','"+_status+"')\"  title='回退条数'>回退条数</button>";
+
+                            if (_agent_type == 5)
+                            {
+                                switcher += "<button type='button' class='btn btn-link btn-xs hide'  data-menuId='6333' onclick=\"noidentify('"+_oauth_status+"','"+_status+"')\"  title='返还发票'>返还发票</button>";
+                            }
+
+                        }
+                        return switcher;
+                    }
+                }
+
+            ],
+            pager: "#pager_list",
+            viewrecords: true,
+            hidegrid: false,
+            footerrow:true,
+            gridComplete: function(){
+                var menuId = $("#menuId").val();
+                checkMenu(menuId);
+
+                var balanceTotal=0.00 ;
+                var commissionTotal=0.00 ;
+                var rebateTotal=0.00 ;
+                var depositTotal=0.00 ;
+//            var amountTotal=0.00;
+                $.ajax({
+                    type : "post",
+                    url : [[@{/finance/agentFinance/total}]],
+                data : {
+                    condition: $("#condition_1").val(),
+
+                        agentType:$("#agentType_1").val()
+
+
+                },
+                async:false,
+                    success : function(data) {
+                    if(data.success){
+                        balanceTotal = Number(data.data.balance_total).toFixed(2);
+                        commissionTotal=Number(data.data.commission_income_total).toFixed(2);
+                        rebateTotal=Number(data.data.rebate_income_total).toFixed(2);
+                        depositTotal=Number(data.data.deposit_total).toFixed(2);
+//                    amountTotal=Number(data.data.amount_total).toFixed(2);
+
+                    }else{
+                        layer.msg("计算总计失败", {icon: 2,time: msgTime});
+                    }
+
+                }
+            });
+
+                $("#table_list_1").footerData('set', {
+                    'mobile':"合计",
+                    'balance':balanceTotal,
+                    'commission_income':commissionTotal,
+                    'rebate_income':rebateTotal,
+                    'deposit':depositTotal
+//                'amount':amountTotal
+                });
+            },
+
+        });
+
+
+        $(window).bind("resize", function () {
+            var width = $(".jqGrid_wrapper").width();
+            $("#table_list_1").setGridWidth(width);
+        })
+
+        function keyUp(e) {
+            var currKey=0,e=e||event;
+            currKey=e.keyCode||e.which||e.charCode;
+            var keyName = String.fromCharCode(currKey);
+            if (currKey == 13){
+                search();
+                e.stopPropagation()
+            }
+        }
+        document.onkeyup = keyUp;
+    });
+
+
+    //表格统计功能
+    function completeMethod(){
+        var jq_tables = $("#table_list_1").jqGrid("getRowData");
+        var balanceTotal= $("#table_list_1").jqGrid('getGridParam', 'balanceTotal');
+        var commissionTotal= $("#table_list_1").jqGrid('getGridParam', 'commissionTotal');
+        var rebateTotal= $("#table_list_1").jqGrid('getGridParam', 'rebateTotal');
+        var depositTotal= $("#table_list_1").jqGrid('getGridParam', 'depositTotal');
+        //       var amountTotal= $("#table_list_1").jqGrid('getGridParam', 'amountTotal');
+
+
+        $(this).footerData("set",{"mobile":"合计",
+            'balance': Number(balanceTotal).toFixed(2),
+            'commission_income': Number(commissionTotal).toFixed(2),
+            'rebate_income': Number(rebateTotal).toFixed(2),
+            'deposit': Number(depositTotal).toFixed(2),
+//            'amount': Number(amountTotal).toFixed(2)
+        });
+    }
+
+
+
+
+    //点击传数据
+    $("#operateType").blur(function () {
+    });
+
+    //未授信提示
+    function noidentify(auth, status) {
+        var tip = "";
+        if(auth != 3){
+            tip = '该代理商未进行资质认证，请认证后执行此操作';
+        } else if(status != 1){
+            tip = '该代理商已注销';
+        }
+        layer.confirm(tip,{
+            btn:['确定']
+        },function () {
+            layer.closeAll();
+        });
+    }
+
+    function returnInvoice(agentId, name) {
+		//OEM代理商
+        var url = "/finance/invoice/retuan/add?agentId=" + agentId + "&name=" + name;
+        var width="950px";
+
+        layer.open({
+            type: 2,
+            title: '已返还发票',
+            shadeClose: true,
+            shade: 0.8,
+            area: [width, '63%'],
+            content: url //iframe的url
+        });
+	}
+
+
+    //充值，退款，赠送，扣减，授信
+	var rechargeFlag = false;
+    $("#operateOne").on('click',function () {
+		if(rechargeFlag){
+		    return;
+		}
+        var url = [[@{/finance/balanceOperate/edit}]];
+        var operateType =  $("#operateType").val();
+        var operateAmount =  $("#inputOne").val();
+        var agent_id = $("#agent_one").val();
+        var remark = $("#remarkOne").val();
+        var clientId=$("#ClientId1").val();
+        if(operateType == '余额'){
+            url = '/finance/balanceOperate/edit';
+
+        }else if(operateType == '押金'){
+            url = '/finance/depositOperate/edit';
+        }
+
+        if(remark.length>50){
+            layer.msg('备注信息请在50个字符内', {icon:2});
+            return false;
+        }
+        if(!_Auth.isTwodecimal(operateAmount)) {
+            layer.msg('充值金额必须为数字，最多保留两位小数', {icon: 2})
+            return false;
+        }
+        if(operateAmount>1000000){
+            layer.msg('充值金额需低于100w',{icon:2})
+            return false;
+        }
+
+        rechargeFlag = true;
+        $.ajax({
+            type:'post',
+            url:url,
+            data:{
+                agent_id:agent_id,
+                operateAmount:operateAmount,
+                remark:remark,
+                clientId:clientId,
+                operateType:'充值'
+            },
+            cache:false,
+            dataType:'json',
+            beforeSend:function(XMLHttpRequest){
+                $("#operateOne").attr('disabled',true)
+            },
+            success:function(data){
+                $("#operateOne").attr('disabled',false);
+
+                if(data.success != true){
+                    rechargeFlag = false;
+
+                    layer.msg(data.msg,{icon:2},function(){
+                        rechargeFlag = false;
+					});
+
+                    return ;
+
+                }else {
+                    layer.msg(data.msg,{icon:1},function(){
+                        rechargeFlag = false;
+					});
+
+                    $(this).attr('disabled',false);
+                    $("#myModal1").modal('hide');
+                    reload();
+                }
+                	$("#inputOne").val('');
+
+
+            }
+        });
+
+    });
+    //回退
+    function reback(id, type, name){
+        var url = "",width=""
+        if(type == 5){
+            //OEM代理商
+            url = "/finance/oemReback?agentId=" + id + "&name=" + name;
+            width="900px";
+        } else {
+            url = "/finance/agentReback?agentId=" + id + "&name=" + name;
+            width="1000px"
+        }
+        layer.open({
+            type: 2,
+            title: '回退条数',
+            shadeClose: true,
+            shade: 0.8,
+            area: [width, '100%'],
+            content: url //iframe的url
+        });
+    }
+    $("#operateTwo").on('click',function () {
+        var url = [[@{/finance/balanceOperate/edit}]];
+        var operateAmount =  $("#inputTwo").val();
+        var balace = $("#inputTwo").attr('balance');
+        var deposit= $("#inputTwo").attr('deposit');
+        var operateType = $("#opttwo").val();
+        var agent_id = $("#agent_two").val();
+        var remark = $("#remarkTwo").val();
+        var clientId=$("#ClientId2").val();
+
+        var canbackmoney = $("#inputTwo").attr('canbackmoney');
+        var agenttype = $("#inputTwo").attr('agenttype');
+
+
+        if(operateType == '余额'){
+            url = '/finance/balanceOperate/edit';
+        }else if(operateType == '押金'){
+            url = '/finance/depositOperate/edit';
+        }
+
+        if(remark.length>20){
+            layer.msg('备注信息请在20个字符内', {icon:2});
+            return false;
+        }
+        if(!_Auth.isTwodecimal(operateAmount)) {
+            layer.msg('退款金额必须为数字，最多保留两位小数', {icon: 2});
+            return false;
+        }
+        if(operateAmount>1000000){
+            layer.msg('退款金额需低于100w',{icon:2});
+            return false;
+        }
+        if (agenttype != 5)
+		{
+            if(operateType == '余额' && Number(operateAmount)>Number(balace)){
+                layer.msg('退款金额需小于余额',{icon:2});
+                return false;
+            }
+		} else {
+            if(operateType == '余额' && Number(operateAmount)>Number(canbackmoney)){
+                layer.msg('退款金额需小于可退金额',{icon:2});
+                return false;
+            }
+		}
+
+        if(operateType == '押金' && Number(operateAmount)>Number(deposit)){
+            layer.msg('退款金额需小于押金',{icon:2});
+            return false;
+        }
+
+        $.ajax({
+            type:'post',
+            url:url,
+            data:{
+                agent_id:agent_id,
+                operateAmount:operateAmount,
+                remark:remark,
+                clientId:clientId,
+                operateType:'退款'
+            },
+            cache:false,
+            dataType:'json',
+            beforeSend:function(XMLHttpRequest){
+                $(this).attr('disabled',true)
+            },
+            success:function(data){
+                if(data.success != true){
+                    layer.msg(data.msg);
+                    return;
+                }
+                $("#myModal2").modal('hide');
+                layer.msg(data.msg,{icon:1});
+                reload();
+
+            }
+        });
+    });
+
+    $("#operateThree").on('click',function () {
+        var url = [[@{/finance/balanceOperate/edit}]];
+        var operateAmount =  $("#inputThree").val();
+        var agent_id = $("#agent_three").val();
+        var remark = $("#remarkThree").val();
+        var clientId=$("#ClientId3").val();
+        if(operateType == '余额'){
+            url = '/finance/balanceOperate/edit';
+        }else if(operateType == '押金'){
+            url = '/finance/depositOperate/edit';
+        }
+
+        if(remark.length>20){
+            layer.msg('备注信息请在20个字符内', {icon:2});
+            return false;
+        }
+        if(!_Auth.isTwodecimal(operateAmount)) {
+            layer.msg('赠送金额必须为数字，最多保留两位小数', {icon: 2});
+            return false;
+        }
+        if(operateAmount>1000000){
+            layer.msg('赠送金额需低于100w',{icon:2});
+            return false;
+        }
+        $.ajax({
+            type:'post',
+            url:url,
+            data:{
+                agent_id:agent_id,
+                operateAmount:operateAmount,
+                remark:remark,
+                clientId:clientId,
+                operateType:'赠送'
+            },
+            cache:false,
+            dataType:'json',
+            beforeSend:function(XMLHttpRequest){
+                $(this).attr('disabled',true)
+            },
+            success:function(data){
+                if(data.success != true){
+                    layer.msg(data.msg);
+                    return;
+                }
+                layer.msg(data.msg,{icon:1});
+                $("#myModal3").modal('hide')
+                reload();
+
+            }
+        });
+
+
+    });
+
+    $("#operateFour").on('click',function () {
+        var url = [[@{/finance/balanceOperate/edit}]];
+        var operateAmount =  $("#inputFour").val();
+        var balace = $("#inputFour").attr('balance');
+        var deposit= $("#inputFour").attr('deposit');
+        var agent_id = $("#agent_four").val();
+        var remark = $("#remarkFour").val();
+        var operateType = $("#optfour").val();
+        var clientId=$("#ClientId4").val();
+        if(operateType == '余额'){
+            url = '/finance/balanceOperate/edit';
+        }else if(operateType == '押金'){
+            url = '/finance/depositOperate/edit';
+        }
+
+        if(remark.length>20){
+            layer.msg('备注信息请在20个字符内', {icon:2});
+            return false;
+        }
+        if(!_Auth.isTwodecimal(operateAmount)) {
+            layer.msg('扣减金额必须为数字，最多保留两位小数', {icon: 2});
+            return false;
+        }
+        if(operateAmount>1000000){
+            layer.msg('扣减金额需低于100w',{icon:2});
+            return false;
+        }
+        if(operateType == '余额' && Number(operateAmount)>Number(balace)){
+            layer.msg('扣减金额需小于余额',{icon:2});
+            return false;
+        }
+        if(operateType == '押金' && Number(operateAmount)>Number(deposit)){
+            layer.msg('扣减金额需小于押金',{icon:2});
+            return false;
+        }
+        $.ajax({
+            type:'post',
+            url:url,
+            data:{
+                agent_id:agent_id,
+                operateAmount:operateAmount,
+                remark:remark,
+                clientId:clientId,
+                operateType:'扣减'
+            },
+            cache:false,
+            dataType:'json',
+            beforeSend:function(XMLHttpRequest){
+                $(this).attr('disabled',true)
+            },
+            success:function(data){
+                if(data.success != true){
+                    layer.msg(data.msg);
+                    return;
+                }
+                layer.msg(data.msg,{icon:1});
+                $("#myModal4").modal('hide');
+                reload();
+            }
+        });
+    });
+
+	/* $("#operateFive").on('click',function () {
+	 var url = '/finance/creditOperate/edit';
+	 var operateAmount =  $("#inputFive").val();
+	 var agent_id = $("#agent_five").val();
+	 var remark = $("#remarkFive").val();
+	 if(remark.length>20){
+	 layer.msg('备注信息请在20个字符内', {icon:2});
+	 return false;
+	 }
+	 if(!_Auth.isTwodecimal(operateAmount)) {
+	 layer.msg('授信金额必须为数字，最多保留两位小数', {icon: 2});
+	 return false;
+	 }
+	 if(operateAmount>1000000){
+	 layer.msg('授信金额需低于100w',{icon:2});
+	 return false;
+	 }
+	 $.ajax({
+	 type:'post',
+	 url:url,
+	 data:{
+	 agent_id:agent_id,
+	 operateAmount:operateAmount,
+	 remark:remark,
+	 operateType:'授信'
+	 },
+	 cache:false,
+	 dataType:'json',
+	 success:function(data){
+	 if(data.success != true){
+	 layer.msg(data.msg);
+	 return;
+	 }
+	 layer.msg(data.msg,{icon:1});
+	 $("#myModal5").modal('hide');
+	 reload();
+	 }
+	 });
+	 });*/
+
+
+
+    $("#ClientId1").bind("input propertychange change",function(event){
+        $.ajax({
+            type : "post",
+            url : [[@{/finance/balanceOperate/search}]],
+        data : {
+            agent_id:$("#agent_one").val(),
+                ClientId:$("#ClientId1").val()
+        },
+        async:false,
+            success : function(data) {
+            if(data.success){
+                $("#msg1").html("<span style='color: green'>"+data.msg+"</span>")
+
+            }else{
+                $("#msg1").html("<span style='color: red'>"+data.msg+"</span>");
+                //   layer.msg("客户ID输入有误！", {icon: 2,time: msgTime});
+            }
+
+        }
+    });
+    });
+
+    $("#ClientId2").bind("input propertychange change",function(event){
+        $.ajax({
+            type : "post",
+            url : [[@{/finance/balanceOperate/search}]],
+        data : {
+            agent_id:$("#agent_two").val(),
+                ClientId:$("#ClientId2").val()
+        },
+        async:false,
+            success : function(data) {
+            if(data.success){
+                $("#msg2").html("<span style='color: green'>"+data.msg+"</span>")
+
+            }else{
+                $("#msg2").html("<span style='color: red'>"+data.msg+"</span>");
+                //  layer.msg("客户ID输入有误！", {icon: 2,time: msgTime});
+            }
+
+        }
+    });
+    });
+
+    $("#ClientId3").bind("input propertychange change",function(event){
+        $.ajax({
+            type : "post",
+            url : [[@{/finance/balanceOperate/search}]],
+        data : {
+            agent_id:$("#agent_three").val(),
+                ClientId:$("#ClientId3").val()
+        },
+        async:false,
+            success : function(data) {
+            if(data.success){
+                $("#msg3").html("<span style='color: green'>"+data.msg+"</span>")
+
+            }else{
+                $("#msg3").html("<span style='color: red'>"+data.msg+"</span>");
+                // layer.msg("客户ID输入有误！", {icon: 2,time: msgTime});
+            }
+
+        }
+    });
+    });
+
+    $("#ClientId4").bind("input propertychange change",function(event){
+        $.ajax({
+            type : "post",
+            url : [[@{/finance/balanceOperate/search}]],
+        data : {
+            agent_id:$("#agent_four").val(),
+                ClientId:$("#ClientId4").val()
+        },
+        async:false,
+            success : function(data) {
+            if(data.success){
+                $("#msg4").html("<span style='color: green'>"+data.msg+"</span>")
+
+            }else{
+                $("#msg4").html("<span style='color: red'>"+data.msg+"</span>");
+                //  layer.msg("客户ID输入有误！", {icon: 2,time: msgTime});
+            }
+
+        }
+    });
+    });
+
+
+
+    //余额操作
+    function balanceOperate(agent_id,btn) {
+        var text = $(btn).attr('title');
+        var _balance = $(btn).attr('balance') > 0 ? $(btn).attr('balance')  : 0;
+        var _canBackMoney = $(btn).attr('canBackMoney') > 0 ? $(btn).attr('canBackMoney')  : 0;
+        var _deposit = $(btn).attr('deposit');
+          var _amount = $(btn).attr('amount');
+        var _agent_type = $(btn).attr('agent_type');
+        $("#agentType").val(_agent_type);
+
+        if(_agent_type==1){
+            $("#xsagent1").show();
+            $("#xsagent2").show();
+            $("#xsagent3").show();
+            $("#xsagent4").show();
+        }else {
+            $("#xsagent1").hide();
+            $("#xsagent2").hide();
+            $("#xsagent3").hide();
+            $("#xsagent4").hide();
+        }
+        $("#agent_one").val(agent_id);
+        $("#agent_two").val(agent_id);
+        $("#agent_three").val(agent_id);
+        $("#agent_four").val(agent_id);
+        $("#agent_five").val(agent_id);
+        $("#inputTwo").attr('balance',_balance);
+        $("#inputTwo").attr('deposit',_deposit);
+        $("#inputTwo").attr('canbackmoney',_canBackMoney);
+        $("#inputTwo").attr('agenttype',_agent_type);
+        $("#inputFour").attr('balance',_balance);
+        $("#inputFour").attr('deposit',_deposit);
+        $("#remarkOne").val('');
+        $("#remarkTwo").val('');
+        $("#remarkThree").val('');
+        $("#remarkFour").val('');
+        $("#remarkFive").val('');
+        $("#inputFive").val(_amount);
+        $("#ClientId1").val('');
+        $("#ClientId2").val('');
+        $("#ClientId3").val('');
+        $("#ClientId4").val('');
+        $('#msg1').html('');
+        $('#msg2').html('');
+        $('#msg3').html('');
+        $('#msg4').html('');
+
+
+        if($('#opttwo').val() == '余额'){
+
+            if(_agent_type == 5)
+			{
+                $("#backAmountTip").show();
+                $("#inputTwo").attr('placeholder','余额'+_balance+'元，可退金额'+_canBackMoney+'元');
+			}else {
+                $("#inputTwo").attr('placeholder','可退金额'+_balance+'元');
+                $("#backAmountTip").hide();
+			}
+        }else if($('#opttwo').val() == '押金'){
+            $("#inputTwo").attr('placeholder','可退金额'+_deposit+'元');
+        }
+        if($("#optfour").val() == '余额'){
+            $("#inputFour").attr('placeholder','可扣金额'+_balance+'元');
+        }else if($("#optfour").val() == '押金'){
+            $("#inputFour").attr('placeholder','可扣金额'+_deposit+'元');
+        }
+        $("#inputOne").val('');
+        $("#inputTwo").val('');
+        $("#inputThree").val('');
+        $("#inputFour").val('');
+
+
+        //是否隐藏子客户ID
+        $("#operateType").change(function () {
+            var _agent_type=$("#agentType").val();
+            if($(this).val() == '余额' && _agent_type==1){
+                $("#xsagent1").show();
+            }else if($(this).val() == '押金'){
+                $("#xsagent1").hide();
+                $("#ClientId1").val('');
+                $('#msg1').html('');
+            }
+        });
+
+
+        //余额、押金
+        $("#opttwo").change(function () {
+            if($(this).val() == '余额'){
+                $("#xsagent2").hide();
+                $("#inputTwo").attr('placeholder','可退金额'+_canBackMoney+'元');
+            }else if($(this).val() == '押金'){
+                $("#xsagent2").hide();
+                $("#ClientId2").val('');
+                $('#msg2').html('');
+                $("#inputTwo").attr('placeholder','可退金额'+_deposit+'元');
+            }
+        });
+
+
+        $("#optfour").change(function () {
+            if($(this).val() == '余额'){
+                $("#xsagent4").hide();
+                $("#inputFour").attr('placeholder','可扣金额'+_balance+'元');
+            }else if($(this).val() == '押金'){
+                $("#xsagent4").hide();
+                $("#ClientId4").val('');
+                $('#msg4').html('');
+                $("#inputFour").attr('placeholder','可扣金额'+_deposit+'元');
+            }
+        });
+
+        var text1 = encodeURI(encodeURI(text));
+//        var url = [[@{/finance/balanceOperate}]];
+//        window.location.href = url + "?operate="+text1+"&agentId=" + agent_id;
+    }
+
+    // 押金操作
+    function depositOperate(agent_id,btn){
+        var text = $(btn).text();
+        var text1 = encodeURI(encodeURI(text));
+        var url = [[@{/finance/depositOperate}]];
+        window.location.href = url + "?operate="+text1+"&agentId=" + agent_id;
+    }
+
+	/*  // 授信操作
+	 function creditOperate(agent_id){
+	 var creditUrl = [[@{/finance/creditOperate}]];
+	 window.location.href=creditUrl+"?agentId="+agent_id;
+	 }*/
+</script>
+
+</body>
+</html>

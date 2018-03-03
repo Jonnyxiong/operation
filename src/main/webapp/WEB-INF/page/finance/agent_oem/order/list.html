@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:th="http://www.thymeleaf.org"
+	  lang="zh-cn">
+<head>
+	<meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+	<meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+	<title>短信云平台运营系统 - OEM订单信息</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+	<link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+	<link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+	<link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+	<link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+	<style>
+		/* Additional style to fix warning dialog position */
+		#alertmod_table_list_2 {
+			top: 900px !important;
+		}
+	</style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content  animated fadeInRight">
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="tabs-container">
+				<ul class="nav nav-tabs">
+					<li  th:if="${menus.PINdlsdd}"><a  href="/finance/order">品牌代理商订单</a>
+					</li>
+					<li class="active" id="agentTab" th:if="${menus.OEMdlsdd}"><a data-toggle="tab" href="#tab-1" aria-expanded="true" onclick="resizeJqgrid1()"> 客户订单</a>
+					</li>
+					<li class=""  id="clientTab" th:if="${menus.OEMkhdd}"><a data-toggle="tab" href="#tab-2" aria-expanded="false" onclick="resizeJqgrid2()">子账户订单</a>
+					</li>
+					<li class="" th:if="${menus.OEMdlskc}"><a  href="/finance/oem/agentInventory?tab=1">客户库存</a>
+					</li>
+					<li class="" th:if="${menus.OEMkhkc}"><a  href="/finance/oem/agentInventory?tab=2">子账户库存</a>
+					</li>
+				</ul>
+				<div class="tab-content">
+					<div id="tab-1" class="tab-pane active" th:if="${menus.OEMdlsdd}">
+						<div class="panel-body">
+							<div class="ibox ">
+								<!-- 搜索条件 -->
+								<div class="ibox-content">
+									<div class="row">
+									<div class="col-sm-12">
+										<form class="form-inline" method="post" id="agentForm" >
+											<div class="form-group m-r-md">
+												<input type="text" placeholder="订单编号/产品代码/客户ID" name="condition" id="agent_condition" class="form-control" style="width:230px;">
+											</div>
+
+											<div class="form-group m-r-md">
+												<label for="agent_productType">产品类型:</label>
+												<select id="agent_productType" name="productType" class="form-control">
+													<option value="">全部</option>
+													<option value="3">验证码</option>
+													<option value="4">通知</option>
+													<option value="1">会员营销</option>
+													<option value="0">行业</option>
+													<option value="2">国际短信</option>
+												</select>
+											</div>
+
+											<div class="form-group m-r-md">
+												<label for="agent_orderType">订单类型:</label>
+												<select id="agent_orderType" name="orderType" class="form-control">
+													<option value="">全部</option>
+													<option value="0">短信购买</option>
+													<option value="1">子账户充值</option>
+													<option value="2">子账户回退</option>
+													<option value="3">回退条数</option>
+												</select>
+											</div>
+											<div class="form-group m-r-md">
+												<label for="agent_operatorCode">运营商类型:</label>
+												<select id="agent_operatorCode" name="operatorCode" class="form-control">
+													<option value="">全部</option>
+													<option value="1">移动</option>
+													<option value="2">联通</option>
+													<option value="3">电信</option>
+													<option value="0">全网</option>
+													<option value="4">国际</option>
+												</select>
+											</div>
+											<!-- 时间选择 -->
+											<div class="form-group" style="margin-left:2.5%;visibility: hidden">
+												<div class="form-group pull-right">到期时间:
+													<input placeholder="开始时间" class="form-control layer-date" name="start_time_day" id="agent_start_time_day" style="width:100px"/>至
+													<input placeholder="结束时间" class="form-control layer-date" name="end_time_day" id="agent_end_time_day"  style="width:100px"/>
+												</div>
+											</div>
+											<div class="form-group">
+												<span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-danger" onclick="agentSearch()">搜索</button></span>
+												<span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-primary" onclick="agentExportExcel()">导出Excel</button></span>
+											</div>
+										</form>
+									</div>
+								</div>
+								</div>
+								<div class="ibox-content">
+									<div class="jqGrid_wrapper">
+										<table id="agent_table_list"></table>
+										<div id="agent_pager_list"></div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div id="tab-2" class="tab-pane" th:if="${menus.OEMkhdd}">
+						<div class="panel-body">
+							<div class="ibox ">
+								<!-- 搜索条件 -->
+								<div class="ibox-content">
+									<div class="row">
+									<div class="col-sm-12">
+										<form class="form-inline" method="post" id="clientForm" >
+											<div class="form-group m-r-md">
+												<input type="text" placeholder="订单编号/子账户ID/客户ID" name="condition" id="client_condition" class="form-control">
+											</div>
+
+											<div class="form-group m-r-md">
+												<label for="client_productType">产品类型:</label>
+												<select id="client_productType" name="productType" class="form-control">
+													<option value="">全部</option>
+													<option value="3">验证码</option>
+													<option value="4">通知</option>
+													<option value="1">会员营销</option>
+													<option value="0">行业</option>
+													<option value="2">国际短信</option>
+												</select>
+											</div>
+
+											<div class="form-group m-r-md">
+												<label for="client_orderType">订单类型:</label>
+												<select id="client_orderType" name="orderType" class="form-control">
+													<option value="">全部</option>
+													<option value="1">子账户充值</option>
+													<option value="2">子账户回退</option>
+												</select>
+											</div>
+											<div class="form-group m-r-md">
+												<label for="client_operatorCode">运营商类型:</label>
+												<select id="client_operatorCode" name="operatorCode" class="form-control">
+													<option value="">全部</option>
+													<option value="1">移动</option>
+													<option value="2">联通</option>
+													<option value="3">电信</option>
+													<option value="0">全网</option>
+													<option value="4">国际</option>
+												</select>
+											</div>
+											<!-- 时间选择 -->
+											<div class="form-group" style="margin-left:2.5%;visibility: hidden">
+												<div class="form-group pull-right">到期时间:
+													<input placeholder="开始时间" class="form-control layer-date" name="start_time_day" id="client_start_time_day"  style="width:100px"/>至
+													<input placeholder="结束时间" class="form-control layer-date" name="end_time_day" id="client_end_time_day"  style="width:100px"/>
+												</div>
+											</div>
+											<div class="form-group">
+												<span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-danger" onclick="clientSearch()">搜索</button></span>
+												<span>&nbsp;&nbsp;<button type="button" class="btn btn-sm btn-primary" onclick="clientExportExcel()">导出Excel</button></span>
+											</div>
+										</form>
+									</div>
+								</div>
+								</div>
+								<div class="ibox-content">
+									<div class="jqGrid_wrapper2">
+										<table id="client_table_list"></table>
+										<div id="client_pager_list"></div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/js/plugins/layer/laydate/laydate.js}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+
+<script th:inline="javascript">
+    var max_export_num = [[${max_export_num}]];
+    var type = [[${type}]];
+    var tab = [[${tab}]];
+
+    var agentStart = {
+        elem: "#agent_start_time_day",
+        format: "YYYY-MM-DD",
+    	min: halfYearAgo("yyyy-MM-dd"),
+        max: laydate.now(),
+        istoday: true,
+        choose: function (datas) {
+            agentEnd.min = datas;
+        }
+    };
+
+    var agentEnd = {
+        elem: "#agent_end_time_day",
+        format: "YYYY-MM-DD",
+    	min: halfYearAgo("yyyy-MM-dd"),
+        max: laydate.now(),
+        istoday: true,
+        choose: function (datas) {
+            agentStart.max = datas;
+        }
+    };
+
+    var clientStart = {
+        elem: "#client_start_time_day",
+        format: "YYYY-MM-DD",
+        max: laydate.now(),
+        istoday: true,
+        choose: function (datas) {
+            clientEnd.min = datas;
+        }
+    };
+
+    var clientEnd = {
+        elem: "#client_end_time_day",
+        format: "YYYY-MM-DD",
+        max: laydate.now(),
+        istoday: true,
+        choose: function (datas) {
+            clientStart.max = datas;
+        }
+    };
+
+    laydate(agentStart);
+    laydate(agentEnd);
+    laydate(clientStart);
+    laydate(clientEnd);
+
+    function search(){
+		if ($("#tab-1").hasClass("active")){
+            agentSearch();
+		}else{
+            clientSearch();
+		}
+	}
+    function agentSearch(){
+        $("#agent_table_list").jqGrid('setGridParam',{
+            datatype:'json',
+            postData: {
+                condition: $("#agent_condition").val(),
+                productType:$("#agent_productType").val(),
+                operatorCode:$("#agent_operatorCode").val(),
+                orderType:$("#agent_orderType").val(),
+                start_time_day: $("#agent_start_time_day").val(),
+                end_time_day: $("#agent_end_time_day").val(),
+            }, //发送数据
+        }).trigger("reloadGrid"); //重新载入
+    }
+
+    function clientSearch(){
+        $("#client_table_list").jqGrid('setGridParam',{
+            datatype:'json',
+            postData: {
+                condition: $("#client_condition").val(),
+                productType:$("#client_productType").val(),
+                operatorCode:$("#client_operatorCode").val(),
+                orderType:$("#client_orderType").val(),
+                start_time_day: $("#client_start_time_day").val(),
+                end_time_day: $("#client_end_time_day").val(),
+            }, //发送数据
+        }).trigger("reloadGrid"); //重新载入
+    }
+
+    // 导出Excel文件
+    function agentExportExcel() {
+        var totalCount = $("#agent_table_list").jqGrid('getGridParam','records');
+        if (totalCount == 0) {
+            layer.alert("共0条记录，导出Excel文件失败");
+            return;
+        }
+        if(totalCount > max_export_num){
+            layer.msg("导出Excel文件条数大于"+max_export_num+"条", {icon: 2});
+            return;
+        }
+        var mainForm = $("#agentForm");
+        var action = mainForm.attr("action");
+        var exporUrl = [[@{/finance/oem/agentOrder/export}]];
+        mainForm.attr("action", exporUrl).submit();
+        mainForm.attr("action", action);
+    }
+
+    // 导出Excel文件
+    function clientExportExcel() {
+        var totalCount = $("#client_table_list").jqGrid('getGridParam','records');
+        if (totalCount == 0) {
+            layer.alert("共0条记录，导出Excel文件失败");
+            return;
+        }
+        if(totalCount > max_export_num){
+            layer.msg("导出Excel文件条数大于"+max_export_num+"条", {icon: 2});
+            return;
+        }
+        var mainForm = $("#clientForm");
+        var action = mainForm.attr("action");
+        var exporUrl = [[@{/finance/oem/clientOrder/export}]];
+        mainForm.attr("action", exporUrl).submit();
+        mainForm.attr("action", action);
+    }
+
+   
+
+    function getDetailAgent(order_id){
+        var url = [[@{/finance/oem/agentOrder/view}]];
+        window.location.href = url+"?orderId="+order_id;
+    }
+
+    function getDetailClient(order_id){
+        var url = /*[[@{/finance/oem/clientOrder/view}]]*/'';
+        window.location.href = url+"?orderId="+order_id;
+    }
+
+    $(document).ready(function () {
+        if(tab ==1){
+            $("#agentTab").addClass("active");
+            $("#clientTab").removeClass("active");
+            $("#tab-1").addClass("active");
+            $("#tab-2").removeClass("active");
+
+        }else if(tab==2){
+            $("#clientTab").addClass("active");
+            $("#agentTab").removeClass("active");
+
+            $("#tab-2").addClass("active");
+            $("#tab-1").removeClass("active");
+
+        }
+
+
+        $.jgrid.defaults.styleUI = "Bootstrap";
+        $("#agent_table_list").jqGrid({
+            url:/*[[@{/finance/oem/agentOrder/list}]]*/'',
+			mtype: 'POST',
+				datatype: "json",
+				jsonReader : {
+				root:"list",
+					page: "currentPage",
+					total: "totalPage",
+					records: "totalCount"
+			},
+			height: 'auto',
+			rownumbers:true,
+			autowidth: true,
+			shrinkToFit: false,
+			autoScroll: true,
+			rowNum: 20,
+			rowList: [10, 20, 30,50],
+//			colNames: ["订单ID唯一标识","订单编号","订单类型","产品代码","产品类型","短信单价（元）","订单短信条数", "订单金额（元）", "代理商ID", "到期时间", "创建时间", "操作"],
+			colModel: [
+				{label:"订单ID唯一标识",name: "order_id",align: "left",sortable:false,hidden:true},
+				{label:"订单编号",name: "order_no",align: "left",sortable:false},
+				{label:"订单类型",name: "order_type_name",align: "left",sortable:false},
+				{label:"产品代码",name: "product_code",align: "left",sortable:false},
+				{label:"产品类型",name: "product_type_name",align: "left",sortable:false},
+                {label:"运营商",name: "operator_code",align: "left",sortable:false},
+                {label:"区域",name: "area_code",align: "left",sortable:false},
+				{label:"短信单价（元）",name: "unit_price",align: "left",sortable:false,
+					formatter:function(cellvalue, options, rowObject){
+						if(cellvalue=='-')
+							return cellvalue;
+						var numValue = new Number(cellvalue);
+						return numValue.toFixed(4); 
+					}
+				},
+				{label:"订单短信条数",name: "order_number",align: "left",sortable:false,
+					formatter:function(cellvalue, options, rowObject){
+						var _order_type = rowObject.order_type;
+						var _order_number = rowObject.order_number;
+						var switcher = "";
+						if(_order_type == 2){
+                            switcher += "&minus;";
+                        }
+						switcher += _order_number;
+						return switcher;
+					}
+				},
+            	{label:"订单金额（元）",name: "order_amount",align: "left",sortable:false,
+					formatter:function(cellvalue, options, rowObject){
+						if(cellvalue=='-')
+							return cellvalue;
+						var numValue = new Number(cellvalue);
+						return numValue.toFixed(4); 
+					}
+				},
+            	{label:"客户ID",name: "agent_id",align: "left",sortable:false},
+            	{label:"到期时间",name: "due_time",align: "left",sortable:false},
+            	{label:"创建时间",name: "create_time",align: "left",sortable:false},
+				{label:"操作",name: "total",index: "total",align: "left",sortable:false,title:false,
+					formatter:function(cellvalue, options, rowObject){
+						var _order_id = rowObject.order_id;
+						var switcher = "<button type='button' class='btn btn-link btn-xs ' onclick=\"getDetailAgent('"+_order_id+"')\" title='详情'>详情</button>";
+						return switcher;
+					}
+				}
+			],
+            pager: "#agent_pager_list",
+            viewrecords: true,
+            hidegrid: false
+    	});
+
+        $("#client_table_list").jqGrid({
+            url:/*[[@{/finance/oem/clientOrder/list}]]*/'',
+			mtype: 'POST',
+				datatype: "json",
+				jsonReader : {
+				root:"list",
+					page: "currentPage",
+					total: "totalPage",
+					records: "totalCount"
+			},
+			height: 'auto',
+			rownumbers:true,
+			autowidth: true,
+			shrinkToFit: false,
+			autoScroll: true,
+			rowNum: 20,
+			rowList: [10, 20, 30,50],
+//            colNames: ["订单ID唯一标识","订单编号","订单类型","产品类型(隐藏)","产品类型","短信单价(元)","订单短信条数", "订单金额（元）", "客户ID", "代理商ID", "到期时间", "创建时间", "操作"],
+            colModel: [
+				{label:"订单ID唯一标识",name: "order_id",align: "left",sortable:false,hidden:true},
+				{label:"订单编号",name: "order_no",align: "left",sortable:false},
+				{label:"订单类型",name: "order_type_name",align: "left",sortable:false},
+				{label:"产品类型(隐藏)",name: "product_type",align: "left",sortable:false,hidden:true},
+				{label:"产品类型",name: "product_type_name",align: "left",sortable:false},
+                {label:"运营商",name: "operator_code",align: "left",sortable:false},
+                {label:"区域",name: "area_code",align: "left",sortable:false},
+				{label:"短信单价(元)",name: "unit_price",align: "left",sortable:false,
+					formatter:function(cellvalue, options, rowObject){ 
+						if(cellvalue=='-')
+							return cellvalue;
+						var numValue = new Number(cellvalue);
+						return numValue.toFixed(4); 
+					}
+				},
+				{label:"订单短信条数",name: "order_number",align: "left",sortable:false,
+					formatter:function(cellvalue, options, rowObject){
+                        var _order_type = rowObject.order_type;
+                        var _order_number = rowObject.order_number;
+                        var switcher = "";
+                        if(_order_type == 2){
+                            switcher += "&minus;";
+                        }
+                        switcher += _order_number;
+                        return switcher;
+					}
+				},
+				{label:"订单金额（元）",name: "order_price",align: "left",sortable:false,
+					formatter:function(cellvalue, options, rowObject){
+						var product_type = rowObject.product_type;
+						var unit_price = rowObject.unit_price;
+						var order_number = rowObject.order_number;
+						if(product_type!=2){
+							if(order_number=="-"||unit_price=="-")
+								return 0;
+							var price =  unit_price * order_number;
+							return price.toFixed(4);
+						} 
+						if(cellvalue=='-')
+							return cellvalue;
+						var numValue = new Number(cellvalue);
+						return numValue.toFixed(4);
+					}
+				},
+				{label:"子账户ID",name: "client_id",align: "left",sortable:false},
+				{label:"客户ID",name: "agent_id",align: "left",sortable:false},
+				{label:"到期时间",name: "due_time",align: "left",sortable:false},
+				{label:"创建时间",name: "create_time",align: "left",sortable:false},
+				{label:"操作",name: "total",index: "total",align: "left",sortable:false,
+					formatter:function(cellvalue, options, rowObject){
+						var _order_id = rowObject.order_id;
+						var switcher = "<button type='button' class='btn btn-link btn-xs ' onclick=\"getDetailClient('"+_order_id+"')\">详情</button>";
+						return switcher;
+					}
+				}
+			],
+			pager: "#client_pager_list",
+			viewrecords: true,
+			hidegrid: false
+		});
+
+
+        function keyUp(e) {
+            var currKey=0,e=e||event;
+            currKey=e.keyCode||e.which||e.charCode;
+            var keyName = String.fromCharCode(currKey);
+            if (currKey == 13){
+                search();
+            }
+        }
+        document.onkeyup = keyUp;
+
+        if (type == 0){
+        } else {
+            var width = $(".jqGrid_wrapper").width();
+            $("#client_table_list").setGridWidth(width);
+
+            if ($("#tab-1").hasClass("active")){
+                $("#tab-1").removeClass("active");
+                $("#tab-2").addClass("active");
+            }
+
+            if ($("#agentTab").hasClass("active")){
+                $("#agentTab").removeClass("active");
+                $("#clientTab").addClass("active");
+            }
+        }
+    });
+
+	var tag = 'tag-1';
+    function resizeJqgrid1(){
+    	if(tag=='tag-1')
+    		return;
+        var width = $(".jqGrid_wrapper2").width();
+        $("#agent_table_list").setGridWidth(width);
+
+        tag='tag-1';
+    }
+    
+    function resizeJqgrid2(){
+    	if(tag=='tag-2')
+    		return;
+        var width = $(".jqGrid_wrapper").width();
+        $("#client_table_list").setGridWidth(width);
+        tag='tag-2';
+    }
+     
+</script>
+
+</body>
+</html>

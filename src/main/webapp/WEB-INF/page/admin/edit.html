@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信平台运营系统 - 管理员中心</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet">
+    <!-- jqgrid-->
+    <!--<link th:href="@{/resources/css/plugins/jqgrid/ui.jqgridffe4.css?0820}" rel="stylesheet">-->
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+	<link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+
+	<link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+    <style>
+        /* Additional style to fix warning dialog position */
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+    </style>
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+	<div class="wrapper wrapper-content animated fadeInRight">
+	    <div class="row">
+	        <div class="col-sm-12">
+	            <div class="ibox ">
+	                <div class="ibox-title">
+	                    <h5>修改管理员资料</h5>
+	                </div>
+	                <div class="ibox-content">
+
+						<div class="pull-right tooltip-demo">
+							<a class="btn btn-danger btn-sm" data-toggle="tooltip" data-placement="top" title="返回" onclick="javascript:history.back(-1);"><i class="fa fa-reply"></i>&nbsp;返回</a>
+						</div>
+	                    <div class="row">
+	                        <div class="col-sm-6 b-r">
+	                            <form class="form-horizontal m-t" id="manager_form">
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">管理员账号</label>
+	                                    <div class="col-sm-8">
+		                                    <input id="email" type="email" name="email" class="form-control isEmail" th:value="${model.email}" aria-required="true" placeholder="邮箱">
+											<input name="id" type="hidden" th:value="${model.id}"/>
+	                                    </div>
+	                                </div>
+	                                <div class="form-group">
+	                                	<label class="col-sm-3 control-label">管理员身份</label>
+	                                    <div class="col-sm-8">
+											<input type="text" class="form-control" th:value="${model.role_name}" disabled>
+	                                    </div>
+	                                </div>
+	                                <div class="form-group" th:if="${model.web_id}==3">
+	                                	<label class="col-sm-3 control-label">web应用系统</label>
+	                                    <div class="col-sm-8">
+								            <select class="form-control" >
+								            	<option value="3">运营平台</option>
+								            </select>
+								        </div>
+	                                </div>	                                
+								    <input type="hidden" name="webId" th:value="${model.web_id}"/>
+	                                <div class="form-group">
+	                                	<label class="col-sm-3 control-label">真实姓名</label>
+	                                	<div class="col-sm-8">
+		                                    <input id="realname" name="realname" type="text" th:value="${model.realname}" class="form-control">
+	                                	</div>
+	                                </div>
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">联系电话</label>
+	                                    <div class="col-sm-8">
+		                                    <input id="mobile" type="text" name="mobile" class="form-control isMobile" autocomplete="false" th:value="${model.mobile}" placeholder="手机号码">
+	                                    </div>
+	                                </div>
+	                                <div class="form-group">
+	                                    <label class="col-sm-3 control-label">登录密码</label>
+	                                    <div class="col-sm-8">
+		                                    <input id="password" type="password" autocomplete="false" class="form-control"><label style="color:#c1c1c1">为空则不修改</label>
+											<label id="pwd-error" class="error"></label>
+	                                    </div>
+	                                </div>
+								     <div class="form-group">
+								        <div class="col-sm-12 col-sm-offset-3">
+								            <button class="btn btn-primary btn-sm m-r-md" type="button" id="editButton">修 改</button>
+								            <button class="btn btn-white btn-sm" type="reset" id="cancelButton">重 置</button>
+								        </div>
+								    </div>
+	                            </form>
+	                        </div>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	</div>
+	<script th:src="@{/resources/js/hex_ha_ha_ha_ha_ha.js}"></script>
+	<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+	<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+	<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+	<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+	<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+	<script th:src="@{/resources/js/jquery.form.js?v=1.0.0}"></script>
+
+	<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+	<script th:src="@{/resources/js/plugins/validate/jquery.validate.min.js}"></script>
+	<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+	
+	<script th:inline="javascript">
+		/*<![CDATA[*/
+		var validate;
+		$.validator.defaults.ignore = ""; /* 不需要验证的元素*/
+		/*表单验证规则*/
+		validate = $("#manager_form").validate({
+			rules: {
+				mobile: {
+					required: true
+				},
+				email: {
+					required: true
+				},
+				realname: {
+					required: true,
+					minlength: 1,
+					maxlength: 60
+				}
+			},
+			messages: {
+				mobile: {
+					required: "手机号必填"
+				},
+				email: {
+					required: "管理员账号必填"
+				},
+				realname: {
+					required: "请输入名称",
+					minlength: "名称不能为空",
+					maxlength: "名称字符不能超过60个字符"
+				}
+			}
+		});
+		jQuery.validator.addMethod("isEmail", function (value, element) {
+			var email =  /^[a-zA-Z]+@ucpaas.com$/;
+			return this.optional(element) || (email.test(value));
+		}, "必须是云之讯邮箱");
+		jQuery.validator.addMethod("isMobile", function (value, element) {
+			var mobile =  /^1[34578]\d{9}$/;
+			return this.optional(element) || (mobile.test(value));
+		}, "请输入正确格式的手机号码");
+//		jQuery.validator.addMethod("isPaasword", function (value, element) {
+//			var password =  /^\w{6,20}$/;
+//			return this.optional(element) || ((password.test(value) && (password.length > 5)) );
+//		}, "密码必须是由6-20字母数字下滑线组成的位字符");
+
+		function checkPwd(pwd){
+			$("#pwd-error").text("");
+			if((pwd.length < 5 && pwd.length != 0) || pwd.length > 20){
+				$("#pwd-error").text("密码长度限制在6-20位");
+				return false;
+			}
+			var reg =  /^\w{6,20}$/;
+			if(pwd.length != 0 && !reg.test(pwd)){
+				$("#pwd-error").text("密码只能是6-20位字母、数字或下划线");
+				return false;
+			}
+			$("#pwd-error").text("");
+			return true;
+		}
+
+			// 修改管理员
+			$("#editButton").on("click",function(){
+				if(!validate.form()){return;}
+				var password = $.trim($("#password").val());
+				if(!checkPwd(password)){return ;}
+				swal({
+					title: "您确定要修改管理员信息吗？",
+					text: "",
+					type: "warning",
+					showCancelButton: true,
+					confirmButtonColor: "#DD6B55",
+					confirmButtonText: "修改",
+					cancelButtonText: "让我再考虑一下…",
+					closeOnConfirm: false
+				}, function () {
+					var options = {
+	//					beforeSubmit : function() {
+	//						$(btn).attr("disabled", true);
+	//					},
+						data: {
+							password: password.length > 0 ? hex_ha_ha_ha_ha_ha(password) : ''
+						},
+						success: function (data) {
+							//						$(btn).attr("disabled", false);
+
+							if (data == null) {
+								swal("修改失败！", "系统错误，请稍后再试！", "error")
+							} else if (data.success == true) {
+								swal("修改成功！", "信息已保存！", "success");
+                                $(".confirm").click(function (){
+                                    window.location.href = /*[[@{/admin/view}]]*/;
+                                });
+
+							} else {
+								swal("修改失败！", data.msg, "error")
+							}
+						},
+						url: /*[[@{/admin/edit}]]*/,
+						type: "post",
+						timeout: 30000
+					};
+					$("#manager_form").ajaxSubmit(options);
+				});
+			});
+		$(function(){
+		    var hid_roleId = $("#hid_roleId").val();
+            $("#roleList").val(hid_roleId);
+			$("#password").bind("input propertychange",function(){
+				checkPwd($("#password").val());
+			});
+
+		});
+
+
+	    /*]]>*/
+	    
+	</script>
+</body>
+</html>

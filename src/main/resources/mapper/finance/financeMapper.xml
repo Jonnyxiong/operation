@@ -1,0 +1,909 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 运营平台财务管理 -->
+<mapper namespace="finance">
+
+
+    <sql id="queryBalanceCommon">
+        <where>
+            <if test="balance_text != null and balance_text != ''">
+                (
+                b.id LIKE CONCAT('%', #{balance_text}, '%')
+                OR
+                b.agent_id LIKE CONCAT('%', #{balance_text}, '%')
+                OR
+                b.order_id LIKE CONCAT('%', #{balance_text}, '%')
+                OR
+                b.payment_id LIKE CONCAT('%', #{balance_text}, '%')
+                )
+            </if>
+            <if test="financial_type != null and financial_type != '' ">
+                AND b.financial_type = #{financial_type}
+            </if>
+            <if test="payment_type != null and payment_type != '' ">
+                AND b.payment_type = #{payment_type}
+            </if>
+            <if test="agent_type != null and agent_type != '' ">
+                AND i.agent_type = #{agent_type}
+            </if>
+            <if test="start_time_day != null">
+                AND b.create_time >= STR_TO_DATE(#{start_time_day},'%Y-%m-%d %T')
+            </if>
+            <if test="end_time_day != null">
+                AND b.create_time <![CDATA[<= STR_TO_DATE(#{end_time_day},'%Y-%m-%d %T') ]]>
+                <!-- 				AND b.create_time <![CDATA[<= STR_TO_DATE(CONCAT(#{end_time_day},' 23:59:59'),'%Y-%m-%d %T') ]]> -->
+            </if>
+            <if test="agentIds != null and agentIds.size > 0">
+                AND b.agent_id IN
+                <foreach collection="agentIds" item="item" separator="," open="(" close=")">
+                    #{item}
+                </foreach>
+            </if>
+            and b.payment_type not in(9,10)
+        </where>
+    </sql>
+
+    <!-- 查询余额账单 -->
+    <select id="queryBalance" resultType="map">
+        SELECT
+        b.id AS id,
+        b.payment_type,
+        b.financial_type,
+        b.amount AS amount,
+        b.balance AS balance,
+        IFNULL(b.order_id,'-') AS order_id,
+        b.agent_id AS agent_id,
+        b.client_id,
+        i.agent_type,
+        CASE i.agent_type
+        WHEN 1 THEN '销售代理商'
+        WHEN 2 THEN '品牌代理商'
+        WHEN 3 THEN '资源合作商'
+        WHEN 4 THEN '代理商和资源合作'
+        WHEN 5 THEN 'OEM代理商'
+        END AS agent_type_name,
+        b.admin_id,
+        b.remark AS remark,
+        b.payment_id AS paymentId,
+        DATE_FORMAT(b.create_time, '%Y-%m-%d %H:%i:%S') AS create_time
+        FROM
+        t_sms_agent_balance_bill b
+        LEFT JOIN t_sms_agent_info i ON i.agent_id = b.agent_id
+        <include refid="queryBalanceCommon"/>
+        ORDER BY b.create_time DESC, b.id DESC
+        ${limit}
+    </select>
+
+
+    <!-- 余额账单总计 -->
+    <select id="balanceTotal" resultType="map">
+        SELECT
+        SUM(
+        CASE b.financial_type
+        WHEN 1 THEN
+        0 - b.amount
+        ELSE
+        b.amount
+        END
+        ) AS sum_amount
+        FROM
+        t_sms_agent_balance_bill b
+        LEFT JOIN t_sms_agent_info i
+        ON i.agent_id = b.agent_id
+        <include refid="queryBalanceCommon"/>
+    </select>
+
+
+    <!-- 查询余额账单总数 -->
+    <select id="queryBalanceCount" resultType="map">
+        SELECT
+        COUNT(1) as totalCount
+        FROM
+        t_sms_agent_balance_bill b
+        LEFT JOIN t_sms_agent_info i
+        ON i.agent_id = b.agent_id
+        <include refid="queryBalanceCommon"/>
+    </select>
+
+    <!-- 导出余额账单Excel -->
+    <select id="queryBalance4Excel" resultType="map">
+        SELECT
+            b.id AS id,
+            b.payment_type,
+            b.financial_type,
+            b.amount AS amount,
+            b.balance AS balance,
+            b.order_id AS order_id,
+            b.agent_id AS agent_id,
+            b.client_id,
+            b.admin_id,
+            b.remark AS remark,
+            payment_id AS paymentId,
+            DATE_FORMAT(b.create_time, '%Y-%m-%d %H:%i:%S') AS create_time,
+            i.agent_type,
+            CASE i.agent_type
+                WHEN 1 THEN '销售代理商'
+                WHEN 2 THEN '品牌代理商'
+                WHEN 3 THEN '资源合作商'
+                WHEN 4 THEN '代理商和资源合作'
+                WHEN 5 THEN 'OEM代理商'
+            END AS agent_type_name
+        FROM
+        t_sms_agent_balance_bill b
+        LEFT JOIN t_sms_agent_info i ON i.agent_id = b.agent_id
+        <include refid="queryBalanceCommon"/>
+        ORDER BY b.create_time DESC
+    </select>
+
+
+    <sql id="queryCommissionCommon">
+        <where>
+            <if test="commission_text != null and commission_text != ''">
+                (
+                c.id LIKE CONCAT('%', #{commission_text}, '%')
+                OR
+                c.agent_id LIKE CONCAT('%', #{commission_text}, '%')
+                )
+
+            </if>
+            <if test="financial_type != null and financial_type != '' ">
+                AND c.financial_type = #{financial_type}
+            </if>
+            <if test="agent_type != null and agent_type != '' ">
+                AND i.agent_type = #{agent_type}
+            </if>
+            <if test="start_time_day != null">
+                AND c.create_time >= STR_TO_DATE(#{start_time_day},'%Y-%m-%d %T')
+            </if>
+            <if test="end_time_day != null">
+                AND c.create_time <![CDATA[<= STR_TO_DATE(#{end_time_day},'%Y-%m-%d %T') ]]>
+                <!-- 				AND c.create_time <![CDATA[<= STR_TO_DATE(CONCAT(#{end_time_day},' 23:59:59'),'%Y-%m-%d %T') ]]> -->
+            </if>
+        </where>
+    </sql>
+
+    <!-- 查询佣金账单 -->
+    <select id="queryCommission" resultType="map">
+        SELECT
+        c.id AS id,
+        CASE c.payment_type
+        WHEN 0 THEN '佣金收入'
+        WHEN 1 THEN '佣金转余额'
+        END AS payment_type,
+        CASE c.financial_type
+        WHEN 0 THEN '入账'
+        WHEN 1 THEN '出账'
+        END AS financial_type,
+        TRUNCATE(c.amount,2) AS amount,
+        TRUNCATE(c.balance,2) AS balance,
+        c.agent_id,
+        i.agent_type,
+        CASE i.agent_type
+        WHEN 1 THEN '销售代理商'
+        WHEN 2 THEN '品牌代理商'
+        WHEN 3 THEN '资源合作商'
+        WHEN 4 THEN '代理商和资源合作商'
+        WHEN 5 THEN 'OEM代理商'
+        END AS agent_type_name,
+        DATE_FORMAT(
+        c.create_time,
+        '%Y-%m-%d %T'
+        ) AS create_time,
+        c.remark AS remark
+        FROM
+        t_sms_agent_commission_income_bill c
+        LEFT JOIN t_sms_agent_info i
+        ON i.agent_id = c.agent_id
+        <include refid="queryCommissionCommon"/>
+        ORDER BY c.id DESC
+        ${limit}
+    </select>
+
+    <!-- 查询佣金账单总数 -->
+    <select id="queryCommissionCount" resultType="map">
+        SELECT
+        COUNT(1) as totalCount
+        FROM
+        t_sms_agent_commission_income_bill c
+        LEFT JOIN t_sms_agent_info i
+        ON i.agent_id = c.agent_id
+        <include refid="queryCommissionCommon"/>
+    </select>
+
+
+    <!-- 导出佣金账单Excel -->
+    <select id="queryCommission4Excel" resultType="map">
+        SELECT
+        c.id AS id,
+        CASE c.payment_type
+        WHEN 0 THEN '佣金收入'
+        WHEN 1 THEN '佣金转余额'
+        END AS payment_type,
+        CASE c.financial_type
+        WHEN 0 THEN '入账'
+        WHEN 1 THEN '出账'
+        END AS financial_type,
+        TRUNCATE(c.amount,2) AS amount,
+        TRUNCATE(c.balance,2) AS balance,
+        c.agent_id,
+        i.agent_type,
+        CASE i.agent_type
+        WHEN 1 THEN '销售代理商'
+        WHEN 2 THEN '品牌代理商'
+        WHEN 3 THEN '资源合作商'
+        WHEN 4 THEN '代理商和资源合作商'
+        WHEN 5 THEN 'OEM代理商'
+        END AS agent_type_name,
+        DATE_FORMAT(
+        c.create_time,
+        '%Y-%m-%d %T'
+        ) AS create_time,
+        c.remark AS remark
+        FROM
+        t_sms_agent_commission_income_bill c
+        LEFT JOIN t_sms_agent_info i
+        ON i.agent_id = c.agent_id
+        <include refid="queryCommissionCommon"/>
+        ORDER BY c.id DESC
+    </select>
+
+    <!-- 4.3.1 OEM 需求  begin -->
+
+    <!-- 查询返点账单 -->
+    <sql id="queryRebateCommon">
+        <where>
+            <if test="rebate_text != null and rebate_text != ''">
+                (
+                r.id LIKE CONCAT('%', #{rebate_text}, '%')
+                OR
+                r.agent_id LIKE CONCAT('%', #{rebate_text}, '%')
+                )
+            </if>
+            <if test="financial_type != null and financial_type != '' ">
+                AND r.financial_type = #{financial_type}
+            </if>
+            <if test="agent_type != null and agent_type != '' ">
+                AND i.agent_type = #{agent_type}
+            </if>
+            <if test="start_time_day != null">
+                AND r.create_time >= STR_TO_DATE(#{start_time_day},'%Y-%m-%d %T')
+            </if>
+            <if test="end_time_day != null">
+                AND r.create_time <![CDATA[<= STR_TO_DATE(#{end_time_day},'%Y-%m-%d %T') ]]>
+                <!-- 				AND r.create_time <![CDATA[<= STR_TO_DATE(CONCAT(#{end_time_day},' 23:59:59'),'%Y-%m-%d %T') ]]> -->
+            </if>
+        </where>
+    </sql>
+    <select id="queryRebate" resultType="map">
+        SELECT
+        r.id,
+        r.payment_type,
+        CASE r.payment_type
+        WHEN 0 THEN '返点收入'
+        WHEN 1 THEN '抵扣'
+        END AS payment_type_name,
+        r.financial_type,
+        CASE r.financial_type
+        WHEN 0 THEN '入账'
+        WHEN 1 THEN '出账'
+        END AS financial_type_name,
+        TRUNCATE(r.amount,2) AS amount,
+        TRUNCATE(r.balance,2) AS balance,
+        r.order_id,
+        r.agent_id,
+        i.agent_type,
+        CASE i.agent_type
+        WHEN 1 THEN '销售代理商'
+        WHEN 2 THEN '品牌代理商'
+        WHEN 3 THEN '资源合作商'
+        WHEN 4 THEN '代理商和资源合作商'
+        WHEN 5 THEN 'OEM代理商'
+        END AS agent_type_name,
+        r.remark,
+        DATE_FORMAT(r.create_time,'%Y-%m-%d %T')
+        AS create_time
+        FROM
+        t_sms_agent_rebate_bill r
+        LEFT JOIN
+        t_sms_agent_info i
+        ON i.agent_id = r.agent_id
+        <include refid="queryRebateCommon"/>
+        ORDER BY r.create_time DESC
+        ${limit}
+    </select>
+
+    <!-- 查询返点账单	总记录数 -->
+    <select id="queryRebateCount" resultType="map">
+        SELECT
+        COUNT(0) AS totalCount
+        FROM
+        t_sms_agent_rebate_bill r
+        LEFT JOIN
+        t_sms_agent_info i
+        ON i.agent_id = r.agent_id
+        <include refid="queryRebateCommon"/>
+    </select>
+    <!-- 导出返点账单 -->
+    <select id="exportRebateExcel" resultType="map">
+        SELECT
+        r.id,
+        r.payment_type,
+        CASE r.payment_type
+        WHEN 0 THEN '返点收入'
+        WHEN 1 THEN '抵扣'
+        END AS payment_type_name,
+        r.financial_type,
+        CASE r.financial_type
+        WHEN 0 THEN '入账'
+        WHEN 1 THEN '出账'
+        END AS financial_type_name,
+        TRUNCATE(r.amount,2) AS amount,
+        TRUNCATE(r.balance,2) AS balance,
+        r.order_id,
+        r.agent_id,
+        i.agent_type,
+        CASE i.agent_type
+        WHEN 1 THEN '销售代理商'
+        WHEN 2 THEN '品牌代理商'
+        WHEN 3 THEN '资源合作商'
+        WHEN 4 THEN '代理商和资源合作商'
+        WHEN 5 THEN 'OEM代理商'
+        END AS agent_type_name,
+        r.remark,
+        DATE_FORMAT(r.create_time,'%Y-%m-%d %T')
+        AS create_time
+        FROM
+        t_sms_agent_rebate_bill r
+        LEFT JOIN
+        t_sms_agent_info i
+        ON i.agent_id = r.agent_id
+        <include refid="queryRebateCommon"/>
+        ORDER BY r.create_time DESC
+    </select>
+    <!-- 查询授信记录 -->
+    <sql id="queryCreditCommon">
+        <where>
+            <if test="credit_text != null and credit_text != ''">
+                (
+                c.id LIKE CONCAT('%', #{credit_text}, '%')
+                OR
+                c.agent_id LIKE CONCAT('%', #{credit_text}, '%')
+                )
+            </if>
+            <!-- 			<if test="financial_type != null and financial_type != '' "> -->
+            <!-- 				AND c.financial_type = #{financial_type} -->
+            <!-- 			</if> -->
+            <if test="agent_type != null and agent_type != '' ">
+                AND i.agent_type = #{agent_type}
+            </if>
+            <if test="start_time_day != null">
+                AND c.create_time >= STR_TO_DATE(#{start_time_day},'%Y-%m-%d %T')
+            </if>
+            <if test="end_time_day != null">
+                AND c.create_time <![CDATA[<= STR_TO_DATE(#{end_time_day},'%Y-%m-%d %T') ]]>
+                <!-- 				AND r.create_time <![CDATA[<= STR_TO_DATE(CONCAT(#{end_time_day},' 23:59:59'),'%Y-%m-%d %T') ]]> -->
+            </if>
+        </where>
+    </sql>
+    <select id="queryCredit" resultType="map">
+        SELECT
+        c.id,
+        c.payment_type,
+        CASE c.payment_type
+        WHEN 0 THEN '授信'
+        END AS payment_type_name,
+        TRUNCATE(c.amount,2)
+        AS amount,
+        c.agent_id,
+        i.agent_type,
+        CASE i.agent_type
+        WHEN 1 THEN '销售代理商'
+        WHEN 2 THEN '品牌代理商'
+        WHEN 3 THEN '资源合作商'
+        WHEN 4 THEN '代理商和资源合作商'
+        WHEN 5 THEN 'OEM代理商'
+        END AS agent_type_name,
+        d.realname as "admin_id",
+        c.remark,
+        DATE_FORMAT(c.create_time,'%Y-%m-%d %T')
+        AS create_time
+        FROM
+        t_sms_agent_credit_record c
+        LEFT JOIN
+        t_sms_agent_info i ON i.agent_id = c.agent_id
+        JOIN t_sms_user d on d.id = c.admin_id
+        <include refid="queryCreditCommon"/>
+        ORDER BY c.create_time DESC
+        ${limit}
+    </select>
+
+    <!-- 查询授信记录	总记录数 -->
+    <select id="queryCreditCount" resultType="map">
+        SELECT
+        COUNT(0) AS totalCount
+        FROM
+        t_sms_agent_credit_record c
+        LEFT JOIN
+        t_sms_agent_info i
+        ON i.agent_id = c.agent_id
+        <include refid="queryCreditCommon"/>
+    </select>
+    <!-- 导出授信记录 -->
+    <select id="exportCreditExcel" resultType="map">
+        SELECT
+        c.id,
+        c.payment_type,
+        CASE c.payment_type
+        WHEN 0 THEN '授信'
+        END AS payment_type_name,
+        TRUNCATE(c.amount,2)
+        AS amount,
+        c.agent_id,
+        i.agent_type,
+        CASE i.agent_type
+        WHEN 1 THEN '销售代理商'
+        WHEN 2 THEN '品牌代理商'
+        WHEN 3 THEN '资源合作商'
+        WHEN 4 THEN '代理商和资源合作商'
+        WHEN 5 THEN 'OEM代理商'
+        END AS agent_type_name,
+        d.realname as "admin_id",
+        c.remark,
+        DATE_FORMAT(c.create_time,'%Y-%m-%d %T')
+        AS create_time
+        FROM
+        t_sms_agent_credit_record c
+        LEFT JOIN
+        t_sms_agent_info i ON i.agent_id = c.agent_id
+        JOIN t_sms_user d on d.id = c.admin_id
+        <include refid="queryCreditCommon"/>
+        ORDER BY c.create_time DESC
+    </select>
+    <!-- 查询押金账单 -->
+    <sql id="queryDepositCommon">
+        <where>
+            <if test="deposit_text != null and deposit_text != ''">
+                (
+                d.id LIKE CONCAT('%', #{deposit_text}, '%')
+                OR
+                d.agent_id LIKE CONCAT('%', #{deposit_text}, '%')
+                )
+            </if>
+            <if test="financial_type != null and financial_type != '' ">
+                AND d.financial_type = #{financial_type}
+            </if>
+            <if test="agent_type != null and agent_type != '' ">
+                AND i.agent_type = #{agent_type}
+            </if>
+            <if test="start_time_day != null">
+                AND d.create_time >= STR_TO_DATE(#{start_time_day},'%Y-%m-%d %T')
+            </if>
+            <if test="end_time_day != null">
+                AND d.create_time <![CDATA[<= STR_TO_DATE(#{end_time_day},'%Y-%m-%d %T') ]]>
+                <!-- 				AND r.create_time <![CDATA[<= STR_TO_DATE(CONCAT(#{end_time_day},' 23:59:59'),'%Y-%m-%d %T') ]]> -->
+            </if>
+        </where>
+    </sql>
+    <select id="queryDeposit" resultType="map">
+        SELECT
+        d.id,
+        d.payment_type,
+        CASE d.payment_type
+        WHEN 0 THEN '押金充值'
+        WHEN 1 THEN '押金扣减'
+        WHEN 2 THEN '押金退款'
+        END AS payment_type_name,
+        d.financial_type,
+        CASE d.financial_type
+        WHEN 0 THEN '入账'
+        WHEN 1 THEN '出账'
+        END AS financial_type_name,
+        TRUNCATE(d.amount,2)
+        AS amount,
+        TRUNCATE(d.balance,2)
+        AS balance,
+        d.agent_id,
+        i.agent_type,
+        CASE i.agent_type
+        WHEN 1 THEN '销售代理商'
+        WHEN 2 THEN '品牌代理商'
+        WHEN 3 THEN '资源合作商'
+        WHEN 4 THEN '代理商和资源合作商'
+        WHEN 5 THEN 'OEM代理商'
+        END AS agent_type_name,
+        c.realname as "admin_id",
+        d.remark,
+        DATE_FORMAT(d.create_time,'%Y-%m-%d %T')
+        AS create_time
+        FROM
+        t_sms_agent_deposit_bill d
+        LEFT JOIN
+        t_sms_agent_info i ON i.agent_id = d.agent_id
+        JOIN t_sms_user c on c.id = d.admin_id
+        <include refid="queryDepositCommon"/>
+        ORDER BY d.create_time DESC
+        ${limit}
+    </select>
+    <!-- 查询押金账单	总记录数 -->
+    <select id="queryDepositCount" resultType="map">
+        SELECT
+        COUNT(0) AS totalCount
+        FROM
+        t_sms_agent_deposit_bill d
+        LEFT JOIN
+        t_sms_agent_info i
+        ON i.agent_id = d.agent_id
+        <include refid="queryDepositCommon"/>
+        ${limit}
+    </select>
+    <!-- 导出押金账单 -->
+    <select id="exportDepositExcel" resultType="map">
+        SELECT
+        d.id,
+        d.payment_type,
+        CASE d.payment_type
+        WHEN 0 THEN '押金充值'
+        WHEN 1 THEN '押金扣减'
+        WHEN 2 THEN '押金退款'
+        END AS payment_type_name,
+        d.financial_type,
+        CASE d.financial_type
+        WHEN 0 THEN '入账'
+        WHEN 1 THEN '出账'
+        END AS financial_type_name,
+        TRUNCATE(d.amount,2)
+        AS amount,
+        TRUNCATE(d.balance,2)
+        AS balance,
+        d.agent_id,
+        i.agent_type,
+        CASE i.agent_type
+        WHEN 1 THEN '销售代理商'
+        WHEN 2 THEN '品牌代理商'
+        WHEN 3 THEN '资源合作商'
+        WHEN 4 THEN '代理商和资源合作商'
+        WHEN 5 THEN 'OEM代理商'
+        END AS agent_type_name,
+        c.realname as "admin_id",
+        d.remark,
+        DATE_FORMAT(d.create_time,'%Y-%m-%d %T')
+        AS create_time
+        FROM
+        t_sms_agent_deposit_bill d
+        LEFT JOIN
+        t_sms_agent_info i ON i.agent_id = d.agent_id
+        JOIN t_sms_user c on c.id = d.admin_id
+        <include refid="queryDepositCommon"/>
+        ORDER BY d.create_time DESC
+    </select>
+    <!-- 4.3.1 OEM 需求 end -->
+
+    <select id="getOrderDetailBySubId" resultType="map">
+		SELECT
+			sub_id,
+			order_id,
+			client_id,
+			agent_id,
+			product_id,
+			product_type,
+			case product_type
+				when 0 then '行业'
+				when 1 then '营销'
+				else '国际'
+			end as product_type_str,
+			product_name,
+			product_number,
+			case order_type
+				when 0 then '客户购买'
+				when 1 then '代理商购买'
+				when 2 then '运营代买'
+				else '-'
+			end as order_type,
+			status,
+			case status
+				when 0 then '待审核'
+				when 1 then '订单生效'
+				when 2 then '订单完成'
+				when 3 then '订单失败'
+				when 4 then '订单取消'
+			end as status_name,
+			active_period,
+			case active_period
+				when 0 then '无限期'
+				else CONCAT(active_period,"天")
+			end as active_period_str,
+			ROUND(quantity,2) as quantity,
+			ROUND(remain_quantity,2) as remain_quantity,
+			CASE product_type
+	  			when 2 then CONCAT(ROUND(quantity,2), "元")
+	  			else CONCAT(FLOOR(quantity), "条")
+  			END quantity_str,
+			CASE product_type
+	  			when 2 then CONCAT(ROUND(remain_quantity,2), "元")
+	  			else CONCAT(FLOOR(remain_quantity), "条")
+  			END remain_quantity_str,
+			ROUND(sale_price,2) as sale_price,
+			ROUND(product_cost,2) as product_cost,
+			CASE product_type
+	  			when 2 then ROUND(sale_price,2)
+	  			else CONCAT(ROUND(sale_price,2), "元")
+  			END sale_price_str,
+			CASE product_type
+	  			when 2 then ROUND(product_cost,2)
+	  			else CONCAT(ROUND(product_cost,2), "元")
+  			END product_cost_str,
+			date_format(
+				end_time,
+				'%Y-%m-%d %H:%i:%S'
+			) AS end_time,
+			date_format(
+				create_time,
+				'%Y-%m-%d %H:%i:%S'
+			) AS create_time,
+			date_format(
+				effective_time,
+				'%Y-%m-%d %H:%i:%S'
+			) AS effective_time,
+			date_format(
+				update_time,
+				'%Y-%m-%d %H:%i:%S'
+			) AS update_time
+		FROM t_sms_client_order
+		WHERE sub_id = #{sub_id}
+	</select>
+
+    <update id="orderFail">
+		UPDATE
+			t_sms_client_order
+		SET
+			status = #{status},
+			remain_quantity = null
+		WHERE
+			sub_id = #{sub_id}
+	</update>
+
+    <select id="queryCountAgentProduct" resultType="int">
+		SELECT
+			count(id) as Num
+		FROM
+			t_sms_agent_product
+		WHERE
+			agent_id = #{agent_id}
+		AND product_id = #{product_id}
+
+	</select>
+
+    <select id="getAgentAccountByAgentId" resultType="map">
+		SELECT
+			agent_id,
+			TRUNCATE(balance,2) as balance,
+			credit_balance,
+			TRUNCATE(accumulated_income,2) as accumulated_income,
+			TRUNCATE(commission_income,2) as commission_income,
+			TRUNCATE(accumulated_recharge,2) as accumulated_recharge
+		FROM t_sms_agent_account
+		WHERE
+			agent_id = #{agent_id}
+	</select>
+
+    <update id="reduceBalance">
+		update
+			t_sms_agent_account t
+		set
+			t.balance = t.balance - #{amount}
+		where
+			t.agent_id = #{agent_id}
+	</update>
+
+    <update id="updateOrderInfoForComplete">
+		UPDATE
+			t_sms_client_order
+		SET
+			effective_time = #{effective_time},
+			end_time = #{end_time},
+			status = #{status},
+			unit_price = #{unit_price},
+			update_time = #{update_time},
+			remain_quantity = quantity
+		WHERE
+			sub_id = #{sub_id}
+	</update>
+
+    <!-- 根据agentId与时间查询余额账单 -->
+    <select id="queryBalancebyagentIdAndDate" resultType="map">
+        SELECT
+        id AS id,
+        payment_type,
+        CASE payment_type
+        WHEN 0 THEN '充值'
+        WHEN 1 THEN '扣减'
+        WHEN 2 THEN '佣金转余额'
+        WHEN 3 THEN '购买产品包'
+        WHEN 4 THEN '退款'
+        WHEN 5 THEN '赠送'
+        WHEN 6 THEN '消耗'
+        END AS payment_type_name,
+        financial_type,
+        CASE financial_type
+        WHEN 0 THEN '入账'
+        WHEN 1 THEN '出账'
+        END AS financial_type_name,
+        TRUNCATE(IFNULL(amount,0),2) AS amount,
+        TRUNCATE(IFNULL(balance,0),2) AS balance,
+        order_id AS order_id,
+        agent_id AS agent_id,
+        IFNULL(client_id,'') AS client_id,
+        admin_id AS admin_id,
+        remark AS remark,
+        DATE_FORMAT(
+        create_time,
+        '%Y-%m-%d %T'
+        ) AS create_time
+        FROM
+        t_sms_agent_balance_bill
+        where
+        1=1
+        <include refid="queryBalance4agentIdAndDate"/>
+        ORDER BY create_time DESC,id DESC;
+
+    </select>
+
+
+    <sql id="queryBalance4agentIdAndDate">
+
+        and agent_id = #{agent_id}
+        <if test="create_time != null and create_time !=''">
+
+            AND create_time <![CDATA[<= #{create_time} ]]>
+        </if>
+
+    </sql>
+
+    <!-- 根据agentId与时间查询佣金账单 -->
+    <select id="queryCommissionbyagentIdAndDate" resultType="map">
+        SELECT
+        CASE payment_type
+        WHEN 0 THEN '佣金收入'
+        WHEN 1 THEN '佣金转余额'
+        END AS payment_type,
+        CASE financial_type
+        WHEN 0 THEN '入账'
+        WHEN 1 THEN '出账'
+        END AS financial_type,
+        TRUNCATE(IFNULL(amount,0),2) AS amount,
+        TRUNCATE(IFNULL(balance,0),2) AS balance,
+        agent_id,
+        DATE_FORMAT(
+        create_time,
+        '%Y-%m-%d %T'
+        ) AS create_time,
+        remark AS remark
+        FROM
+        t_sms_agent_commission_income_bill
+        where
+        1=1
+        <include refid="queryBalance4agentIdAndDate"/>
+        ORDER BY id DESC
+
+    </select>
+
+    <!--根据agentId与时间查询押金-->
+    <select id="queryDepositbyagentIdAndDate" resultType="map">
+        SELECT
+        payment_type,
+        CASE payment_type
+        WHEN 0 THEN '押金充值'
+        WHEN 1 THEN '押金扣减'
+        WHEN 2 THEN '押金退款'
+        END AS payment_type_name,
+        financial_type,
+        CASE financial_type
+        WHEN 0 THEN '入账'
+        WHEN 1 THEN '出账'
+        END AS financial_type_name,
+        TRUNCATE(IFNULL(amount,0),2)
+        AS amount,
+        TRUNCATE(IFNULL(balance,0),2)
+        AS balance,
+        agent_id,
+        admin_id,
+        remark,
+        DATE_FORMAT(create_time,'%Y-%m-%d %T')
+        AS create_time
+        FROM
+        t_sms_agent_deposit_bill
+        where
+        1=1
+        <include refid="queryBalance4agentIdAndDate"/>
+        ORDER BY create_time DESC,id DESC;
+    </select>
+
+    <select id="queryRebatebyagentIdAndDate" resultType="map">
+        SELECT
+        payment_type,
+        CASE payment_type
+        WHEN 0 THEN '返点收入'
+        WHEN 1 THEN '抵扣'
+        END AS payment_type_name,
+        financial_type,
+        CASE financial_type
+        WHEN 0 THEN '入账'
+        WHEN 1 THEN '出账'
+        END AS financial_type_name,
+        TRUNCATE(IFNULL(amount,0),2) AS amount,
+        TRUNCATE(IFNULL(balance,0),2) AS balance,
+        order_id,
+        agent_id,
+        remark,
+        DATE_FORMAT(create_time,'%Y-%m-%d %T')
+        AS create_time
+        FROM
+        t_sms_agent_rebate_bill
+        where
+        1=1
+        <include refid="queryBalance4agentIdAndDate"/>
+        ORDER BY create_time DESC,id DESC;
+
+    </select>
+
+    <select id="queryCreditbyagentIdAndDate" resultType="map">
+        SELECT
+        payment_type,
+        CASE payment_type
+        WHEN 0 THEN '授信'
+        END AS payment_type_name,
+        TRUNCATE(IFNULL(amount,0),2)
+        AS amount,
+        agent_id,
+        admin_id,
+        remark,
+        create_time
+        FROM
+        t_sms_agent_credit_record
+        where
+        1=1
+
+        <include refid="queryBalance4agentIdAndDate"/>
+        ORDER BY create_time DESC,id DESC;
+
+    </select>
+
+    <sql id="BASE_COLUMN_LIST">
+		sub_id,
+		order_id,
+		client_id,
+		agent_id,
+		product_id,
+		product_type,
+		operator_code,
+		area_code,
+		unit_price,
+		product_name,
+		product_number,
+		order_type,
+		status,
+		active_period,
+		quantity,
+		remain_quantity,
+		sale_price,
+		product_cost,
+		end_time,
+		create_time,
+		effective_time,
+		update_time,
+		audit_type,
+		auditor,
+		admin_id
+	</sql>
+
+    <select id="getBySubId" resultType="map">
+        SELECT
+        <include refid="BASE_COLUMN_LIST"/>
+        FROM t_sms_client_order
+        WHERE
+        sub_id = #{sub_id}
+    </select>
+
+</mapper>

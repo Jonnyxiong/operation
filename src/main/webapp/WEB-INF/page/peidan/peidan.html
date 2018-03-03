@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信云平台运营系统 </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link href="/resources/css/bootstrap.min14ed.css?v=3.3.6" th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    <link href="/resources/css/font-awesome.min93e3.css?v=4.4.0" th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+    <link href="/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css" th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+    <link href="/resources/css/animate.min.css" th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+    <link href="/resources/css/style.min862f.css?v=4.1.0" th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+    <link href="/resources/css/plugins/sweetalert/sweetalert.css" th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+    <link href="/resources/css/peidan.css" th:href="@{/resources/css/peidan.css?v=1.2}" rel="stylesheet">
+</head>
+<body class="gray-bg"><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content container-fuild  animated fadeInRight">
+    <div class="row peidan-wrap">
+        <div class="col-sm-12">
+            <h2 class="peidan-title">配单</h2>
+        </div>
+        <div class="col-sm-12 ">
+            <div class="guideline1 guideline"></div>
+            <div class="guideline2 guideline"></div>
+
+            <div class="col-lg-4 grid-col">
+                <div class="ui-loading order-loading">
+                    <span class="glyphicon glyphicon-repeat"></span>
+                </div>
+            	<div class="ctx order-info grid-animate">
+                    <h4 class="animate-title"><span class="text">订单信息</span><span class="animate"></span></h4>
+                    <div class="clearfix">
+                        <div class="item">
+                            <div class="title text-right">订单号：</div>
+                            <div class="desc" th:text="${orderId}"></div>
+                        </div>
+                        <div class="item">
+                            <div class="title text-right">公司名称：</div>
+                            <div class="desc js-key" str="companyName"></div>
+                        </div>
+                        <div class="item">
+                            <div class="title text-right">所属行业：</div>
+                            <div class="desc js-key" str="industryType"></div>
+                        </div>
+                        <div class="item">
+                            <div class="title text-right">归属销售：</div>
+                            <div class="desc js-key" str="belongSaleName"></div>
+                        </div>
+                        <div class="item">
+                            <div class="title text-right">发送类型：</div>
+                            <div class="desc js-key" str="smsType"></div>
+                        </div>
+                        <div class="item">
+                            <div class="title text-right">预计量(条/月)：</div>
+                            <div class="desc js-key" str="expectNumber"></div>
+                        </div>
+                        <div class="item">
+                            <div class="title text-right">是否保底：</div>
+                            <div class="desc js-key" str="minimumGuaranteeName"></div>
+                        </div>
+                        <div class="item">
+                            <div class="title text-right">通道类型：</div>
+                            <div class="desc js-key" str="channelTypeName"></div>
+                        </div>
+                        <div class="item">
+                            <div class="title text-right">是否直连：</div>
+                            <div class="desc js-key" str="directConnectName"></div>
+                        </div>
+                        <div class="item">
+                            <div class="title text-right">扩展位：</div>
+                            <div class="desc js-key" str="extendSizeName"></div>
+                        </div>
+                        <div class="item">
+                            <div class="title text-right">速率：</div>
+                            <div class="desc js-key" str="rate"></div>
+                        </div>
+                        <div class="item">
+                            <div class="title text-right">签名：</div>
+                            <div class="desc js-key" str="signTypeName"></div>
+                        </div>
+                       <div class="item">
+                            <div class="title text-right">发送内容模板：</div>
+                            <div class="desc js-key" str="contentTemplate"></div>
+                        </div>
+                       <div class="item">
+                            <div class="title text-right">结算方式：</div>
+                            <div class="desc js-key" str="payType"></div>
+                        </div>
+                       <div class="item">
+                            <div class="title text-right">销售价格(元/条)：</div>
+                            <div class="desc js-key" str="salePrice"></div>
+                        </div>
+                       <div class="item">
+                            <div class="title text-right">发票：</div>
+                            <div class="desc js-key" str="invoiceTypeName"></div>
+                        </div>
+                       <div class="item">
+                            <div class="title text-right">要求上线时间：</div>
+                            <div class="desc js-key" str="onlineDate"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 chooseResource grid-col">
+                <div class="ui-loading choose-loading">
+                    <span class="glyphicon glyphicon-repeat"></span>
+                </div>
+                <div class="ctx grid-animate">
+                    <h4 class="animate-title"><span class="text">已选资源</span><span class="animate"></span></h4>
+                    <div id="grid-choosed">
+
+
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 grid-col resourceList">
+                <div class="ui-loading resource-loading">
+                    <span class="glyphicon glyphicon-repeat"></span>
+                </div>
+                <div class="ctx grid-animate">
+                    <div>
+                        <h4 class="animate-title"><span class="text">资源信息</span><span class="animate"></span></h4>
+                        <div class="grid-sel">
+                            <div class="sel js-sel active">已接入</div>
+                            <div class="sel js-sel">待接入</div>
+                        </div>
+                    </div>
+                    <div class="">
+                        <div class="ready sel-ctx" id="ready">
+
+                        </div>
+                        <div class="unready sel-ctx" id="unready">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-12 peidan-opera">
+            <div class="grid-btn">
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">匹配成功</button>
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModa2">待匹配</button>
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModa3">订单回退</button>
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModa4">发起资源需求</button>
+                <button type="button" class="btn btn-default" onclick="history.back()">取消</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">配单意见</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <textarea class="form-control" id="success-yijian" placeholder="请填写备注(50个字符以内)"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="js-yijian">确定</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="exampleModa2" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabe2">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">配单意见</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label >是否转审：</label>
+                    <label class="radio-inline">
+                        <input type="radio" name="inlineRadioOptions" id="inlineRadio1" value="option1" class="inlineradio" readonly disabled checked>否
+                    </label>
+                    <label class="radio-inline">
+                        <input type="radio" name="inlineRadioOptions" id="inlineRadio2" value="option2" class="inlineradio" readonly disabled >是
+                    </label>
+                </div>
+                <div class="form-group">
+                    <textarea class="form-control" id="remark-daipipei" placeholder="例如：价格不匹配需转审，或即将有通道接入并填写接入时间(50字符以内）"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="js-daipipei">确定</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="exampleModa3" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabe3">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">配单意见</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <textarea class="form-control" id="remark-huitui" placeholder="请填写回退原因(50字符以内）"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="js-huitui">确定</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="exampleModa4" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabe3">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">发起资源需求</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <textarea class="form-control" id="remark-faqixuqiu" placeholder="填写备注(50字符以内）"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="js-faqixuqiu">确定</button>
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" th:value="${orderId}" id="orderId"/>
+
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/content.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/i18n/grid.locale-cn.js}"></script>
+<script th:src="@{/resources/js/plugins/jqgrid/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/plugins/validate/jquery.validate.min.js}"></script>
+<script th:src="@{/resources/js/jquery.form.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/common.js?v=1.1.0}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script th:src="@{/resources/js/template-web.js}"></script>
+<script th:src="@{/resources/js/peidan.js?v=1.5}"></script> 
+<script id="temp-resource" type="text/html">
+    {{each data}}
+    <div class="grid-resource grid-small js-grid-flex">
+        <div class="ui-checkbox {{$value.resourceId}}" targetclass="{{$value.resourceId}}">
+            <span class="glyphicon glyphicon-unchecked"></span>
+            <span class="glyphicon glyphicon-check"></span>
+        </div>
+        <span class="js-more btn-more">展开<i class="glyphicon glyphicon-arrow-down "></i></span>
+        <span class="js-less btn-less hide">收起<i class="glyphicon glyphicon-arrow-up "></i></span>
+        <div class="item">
+            <div class="title text-right">资源编号：</div>
+            <div class="desc">{{$value.resourceId}}</div>
+        </div>
+        <div class="item">
+            <div class="title text-right">通道号：</div>
+            <div class="desc">{{$value.channelId}}</div>
+        </div>
+        <div class="item">
+            <div class="title text-right">通道类型：</div>
+            <div class="desc">{{$value.channelTypeName}}</div>
+        </div>
+        <div class="item">
+            <div class="title text-right">发送类型：</div>
+            <div class="desc">{{$value.smsType}}</div>
+        </div>
+        <div class="item">
+            <div class="title text-right">发送内容属性：</div>
+            <div class="desc">{{$value.contentProp}}</div>
+        </div>
+        <div class="item">
+            <div class="title text-right">归属商务：</div>
+            <div class="desc">{{$value.belongBusinessName}}</div>
+        </div>
+        <div class="item">
+            <div class="title text-right">是否直连：</div>
+            <div class="desc">{{$value.directConnectName}}</div>
+        </div>
+        <div class="item">
+            <div class="title text-right">是否扩展：</div>
+            <div class="desc">{{$value.extendSizeName}}</div>
+        </div>
+        <div class="item">
+            <div class="title text-right">签名：</div>
+            <div class="desc">{{$value.signTypeName}}</div>
+        </div>
+        <div class="item">
+            <div class="title text-right">采购价(元/条)：</div>
+            <div class="desc">{{$value.purchasePrice}}</div>
+        </div>
+        <div class="item">
+            <div class="title text-right">是否已接入：</div>
+            <div class="desc">{{$value.stateName}}</div>
+        </div>
+        <div class="item">
+            <div class="title text-right">速率：</div>
+            <div class="desc">{{$value.rate}}</div>
+        </div>
+        <div class="item">
+            <div class="title text-right">是否保底：</div>
+            <div class="desc">{{$value.minimumGuaranteeName}}</div>
+        </div>
+        <div class="item">
+            <div class="title text-right">是否授信：</div>
+            <div class="desc">{{$value.isCreditName}}</div>
+        </div>
+        <div class="item">
+            <div class="title text-right">结算方式：</div>
+            <div class="desc">{{$value.payType}}</div>
+        </div>
+        <div class="item">
+            <div class="title text-right">发票：</div>
+            <div class="desc">{{$value.invoiceTypeName}}</div>
+        </div>
+        <div class="item">
+            <div class="title text-right">接入IP：</div>
+            <div class="desc">{{$value.mtIp}}</div>
+        </div>
+        <div class="item">
+            <div class="title text-right">接入协议：</div>
+            <div class="desc">{{$value.protocolTypeName}}</div>
+        </div>
+        <div class="item">
+            <div class="title text-right">备注：</div>
+            <div class="desc">{{$value.remark}}</div>
+        </div>
+    </div>
+    {{/each}}
+
+</script>
+<script id="temp-choosed" type="text/html">
+    {{each data}}
+    <div class="grid-choose grid-small js-grid-flex {{$value.resourceId}}">
+        <span class="glyphicon glyphicon-remove-circle choose-close" targetclass="{{$value.resourceId}}"></span>
+        <span class="js-more btn-more">展开<i class="glyphicon glyphicon-arrow-down "></i></span>
+        <span class="js-less btn-less hide">收起<i class="glyphicon glyphicon-arrow-up "></i></span>
+        <div class="item">
+            <div class="title text-right">资源编号：</div>
+            <div class="desc">{{$value.resourceId}}</div>
+        </div>
+        <div class="item">
+            <div class="title text-right">通道号：</div>
+            <div class="desc">{{$value.channelId}}</div>
+        </div>
+        <div class="item">
+            <div class="title text-right">通道类型：</div>
+            <div class="desc">{{$value.channelTypeName}}</div>
+        </div>
+        <div class="item">
+            <div class="title text-right">发送类型：</div>
+            <div class="desc">{{$value.smsType}}</div>
+        </div>
+        <div class="item">
+            <div class="title text-right">发送内容属性：</div>
+            <div class="desc">{{$value.contentProp}}</div>
+        </div>
+        <div class="item">
+            <div class="title text-right">归属商务：</div>
+            <div class="desc">{{$value.belongBusinessName}}</div>
+        </div>
+        <div class="item">
+            <div class="title text-right">是否直连：</div>
+            <div class="desc">{{$value.directConnectName}}</div>
+        </div>
+        <div class="item">
+            <div class="title text-right">是否扩展：</div>
+            <div class="desc">{{$value.extendSizeName}}</div>
+        </div>
+        <div class="item">
+            <div class="title text-right">签名：</div>
+            <div class="desc">{{$value.signTypeName}}</div>
+        </div>
+        <div class="item">
+            <div class="title text-right">采购价(元/条)：</div>
+            <div class="desc">{{$value.purchasePrice}}</div>
+        </div>
+        <div class="item">
+            <div class="title text-right">是否已接入：</div>
+            <div class="desc">{{$value.stateName}}</div>
+        </div>
+        <div class="item">
+            <div class="title text-right">速率：</div>
+            <div class="desc">{{$value.rate}}</div>
+        </div>
+        <div class="item">
+            <div class="title text-right">是否保底：</div>
+            <div class="desc">{{$value.minimumGuaranteeName}}</div>
+        </div>
+        <div class="item">
+            <div class="title text-right">是否授信：</div>
+            <div class="desc">{{$value.isCreditName}}</div>
+        </div>
+        <div class="item">
+            <div class="title text-right">结算方式：</div>
+            <div class="desc">{{$value.payType}}</div>
+        </div>
+        <div class="item">
+            <div class="title text-right">发票：</div>
+            <div class="desc">{{$value.invoiceTypeName}}</div>
+        </div>
+        <div class="item">
+            <div class="title text-right">接入IP：</div>
+            <div class="desc">{{$value.mtIp}}</div>
+        </div>
+        <div class="item">
+            <div class="title text-right">接入协议：</div>
+            <div class="desc">{{$value.protocolTypeName}}</div>
+        </div>
+        <div class="item">
+            <div class="title text-right">备注：</div>
+            <div class="desc">{{$value.remark}}</div>
+        </div>
+    </div>
+    {{/each}}
+
+</script>
+<script>
+//    var data = {
+//        title: '标签',
+//        list: [{name:"123"}, {name:"123"},{name:"123"}]
+//    };
+//    var html = template('test', data);
+//    document.getElementById('content').innerHTML = html;
+</script>
+</body>
+</html>

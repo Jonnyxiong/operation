@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="zh-cn">
+<head>
+    <meta content="云之讯,云通讯,云通讯平台" name="keywords"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title>短信云平台运营系统 </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link th:href="@{/resources/css/bootstrap.min14ed.css?v=3.3.6}" rel="stylesheet">
+    <link th:href="@{/resources/css/font-awesome.min93e3.css?v=4.4.0}" rel="stylesheet"><!-- jqgrid-->
+    <link th:href="@{/resources/js/plugins/jqgrid/css/ui.jqgrid-bootstrap.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/animate.min.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/style.min862f.css?v=4.1.0}" rel="stylesheet">
+    <link th:href="@{/resources/css/plugins/sweetalert/sweetalert.css}" rel="stylesheet">
+    <link th:href="@{/resources/css/doublebox-bootstrap.css}" rel="stylesheet">
+</head>
+<body><div th:replace="stat :: statCode"></div>
+<div class="wrapper wrapper-content">
+    <!-- 客户分级设置页面 -->
+    <form class="form-horizontal">
+        <!-- 客户id -->
+        <div class="form-group"  id="grid-agent">
+            <label class="col-xs-3 control-label">客户id：</label>
+            <div class="col-xs-9">
+                <input type="text" name="client" class="form-control" th:value="${clientid}" id="clientid" readonly>
+            </div>
+        </div>
+        <!-- 客户id end-->
+        <!-- 客户名称 -->
+        <div class="form-group">
+            <label class="col-xs-3 control-label">客户名称：</label>
+            <div class="col-xs-9">
+                <input type="text" name="client" class="form-control" th:value="${name}" readonly>
+            </div>
+        </div>
+        <!-- 客户名称 end -->
+        <!-- 客户等级设置 -->
+        <div class="form-group">
+            <label class="col-xs-3 control-label"><span class="red">*</span>客户等级设置：</label>
+            <div class="col-xs-9">
+                <select class="form-control" name="starLevel" id="starLevel">
+                    <option value="1" th:selected="${starLevel} eq 1">1星</option>
+                    <option value="2" th:selected="${starLevel} eq 2">2星</option>
+                    <option value="3" th:selected="${starLevel} eq 3">3星</option>
+                    <option value="4" th:selected="${starLevel} eq 4">4星</option>
+                    <option value="5" th:selected="${starLevel} eq 5">5星</option>
+                </select>
+            </div>
+        </div>
+        <!-- 客户等级设置 end -->
+        <!-- 提交 -->
+        <div class="form-group">
+            <div class="col-xs-offset-3 col-xs-4 m-r-md">
+                <a class="btn btn-primary js-confirm">修改</a>
+                <a class="btn btn-default js-cancel">取消</a>
+            </div>
+        </div>
+    </form>
+</div>
+<script th:src="@{/resources/js/jquery.min.js?v=2.1.4}"></script>
+<script th:src="@{/resources/js/bootstrap.min.js?v=3.3.6}"></script>
+<script th:src="@{/resources/js/plugins/peity/jquery.peity.min.js}"></script>
+<script th:src="@{/resources/js/date_format.min.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/plugins/sweetalert/sweetalert.min.js}"></script>
+<script th:src="@{/resources/js/common.js?v=1.0.0}"></script>
+<script th:src="@{/resources/js/layer/layer.js}"></script>
+<script>
+$(function(){
+    $(".js-confirm").click(function(){
+        $.ajax({
+            url : '/accountInfo/customerStarLevel/updateAccountPoOfStarLevel',
+            type :'POST',
+            data : {
+                clientid: $("#clientid").val(),
+                starLevel : $("#starLevel").val()
+            },
+            success : function(res){
+                if(res.code !== 200){
+                    parent.layer.msg(res.msg, {icon:2})
+                }
+                var _p = parent;
+                parent.layer.msg(res.msg, {icon: 1,time: 1000},function(){
+                    _p.location.reload();
+                });
+            }
+        })
+    })
+    $(".js-cancel").click(function () {
+        parent.layer.closeAll();
+    })
+})
+</script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 运营平台客户短信记录 -->
+<mapper namespace="smsReportCommon">
+	
+	<!-- 查询公用条件 -->
+	<sql id="smsQueryCommon">
+		<where>
+			<if test="text != null and text!='' and saleIdList == null">
+				and (
+						t.clientid like CONCAT('%',#{text},'%' ) 
+						OR t.name like CONCAT('%',#{text},'%' )
+						OR t.agent_id LIKE CONCAT('%',#{text},'%' )
+					)
+			</if>
+			<if test="text != null and text!='' and saleIdList != null">
+				and (
+				t.clientid like CONCAT('%',#{text},'%' )
+				OR t.name like CONCAT('%',#{text},'%' )
+				OR t.agent_id LIKE CONCAT('%',#{text},'%' )
+					OR (
+						t.belong_sale IN
+						<foreach collection="saleIdList" item="item" open="(" separator="," close=")">
+							#{item}
+						</foreach>
+					)
+				)
+			</if>
+			<if test="start_time != null and start_time!=''">
+				<![CDATA[
+					AND t.date >= REPLACE(#{start_time},"-","")
+				 ]]>
+			</if>
+			<if test="end_time != null and end_time!=''">
+				<![CDATA[
+					AND t.date <= REPLACE(#{end_time},"-","")
+				 ]]>
+			</if>
+			<if test="product_types != null">
+					AND t.product_type IN  <!-- 按产品类型统计 0：行业，1：营销，2：国际，7：USSD，8：闪信，9：挂机短信 -->
+				  <foreach item="item" index="index" collection="product_types"
+				      open="(" separator="," close=")">
+				        #{item}
+				  </foreach>
+			</if>
+
+			AND t.stattype = 0 <!-- 每日数据 -->
+		</where>
+	</sql>
+	<!-- 短信查询  -->
+	<select id="smsQuery" resultType="map">
+		SELECT
+			t.clientid,
+			t.name,
+			t.agent_id,
+			t.belong_sale,
+			SUM(t.usersmstotal) AS cusSubTotal,<!-- 提交条数 -->
+			SUM(t.reportsuccess) AS successTotal,<!-- 成功条数 -->
+			SUM(t.usersmstotal) - (
+				SUM(t.submitsuccess) + SUM(t.reportsuccess) + SUM(t.notsend)
+			) AS failTotal,<!-- 失败条数 -->
+			SUM(t.chargetotal) AS chargetotal,<!-- 计费条数 -->
+			SUM(t.notsend) AS notsend,<!-- 待发送条数 -->
+			SUM(t.submitsuccess) AS submitsuccess,<!-- 未知条数 -->
+			ROUND(SUM(t.salefee) / 1000, 2) AS salefee,<!-- 消费金额 -->
+			ROUND(SUM(t.productfee) / 1000, 2) AS productfee,<!-- 消耗成本 -->
+			ROUND(SUM(t.costfee) / 1000, 2) AS costfee<!-- 通道成本 -->
+		FROM
+			t_sms_access_channel_statistics t
+			
+		<include refid="smsQueryCommon" />
+		GROUP BY t.clientid,t.belong_sale
+		ORDER BY t.chargetotal,t.clientid DESC
+		${limit}
+	</select>
+	
+	
+	<!-- 传统短信总计栏 -->
+	<select id="smsTotal" resultType="map">
+		SELECT 
+			SUM(IFNULL(t.usersmstotal,0)) AS cusSubTotal,<!-- 提交条数 -->
+			SUM(IFNULL(t.reportsuccess,0)) AS successTotal,<!-- 成功条数 -->
+			SUM(IFNULL(t.usersmstotal,0)) - (
+				SUM(IFNULL(t.submitsuccess,0)) + SUM(IFNULL(t.reportsuccess,0)) + SUM(IFNULL(t.notsend,0))
+			) AS failTotal,<!-- 失败条数 -->
+			SUM(IFNULL(t.chargetotal,0)) AS chargetotal,<!-- 计费条数 -->
+			SUM(IFNULL(t.notsend,0)) AS notsend,<!-- 待发送条数 -->
+			SUM(IFNULL(t.submitsuccess,0)) AS submitsuccess,<!-- 未知条数 -->
+			ROUND(SUM(IFNULL(t.salefee,0)) / 1000, 2) AS salefee,<!-- 消费金额 -->
+			ROUND(SUM(IFNULL(t.productfee,0)) / 1000, 2) AS productfee,<!-- 消耗成本 -->
+			ROUND(SUM(IFNULL(t.costfee,0)) / 1000, 2) AS costfee<!-- 通道成本 -->
+		FROM
+			t_sms_access_channel_statistics t
+			
+		<include refid="smsQueryCommon" />
+		 
+	</select>
+	
+	<!-- 获取传统短信记录数 -->
+	<select id="smsQueryCount" resultType="map">
+		SELECT
+			count(0) as totalCount
+		FROM(
+			SELECT
+				t.clientid
+			FROM
+				t_sms_access_channel_statistics t
+			<include refid="smsQueryCommon" />
+			GROUP BY clientid
+			ORDER BY chargetotal DESC
+		) temp
+	</select>
+	
+	<!-- 查询传统短信(用于导出Excel) -->
+	<select id="smsExcel" resultType="map">
+		SELECT
+			t.clientid,
+			t.name,
+			t.agent_id,
+			t.belong_sale,
+			SUM(t.usersmstotal) AS cusSubTotal,<!-- 提交条数 -->
+			SUM(t.reportsuccess) AS successTotal,<!-- 成功条数 -->
+			SUM(t.usersmstotal) - (
+				SUM(t.submitsuccess) + SUM(t.reportsuccess) + SUM(t.notsend)
+			) AS failTotal,<!-- 失败条数 -->
+			SUM(t.chargetotal) AS chargetotal,<!-- 计费条数 -->
+			SUM(t.notsend) AS notsend,<!-- 待发送条数 -->
+			SUM(t.submitsuccess) AS submitsuccess,<!-- 未知条数 -->
+			ROUND(SUM(t.salefee) / 1000, 2) AS salefee,<!-- 消费金额 -->
+			ROUND(SUM(t.productfee) / 1000, 2) AS productfee,<!-- 消耗成本 -->
+			ROUND(SUM(t.costfee) / 1000, 2) AS costfee<!-- 通道成本 -->
+		FROM
+			t_sms_access_channel_statistics t
+			
+		<include refid="smsQueryCommon" />
+		
+		GROUP BY t.clientid,t.belong_sale
+		ORDER BY t.chargetotal ,t.clientid DESC
+	</select>
+	 
+
+</mapper> 
